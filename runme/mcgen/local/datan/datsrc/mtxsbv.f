@@ -1,0 +1,7 @@
+      SUBROUTINE MTXSBV(U,V,W,N)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION U(N),V(N),W(N)
+      DO 10 I=1,N
+        W(I)=U(I)-V(I)
+   10 CONTINUE
+      END

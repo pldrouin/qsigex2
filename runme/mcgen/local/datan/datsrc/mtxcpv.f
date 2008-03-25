@@ -1,0 +1,7 @@
+      SUBROUTINE MTXCPV(U,V,N)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION U(N),V(N)
+      DO 10 I=1,N
+        V(I)=U(I)
+   10 CONTINUE
+      END

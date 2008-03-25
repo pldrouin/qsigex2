@@ -1,0 +1,68 @@
+\chapter{Introduction} \label{intro}
+QSigEx is a package that can be used to estimate population parameters using a
+sample of events. In particular, it estimates in which proportions some event
+groups are present in the population. This situation arises often in particle
+physics in what is called signal extraction, from which QSigEx borrows its name. 
+
+Let a population be composed of $n$ groups. Each entry in the population has
+some measurable characteristics, such that this entry can be described by a
+vector $\vec{x}$, where each $x_i$ coordinate $(i=1,2,\ldots,m)$ corresponds to
+a specific observable. The population entries of a given group have
+characteristic $\vec{x}$ values that allow to differenciate the group from
+another one. Then, the entries in a group have a particular distribution. In
+some cases, it is possible to predict the distribution associated which each
+group (using Monte Carlo method for example). Provided these distributions, the
+probability density of an event member of group $G_j$ to have coordinates
+$\vec{x}$ is given by $f(\vec{x}|G_j)$. In QSigEx, the function $f(\vec{x}|G_j)$
+is called the {\em joint probability density function} for the group $G_j$,
+since it gives the probability density of an event considering all its
+characteristics ($\vec{x}$).
+
+In the case where all the groups are mutually exclusive (an entry member of
+group $G_j$ cannot be member of group $G_k$ at the same time, for all $j$ and
+$k$, $j\ne k$), the probability density of an entry with coordinates $\vec{x}$
+to be a member of any group is given by:
+\begin{equation}
+f(\vec{x})=\sum_{j=1}^n f(\vec{x}\cap G_j)=\sum_{j=1}^n p(G_j)f(\vec{x}|G_j)
+\end{equation}
+where $p(G_j)$ is the probability of an event to be member of group $G_j$. The
+set of probabilities $p(G_1),\ p(G_2),\ \ldots\ ,\ p(G_n)$, or some values
+function of these probabilities (depending on the minimization function that is
+defined by the user) are the population parameters that are estimated by QSigEx.
+They can be viewed as the fraction of events which belong to a given group. 
+
+In a given group, the variables $x_i$ can be independent or not. When the
+variables are considered to be independent, the function $f(\vec{x}|G_j)$
+$(j=1,2,\ldots,n)$ can be expressed using the {\em marginal probability density
+functions} $f_i(x_i|G_j)$ for each of these variables:
+\begin{equation} \label{i:jpdfvsmpdf}
+f(\vec{x}|G_j)=\prod_{i=1}^{m} f_i(x_i|G_j)
+\end{equation}
+In this expression, $m$ is the number of dimensions of vector $\vec{x}$ used to
+fit the parameters. 
+
+Sometimes, only a pair of variables are significantly correlated. In this
+situation, the user can choose to produce, using a method of his choice, a
+probability density function (PDF) $f_{k,\ l}\left((x_k,x_l)|G_j\right)$ $\left(k,\ l\ \ \in
+\{1,2,\ldots,m\}\right)$ that would be equivalent to $f_k(x_k|G_j)f_l(x_l|G_j)$
+if the variables were not correlated. In QSigEx, this is called a {\em
+bidimensional marginal probability density function}, since it doesn't take into
+account all the variables. The {\em joint probability density function}
+$f(\vec{x}|G_j)$ is then given by:
+\begin{equation} \label{i:jpdfvsmpdf2}
+f(\vec{x}|G_j)=f_{k,\ l}\left((x_k,x_l)|G_j\right)\prod_{\substack{
+i=1\\
+i\ne k,\ i\ne l
+}}^{m} f_i(x_i|G_j)
+\end{equation}
+The procedure can be repeated with other pairs of variables, if these pairs are
+not correlated to the other variables and also with triplet of variables if
+necessary.
+ 
+When the correlations between the variables are generally strong enough to be
+considered, the information provided by the functions $f_i(x_i|G_j)$ is not
+sufficient and the joint probability density functions $f(\vec{x}|G_j)$ must be
+defined using more sophisticated methods. QSigEx can handle uncorrelated or
+correlated variables~\cite{Karlen:1998}. It can compute joint probability densities
+using either unidimensional or multidimensional marginal probability density functions.
+

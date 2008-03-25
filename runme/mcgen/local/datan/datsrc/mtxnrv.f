@@ -1,0 +1,5 @@
+      SUBROUTINE MTXNRV(U,S,N)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      CALL MTXDOT(U,U,S,N)
+      S= SQRT(ABS(S))
+      END

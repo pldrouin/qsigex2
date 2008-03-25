@@ -1,0 +1,9 @@
+*************************************************
+
+ Example: D2O results (qsigex must be installed)
+
+*************************************************
+
+> make
+> rund2o d2o_pdfs.dat d2o_results.root
+

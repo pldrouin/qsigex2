@@ -1,0 +1,18 @@
+      DOUBLE PRECISION FUNCTION LSQ2EX(X,NR,T)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION X(NR)
+      PARAMETER (BIG=700.D0,ZERO=0.D0)
+      ARG=X(2)*T
+      IF(ARG.GT.BIG) THEN
+        E1=ZERO
+      ELSE
+        E1=X(1)*EXP(-ARG)
+      END IF
+      ARG=X(4)*T
+      IF(ARG.GT.BIG) THEN
+        E2=ZERO
+      ELSE
+        E2=X(3)*EXP(-ARG)
+      END IF
+      LSQ2EX=E1+E2
+      END

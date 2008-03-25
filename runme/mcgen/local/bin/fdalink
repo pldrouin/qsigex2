@@ -1,0 +1,11 @@
+#!/bin/bash
+#LIBS="/usr/local/lib/libdatsrc.a /usr/local/lib/libgrsrc.a"
+LIBS=-ldatan
+FILE=$1
+OBJLIST=
+while test $# != 0
+do
+  OBJLIST="$OBJLIST $1.o"
+  shift
+done
+g77 $OBJLIST $LIBS -lX11 -o $FILE

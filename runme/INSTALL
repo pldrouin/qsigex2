@@ -1,0 +1,24 @@
+REQUIREMENTS:
+=============
+
+-gMake
+-Sed
+-ROOT 3.05/06 or newer
+
+INSTALLATION:
+=============
+
+-Set the QSIGEXDIR environment variable to the QSigEx root
+ directory.
+
+-Add $QSIGEXDIR/lib to your LD_LIBRARY_PATH enviroment variable.
+
+-To compile the examples, go into directory 
+
+ d2o
+ mcgen
+ data2root
+
+ and type:
+
+ gmake

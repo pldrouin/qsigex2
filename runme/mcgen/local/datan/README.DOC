@@ -1,0 +1,355 @@
+1. PROGRAMS, COPYRIGHT, DISCLAIMER
+   ===============================
+
+   You have installed the programs
+               DATAN version 2.1
+   from the CD-ROM accompanying the text book
+
+        Siegmund Brandt
+        Data Analysis
+        Statistical and Computational Methods for Scientists an Engineers
+        3rd ed.
+        Springer-Verlag, New York 1998
+
+   Copyright for the programs:
+        COPYRIGHT 1998 BY SIEGMUND BRANDT AND SPRINGER-VERLAG NEW YORK, INC.
+
+   This electronic component package is protected by federal copyright law
+   and international treaty. The copyright holder retains title to and
+   ownership of the package. US copyright law prohibits you from making any
+   copy of the CD-ROM for any reason, without the written permission of
+   Springer-Verlag, except that you may download and copy the README and
+   text files for your own research, teaching, and personal communications
+   use. Commercial use without the written consent of Springer-Verlag is
+   strictly prohibited. Springer-Verlag, or its designee, has the right
+   to audit your computer and electronic component usage to determine
+   whether any unauthorized copies of this package have been made. The
+   printed book with which this electronic component is packaged may not be
+   translated or copied in whole or in part without the written permission
+   of Springer-Verlag except for brief excerpts in connection with reviews
+   or scholarly analysis. Use in connection with any form of information
+   storage and retrieval, electronic adaptation, computer software or by
+   similar or dissimilar methodology now known or hereafter developed is
+   forbidden. Springer-Verlag or the author(s) make no warranty or
+   representation, either express or implied, with respect to this CD-ROM
+   or book, including their quality, merchantability, or fitness for a
+   particular purpose. In no event will Springer-Verlag or the author(s)
+   be liable for direct, indirect, special, incidental, or consequential
+   damages arising out of the use or inability to use the CD-ROM or book,
+   even if Springer-Verlag or the author(s) has been advised of the
+   possibility of such damages.
+
+
+   Mistakes in the text or in the programs which will be recognized after the
+   printing of this book is completed will be announced on the web document
+
+   http://alephwww.physik.uni-siegen.de/~brandt/datan
+
+   in the INTERNET.
+
+
+2. COMPILER
+   ========
+
+   During installation you have chosen source programs and libraries
+   which will work with the compiler(s) "gcc" and "g77".
+
+
+3. OPERATING SYSTEM
+   ================
+
+   During installation you have chosen a Graphics Library which will
+   work with the compiler chosen (Section 2) under the operating system
+        Linux version 2.0.32
+   The executables provided are in ELF format.
+
+
+4. SETTING OF SEARCH PATH
+   ======================
+
+   The batch file to compile and link C and FORTRAN programs have been
+   put to /usr/local/bin which should be in the executable search path.
+   (For libraries see Sect. 6 below.)
+
+
+5. THE DIRECTORY /usr/local/datan AND ITS SUBDIRECTORIES
+   =====================================================
+
+   The directory /usr/local/datan contains
+   - the file README.DOC which you are reading at present,
+   - the graphics initialization file GRINIT.DAT,
+   - the subdirectories mentioned below.
+
+   The subdirectory /usr/local/datan/datsrc contains
+   - the source files of the data analysis programs.
+
+   The subdirectory /usr/local/datan/exasrc contains
+   - the source files of the example programs,
+   - an executable file for each example program
+     which can be directly run as demonstration.
+
+   The subdirectory /usr/local/datan/solsrc contains
+   - the source files of programs
+     which are solutions to the programming problems,
+   - an executable file for each solution program
+     which can be directly run as demonstration.
+
+   The subdirectory /usr/local/datan/utils contains
+   - files helping with compilation and linking (cf. Sect. 9 below).
+
+
+6. FILES PUT INTO THE DIRECTORY /usr/local/lib
+   ===========================================
+
+   The subdirectory /usr/local/lib contains
+   - the static Data Analysis Library libdatsrc.a
+     (it is a library file in which all object programs which are produced by
+     compiling the source programs in the subdirectory /usr/local/datan/datsrc
+     are combined),
+   - the static Graphics Library libgrsrc.a
+     (a library file containing the graphics programs),
+   - the shared library libdatan.so.1.0
+     which is a dynamic library loaded at run time and the corresponding
+     symbolic links libdatan.so and libdatan.so.1. In order to use this
+     library either make sure that the entry /usr/local/lib
+     appears in the file /etc/ld.so.conf or /etc/ld.so.conf.in, in which
+     case one should run ldconfig after modification of the file (see also
+     the man page), or move (copy) the files libdatan.so* to a directory
+     mentioned in the file(s) ld.so.conf or set the environment variable
+     LD_LIBRARY_PATH appropriately.
+
+
+7. RUNNING A DEMONSTRATION
+   =======================
+
+   You may run demonstration programs by running an executable from the
+   directories /usr/local/datan/exasrc or /usr/local/datan/solsrc.
+   These programs are explained in the text book.
+
+
+8. MODIFYING THE DATA ANALYSIS LIBRARY
+   ===================================
+
+   If you want to change programs from the Data Analysis Library for
+   whatever reasons you first have to change the source programs in the
+   subdirectory /usr/local/datan/datsrc. Remember that the default libraries
+   were created from the C sources. Then you have to compile the modified
+   source programs. To ensure that the changed programs are used in your
+   application you must give the names of the resulting object files during
+   linking, cf. Sect. 9 below, or include the new object files into the
+   library so that they replace the original ones. To replace single files
+   in the library use ar -rv ... (see man page). It may be simpler for you
+   to generate a completely new Data Analysis Library after having changed
+   one or several files from the subdirectory /usr/local/datan/datsrc.
+
+   8a COMPILATION AND LIBRARY BUILDING WITH SHELL SCRIPTS
+      ---------------------------------------------------
+
+   You should put the source file(s) which are changed or the whole set
+   into a directory of your choice. To rebuild the data analysis library
+   from C sources run
+   /usr/local/datan/utils/makedlib.sh
+   If FORTRAN files serve as sources the command is
+   /usr/local/datan/utils/makedlibf.sh
+   These files rebuild libdatsrc.a as well as the shared library
+   (libdatan.so.1.1) by using extracted objects from libgrsrc.a.
+   
+   8b COMBINED COMPILATION AND LIBRARY BUILDING
+      -----------------------------------------
+
+   Type the command
+   make -f /usr/local/datan/utils/makefile.lib
+   using C sources or
+   make -f /usr/local/datan/utils/makefilef.lib
+   using FORTRAN sources.
+   (The MAKE program will work through the statements contained in the
+   description file and the result will be the recompilation of all
+   source programs in the current directory and remaining ones in
+   /usr/local/datan/datsrc and the creation of a new Data Analysis Library.)
+
+9. COMPILING, LINKING, AND EXECUTING PROGRAMS
+   ==========================================
+
+   After the installation has successfully been completed you
+   can write any program, compile it, link it with the Data Analysis Library
+   and - if needed - with the Graphics Library, and finally execute it. We
+   demonstrate here compiling, linking and execution of two example programs.
+
+   9a CREATING YOUR OWN WORKING DIRECTORY
+      -----------------------------------
+   For every problem you are working on you may create a separate
+   subdirectory. For all examples you might, for instance, create
+   the directory examples and for the two examples of this section
+   the subdirectories examples/ex1 and examples/ex2.
+   This is done under Linux by the commands
+   mkdir examples
+   mkdir examples/ex1
+   mkdir examples/ex2
+   Now choose the subdirectory examples/ex1 as your working directory
+   and copy the source file of the Example Program e2lsq  from the
+   subdirectory /usr/local/datan/exasrc into your working directory.
+   If you want to use the MAKE facility (Section 9d) copy the file
+   makefile.exe from the directory /usr/local/datan/utils to your
+   working directory under the name makefile.
+
+   9b COMPILATION
+      -----------
+
+   To compile the program e2lsq (if it is written in C) type the command
+   dacomp e2lsq
+   or (if it is written in FORTRAN)
+   fdacomp e2lsq
+   (The batch files (f)dacomp located in the directory /usr/local/bin are
+   used to initiate the compilation. In the above example they take the
+   argument e2lsq and compile e2lsq.c or e2lsq.f, respectively.)
+
+   9c LINKING
+      -------
+
+   To link the object file resulting from the compilation of the
+   program e2lsq to the Data Analysis Library and to the Graphics
+   Library type the command
+   dalink e2lsq
+   or
+   fdalink e2lsq
+   (The batch files (f)dalink which is located in the directory
+   /usr/local/bin are used to initiate the linking process. In the
+   above example they take the argument e2lsq. They can take a list of
+   arguments, i.e., initiate the linking of more than one object file
+   with the libraries to yield an executable program.)
+
+   9d COMBINED COMPILATION AND LINKING
+      --------------------------------
+
+   For compiling a C source file you can type
+   make -f /usr/local/datan/utils/makefile.exe e2lsq
+   and for a FORTRAN source
+   make -f /usr/local/datan/utils/makefilef.exe e2lsq
+   If you copy one of these MAKE description files to the current (working)
+   directory and give it the name makefile or Makefile you can simply run
+   make e2lsq
+   (The MAKE description file in the directory then successively
+   initiates compilation and linking. It takes only one argument.
+   For projects requiring the compilation of more than one file
+   the MAKEFILE has to be adapted to the particular project. In that case
+   study the MAKE facility (man make).)
+
+   9e EXECUTION
+      ---------
+
+   As a result of compilation and linking a file with the name e2lsq
+   containing the executable program now exists in your working directory.
+   You can execute it by simply entering
+   e2lsq
+
+
+   NOTE
+   ----
+
+   The program e2lsq used as example above does not use graphics.
+   During execution alphanumeric text is displayed on the screen.
+   Its meaning is explained in the text book.
+
+   As a simple example of a main program with graphics you may take e1gr.
+   Use examples/ex2 as working directory. Copy the source program e1gr.[cf]
+   into it and repeat all steps of this section (replacing e2lsq by e1gr).
+
+
+10. ACTION IN CASE OF DIFFICULTIES
+    ==============================
+
+   10a ERRORS WITH COMPILATION, LINKING OR LIBRARY BUILDING
+       ----------------------------------------------------
+   Please check:
+   - whether the particular compiler which you selected during
+     installation is available on your computer,
+   - whether your version of the compiler is invoked
+     with exactly those keywords used in the files
+     /usr/local/bin/(f)dacomp and /usr/local/bin/(f)dalink or in
+     the file /usr/local/datan/utils/makefile(f).exe
+     or in the case of library building in the file
+     /usr/local/datan/utils/makedlib(f).sh or in the file
+     /usr/local/datan/utils/makefile(f).lib,
+   - whether the compiler environment is set up properly, in particular
+     whether the search path conventions of Section 11 are fulfilled.
+   You may possibly have to install the compiler, repeat the installation
+   (cf. Section 5 above) or change the batch files mentioned above.
+
+   10b ERRORS WITH THE GRAPHICS
+       ------------------------
+
+   Please check:
+   - whether the file GRERR.LIS contains explicit error messages,
+   - whether your computer really has the type of graphics workstation
+     you selected,
+   - whether the graphics initialization file GRINIT.DAT exists and
+     whether it describes correctly the graphics workstation you selected.
+     Note: The file GRINIT.DAT is first searched for in you working directory.
+     If not found there it is searched for in the directory /usr/local/datan.
+   If necessary, you must select a different workstation and/or change the
+   contents of the file GRINIT.DAT.
+
+
+11. PATH NAMES OF COMPILERS AND THEIR LIBRARIES
+    ===========================================
+
+   The files makedlib(f).sh, (f)dacomp and (f)dalink and the
+   files of type MAKEFILE contain references to your compiler, its
+   library manager and linker, and to the compiler libraries.
+   These programs and libraries are located in directories with names that were
+   defined during the installation of the compiler on your computer. Most
+   probably, these names are identical to the default names suggested by the
+   producers of your compiler and used by us. It is possible, however, that the
+   directory names are different from the defaults. The commands to
+   invoke the compiler, library manager, and linker in the batch files
+   mentioned above are independent of the name of the directory in which they
+   are found. It is required, however, that the name of that directory be
+   entered into the search path using the environment variable PATH. Please
+   make sure that the directory name of your compiler is mentioned in the
+   variable PATH, which is set in your login profile.
+
+   The compiler libraries may be referred to by their absolute path names in
+   the batch file (f)dalink, i.e., the explicit directory names are used.
+   If different path names are used on your computer, you have to
+   change the batch file.
+
+
+12. ADDITIONAL REMARKS FOR GRAPHICS UNDER X11
+    =========================================
+
+   The graphics information (for redrawing and zoom) is stored in a
+   temporary file XW.<UID_hex>_<PID_hex> under the directory /tmp (see
+   below). If this file system is full the graphics redrawing may fail.
+   Normally the temporary file is deleted when the program finishes.
+   In the case of a program abort or closing of the graphics window not
+   by giving ENTER with the mouse cursor in the window but by using the
+   window manager the temporary file will remain on the file system.
+   Therefore, from time to time the directory should be inspected for
+   old files.
+
+   The graphics window is sensitive to the key strokes "r" and "s" in
+   addition to the ENTER key. The first one (set remove status) prevents
+   the program from saving the graphics (caution) so that this window
+   closes after the program is finished. The second one (set save status)
+   restores "normal" behavior if the current plot is not yet finished or
+   for a possible next plot.
+
+   The default behavior and look can be changed by adding entries to
+   $HOME/.Xdefaults or to an equivalent place. The graphics package
+   reads the entries for:
+
+   - X11 geometry specification in standard form, e.g.,
+   datan.Geometry: =848x600-0-0
+
+   - directory where to save the temporary files (see above), e.g.,
+   datan.SaveDirectory: /var/tmp
+
+   - colors of the mouse pointer, e.g.,
+   datan.MouseColor: Blue
+   datan.MouseMask: Red
+
+   - title of the graphics window, e.g.,
+   datan.IconText: DATAN 2.1
+
+   - the status for saving the plots (see above, 0: remove, 1: save),
+   datan.SaveStatus: 1

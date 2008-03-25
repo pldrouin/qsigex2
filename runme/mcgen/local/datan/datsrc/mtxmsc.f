@@ -1,0 +1,9 @@
+      SUBROUTINE MTXMSC(A,R,S,M,N)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION A(M,N),R(M,N)
+      DO 20 J=1,N
+        DO 10 I=1,M
+          R(I,J)=S*A(I,J)
+   10   CONTINUE
+   20 CONTINUE
+      END

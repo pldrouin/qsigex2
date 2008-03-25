@@ -1,0 +1,8 @@
+      SUBROUTINE MTXWRT(A,M,N)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION A(M,N)
+      DO 20 I=1,M
+        WRITE(*,10)(A(I,J),J=1,N)
+   10 FORMAT(1X,4G20.13)
+   20 CONTINUE
+      END

@@ -1,0 +1,10 @@
+      DOUBLE PRECISION FUNCTION SCBINM(K,N,P)
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      S=DBLE(0.)
+      IF(K.GT.0) THEN
+        DO 10 J=0,K-1
+          S=S+SDBINM(J,N,P)
+   10   CONTINUE
+      END IF
+      SCBINM=S
+      END

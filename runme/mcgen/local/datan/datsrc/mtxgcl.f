@@ -1,0 +1,7 @@
+      SUBROUTINE MTXGCL(A,C,M,N,I)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION A(M,N), C(M)
+      DO 10 J=1,M
+        C(J)=A(J,I)
+   10 CONTINUE
+      END

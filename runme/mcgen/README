@@ -1,0 +1,37 @@
+**************************************************
+
+ Example: Ensemble test (qsigex must be installed)
+
+**************************************************
+
+Compile and link (on linux only - ask alainb for solaris)
+> make
+
+This will run the ensemble test with no correlation
+
+> bias bias_xxx_pdfs.dat bias_xxx_pdfs.root
+
+Here xxx=ucor, corr, or 2dim. The results are in the root 
+file bias_xxx_pdfs.root.
+
+
+This will run the ensemble test with correlation (rho=0.5)
+
+> bias bias_xxx_pdfs.dat bias_xxx_pdfs.root
+
+Here xxx=ucor, corr, or 2dim. The results are in the root 
+file bias_xxx_pdfs.root.
+
+The card files for qsigex are:
+
+bias_ucor_pdfs.dat  (1D fit)
+bias_corr_pdfs.dat  (PCA fit)
+bias_2dim_pdfs.dat  (2D fit)
+
+See: www.physics.carleton.ca/research/sno/anal/software/qsigex.html
+
+
+
+
+
+

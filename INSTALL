@@ -1,0 +1,29 @@
+REQUIREMENTS:
+=============
+
+-gMake
+-Sed
+-ROOT 3.05/06 or newer compiled with libtable
+
+INSTALLATION:
+=============
+
+1-Verify that the environment variable ROOTSYS contains the main ROOT directory.
+
+2-Verify that the environment variable PATH contains $ROOTSYS/bin
+
+3-Store the main QSigEx directory into the QSIGEXDIR environment variable.
+
+4-Add $QSIGEXDIR/lib to you LD_LIBRARY_PATH environment variable. 
+
+5-From the root directory of the QSigEx distribution, type:
+
+ gmake
+
+6-If you want to generate HTML documentation for QSigEx, type:
+
+ gmake htmldoc
+
+7-To compile the examples, go into $QSIGEXDIR/runme directory and type:
+
+ gmake

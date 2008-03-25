@@ -1,0 +1,25 @@
+DATA_FILE	data.root	datatree
+
+# 	name	coordinate	condition	value	
+
+cut	xmin	x>=-3
+cut	xmax	x<=3
+cut	ymin	y>=-6
+cut	ymax	y<=6
+
+#    flag class	  flux_group   dimension   name  PDF filename   data field     NBins	
+                                           
+pdf    1  TH2F     c1      systxy     c1xy      mc.root                x y
+
+pdf    1  TH2F     c2      systxy     c2xy      mc.root                x y
+
+pdf    1  TH2F     c3      systxy     c3xy      mc.root                x y
+
+#	parameter_name	active(1)  startval  minval  maxval  stepval
+	
+flux		c1	1           500         0    100000   0.01
+flux		c2	1           500 	0    100000   0.01
+flux		c3	1           500 	0    100000   0.01
+
+#Minuit control
+minimizer  MIGrad  1

@@ -1,0 +1,6 @@
+      SUBROUTINE MTXGVT(Z1,Z2,C,S)
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      W=Z1*C+Z2*S
+      Z2=-Z1*S+Z2*C
+      Z1=W
+      END

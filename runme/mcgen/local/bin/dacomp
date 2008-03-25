@@ -1,0 +1,2 @@
+#!/bin/bash
+gcc -c -O -I/usr/local/datan/include $1.c

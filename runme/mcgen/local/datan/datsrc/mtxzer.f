@@ -1,0 +1,9 @@
+      SUBROUTINE MTXZER(R,N,M)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION R(N,M)
+      DO 20 J=1,M
+        DO 10 I=1,N
+          R(I,J)=0.
+   10   CONTINUE
+   20 CONTINUE
+      END

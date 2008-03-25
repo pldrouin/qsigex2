@@ -1,0 +1,38 @@
+DATA_FILE	d2o_data.root   Tree
+
+#       name    coordinate      condition       value
+
+cut     emin    energy>=0
+cut     emax    energy<=42
+cut     rmin    radius>=0
+cut     rmax    radius<=26
+cut     cmin    cthsun>=0
+cut     cmax    cthsun<=40
+
+#    flag class	  flux_group   dimension   name  PDF filename   data field     NBins	
+                                           
+pdf    1  TH1F     cc      syste     h1001      signal_pdf.root     energy 
+pdf    1  TH1F     cc      systr     h1002      signal_pdf.root     radius
+pdf    1  TH1F     cc      systc     h1003      signal_pdf.root     cthsun
+
+pdf    1  TH1F     es      syste     h2001      signal_pdf.root     energy
+pdf    1  TH1F     es      systr     h2002      signal_pdf.root     radius
+pdf    1  TH1F     es      systc     h2003      signal_pdf.root     cthsun
+
+pdf    1  TH1F     nc      syste     h3001      signal_pdf.root     energy
+pdf    1  TH1F     nc      systr     h3002      signal_pdf.root     radius
+pdf    1  TH1F     nc      systc     h3003      signal_pdf.root     cthsun
+
+pdf    1  TH1F     bk      syste     h4001      bck_pdf.root        energy
+pdf    1  TH1F     bk      systr     h4002      bck_pdf.root        radius
+pdf    1  TH1F     bk      systc     h4003      bck_pdf.root        cthsun
+
+#	parameter_name	active(1)  startval  minval  maxval  stepval
+	
+flux	cc	1               2000    0     10000   0.01
+flux	es	1          	 200    0      1000   0.01
+flux	nc	1                500    0      1000   0.01
+flux	bk	1              124.2  124.2   124.2   0.00
+
+#Minuit control
+minimizer  MIGrad 1
