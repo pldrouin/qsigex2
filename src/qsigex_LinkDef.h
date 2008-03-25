@@ -8,6 +8,7 @@
 #pragma link C++ class QList<Float_t>;
 #pragma link C++ class QList<Double_t>;
 #pragma link C++ class QList<TString>;
+#pragma link C++ class QList<TObject*>;
 #pragma link C++ class QList<QList<TString> >;
 #pragma link C++ class QList<QList<Int_t> >;
 #pragma link C++ class QList<QList<Double_t> >;
