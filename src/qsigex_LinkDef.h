@@ -43,12 +43,11 @@
 #pragma link C++ class QSigExChecks;
 #pragma link C++ class QIdxHashList;
 #pragma link C++ class QSigExStruct-;
-#pragma link C++ class QMyDir-;
-#pragma link C++ class QNamedVar<TString>+;
-#pragma link C++ class QNamedVar<UShort_t>+;
-#pragma link C++ class QNamedVar<Int_t>+;
-#pragma link C++ class QNamedVar<Float_t>+;
-#pragma link C++ class QNamedVar<Double_t>+;
+#pragma link C++ class QNamedVar<TString>;
+#pragma link C++ class QNamedVar<UShort_t>;
+#pragma link C++ class QNamedVar<Int_t>;
+#pragma link C++ class QNamedVar<Float_t>;
+#pragma link C++ class QNamedVar<Double_t>;
 
 #pragma link C++ function QExtendedLikelihood;
 #pragma link C++ function QF2EExtendedLikelihood;

@@ -506,7 +506,6 @@ Int_t QSigExFit::Get()
 	parnames+=(TString)(dirbuf->GetName());
 	parname[i]=parnames[i].Data();
 	//Get the start value for the parameter
-	printf("%p\t%p\n",dirbuf->Get("StartVal"),dirbuf->Get("MinVal"));
 	vstart[i]=*((QNamedVar<Float_t>*)dirbuf->FindObject("StartVal"));
 	//Get the min value for the parameter
 	vmin[i]=*((QNamedVar<Float_t>*)dirbuf->FindObject("MinVal"));

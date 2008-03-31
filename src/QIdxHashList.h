@@ -2,6 +2,7 @@
 #define _QIDXHASHLIST_
 
 #include "THashList.h"
+#include "THashTable.h"
 #include "QList.h"
 
 //#define DEBUF
@@ -14,8 +15,7 @@ class QIdxHashList: public THashList
 {
   public:
     QIdxHashList(Int_t capacity = TCollection::kInitHashTableCapacity, Int_t rehash=0):THashList(capacity,rehash),fIdx2Obj(),fObj2Idx(){}
-    QIdxHashList(TObject* parent, Int_t capacity = TCollection::kInitHashTableCapacity, Int_t rehash = 0):THashList(parent,capacity),fIdx2Obj(),fObj2Idx(){}
-    virtual ~QIdxHashList(){Clear();}
+    QIdxHashList(TObject* parent, Int_t capacity = TCollection::kInitHashTableCapacity, Int_t rehash = 0):THashList(parent,capacity,rehash),fIdx2Obj(),fObj2Idx(){}
     void       Clear(Option_t *option=""){THashList::Clear(option); fIdx2Obj.Clear(); fObj2Idx.Clear();}
     void       Delete(Option_t *option=""){THashList::Delete(option); fIdx2Obj.Clear(); fObj2Idx.Clear();}
 
@@ -41,9 +41,14 @@ class QIdxHashList: public THashList
     void AddBefore(const TObject *before, TObject *obj, Int_t qidx);
     void AddBefore(TObjLink *before, TObject *obj){AddBefore(before,obj,-1);}
     void AddBefore(TObjLink *before, TObject *obj, Int_t qidx);
+    void SetObjQIdx(TObject *obj, Int_t qidx);
+    void SetObjQIdx(Int_t idx, Int_t qidx);
+    TObject *AtQIdx(Int_t qidx){if(qidx<0 || qidx>=fIdx2Obj.Count()) return NULL; return fIdx2Obj[qidx];}
     void RecursiveRemove(TObject *obj);
     TObject   *Remove(TObject *obj);
-    TObject   *Remove(TObjLink *lnk);
+    TObject   *Remove(TObjLink *lnk){return Remove(lnk,-1);}
+    TObject   *Remove(TObjLink *lnk, Int_t index);
+    TObject   *Remove(Int_t qidx);
 
   protected:
     void SetQIdx(TObject *obj, Int_t qidx);

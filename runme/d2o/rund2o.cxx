@@ -46,9 +46,10 @@ int main(int nargs, char* args[])
   QSigExGCJointProbs gcjprobs(qstruct);
   gcjprobs.Get();
 
-  QSigExFit fitter(qstruct,QExtendedLikelihood,args[1]);
-  fitter.Get();
-//  fitter.CleanDir();
+  QSigExFit *fitter;
+  fitter=new QSigExFit(qstruct,QExtendedLikelihood,args[1]);
+  fitter->Get();
+  fitter->CleanDir();
 
   f1.Write();
   f1.Close();

@@ -425,13 +425,13 @@ template <typename U> Int_t QList<U>::RedimList(Int_t newdim,Int_t index)
     
     if(newdim<fNElements){
       Int_t dimdif=newdim-fNElements;
-      if(index==-1) index=fNElements+dimdif;
-      if(index<0 || index>fNElements+dimdif) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed\n"; throw 4000;}
+      if(index==-1) index=newdim;
+      if(index<0 || index>newdim) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed\n"; throw 4000;}
       Int_t i;
       for(i=index-dimdif;i<fNElements;i++){
 	fUArray[i+dimdif]=fUArray[i];
       }
-      for(i=fNElements+dimdif;i<fNElements;i++){
+      for(i=newdim;i<fNElements;i++){
 	fUArray[i].~U();
       }
       fNElements=newdim;
@@ -479,7 +479,7 @@ template <typename U> Int_t QList<U>::RedimList(Int_t newdim,Int_t index)
 template <typename U> Int_t QList<U>::RedimList(Int_t newdim,Int_t index,const U& fillvalue)
 {
   Int_t nebefore=fNElements;
-  RedimList(newdim,index);
+  index=RedimList(newdim,index);
 
   if(fNElements>nebefore){
     Int_t i;

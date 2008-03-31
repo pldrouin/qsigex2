@@ -22,6 +22,7 @@
 #include "TStreamerElement.h"
 #include "TProcessUUID.h"
 #include "TVirtualMutex.h"
+#include "QIdxHashList.h"
 
 
 //#define DEBUG
@@ -32,39 +33,37 @@
 class QSigExStruct: public TDirectoryFile
 {
   public:
-    QSigExStruct():TDirectoryFile(), fQArray(NULL){}
+    QSigExStruct():TDirectoryFile(){}
 
-    QSigExStruct(const QSigExStruct& newqds):TDirectoryFile(),fQArray(NULL){PRINTF2(this,"\tQSigExStruct::QSigExStruct(const QSigExStruct& newqds)\n") *this=newqds; }
+    QSigExStruct(const QSigExStruct& newqds):TDirectoryFile(){PRINTF2(this,"\tQSigExStruct::QSigExStruct(const QSigExStruct& newqds)\n") *this=newqds; }
 
-    QSigExStruct(const char *name, const char *title, TDirectory* initMotherDir = 0):TDirectoryFile(),fQArray(NULL){Init(name,title,initMotherDir);}
-    QSigExStruct(const char *name, const char *title, QSigExStruct* initMotherDir, Int_t idx):TDirectoryFile(),fQArray(NULL){Init(name,title,initMotherDir); if(initMotherDir) initMotherDir->AddIdx(this,idx);}
+    QSigExStruct(const char *name, const char *title, TDirectory* initMotherDir = 0):TDirectoryFile(){Init(name,title,initMotherDir);}
+    QSigExStruct(const char *name, const char *title, QSigExStruct* initMotherDir, Int_t idx):TDirectoryFile(){Init(name,title,initMotherDir); if(initMotherDir) initMotherDir->SetIdx(this,idx);}
 
-    virtual ~QSigExStruct(){PRINTF2(this,"\tQSigExStruct::~QSigExStruct()\n") if(fQArray) delete fQArray;}
+    virtual ~QSigExStruct(){PRINTF2(this,"\tQSigExStruct::~QSigExStruct()\n")}
 
-    QSigExStruct& operator=(const QSigExStruct &rhs){fprintf(stderr,"Warning: TDirectoryFile::operator= function is private and cannot be called by derived class QSigExStruct\n"); return *this;}
+    QSigExStruct& operator=(const QSigExStruct &rhs){fprintf(stderr,"Warning: TDirectoryFile::operator= function is private and cannot be called by derived class QSigExStruct. Address of rhs object: %p\n",&rhs); return *this;}
 
     void Add(TObject *obj){TDirectoryFile::Add(obj);}
-    void Add(TObject *obj, Int_t idx){TDirectoryFile::Add(obj); if(!fQArray) fQArray=new TObjArray; fQArray->AddAtAndExpand(obj,idx);}
-    void AddIdx(TObject *obj, Int_t idx){if(GetList()->FindObject(obj)){if(!fQArray) fQArray=new TObjArray; fQArray->AddAtAndExpand(obj,idx);}}
+    void Add(TObject *obj, Int_t idx){dynamic_cast<QIdxHashList*>(GetList())->AddLast(obj,idx);}
+    void SetIdx(TObject *obj, Int_t idx){dynamic_cast<QIdxHashList*>(GetList())->SetObjQIdx(obj,idx);}
+    void Build(TFile* motherFile = 0, TDirectory* motherDir = 0);
     void Delete(const char* namecycle="");
     void Delete(Int_t idx);
-    TObject *Remove(TObject *obj){RemoveIdx(obj); return GetList()->Remove(obj);}
-    TObject *Remove(Int_t idx){if(fQArray){TObject *obj=fQArray->At(idx); fQArray->RemoveAt(idx); return GetList()->Remove(obj);} return NULL;}
-    TObject *RemoveIdx(TObject *obj){if(fQArray) fQArray->Remove(obj); return NULL;}
-    TObject *RemoveIdx(Int_t idx){if(fQArray) return fQArray->RemoveAt(idx); return NULL;}
+    TObject *Remove(TObject *obj){return GetList()->Remove(obj);}
+    TObject *Remove(Int_t idx){return dynamic_cast<QIdxHashList*>(GetList())->Remove(idx);}
 
     void FillBuffer(char*& buffer);
     TObject* Get(const char* namecycle){return TDirectoryFile::Get(namecycle);}
-    TObject* Get(Int_t idx){if(fQArray) return fQArray->At(idx); return NULL;}
-    Int_t GetKeyIdx(const TKey *key);
+    TObject* Get(Int_t idx){return dynamic_cast<QIdxHashList*>(GetList())->AtQIdx(idx);}
     void Init(const char* name, const char *title, TDirectory* initMotherDir=0);
     TDirectory *mkdir(const char *name, const char *title=""){return mkdir(name,title,-1);}
     TDirectory *mkdir(const char *name, const char *title, Int_t idx);
+    void ReadAll(Option_t *option="");
     void WriteDirHeader();
     void WriteKeys();
 
   protected:
-    TObjArray *fQArray; //! Array of indices
 
     ClassDef(QSigExStruct,1) //QSigEx Data Structure Class
 };

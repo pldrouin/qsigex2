@@ -5,39 +5,148 @@
 
 #include "debugger.h"
 
+const Int_t  kMaxLen = 2048;
+
 ClassImp(QSigExStruct)
+
+void QSigExStruct::Build(TFile* motherFile, TDirectory* motherDir)
+{
+  //*-*-*-*-*-*-*-*-*-*-*-*Initialise directory to defaults*-*-*-*-*-*-*-*-*-*
+  //*-*                    ================================
+
+  // If directory is created via default ctor (when dir is read from file)
+  // don't add it here to the directory since its name is not yet known.
+  // It will be added to the directory in TKey::ReadObj().
+
+  if (motherDir && strlen(GetName()) != 0) motherDir->Append(this);
+
+  fModified   = kTRUE;
+  fWritable   = kFALSE;
+  fDatimeC.Set();
+  fDatimeM.Set();
+  fNbytesKeys = 0;
+  fSeekDir    = 0;
+  fSeekParent = 0;
+  fSeekKeys   = 0;
+  fList       = new QIdxHashList(100,50);
+  fKeys       = new THashList(100,50);
+  fMother     = motherDir;
+  fFile       = motherFile ? motherFile : gFile;
+  SetBit(kCanDelete);
+}
 
 void QSigExStruct::Delete(const char* namecycle)
 {
-  if(fQArray){
-    Short_t cycle;
-    char name[2048];
-    DecodeNameCycle(namecycle, name, cycle);
-    fQArray->Remove(TDirectoryFile::FindObject(name));
+  //*-*-*-*-*-*-*-* Delete Objects or/and keys in a directory *-*-*-*-*-*-*-*
+  //*-*             =========================================
+  //   namecycle has the format name;cycle
+  //   namecycle = "" same as namecycle ="T*"
+  //   name  = * means all
+  //   cycle = * means all cycles (memory and keys)
+  //   cycle = "" or cycle = 9999 ==> apply to a memory object
+  //   When name=* use T* to delete subdirectories also
+  //
+  //   To delete one directory, you must specify the directory cycle,
+  //      eg.  file.Delete("dir1;1");
+  //
+  //   examples:
+  //     foo   : delete object named foo in memory
+  //     foo*  : delete all objects with a name starting with foo
+  //     foo;1 : delete cycle 1 of foo on file
+  //     foo;* : delete all cycles of foo on file and also from memory
+  //     *;2   : delete all objects on file having the cycle 2
+  //     *;*   : delete all objects from memory and file
+  //
+
+  TDirectory::TContext ctxt(gDirectory, this);
+  Short_t  cycle;
+  char     name[kMaxLen];
+  DecodeNameCycle(namecycle, name, cycle);
+
+  Int_t deleteall    = 0;
+  if(strlen(namecycle) == 0 || strcmp(name,"*") == 0)   deleteall = 1;
+  TRegexp re(name,kTRUE);
+  TString s;
+  Int_t deleteOK = 0;
+  TClass *cl;
+
+  //*-*---------------------Case of Object in memory---------------------
+  //                        ========================
+  if (cycle >= 9999 ) {
+    TNamed *idcur;
+    TIter   next(fList);
+    TObjLink *lnk=fList->FirstLink();
+    Int_t idx=0;
+    while (lnk) {
+      idcur=(TNamed*)lnk->GetObject();
+      deleteOK = 0;
+      s = idcur->GetName();
+      if (deleteall || s.Index(re) != kNPOS) {
+	deleteOK = 1;
+	if (idcur->IsA()->InheritsFrom(TDirectoryFile::Class())) {
+	  deleteOK = 2;
+	}
+      }
+      if (deleteOK != 0) {
+	dynamic_cast<QIdxHashList*>(fList)->Remove(lnk,idx);
+	if (deleteOK==2) {
+	  // read subdirectories to correctly delete them
+	  ((TDirectory*) idcur)->ReadAll("dirs");
+	  idcur->Delete();
+	  delete idcur;
+	} else
+	  idcur->Delete(name);
+      }
+      idx++;
+      lnk=lnk->Next();
+    }
   }
-  TDirectoryFile::Delete(namecycle);
+  //*-*---------------------Case of Key---------------------
+  //                        ===========
+  if (cycle != 9999 ) {
+    if (IsWritable()) {
+      TKey *key;
+      TIter nextkey(GetListOfKeys());
+      while ((key = (TKey *) nextkey())) {
+	deleteOK = 0;
+	s = key->GetName();
+	if (deleteall || s.Index(re) != kNPOS) {
+	  if (cycle == key->GetCycle()) deleteOK = 1;
+	  if (cycle > 9999) deleteOK = 1;
+	  cl=TClass::GetClass(key->GetClassName());
+	  if (cl->InheritsFrom(TDirectoryFile::Class())) 
+	    deleteOK = 2;
+	}
+	if (deleteOK) {
+	  if (deleteOK==2) {
+	    // read directory with subdirectories to correctly delete and free key structure
+	    TDirectory* dir = GetDirectory(key->GetName(), kTRUE, "Delete");
+	    if (dir!=0) {
+	      dir->Delete();
+	      fList->Remove(dir);
+	      delete dir;
+	    }
+	  }
+
+	  key->Delete();
+	  fKeys->Remove(key);
+	  fModified = kTRUE;
+	  delete key;
+	}
+      }
+      TFile* f = GetFile();
+      if (fModified && (f!=0)) {
+	WriteKeys();            //*-* Write new keys structure
+	WriteDirHeader();       //*-* Write new directory header
+	f->WriteFree();     //*-* Write new free segments list
+	f->WriteHeader();   //*-* Write new file header
+      }
+    }
+  }
 }
 
 void QSigExStruct::Delete(Int_t idx)
 {
-  TObject *obj;
-  if(fQArray && (obj=fQArray->At(idx))){
-
-    if(dynamic_cast<TDirectoryFile*>(obj))
-      dynamic_cast<TDirectoryFile*>(obj)->Delete("T*;*");
-    GetList()->Remove(obj);
-    fQArray->RemoveAt(idx);
-    TKey *keybuf;
-
-    while((keybuf=GetKey(obj->GetName()))){
-      //TKey::Delete deletes the TKey from the file but does not free the memory
-      keybuf->Delete();
-//      Commented out because this is already done in TKey::Delete
-//      GetListOfKeys()->Remove(keybuf);
-      delete keybuf;
-    }
-    delete obj;
-  }
 }
 
 void QSigExStruct::Init(const char *name, const char *title, TDirectory *initMotherDir)
@@ -84,7 +193,6 @@ void QSigExStruct::Init(const char *name, const char *title, TDirectory *initMot
     fSeekDir     = key->GetSeekKey();
     if (fSeekDir == 0) return;
     char *buffer = key->GetBuffer();
-    printf("QSigExStruct::QSigExStruct: Calling FillBuffer\n");
     FillBuffer(buffer);
     
     Int_t cycle = motherdir->AppendKey(key);
@@ -129,8 +237,8 @@ TDirectory* QSigExStruct::mkdir(const char *name, const char *title, Int_t idx)
 
 void QSigExStruct::FillBuffer(char *&buffer)
 {
-  char* ibuf=buffer;
-  printf("QSigExStruct::FillBuffer\n");
+  //char* ibuf=buffer;
+  PRINTF2(this,"\tQSigExStruct::FillBuffer\n")
   Version_t version = QSigExStruct::Class_Version();
   if (fSeekKeys > TFile::kStartBigFile) version += 1000;
   tobuf(buffer, version);
@@ -149,12 +257,48 @@ void QSigExStruct::FillBuffer(char *&buffer)
   }
   fUUID.FillBuffer(buffer);
   if (fFile && fFile->GetVersion() < 40000){
-    printf("Number of bytes written: %i\n",buffer-ibuf);
+    //printf("Number of bytes written: %i\n",buffer-ibuf);
     return;
   }
   if (version <=1000) for (Int_t i=0;i<3;i++) tobuf(buffer,Int_t(0));
-  printf("Number of bytes written: %i\n",buffer-ibuf);
+  //printf("Number of bytes written: %i\n",buffer-ibuf);
 }
+
+void QSigExStruct::ReadAll(Option_t* opt)
+{
+  // Read objects from a ROOT db file directory into memory.
+  // If an object is already in memory, the memory copy is deleted
+  // and the object is again read from the file.
+  // If opt=="dirs", only subdirectories will be read
+  // If opt=="dirs*" complete directory tree will be read
+
+  TDirectory::TContext ctxt(this);
+
+  TKey *key;
+  TIter next(GetListOfKeys());
+
+  Bool_t readdirs = ((opt!=0) && ((strcmp(opt,"dirs")==0) || (strcmp(opt,"dirs*")==0)));
+  TClass *cl;
+
+  if (readdirs)
+    while ((key = (TKey *) next())) {
+
+      //if (strcmp(key->GetClassName(),"TDirectory")!=0) continue;
+      //if (strstr(key->GetClassName(),"TDirectory")==0) continue;
+      cl = TClass::GetClass(key->GetClassName());
+      if(!(cl->InheritsFrom(TDirectoryFile::Class()))) continue;
+
+	  TDirectory *dir = GetDirectory(key->GetName(), kTRUE, "ReadAll");
+
+	  if ((dir!=0) && (strcmp(opt,"dirs*")==0)) dir->ReadAll("dirs*");
+	  }
+	  else
+	  while ((key = (TKey *) next())) {
+	  TObject *thing = GetList()->FindObject(key->GetName());
+	  if (thing) { delete thing; }
+	  thing = key->ReadObj();
+	  }
+	  }
 
 Int_t TDirectoryFile::Sizeof() const
 {
@@ -169,8 +313,6 @@ Int_t TDirectoryFile::Sizeof() const
   //nbytes     += sizeof fSeekParent;    4 or 8
   //nbytes     += sizeof fSeekKeys;      4 or 8
   //nbytes     += fUUID.Sizeof();
-  //nbytes     += sizeof Int_t;
-  //nbytes     += fKeys->GetSize()*sizeof(Int_t);
   Int_t nbytes = 22;
 
   nbytes     += fDatimeC.Sizeof();
@@ -321,6 +463,7 @@ void QSigExStruct::WriteDirHeader()
 
 void QSigExStruct::WriteKeys()
 {
+  PRINTF2(this,"\tQSigExStruct::WriteKeys()\n")
   TFile* f = GetFile();
   if (f==0) return;
 
@@ -337,7 +480,7 @@ void QSigExStruct::WriteKeys()
   TIter next(fKeys);
   TKey *key;
   Int_t nkeys  = fKeys->GetSize();
-  Int_t nobjs  = fList->GetSize();
+  //Int_t nobjs  = fList->GetSize();
   Int_t nbytes = sizeof nkeys;          //*-* Compute size of all keys
   if (f->GetEND() > TFile::kStartBigFile) nbytes += 8;
   while ((key = (TKey*)next())) {
