@@ -7,7 +7,6 @@
 #include "QSigExDirHandler.h"
 #include "TTree.h"
 #include "TList.h"
-#include "TNamed.h"
 #include "TFormula.h"
 #include "TCut.h"
 #include "TCollection.h"
@@ -16,6 +15,7 @@
 #include "TLeaf.h"
 #include "TEventList.h"
 #include "TKey.h"
+#include "QNamedVar.h"
 #include "QFormulaUtils.h"
 
 //#define DEBUG

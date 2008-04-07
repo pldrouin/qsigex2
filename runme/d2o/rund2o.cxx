@@ -22,9 +22,8 @@ int main(int nargs, char* args[])
     outfile=args[2];
   }
 
-  TFile f1(outfile,"RECREATE");
+//  TFile f1(outfile,"RECREATE");
   QSigExStruct* qstruct=new QSigExStruct("QSigEx","QSigEx");
-//  TDirectoryFile* qstruct=new TDirectoryFile("QSigEx","QSigEx");
 
   QSigExCuts cuts(qstruct,args[1]);
   cuts.Get();
@@ -56,6 +55,6 @@ int main(int nargs, char* args[])
     delete fitter;
   }
 
-  f1.Write();
-  f1.Close();
+//  f1.Write();
+//  f1.Close();
 }

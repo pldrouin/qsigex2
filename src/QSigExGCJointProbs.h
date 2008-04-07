@@ -12,11 +12,11 @@
 #include "TMatrixDSym.h"
 #include "TDecompChol.h"
 #include "TF1.h"
-#include "TNamed.h"
 #include "QSigExDirHandler.h"
 #include "QTTreeUtils.h"
 #include "arrayutils.h"
 #include "QProgress.h"
+#include "QNamedVar.h"
 
 //#define DEBUG
 //#define DEBUG2

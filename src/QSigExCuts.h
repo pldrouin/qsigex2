@@ -7,7 +7,6 @@
 #include "QSigExDirHandler.h"
 #include "TTree.h"
 #include "TList.h"
-#include "TNamed.h"
 #include "TFormula.h"
 #include "TCut.h"
 #include "TCollection.h"
@@ -16,6 +15,7 @@
 #include "TLeaf.h"
 #include "TEventList.h"
 #include "TKey.h"
+#include "QNamedVar.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -30,12 +30,9 @@
 // cuts can be defined as C/C++ conditional expressions. To simplify  //
 // these expressions, equivalences (alias expresions) can be created. //
 //                                                                    //
-// The output of this class is a set of TNamed objects located in     //
+// The output of this class is a set of QNamedVar objects located in  //
 // subfolders "Cuts Expressions" or "Equivalences" in "Cuts"          //
-// QSigExStruct. The cuts and equivalences names are contained in the //
-// Name of the object and their expression is located in the Title,   //
-// such that these strings can be read using TNamed::GetName() and    //
-// TNamed::GetTitle()                                                 //
+// QSigExStruct.                                                      //
 //                                                                    //
 ////////////////////////////////////////////////////////////////////////
 

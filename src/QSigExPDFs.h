@@ -6,7 +6,6 @@
 
 #include "TDirectory.h"
 #include "TList.h"
-#include "TNamed.h"
 #include "TCut.h"
 #include "TCollection.h"
 #include "TList.h"
@@ -17,6 +16,7 @@
 #include "QSigExIO.h"
 #include "QSigExDis.h"
 #include "QFormulaUtils.h"
+#include "QNamedVar.h"
 
 //#define DEBUG
 //#define DEBUG2

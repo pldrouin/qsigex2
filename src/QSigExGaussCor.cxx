@@ -27,7 +27,7 @@
 // produces a y(x) mapping function with gaussian distribution (TF1   //
 // object). Then, it uses the set of y(x) functions and the clean     //
 // TTree belonging to the flux group to compute the covariance matrix //
-// (TMatrixDSym object).  Matrix indexes are identified using TNamed  //
+// (TMatrixDSym object). Matrix indexes are identified using QNamedVar//
 // objects in the PDFs directories.                                   //
 //                                                                    //
 ////////////////////////////////////////////////////////////////////////
@@ -113,7 +113,7 @@ Int_t QSigExGaussCor::Get()
   //This function uses the "Event Info" TTree objects in flux group directories
   //and QSigExDisTH* PDFs in pdf directories to create TMatrixDSym covariance matrices
   //in flux group directories after to have produced "GaussMapping" TF1 objects
-  //(y(x) mapping functions) and "TMatrixIndex" TNamed objects (matrix indexes)
+  //(y(x) mapping functions) and "TMatrixIndex" QNamedVar objects (matrix indexes)
   //in PDF directories
 
   PRINTF2(this,"\tInt_t QSigExGaussCor::Get()\n")
@@ -124,7 +124,7 @@ Int_t QSigExGaussCor::Get()
   QSigExDisTH *qthbuf; //PDF buffer
   TH1 *thbuf; //TH1 buffer
   TF1 *tfbuf; //TF1 buffer
-  TNamed* nbuf; //TNamed buffer
+  TObject* nbuf; //QNamedVar buffer
   TTree* eitree; //Pointer to "Event Info" TTree in flux group directories
   QList<TString> vars; //List of correlated variable names
   //"PDFs", flux group, syst. group, pdf and "Inputs" TDirectory pointers
@@ -192,12 +192,12 @@ Int_t QSigExGaussCor::Get()
 	    GetObjs(&ilist,idir);
 
 	    //If the list is not empty and if the first object in the list is a
-	    //TNamed object
-	    if(ilist.GetSize() && (nbuf=dynamic_cast<TNamed*>(ilist.At(0)))){
+	    //QNamedVar object
+	    if(ilist.GetSize() && (nbuf=dynamic_cast<QNamedVar<TString>*>(ilist.At(0)))){
 	      //Resize the list of correlated variable names
 	      vars.RedimList(vars.Count()+1);
 	      //Add the title of the TNamed object to the list of correlated variables
-	      vars[vars.Count()-1]=nbuf->GetTitle();
+	      vars[vars.Count()-1]=dynamic_cast<QNamedVar<TString>*>(nbuf)->GetValue();
 
 	    //Else if there's no TNamed object in "Inputs" TDirectory, throw an exception  
 	    }else{
@@ -245,7 +245,7 @@ Int_t QSigExGaussCor::Get()
 	    strbuf+=vars.Count()-1;
 	    //Create a new TNamed object with name "TMatrixIndex" and with the
 	    //correlated variable index string as title
-	    nbuf=new TNamed("TMatrixIndex",strbuf.Data());
+	    nbuf=new QNamedVar<Int_t>("TMatrixIndex",strbuf.Data());
 	    //Add it to the PDF TDirectory
 	    pdir->Add(nbuf);
 	  }

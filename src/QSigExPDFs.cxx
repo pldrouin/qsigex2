@@ -196,9 +196,9 @@ Int_t QSigExPDFs::Get()
     //Loads the equivalence TDirectory in memory
     cutsdir->cd("Equivalences");
     TDirectory* eqdir=dynamic_cast<TDirectory*>(cutsdir->Get("Equivalences"));
-    TList equiv;           //List of equivalences TNamed objects
+    TList equiv;           //List of equivalences QNamedVar objects
 
-    //Get the list of equivalences TNamed objects from the equivalence
+    //Get the list of equivalences QNamedVar objects from the equivalence
     //TDirectory
     GetObjs(&equiv,eqdir);
 
@@ -212,12 +212,12 @@ Int_t QSigExPDFs::Get()
     for(j=0;j<equiv.GetSize();j++){
       
       //Add the equivalence name
-      eqnames+=dynamic_cast<TNamed*>(equiv.At(j))->GetName();
+      eqnames+=dynamic_cast<QNamedVar<TString>*>(equiv.At(j))->GetName();
       
       //Add the equivalence expression
-      eqformulas+=dynamic_cast<TNamed*>(equiv.At(j))->GetTitle();
+      eqformulas+=dynamic_cast<QNamedVar<TString>*>(equiv.At(j))->GetValue();
     }
-    //Clear the list of equivalences TNamed objects and delete these
+    //Clear the list of equivalences QNamedVar objects and delete these
     //objects from memory
     equiv.Clear();
     
@@ -229,7 +229,7 @@ Int_t QSigExPDFs::Get()
 
     TList cuts; //List of simple cuts
 
-    //Get the list of cuts TNamed objects from the equivalence TDirectory
+    //Get the list of cuts QNamedVar objects from the equivalence TDirectory
     GetObjs(&cuts,gDirectory);
 
     TCut* buf; //TCut buffer
@@ -237,13 +237,13 @@ Int_t QSigExPDFs::Get()
     //Loop over the cuts
     for(i=0;i<cuts.GetSize();i++){
       //Read the cut expression
-      buf=new TCut(dynamic_cast<TNamed*>(cuts.At(i))->GetTitle());
+      buf=new TCut(dynamic_cast<QNamedVar<TString>*>(cuts.At(i))->GetValue());
       //Add it to allcuts
       allcuts+=(*buf);
       //Add the cut to the list of combined cuts
       ccuts.Add(buf);
     }
-    //Clear the list of cuts TNamed objects and delete these objects from
+    //Clear the list of cuts QNamedVar objects and delete these objects from
     //memory
     cuts.Clear();
 
@@ -259,7 +259,7 @@ Int_t QSigExPDFs::Get()
     QSigExDis* pdfbuf;        //QSigExDis buffer
     Bool_t pdfneedscuts;
 
-    TNamed* nbuf;      //TNamed buffer
+    TObject* nbuf;      //QNamedVar buffer
 
     Double_t buf1,buf2,buf3;   //Float_t buffers
 
@@ -307,7 +307,7 @@ Int_t QSigExPDFs::Get()
 	  pdfdir=systdir->mkdir(pdfbuf->GetName());
 
 	  //Add class identifier in pdf directory;
-	  nbuf=new TNamed(ClassName(),"Class Owner Identifier");
+	  nbuf=new QNamedVar<TString>(ClassName(),"Class Owner Identifier");
 	  pdfdir->Add(nbuf);
 	  
 	  //Create an "Inputs" directory for the pdf
@@ -317,8 +317,8 @@ Int_t QSigExPDFs::Get()
 	  
 	  //Loop over the coordinates in card file
 	  for(j=0;j<ninputs;j++){
-	    //Create a new TNamed object to contain the Input
-	    nbuf=new TNamed(((TString)"Input ")+(long int)(j),inputs[j]);
+	    //Create a new QNamedVar object to contain the Input
+	    nbuf=new QNamedVar<TString>(((TString)"Input ")+(long int)(j),inputs[j]);
 	    //Add the Input object to the Input TDirectory
 	    inputspdir->Add(nbuf);
 	    //Increment the number of inputs
@@ -340,8 +340,8 @@ Int_t QSigExPDFs::Get()
 	      for(j=0;j<ninputs;j++){
 		//If the current cut contains the input name, add it to the
 		//list of cuts for this PDF
-		if(QFormulaUtils::IndexVar(strbuf,((TNamed*)inputspdir->GetList()->
-			At(j))->GetTitle())!=-1) pdfcuts+=(*buf);
+		if(QFormulaUtils::IndexVar(strbuf,((QNamedVar<TString>*)inputspdir->GetList()->
+			At(j))->GetValue())!=-1) pdfcuts+=(*buf);
 	      }
 	    }
 	  }
@@ -352,13 +352,12 @@ Int_t QSigExPDFs::Get()
 	  //Loop over the inputs
 	  for(j=0;j<ninputs;j++){
 	    //Replace the input variables names by x,y,z
-	    QFormulaUtils::ReplaceVar(&cutsexpr,((TNamed*)inputspdir->GetList()->At(j))->GetTitle(),labels[j]);
+	    QFormulaUtils::ReplaceVar(&cutsexpr,((QNamedVar<TString>*)inputspdir->GetList()->At(j))->GetValue(),labels[j]);
 	    //For the inputs, replace the equivalences names  by their
 	    //expression
-	    if((eqfound=eqnames.Find(((TNamed*)inputspdir->GetList()->At(j))
-				     ->GetTitle())).Count())
-	      ((TNamed*)inputspdir->GetList()->At(j))->
-		SetTitle(eqformulas[eqfound[0]]);
+	    if((eqfound=eqnames.Find(((QNamedVar<TString>*)inputspdir->GetList()->At(j))
+				     ->GetValue())).Count())
+	      *((QNamedVar<TString>*)inputspdir->GetList()->At(j))=eqformulas[eqfound[0]];
 	  }
 	  
 	  //Normalize the PDF using the cuts and according to what indicated by the act flag

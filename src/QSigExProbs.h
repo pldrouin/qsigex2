@@ -9,7 +9,6 @@
 #include "TCollection.h"
 #include "TTree.h"
 #include "TBranch.h"
-#include "TNamed.h"
 #include "TFormula.h"
 #include "QSigExDirHandler.h"
 #include "QSigExDis.h"
@@ -17,6 +16,7 @@
 #include "QTTreeUtils.h"
 #include "arrayutils.h"
 #include "QFormulaUtils.h"
+#include "QNamedVar.h"
 
 //#define DEBUG
 //#define DEBUG2

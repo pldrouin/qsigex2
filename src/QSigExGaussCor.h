@@ -7,7 +7,6 @@
 #include "TCollection.h"
 #include "TF1.h"
 #include "TH1.h"
-#include "TNamed.h"
 #include "TTree.h"
 #include "TMatrixDSym.h"
 #include "QSigExDirHandler.h"
@@ -16,6 +15,7 @@
 #include "QSigExGaussMapping.h"
 #include "QTTreeUtils.h"
 #include "QProgress.h"
+#include "QNamedVar.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -41,7 +41,7 @@
 // produces a y(x) mapping function with gaussian distribution (TF1   //
 // object). Then, it uses the set of y(x) functions and the clean     //
 // TTree belonging to the flux group to compute the covariance matrix //
-// (TMatrixD object).  Matrix indexes are identified using TNamed     //
+// (TMatrixD object).  Matrix indexes are identified using QNamedVar  //
 // objects in the PDFs directories.                                   //
 //                                                                    //
 ////////////////////////////////////////////////////////////////////////

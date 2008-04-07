@@ -90,7 +90,7 @@ Int_t QSigExGCJointProbs::Get()
   //matrices in y variables space (space in which the set of variables have a
   //multi-gaussian distribution). If this matrix exists, it determines which
   //marginal PDFs in this flux group are represented in this matrix (using a
-  //"TMatrixIndex" TNamed object in the PDFs directories). For each of these
+  //"TMatrixIndex" QNamedVar<Int_t> object in the PDFs directories). For each of these
   //PDFs, it loads the y(x) mapping function, TF1 object named "GaussMapping"
   //located in the marginal PDF directory. The function then loops over the
   //events in the TTree located in "Event Info" main TDirectory (not the one in
@@ -116,7 +116,7 @@ Int_t QSigExGCJointProbs::Get()
   //          -When they exist, TMatrixDSym objects (covariance matrices in y
   //           space) in the flux group directories located in "PDFs" TDirectory
   //          -When they exist, "GaussMapping" TF1 objects (y(x) mapping 
-  //           functions) and "TMatrixIndex" TNamed objects located in the PDFs
+  //           functions) and "TMatrixIndex" QNamedVar<Int_t> objects located in the PDFs
   //           directories
   //          -clean TTree located in "Event Info" main TDirectory
   //
@@ -234,7 +234,8 @@ Int_t QSigExGCJointProbs::Get()
     
     //Some multi-purpose buffers
     Int_t ibuf;
-    TNamed* namedbuf;
+    QNamedVar<Int_t>* namedbuf;
+    QNamedVar<TString>* namedbuf2;
     TF1* tfbuf;
     TObject *objbuf;
     TMatrixDSym* matbuf;
@@ -330,14 +331,14 @@ Int_t QSigExGCJointProbs::Get()
 	      strbuf+=pdir->GetName();
 
 	      //If there's a covariance matrix coordinate index and a y(x) mapping function for this PDF
-	      if((namedbuf=dynamic_cast<TNamed*>(pdir->Get("TMatrixIndex"))) && (tfbuf=dynamic_cast<TF1*>(pdir->Get(strbuf)))){
+	      if((namedbuf=dynamic_cast<QNamedVar<Int_t>*>(pdir->Get("TMatrixIndex"))) && (tfbuf=dynamic_cast<TF1*>(pdir->Get(strbuf)))){
 
 		cout << "\tCorrelations considered for PDF " << pdir->GetName() << endl;
 
 		//Read the coordinate index
-		sscanf(namedbuf->GetTitle(),"%i",&ibuf);
+		ibuf=*namedbuf;
 
-		//Delete the TNamed object (the covariance matrix index object);
+		//Delete the QNamedVar object (the covariance matrix index object);
 		delete namedbuf;
 
 		//If the current index is greater than the others read before
@@ -362,21 +363,21 @@ Int_t QSigExGCJointProbs::Get()
 		  GetObjs(&anlist,idir);
 
 		  //If there's no object or if there's no Input 0, throw an error
-		  if(anlist.GetSize()==0 || !(namedbuf=dynamic_cast<TNamed*>(anlist.FindObject("Input 0")))){
+		  if(anlist.GetSize()==0 || !(namedbuf2=dynamic_cast<QNamedVar<TString>*>(anlist.FindObject("Input 0")))){
 		    cout << "Error: There is no input for pdf " << pdir->GetName() << endl;
 		    throw 1;
 		  }
 
 		  //If the clean data TTree contains a TBranch corresponding to
 		  //the Input 0
-		  if(cdblist->FindObject(namedbuf->GetTitle())){
+		  if(cdblist->FindObject(namedbuf2->GetValue())){
 		    //Assign an address to the branch of the clean data TTree if
 		    //not already done and store the address in x
-		    (x[ngcgroups])[ibuf]=QTTreeUtils::AssignBAddress(namedbuf->GetTitle(),cdtree,dummy);
+		    (x[ngcgroups])[ibuf]=QTTreeUtils::AssignBAddress(namedbuf2->GetValue(),cdtree,dummy);
 
 		  //Else
 		  }else{
-		    cout << "Error: There's no branch '" << namedbuf->GetTitle() << "' in the clean data TTree\n";
+		    cout << "Error: There's no branch '" << namedbuf2->GetValue() << "' in the clean data TTree\n";
 		  }
 
 		  //Store the address of the current g.c. PDF y(x) function into

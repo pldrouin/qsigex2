@@ -152,6 +152,7 @@ template <typename U> Int_t QSigExProbs<U>::Get()
     TList pdfs; //List of PDF pointers (QSigExDis pointers)
     Int_t npdfs; //Number of PDFs
     TList anlist; //List of objects in an "Inputs" TDirectory
+    QNamedVar<TString>* qnvbuf; //QNamedVar buffer for inputs;
     QList<QList<TString> > axesnames; //List of coordinate names for all PDFs
     Double_t **poaddrs=NULL;  //PDFs outputs addresses
     U **piaddrs;    //PDFs inputs addresses
@@ -239,13 +240,12 @@ template <typename U> Int_t QSigExProbs<U>::Get()
 	    for(l=0;l<anlist.GetSize();l++){
 
 	      //If a valid input is found
-	      if(dynamic_cast<TNamed*>(anlist.FindObject(((TString)"Input ")+
-		      (Long_t)l))){
+	      if((qnvbuf=dynamic_cast<QNamedVar<TString>*>(anlist.FindObject(((TString)"Input ")+
+		      (Long_t)l)))){
 		//Increment the number of valid inputs
 		m++;
 		//Add the input title to the list of inputs of the current PDF
-		axesnames[axesnames.Count()-1]+=dynamic_cast<TNamed*>(
-		    anlist.FindObject(((TString)"Input ")+(Long_t)l))->GetTitle();
+		axesnames[axesnames.Count()-1]+=qnvbuf->GetValue();
 	      }
 	    }
 

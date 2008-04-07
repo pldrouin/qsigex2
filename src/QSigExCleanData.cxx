@@ -154,10 +154,10 @@ Int_t QSigExCleanData::Get()
     for(j=0;j<equiv.GetSize();j++){
       
       //Add the equivalence name
-      eqnames+=(TString)dynamic_cast<TNamed*>(equiv.At(j))->GetName();
+      eqnames+=(TString)dynamic_cast<QNamedVar<TString>*>(equiv.At(j))->GetName();
       
       //Add the equivalence expression
-      eqformulas+=(TString)dynamic_cast<TNamed*>(equiv.At(j))->GetTitle();
+      eqformulas+=dynamic_cast<QNamedVar<TString>*>(equiv.At(j))->GetValue();
     }
     //Clear the list of equivalences and delete its objects from memory
     equiv.Clear();
@@ -173,7 +173,7 @@ Int_t QSigExCleanData::Get()
     //Loop over the cuts
     for(i=0;i<cuts.GetSize();i++){
       //Read the cut expression
-      buf=dynamic_cast<TNamed*>(cuts.At(i))->GetTitle();
+      buf=dynamic_cast<QNamedVar<TString>*>(cuts.At(i))->GetValue();
       
       //Loop over the equivalences
       for(j=0;j<eqnames.Count();j++){

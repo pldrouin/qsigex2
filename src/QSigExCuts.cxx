@@ -17,12 +17,9 @@
 // cuts can be defined as ROOT selection expressions. To simplify     //
 // these expressions, equivalences (alias expresions) can be created. //
 //                                                                    //
-// The output of this class is a set of TNamed objects located in     //
+// The output of this class is a set of QNamed objects located in     //
 // subfolders "Cuts Expressions" or "Equivalences" in "Cuts"          //
-// TDirectory. The cuts and equivalences names are contained in the   //
-// Name of the object and their expression is located in the Title,   //
-// such that these strings can be read using TNamed::GetName() and    //
-// TNamed::GetTitle()                                                 //
+// TDirectory.                                                        //
 //                                                                    //
 ////////////////////////////////////////////////////////////////////////
 
@@ -135,12 +132,12 @@ Int_t QSigExCuts::GetEquivalences()
 
     //cd() to the Equivalences directory
     fCutsDir->cd("Equivalences");
-    TNamed* buf=NULL;
+    TObject* buf=NULL;
 
     //Loop over the number of equivalences
     for(Int_t i = 0; i<fEqCard.Count();i++){
       //Create a new object for the list
-      buf=new TNamed(fEqCard[i][varnameindex],fEqCard[i][formulaindex]);
+      buf=new QNamedVar<TString>(fEqCard[i][varnameindex],fEqCard[i][formulaindex]);
       //Add the object to the list
       gDirectory->Add(buf);
     }
@@ -169,14 +166,14 @@ Int_t QSigExCuts::GetCuts()
     Int_t i;
 
     fCutsDir->cd("Cuts Expressions");
-    TNamed* buf2=NULL;
+    TObject* buf2=NULL;
 
     //Loop over the cut commands
     for(i=0;i<fCutsCard.Count();i++){
 
       CheckCardNFields(fCutsCard[i].Count(),expectedcolumns,expectedcolumns);
 
-      buf2=new TNamed(fCutsCard[i][cutnameindex].Data(),fCutsCard[i][exprindex].Data());
+      buf2=new QNamedVar<TString>(fCutsCard[i][cutnameindex].Data(),fCutsCard[i][exprindex].Data());
       gDirectory->Add(buf2);
     }
     return fCutsCard.Count();
@@ -311,8 +308,8 @@ void QSigExCuts::ShowCuts()
   GetObjs(&cuts,gDirectory);
 
   for(Int_t j=0;j<cuts.GetSize();j++){
-    cout << dynamic_cast<TNamed*>(cuts.At(j))->GetName() << ": " 
-      << dynamic_cast<TNamed*>(cuts.At(j))->GetTitle() << "\n";
+    cout << dynamic_cast<QNamedVar<TString>*>(cuts.At(j))->GetName() << ": " 
+      << dynamic_cast<QNamedVar<TString>*>(cuts.At(j))->GetValue() << "\n";
   }
   cuts.Clear();
 }

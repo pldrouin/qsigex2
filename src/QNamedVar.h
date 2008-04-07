@@ -32,6 +32,7 @@ template <typename U> class QNamedVar: public TObject
 
     const char* GetName() const{return fName.Data();}
     const char* GetTitle() const{fTitle=""; fTitle+=fVal; return fTitle;}
+    const U& GetValue() const{return fVal;}
 
     ULong_t Hash() const{return fName.Hash();}
 
