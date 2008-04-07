@@ -148,13 +148,16 @@ void QSigExDirHandler::GetListOfObjsKeys(TList* list, TDirectory* dir)
 
 }
 
-Int_t QSigExDirHandler::DelObjsKeys(const Char_t* name, TDirectory* dir)
+void QSigExDirHandler::DelObjsKeys(const Char_t* name, TDirectory* dir)
 {
   //This function recursively deletes the object instance and/or all the TKeys
-  //that have the name name. It returns the number of deleted objects in the
-  //first level (count 1 for 1 deleted folder in the first level)
+  //that have the name name.
 
-  Int_t ret=0;
+  if(dynamic_cast<QSigExStruct*>(dir)) {
+    TString sbuf=name;
+    dir->Delete(sbuf+";*");
+    return;
+  }
 
   TKey* keybuf; //TKwy buffer
   //If there's an object with name name in dir
@@ -171,7 +174,6 @@ Int_t QSigExDirHandler::DelObjsKeys(const Char_t* name, TDirectory* dir)
       //RecursiveRemove does not delete the object in memory!
       delete objbuf;
       //Increment the number of deleted objects
-      ret++;
     }
   }
   TString strbuf;
@@ -182,11 +184,7 @@ Int_t QSigExDirHandler::DelObjsKeys(const Char_t* name, TDirectory* dir)
     strbuf+=keybuf->GetCycle();
     dir->Delete(strbuf);
     //Increment the number of deleted objects
-    ret++;
   }
-
-  //Return the number of deleted objects
-  return ret;
 }
 
 Bool_t QSigExDirHandler::FindObjKey(const Char_t* name, const TDirectory* dir) const

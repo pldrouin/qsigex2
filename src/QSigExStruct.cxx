@@ -9,32 +9,6 @@ const Int_t  kMaxLen = 2048;
 
 ClassImp(QSigExStruct)
 
-void QSigExStruct::Build(TFile* motherFile, TDirectory* motherDir)
-{
-  //*-*-*-*-*-*-*-*-*-*-*-*Initialise directory to defaults*-*-*-*-*-*-*-*-*-*
-  //*-*                    ================================
-
-  // If directory is created via default ctor (when dir is read from file)
-  // don't add it here to the directory since its name is not yet known.
-  // It will be added to the directory in TKey::ReadObj().
-
-  if (motherDir && strlen(GetName()) != 0) motherDir->Append(this);
-
-  fModified   = kTRUE;
-  fWritable   = kFALSE;
-  fDatimeC.Set();
-  fDatimeM.Set();
-  fNbytesKeys = 0;
-  fSeekDir    = 0;
-  fSeekParent = 0;
-  fSeekKeys   = 0;
-  fList       = new QIdxHashList(100,50);
-  fKeys       = new THashList(100,50);
-  fMother     = motherDir;
-  fFile       = motherFile ? motherFile : gFile;
-  SetBit(kCanDelete);
-}
-
 void QSigExStruct::Delete()
 {
   TDirectory::TContext ctxt(gDirectory, this);
@@ -121,6 +95,8 @@ void QSigExStruct::Delete(const char* namecycle)
   //     *;*   : delete all objects from memory and file
   //
   //
+
+  PRINTF4(this,"\tQSigExStruct::Delete(const char* namecycle<'",namecycle,"'>)\n")
   
   TDirectory::TContext ctxt(gDirectory, this);
   Short_t  cycle;
@@ -140,7 +116,6 @@ void QSigExStruct::Delete(const char* namecycle)
     TNamed *idcur;
     TObjLink *nlnk;
     TObjLink *lnk=fList->FirstLink();
-    Int_t idx=0;
     while (lnk) {
       nlnk=lnk->Next();
       idcur=(TNamed*)lnk->GetObject();
@@ -153,7 +128,7 @@ void QSigExStruct::Delete(const char* namecycle)
 	}
       }
       if (deleteOK != 0) {
-	dynamic_cast<QIdxHashList*>(fList)->Remove(lnk,idx);
+	fList->Remove(lnk);
 	if (deleteOK==2) {
 	  // read subdirectories to correctly delete them
 	  ((TDirectory*) idcur)->ReadAll("dirs");
@@ -163,7 +138,6 @@ void QSigExStruct::Delete(const char* namecycle)
 //	  idcur->Delete(name);
 	  idcur->Delete();
       }
-      idx++;
       lnk=nlnk;
     }
   }
@@ -207,73 +181,6 @@ void QSigExStruct::Delete(const char* namecycle)
 	f->WriteFree();     //*-* Write new free segments list
 	f->WriteHeader();   //*-* Write new file header
       }
-    }
-  }
-}
-
-void QSigExStruct::Delete(Int_t qidx, Bool_t deletekeys)
-{
-  // Delete object with Q index qidx from memory
-
-  TDirectory::TContext ctxt(gDirectory, this);
-
-  //   ---------------------Case of Object in memory---------------------
-  //                        ========================
-  TNamed *idcur=(TNamed*)dynamic_cast<QIdxHashList*>(fList)->AtQIdx(qidx);
-  if(!idcur) return;
-  TString name=idcur->GetName();
-
-  dynamic_cast<QIdxHashList*>(fList)->Remove(qidx);
-  if (idcur->IsA()->InheritsFrom(TDirectoryFile::Class())) {
-    // read subdirectories to correctly delete them
-    ((TDirectory*) idcur)->ReadAll("dirs");
-    idcur->Delete();
-    delete idcur;
-  } else
-    //    idcur->Delete(idcur->GetName());
-    idcur->Delete();
-
-  //*-*---------------------Case of Key---------------------
-  //                        ===========
-  if (deletekeys && IsWritable()) {
-    TKey *key;
-    TIter nextkey(GetListOfKeys());
-    TRegexp re(name,kTRUE);
-    TString s;
-    Int_t deleteOK;
-    TClass *cl;
-    while ((key = (TKey *) nextkey())) {
-      deleteOK = 0;
-      s = key->GetName();
-      if (s.Index(re) != kNPOS) {
-	deleteOK = 1;
-	cl=TClass::GetClass(key->GetClassName());
-	if (cl->InheritsFrom(TDirectoryFile::Class())) 
-	  deleteOK = 2;
-      }
-      if (deleteOK) {
-	if (deleteOK==2) {
-	  // read directory with subdirectories to correctly delete and free key structure
-	  TDirectory* dir = GetDirectory(key->GetName(), kTRUE, "Delete");
-	  if (dir!=0) {
-	    dir->Delete();
-	    fList->Remove(dir);
-	    delete dir;
-	  }
-	}
-
-	key->Delete();
-	fKeys->Remove(key);
-	fModified = kTRUE;
-	delete key;
-      }
-    }
-    TFile* f = GetFile();
-    if (fModified && (f!=0)) {
-      WriteKeys();            //*-* Write new keys structure
-      WriteDirHeader();       //*-* Write new directory header
-      f->WriteFree();     //*-* Write new free segments list
-      f->WriteHeader();   //*-* Write new file header
     }
   }
 }
@@ -338,14 +245,14 @@ void QSigExStruct::Init(const char *name, const char *title, TDirectory *initMot
   gROOT->GetUUIDs()->AddUUID(fUUID,this);
 }
 
-TDirectory* QSigExStruct::mkdir(const char *name, const char *title, Int_t idx)
+TDirectory* QSigExStruct::mkdir(const char *name, const char *title)
 {
   // Create a sub-directory and return a pointer to the created directory.
   // Returns 0 in case of error.
   // Returns 0 if a directory with the same name already exists.
   // Note that the directory name cannot contain slashes.
 
-  PRINTF7("TDirectory* QSigExStruct::mkdir(const char *name<",name,">, const char *title<",title,">, Int_t idx<",idx,">)\n")
+  PRINTF5("TDirectory* QSigExStruct::mkdir(const char *name<",name,">, const char *title<",title,">)\n")
 
   if (!name || !title || !strlen(name)) return 0;
   if (!strlen(title)) title = name;
@@ -360,8 +267,7 @@ TDirectory* QSigExStruct::mkdir(const char *name, const char *title, Int_t idx)
 
   TDirectory::TContext ctxt(this);
 
-  if(idx==-1) return new QSigExStruct(name, title, this);
-  else return new QSigExStruct(name,title,this,idx);
+  return new QSigExStruct(name, title, this);
 }
 
 void QSigExStruct::FillBuffer(char *&buffer)
@@ -417,39 +323,16 @@ void QSigExStruct::ReadAll(Option_t* opt)
       cl = TClass::GetClass(key->GetClassName());
       if(!(cl->InheritsFrom(TDirectoryFile::Class()))) continue;
 
-	  TDirectory *dir = GetDirectory(key->GetName(), kTRUE, "ReadAll");
+      TDirectory *dir = GetDirectory(key->GetName(), kTRUE, "ReadAll");
 
-	  if ((dir!=0) && (strcmp(opt,"dirs*")==0)) dir->ReadAll("dirs*");
-	  }
-	  else
-	  while ((key = (TKey *) next())) {
-	  TObject *thing = GetList()->FindObject(key->GetName());
-	  if (thing) { delete thing; }
-	  thing = key->ReadObj();
-	  }
-	  }
-
-Int_t TDirectoryFile::Sizeof() const
-{
-  //*-*-*-*-*-*-*Return the size in bytes of the directory header*-*-*-*-*-*-*
-  //*-*          ================================================
-  //Int_t nbytes = sizeof(Version_t);    2
-  //nbytes     += fDatimeC.Sizeof();
-  //nbytes     += fDatimeM.Sizeof();
-  //nbytes     += sizeof fNbytesKeys;    4
-  //nbytes     += sizeof fNbytesName;    4
-  //nbytes     += sizeof fSeekDir;       4 or 8
-  //nbytes     += sizeof fSeekParent;    4 or 8
-  //nbytes     += sizeof fSeekKeys;      4 or 8
-  //nbytes     += fUUID.Sizeof();
-  Int_t nbytes = 22;
-
-  nbytes     += fDatimeC.Sizeof();
-  nbytes     += fDatimeM.Sizeof();
-  nbytes     += fUUID.Sizeof();
-  //assume that the file may be above 2 Gbytes if file version is > 4
-  if (fFile && fFile->GetVersion() >= 40000) nbytes += 12;
-  return nbytes;
+      if ((dir!=0) && (strcmp(opt,"dirs*")==0)) dir->ReadAll("dirs*");
+    }
+  else
+    while ((key = (TKey *) next())) {
+      TObject *thing = GetList()->FindObject(key->GetName());
+      if (thing) { delete thing; }
+      thing = key->ReadObj();
+    }
 }
 
 void QSigExStruct::Streamer(TBuffer &b)
@@ -560,83 +443,6 @@ void QSigExStruct::Streamer(TBuffer &b)
       if (version <=1000) for (Int_t i=0;i<3;i++) b << Int_t(0);
     }
   }
-}
-
-void QSigExStruct::WriteDirHeader()
-{
-  PRINTF2(this,"\tQSigExStruct::WriteDirHeader()\n");
-
-  TFile* f = GetFile();
-  if (f==0) return;
-
-  if (!f->IsBinary()) {
-    fDatimeM.Set();
-//    f->DirWriteHeader(this);
-    return;
-  }
-
-  Int_t nbytes  = TDirectoryFile::Sizeof();  //Warning ! TFile has a Sizeof()
-  char * header = new char[nbytes];
-  char * buffer = header;
-  fDatimeM.Set();
-  FillBuffer(buffer);
-  Long64_t pointer = fSeekDir + fNbytesName; // do not overwrite the name/title part
-  fModified     = kFALSE;
-  f->Seek(pointer);
-  f->WriteBuffer(header, nbytes);
-  if (f->MustFlush()) f->Flush();
-  delete [] header;
-}
-
-void QSigExStruct::WriteKeys()
-{
-  PRINTF2(this,"\tQSigExStruct::WriteKeys()\n")
-  TFile* f = GetFile();
-  if (f==0) return;
-
-  if (!f->IsBinary()) {
-    fprintf(stderr,"QSigExStruct::WriteKeys(): Warning: Function not implemented for non-binary files\n");
-    return;
-  }
-
-  //*-* Delete the old keys structure if it exists
-  if (fSeekKeys != 0) {
-    f->MakeFree(fSeekKeys, fSeekKeys + fNbytesKeys -1);
-  }
-  //*-* Write new keys record
-  TIter next(fKeys);
-  TKey *key;
-  Int_t nkeys  = fKeys->GetSize();
-  //Int_t nobjs  = fList->GetSize();
-  Int_t nbytes = sizeof nkeys;          //*-* Compute size of all keys
-  if (f->GetEND() > TFile::kStartBigFile) nbytes += 8;
-  while ((key = (TKey*)next())) {
-    nbytes += key->Sizeof();
-  }
-  //nbytes += nobjs * sizeof(nobjs); //Allocate space for QSigExStruct list
-  TKey *headerkey  = new TKey(fName,fTitle,IsA(),nbytes,this);
-  if (headerkey->GetSeekKey() == 0) {
-    delete headerkey;
-    return;
-  }
-  char *buffer = headerkey->GetBuffer();
-  next.Reset();
-  tobuf(buffer, nkeys);
-  while ((key = (TKey*)next())) {
-    key->FillBuffer(buffer);
-  }
-
-  /*if(fQArray){
-    for(Int_t i=0; i<fList->GetSize(); i++) tobuf(buffer, fQArray->IndexOf(fList->At(i)));
-
-  } else {
-    for(Int_t i=0; i<fList->GetSize(); i++) tobuf(buffer, -1);
-  }*/
-
-  fSeekKeys     = headerkey->GetSeekKey();
-  fNbytesKeys   = headerkey->GetNbytes();
-  headerkey->WriteFile();
-  delete headerkey;
 }
 
 #include "debugger.h"

@@ -39,17 +39,17 @@ void QSigExFit::FormatDir()
 
   PRINTF2(this,"\tvoid QSigExFit::FormatDir()\n")
     try{
-      if(!(fFitDir=(QSigExStruct*)fMyDir->Get(kFitIdx))){
-	fFitDir=(QSigExStruct*)fMyDir->mkdir("Fit","Fit",kFitIdx);
+      if(!(fFitDir=(QSigExStruct*)fMyDir->Get("Fit"))){
+	fFitDir=(QSigExStruct*)fMyDir->mkdir("Fit","Fit");
       }
       if(!FindObjKey("Setup",fFitDir)){
-	fFitDir->mkdir("Setup","Setup",kSetupIdx);
+	fFitDir->mkdir("Setup","Setup");
       }
       if(!FindObjKey("Numbers",fFitDir)){
-	fFitDir->mkdir("Numbers","Numbers",kNumbersIdx);
+	fFitDir->mkdir("Numbers","Numbers");
       }
       if(!FindObjKey("Minuit",fFitDir)){
-	fFitDir->mkdir("Minuit","Minuit",kMinuitIdx);
+	fFitDir->mkdir("Minuit","Minuit");
       }
     }catch(int e){
       cout << "Exception handled by QSigExFit::FormatDir\n";
@@ -65,7 +65,7 @@ void QSigExFit::CleanDir()
 
   PRINTF2(this,"\tvoid QSigExFit::CleanDir()\n")
     try{
-      fMyDir->Delete(kFitIdx);
+      DelObjsKeys("Fit",fMyDir);
       fFitDir=NULL;
     }catch(int e){
       cout << "Exception handled by QSigExFit::CleanDir\n";
@@ -225,7 +225,7 @@ void QSigExFit::GetParametersParams()
       const Int_t stepvalindex = 6;
 
       //Creates a directory to put the flux card parameters info
-      QSigExStruct* fcarddir=(QSigExStruct*)(((QSigExStruct*)fFitDir->Get(kSetupIdx))->mkdir("Parameters","",kSParamsIdx));
+      QSigExStruct* fcarddir=(QSigExStruct*)(((QSigExStruct*)fFitDir->Get("Setup"))->mkdir("Parameters",""));
 
 
       //If there are no fluxes defined, complain!
@@ -245,25 +245,25 @@ void QSigExFit::GetParametersParams()
 	//First check that we loaded the flux info correctly 
 	CheckCardNFields(fFluxCard[i].Count(),numfluxfields,numfluxfields);
 
-	dirbuf=(QSigExStruct*)(fcarddir->mkdir(fFluxCard[i][fluxgroupindex],"",i));
+	dirbuf=(QSigExStruct*)(fcarddir->mkdir(fFluxCard[i][fluxgroupindex],""));
 
 	nvbuf=new QNamedVar<Float_t>("StartVal",fFluxCard[i][startvalindex].Data());
-	dirbuf->Add(nvbuf,kPStartValIdx);
+	dirbuf->Add(nvbuf);
 
 	nvbuf=new QNamedVar<Float_t>("MinVal",fFluxCard[i][minvalindex].Data());
-	dirbuf->Add(nvbuf,kPMinValIdx);
+	dirbuf->Add(nvbuf);
 
 	nvbuf=new QNamedVar<Float_t>("MaxVal",fFluxCard[i][maxvalindex].Data());
-	dirbuf->Add(nvbuf,kPMaxValIdx);
+	dirbuf->Add(nvbuf);
 
 	nvbuf=new QNamedVar<Float_t>("StepVal",fFluxCard[i][stepvalindex].Data());
-	dirbuf->Add(nvbuf,kPStepValIdx);
+	dirbuf->Add(nvbuf);
 
 	nvbuf=new QNamedVar<UShort_t>("Active",fFluxCard[i][activeindex].Data());
-	dirbuf->Add(nvbuf,kPActiveIdx);
+	dirbuf->Add(nvbuf);
 
 	nvbuf=new QNamedVar<Int_t>("Index",i);
-	dirbuf->Add(nvbuf,kPIndexIdx);
+	dirbuf->Add(nvbuf);
       }
 
     }catch(Int_t e){
@@ -286,7 +286,7 @@ void QSigExFit::GetConstants()
     const Int_t variabvalueindex = 2;
 
     //Creates a directory to put the flux card variables info
-    QSigExStruct* fcarddir=(QSigExStruct*)(((QSigExStruct*)fFitDir->Get("Setup"))->mkdir("Constants","",kSConstantsIdx));
+    QSigExStruct* fcarddir=(QSigExStruct*)(((QSigExStruct*)fFitDir->Get("Setup"))->mkdir("Constants",""));
 
     TObject* nvbuf=NULL; 
 
@@ -297,7 +297,7 @@ void QSigExFit::GetConstants()
       CheckCardNFields(fVariabsCard[i].Count(),numvariabfields,numvariabfields);
 
       nvbuf=new QNamedVar<Double_t>(fVariabsCard[i][variabnameindex],fVariabsCard[i][variabvalueindex]);
-      fcarddir->Add(nvbuf,i);
+      fcarddir->Add(nvbuf);
     }
   }catch(Int_t e){
     cout << "Exception handled by QSigExFit::GetConstants\n";
@@ -320,7 +320,7 @@ void QSigExFit::GetMinimizerSettings()
     const Int_t errindex=2;
 
     //Create the "Fit/Setup/Minimizer" QSigExStruct
-    QSigExStruct* fcarddir=(QSigExStruct*)(((QSigExStruct*)fFitDir->Get("Setup"))->mkdir("Minimizer","",kSMinimizerIdx));
+    QSigExStruct* fcarddir=(QSigExStruct*)(((QSigExStruct*)fFitDir->Get("Setup"))->mkdir("Minimizer",""));
 
     //Check the number of fields
     CheckCardNFields(fMinimCard.Count(),minfields);
@@ -331,13 +331,13 @@ void QSigExFit::GetMinimizerSettings()
     //in its title 
     nvbuf=new QNamedVar<TString>("Minimizer",fMinimCard[minimnameindex].Data());
     //Add this QNamedVar object to the minimizer QSigExStruct
-    fcarddir->Add(nvbuf,kMMinimizerIdx);
+    fcarddir->Add(nvbuf);
 
     //Create a QNamedVar object named "FCNError" and that holds the minimization
     //function "UP" vallue in its title
     nvbuf=new QNamedVar<Double_t>("FCNError",fMinimCard[errindex].Data());
     //Add this QNamedVar object to the minimizer QSigExStruct
-    fcarddir->Add(nvbuf,kMFCNErrorIdx); 
+    fcarddir->Add(nvbuf); 
 
     TString sbuf; //TString buffer
 
@@ -349,7 +349,7 @@ void QSigExFit::GetMinimizerSettings()
       //Create a new QNamedVar that holds the minimizer argument value in its title
       nvbuf=new QNamedVar<TString>(sbuf,fMinimCard[i]);
       //Add this QNamedVar object to the minimizer QSigExStruct
-      fcarddir->Add(nvbuf,kMOtherFieldsIdx+i-3);
+      fcarddir->Add(nvbuf);
     }
   }catch(int e){
     cout << "Exception handled by QSigExFit::GetMinimizerSettings\n";
@@ -366,7 +366,7 @@ void QSigExFit::GetMinosSettings()
   try{
 
     //Create a "Fit/Setup/MINOs" QSigExStruct
-    QSigExStruct* fcarddir=(QSigExStruct*)(((QSigExStruct*)fFitDir->Get("Setup"))->mkdir("MINOs","",kSMINOsIdx));
+    QSigExStruct* fcarddir=(QSigExStruct*)(((QSigExStruct*)fFitDir->Get("Setup"))->mkdir("MINOs",""));
 
     TObject* nvbuf; //QNamedVar buffer
     //If the number of fields in the card file entry is greater than 1
@@ -383,7 +383,7 @@ void QSigExFit::GetMinosSettings()
       nvbuf=new QNamedVar<Int_t>("MaxCalls",-1);
     }
     //Aadd the QNamedVar object to the MINOs QSigExStruct
-    fcarddir->Add(nvbuf,kMINOsMaxCallsIdx);
+    fcarddir->Add(nvbuf);
 
   }catch(int e){
     cout << "Exception handled by QSigExFit::GetMinosSettings\n";

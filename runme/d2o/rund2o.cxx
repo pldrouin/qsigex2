@@ -24,6 +24,7 @@ int main(int nargs, char* args[])
 
   TFile f1(outfile,"RECREATE");
   QSigExStruct* qstruct=new QSigExStruct("QSigEx","QSigEx");
+//  TDirectoryFile* qstruct=new TDirectoryFile("QSigEx","QSigEx");
 
   QSigExCuts cuts(qstruct,args[1]);
   cuts.Get();
@@ -48,11 +49,12 @@ int main(int nargs, char* args[])
 
   QSigExFit *fitter;
 
-  fitter=new QSigExFit(qstruct,QExtendedLikelihood,args[1]);
-  fitter->Get();
-  fitter->CleanDir();
-  gDirectory=&f1;
-  delete fitter;
+  for(Int_t i=0; i<100; i++){
+    fitter=new QSigExFit(qstruct,QExtendedLikelihood,args[1]);
+    fitter->Get();
+    fitter->CleanDir();
+    delete fitter;
+  }
 
   f1.Write();
   f1.Close();

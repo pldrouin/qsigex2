@@ -69,14 +69,10 @@ class QSigExDirHandler: public TObject{
   void GetObjs(TList* list, TDirectory* dir);
   void GetDirs(TList* list, TDirectory* dir);
   void GetListOfObjsKeys(TList* list, TDirectory* dir);
-  Int_t DelObjsKeys(const Char_t* name, TDirectory* dir);
+  void DelObjsKeys(const Char_t* name, TDirectory* dir);
   Bool_t FindObjKey(const Char_t* name, const TDirectory* dir) const;
   TDirectory* CopyDir(TDirectory* fromdir, TDirectory* todir); 
   TDirectory* SetDirectory(TDirectory* dir, TObject* obj);
-
-  enum{
-    kFitIdx
-  };
 
  protected:
   virtual void FormatDir()=0;

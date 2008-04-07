@@ -41,7 +41,6 @@
 #pragma link C++ class QSigExTTreePDF;
 #pragma link C++ class QTTreeUtils;
 #pragma link C++ class QSigExChecks;
-#pragma link C++ class QIdxHashList;
 #pragma link C++ class QSigExStruct-;
 #pragma link C++ class QNamedVar<TString>;
 #pragma link C++ class QNamedVar<UShort_t>;

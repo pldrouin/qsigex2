@@ -132,38 +132,6 @@ class QSigExFit: public QSigExDirHandler{
 
   Int_t Get();
 
-  enum{
-    kSetupIdx,
-    kNumbersIdx,
-    kMinuitIdx
-  };
-
-  enum{
-    kSParamsIdx,
-    kSConstantsIdx,
-    kSMinimizerIdx,
-    kSMINOsIdx
-  };
-
-  enum{
-    kPStartValIdx,
-    kPMinValIdx,
-    kPMaxValIdx,
-    kPStepValIdx,
-    kPActiveIdx,
-    kPIndexIdx
-  };
-
-  enum{
-    kMMinimizerIdx,
-    kMFCNErrorIdx,
-    kMOtherFieldsIdx
-  };
-
-  enum{
-    kMINOsMaxCallsIdx
-  };
-
  protected:
   void FormatDir();
   void GetParametersParams();
