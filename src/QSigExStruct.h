@@ -40,7 +40,7 @@ class QSigExStruct: public TDirectoryFile
     QSigExStruct(const char *name, const char *title, TDirectory* initMotherDir = 0):TDirectoryFile(){Init(name,title,initMotherDir);}
     QSigExStruct(const char *name, const char *title, QSigExStruct* initMotherDir, Int_t idx):TDirectoryFile(){Init(name,title,initMotherDir); if(initMotherDir) initMotherDir->SetIdx(this,idx);}
 
-    virtual ~QSigExStruct(){PRINTF2(this,"\tQSigExStruct::~QSigExStruct()\n")}
+    virtual ~QSigExStruct(){PRINTF4(this,"\tQSigExStruct('",GetName(),"')::~QSigExStruct()\n")}
 
     QSigExStruct& operator=(const QSigExStruct &rhs){fprintf(stderr,"Warning: TDirectoryFile::operator= function is private and cannot be called by derived class QSigExStruct. Address of rhs object: %p\n",&rhs); return *this;}
 
@@ -48,8 +48,9 @@ class QSigExStruct: public TDirectoryFile
     void Add(TObject *obj, Int_t idx){dynamic_cast<QIdxHashList*>(GetList())->AddLast(obj,idx);}
     void SetIdx(TObject *obj, Int_t idx){dynamic_cast<QIdxHashList*>(GetList())->SetObjQIdx(obj,idx);}
     void Build(TFile* motherFile = 0, TDirectory* motherDir = 0);
-    void Delete(const char* namecycle="");
-    void Delete(Int_t idx);
+    void Delete();
+    void Delete(const char* namecycle);
+    void Delete(Int_t qidx, Bool_t deletekeys=kTRUE);
     TObject *Remove(TObject *obj){return GetList()->Remove(obj);}
     TObject *Remove(Int_t idx){return dynamic_cast<QIdxHashList*>(GetList())->Remove(idx);}
 

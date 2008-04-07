@@ -81,8 +81,8 @@ class QSigExDirHandler: public TObject{
  protected:
   virtual void FormatDir()=0;
  
-  QSigExStruct* fMyDir; //Pointer to the QSigExStruct instance filled by QSigExDirHandler
-  QDatReader fReader; //QDatReader instance used to read the card file
+  QSigExStruct* fMyDir; //! Pointer to the QSigExStruct instance filled by QSigExDirHandler
+  QDatReader fReader; //! QDatReader instance used to read the card file
 
   void CheckCardNFields(Int_t nfields, Int_t min, Int_t max=-1);
 

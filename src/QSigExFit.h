@@ -84,7 +84,7 @@ class QSigExFit: public QSigExDirHandler{
       }
     }
 
-  virtual ~QSigExFit(){}
+  virtual ~QSigExFit(){PRINTF2(this,"\tQSigExFit::~QSigExFit()\n") fJProbsDirs.Clear("nodelete");}
 
   void LoadCardFile(const Char_t* cardfilename=NULL);
 
@@ -177,14 +177,14 @@ class QSigExFit: public QSigExDirHandler{
 
  private:
   
-  QSigExStruct* fFitDir; //Pointer to the "Fit" QSigExStruct 
+  QSigExStruct* fFitDir; //! Pointer to the "Fit" QSigExStruct 
   TList fJProbsDirs; //! List of pointers to extra joint prob trees
   void (*fCompiledFunc)(Int_t&, Double_t*, Double_t&f, Double_t*, Int_t); //! Pointer to a compiled minimization function
   void* fInterpretedFunc;  //! Pointer to an interpreted minimization function
-  QList<QList<TString> > fFluxCard; //List of setup parameters of population parameters in card file format
-  QList<QList<TString> > fVariabsCard; //List of fit constants in card file format
-  QList<TString> fMinimCard; //Minimizer configuration parameters in card file format
-  QList<TString> fMinosCard; //MINOs configuration parameters in card file format
+  QList<QList<TString> > fFluxCard; //! List of setup parameters of population parameters in card file format
+  QList<QList<TString> > fVariabsCard; //! List of fit constants in card file format
+  QList<TString> fMinimCard; //! Minimizer configuration parameters in card file format
+  QList<TString> fMinosCard; //! MINOs configuration parameters in card file format
 
   ClassDef (QSigExFit,1) //Evaluates the population parameters using Minuit minimization package
 };

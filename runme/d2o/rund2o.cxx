@@ -12,7 +12,7 @@ int main(int nargs, char* args[])
 {
   if(nargs==1 || nargs>3){
     cout <<
-   "Error: Wrong arguments format\nShould be: runme cardfile [rootfile]\nwhere cardfile is the configuration file and where rootfile is the optional\nargument that specifies the file that will be created to put the results\n(default is results.root)\n";
+      "Error: Wrong arguments format\nShould be: runme cardfile [rootfile]\nwhere cardfile is the configuration file and where rootfile is the optional\nargument that specifies the file that will be created to put the results\n(default is results.root)\n";
     exit(1);
   }
   const Char_t* outfile;
@@ -47,26 +47,13 @@ int main(int nargs, char* args[])
   gcjprobs.Get();
 
   QSigExFit *fitter;
+
   fitter=new QSigExFit(qstruct,QExtendedLikelihood,args[1]);
   fitter->Get();
   fitter->CleanDir();
+  gDirectory=&f1;
+  delete fitter;
 
   f1.Write();
   f1.Close();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
