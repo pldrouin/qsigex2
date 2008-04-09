@@ -22,7 +22,7 @@ int main(int nargs, char* args[])
     outfile=args[2];
   }
 
-//  TFile f1(outfile,"RECREATE");
+  TFile f1(outfile,"RECREATE");
   QSigExStruct* qstruct=new QSigExStruct("QSigEx","QSigEx");
 
   QSigExCuts cuts(qstruct,args[1]);
@@ -48,13 +48,13 @@ int main(int nargs, char* args[])
 
   QSigExFit *fitter;
 
-  for(Int_t i=0; i<100; i++){
+  for(Int_t i=0; i<1; i++){
     fitter=new QSigExFit(qstruct,QExtendedLikelihood,args[1]);
     fitter->Get();
     fitter->CleanDir();
     delete fitter;
   }
 
-//  f1.Write();
-//  f1.Close();
+  f1.Write();
+  f1.Close();
 }

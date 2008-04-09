@@ -1,9 +1,9 @@
 //#define DEBUG
 //#define DEBUG2
 
-#include "debugger.h"
-
 #include "QNamedVar.h"
+
+#include "debugger.h"
 
 template <typename U> void QNamedVar<U>::ls(Option_t *) const
 {

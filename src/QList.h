@@ -25,12 +25,14 @@
 #define _QLIST_
 
 #include <cstdlib>
-#include <typeinfo>
+#include <iostream>
 #include <new>
+#include <typeinfo>
 #include "TObject.h"
 #include "TObjectTable.h"
 #include "Rtypes.h"
-#include <iostream>
+#include "TBrowser.h"
+#include "QList_LinkDef_inc.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -64,6 +66,9 @@ template <typename U> class QList: public TObject
   //  Int_t Del(const U& delu, Int_t maxmatches=1);
   Int_t Del(const U* delus, Int_t nelements=1, Int_t maxmatches=1);
   void Del(Int_t index=-1);
+
+  void Browse(TBrowser *b);
+  Bool_t IsFolder() const {return kTRUE;}
 
   const QList<U>& operator=(const QList<U>& newqlist){PRINTF4(this,"\tconst QList<U>& QList<",typeid(U).name(),">::operator=(const QList<U>& newqlist)\n") Set(newqlist); return *this;}
 

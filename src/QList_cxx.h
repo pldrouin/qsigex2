@@ -221,6 +221,18 @@ template <typename U> void QList<U>::Del(Int_t index)
   RedimList(fNElements-1,index);
 }
 
+template <typename U> void QList<U>::Browse(TBrowser *b)
+{
+  if (b && fUArray) {
+    TObject *obj;
+
+    for(Int_t i=0; i<fNElements; i++) {
+      obj=dynamic_cast<TObject*>((TObject*)((void*)(fUArray+i)));
+      if(obj) b->Add(obj,obj->GetName());
+    }
+  }
+}
+
 template <typename U> QList<U>::operator U*() const
 {
   // This function returns a copy of *this U array when *this instance is assigned

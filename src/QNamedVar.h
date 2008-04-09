@@ -1,13 +1,18 @@
 #ifndef _QNAMEDVAR_
 #define _QNAMEDVAR_
 
+#include <iostream>
 #include "TObject.h"
 #include "TString.h"
+#include "TROOT.h"
+#include "TClass.h"
 
 //#define DEBUG
 //#define DEBUG2
 
 #include "debugger.h"
+
+using namespace std;
 
 template <typename U> class QNamedVar: public TObject
 {
@@ -18,9 +23,9 @@ template <typename U> class QNamedVar: public TObject
 
     QNamedVar(const char *name, const char *valstr): TObject(), fName(name) {SetValtoStr(fVal,valstr);}
 
-    QNamedVar(const QNamedVar<U>& namedval): TObject(namedval){fVal=namedval.fVal;}
+    QNamedVar(const QNamedVar<U>& namedval): TObject(namedval), fName(namedval.fName), fVal(namedval.fVal) {}
 
-    const QNamedVar& operator=(const QNamedVar& rhs){TObject::operator=(rhs); fVal=rhs.fVal; return *this;}
+    const QNamedVar& operator=(const QNamedVar& rhs){TObject::operator=(rhs); fName=rhs.fName; fVal=rhs.fVal; return *this;}
 
     const QNamedVar& operator=(const U& rhs){fVal=rhs; return *this;}
 
@@ -60,8 +65,8 @@ template <typename U> class QNamedVar: public TObject
 
   private:
     TString fName;
-    mutable TString fTitle; //!
     U fVal;
+    mutable TString fTitle; //!
 
   ClassDef(QNamedVar,1) //Generic named value template class
 };
