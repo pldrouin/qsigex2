@@ -7,6 +7,8 @@
 #include "rund2o.h"
 //#include "TRandom.h"
 //#include "TMath.h"
+#include "Qtest1.h"
+#include "TFunction.h"
 
 int main(int nargs, char* args[])
 {
@@ -57,4 +59,7 @@ int main(int nargs, char* args[])
 
   f1.Write();
   f1.Close();
+
+  void (*func)(const double**,const double**,double**)=(void (*)(const double**,const double**,double**))(((TFunction*)gROOT->GetListOfGlobalFunctions()->FindObject("Qtest1"))->InterfaceMethod());
+  printf("%p\t%p\n",func,Qtest1);
 }

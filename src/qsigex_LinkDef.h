@@ -8,11 +8,12 @@
 #pragma link C++ class QList<Float_t>;
 #pragma link C++ class QList<Double_t>;
 #pragma link C++ class QList<TString>;
-#pragma link C++ class QList<TObject*>;
 #pragma link C++ class QList<QList<TString> >;
 #pragma link C++ class QList<QList<Int_t> >;
 #pragma link C++ class QList<QList<Double_t> >;
 #pragma link C++ class QList<QNamedVar<TString> >;
+#pragma link C++ class QList<TObject*>-;
+#pragma link C++ class QList<Double_t*>-;
 
 #pragma link C++ class QNamedVar<TString>;
 #pragma link C++ class QNamedVar<UShort_t>;
@@ -49,12 +50,16 @@
 #pragma link C++ class QSigExTHOps;
 #pragma link C++ class QSigExTTreePDF;
 #pragma link C++ class QTTreeUtils;
+#pragma link C++ class QProcedure;
+#pragma link C++ class QCompProc;
+#pragma link C++ class QCINTProc;
+#pragma link C++ class QNamedProc;
 #pragma link C++ class QSigExChecks;
-#pragma link C++ class QSigExSys;
 #pragma link C++ class QSigExSystematics;
 
 #pragma link C++ function QExtendedLikelihood;
 #pragma link C++ function QF2EExtendedLikelihood;
 #pragma link C++ function QSigExGaussMapping;
 #pragma link C++ function erfinv;
+#pragma link C++ function Qtest1;
 #endif

@@ -225,20 +225,24 @@ template <typename U> void QList<U>::Browse(TBrowser *b)
 {
   if (b && fUArray) {
     TObject *obj;
+    char *strbuf=NULL;
 
     for(Int_t i=0; i<fNElements; i++) {
       obj=dynamic_cast<TObject*>((TObject*)((void*)(fUArray+i)));
-      if(obj) b->Add(obj,obj->GetName());
+      strbuf=(char*)realloc(strbuf,8+strlen(obj->GetName()));
+      sprintf(strbuf,"[%03i]: %s",i,obj->GetName());
+      if(obj) b->Add(obj,strbuf);
     }
+    free(strbuf);
   }
 }
 
-template <typename U> QList<U>::operator U*() const
+template <typename U> U* QList<U>::CloneArray() const
 {
   // This function returns a copy of *this U array when *this instance is assigned
   // to a U*, or casted to U* .
 
-  PRINTF4(this,"\tQList<",typeid(U).name(),">::operator U*()\n")
+  PRINTF4(this,"\tQList<",typeid(U).name(),">::CloneArray()\n")
 
   U* newuarray=new U[fNElements];
   for(Int_t i=0;i<fNElements;i++){

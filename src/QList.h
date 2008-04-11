@@ -74,8 +74,6 @@ template <typename U> class QList: public TObject
 
   const QList<U>& operator=(const U& newelement){PRINTF4(this,"\tconst QList<U>& QList<",typeid(U).name(),">::operator=(const U& newelement)\n") Set(newelement); return *this;}
 
-  operator U*() const;
-
   const QList<U>& operator+=(const QList<U>& newqlist){PRINTF4(this,"\tconst QList<U>& QList<",typeid(U).name(),">::operator+=(const QList<U>& newqlist)\n") Add(newqlist); return *this;}
 
   const QList<U>& operator+=(const U& newu){PRINTF4(this,"\tconst QList<U>& QList<",typeid(U).name(),">::operator+=(const U& newu)\n") Add(newu); return *this;}
@@ -85,6 +83,8 @@ template <typename U> class QList: public TObject
   const QList<U>& operator-=(const U& delu){PRINTF4(this,"\tconst QList<U>& QList<",typeid(U).name(),">::operator-=(const U& delu)\n") Del(&delu); return *this;}
 
   Int_t Count() const{PRINTF4(this,"\tInt_t& QList<",typeid(U).name(),">::Count()\n") return fNElements;}
+
+  U* GetArray(){return fUArray;}
   
   QList<Int_t> Find(const QList<U>& qlist,Int_t maxmatches=0) const;
   QList<Int_t> Find(const U& u,Int_t maxmatches=0) const;
@@ -100,6 +100,7 @@ template <typename U> class QList: public TObject
   U& operator[](Int_t index) const;
   const QList<U>& operator()(Int_t index1,Int_t index2,Int_t step=1) const;
   QList<U>* Clone(const char* newname = "") const{PRINTF4(this,"\tQList<U>* QList<",typeid(U).name(),">::Clone()\n") newname=0; return new QList<U>(*this); }
+  U* CloneArray() const;
 
   Int_t RedimList(Int_t newdim,Int_t index=-1);
   Int_t RedimList(Int_t newdim,Int_t index,const U& fillvalue);
