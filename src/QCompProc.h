@@ -14,9 +14,9 @@ class QCompProc: public QProcedure
     virtual ~QCompProc(){}
     const QCompProc& operator=(const QCompProc &rhs){QProcedure::operator=(rhs); fProc=rhs.fProc; return *this;}
 
-    QProcedure* Clone(){return new QCompProc(*this);}
+    QProcedure* Clone() const{return new QCompProc(*this);}
 
-    virtual void Exec();
+    virtual void Exec() const;
     void SetProc(void (*proc)(Double_t**,Double_t**,Double_t**)){fProc=proc;}
   private:
     void (*fProc)(Double_t**,Double_t**,Double_t**);

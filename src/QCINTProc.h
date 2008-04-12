@@ -22,7 +22,7 @@ class QCINTProc: public QProcedure
     virtual void AddOutput(Int_t index=-1, Double_t *buf=NULL){QProcedure::AddOutput(index,buf); InitArgs();}
     virtual void AddParam(Int_t index=-1, Double_t *buf=NULL){QProcedure::AddParam(index,buf); InitArgs();}
 
-    QProcedure* Clone(){return new QCINTProc(*this);}
+    QProcedure* Clone() const{return new QCINTProc(*this);}
 
     virtual void DelInput(Int_t index=-1){QProcedure::DelInput(index); InitArgs();}
     virtual void DelOutput(Int_t index=-1){QProcedure::DelOutput(index); InitArgs();}
@@ -32,7 +32,7 @@ class QCINTProc: public QProcedure
     virtual void SetNOutputs(Int_t n){QProcedure::SetNOutputs(n); InitArgs();}
     virtual void SetNParams(Int_t n){QProcedure::SetNParams(n); InitArgs();}
 
-    virtual void Exec();
+    virtual void Exec() const;
     void InitArgs();
     void SetProc(void *proc);
     void SetProc(const char *procname);

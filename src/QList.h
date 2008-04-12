@@ -65,7 +65,7 @@ template <typename U> class QList: public TObject
   Int_t Del(const QList<U>& delqlist, Int_t maxmatches=1);
   //  Int_t Del(const U& delu, Int_t maxmatches=1);
   Int_t Del(const U* delus, Int_t nelements=1, Int_t maxmatches=1);
-  void Del(Int_t index=-1);
+  void Del(Int_t index=-1, Int_t nelements=1);
 
   void Browse(TBrowser *b);
   Bool_t IsFolder() const {return kTRUE;}
@@ -84,7 +84,7 @@ template <typename U> class QList: public TObject
 
   Int_t Count() const{PRINTF4(this,"\tInt_t& QList<",typeid(U).name(),">::Count()\n") return fNElements;}
 
-  U* GetArray(){return fUArray;}
+  U* GetArray() const{return fUArray;}
   
   QList<Int_t> Find(const QList<U>& qlist,Int_t maxmatches=0) const;
   QList<Int_t> Find(const U& u,Int_t maxmatches=0) const;

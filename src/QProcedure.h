@@ -22,7 +22,7 @@ class QProcedure
     virtual void DelOutput(Int_t index=-1){fOutputsBufs.Del(index);}
     virtual void DelParam(Int_t index=-1){fParamsBufs.Del(index);}
 
-    virtual QProcedure* Clone()=0;
+    virtual QProcedure* Clone() const=0;
 
     Int_t GetNInputs() const{return fInputsBufs.Count();}
     Int_t GetNOutputs() const{return fOutputsBufs.Count();}
@@ -36,7 +36,9 @@ class QProcedure
     virtual void SetNOutputs(Int_t n){fOutputsBufs.RedimList(n,-1,NULL);}
     virtual void SetNParams(Int_t n){fParamsBufs.RedimList(n,-1,NULL);}
 
-    virtual void Exec()=0;
+    virtual void Exec() const=0;
+
+    friend Bool_t operator==(const QProcedure &lhs, const QProcedure &rhs);
   protected:
     QList<Double_t*> fInputsBufs;
     QList<Double_t*> fOutputsBufs;

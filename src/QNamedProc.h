@@ -5,7 +5,6 @@
 #include "TBrowser.h"
 #include "TNamed.h"
 #include "TString.h"
-#include "QList.h"
 #include "QCompProc.h"
 #include "QCINTProc.h"
 
@@ -17,18 +16,23 @@
 class QNamedProc: public TNamed
 {
   public:
-    QNamedProc(const char *name, const char *title, void (*proc)(Double_t**, Double_t**, Double_t**),const char *procname=NULL): TNamed(name,title), fInputsNames(), fOutputsNames(), fParamsNames(), fProcName("Procedure",procname), fProcedure(new QCompProc(proc)){}
+    QNamedProc(): TNamed(), fInputsNames(), fOutputsNames(), fParamsNames(), fProcName(), fProcedure(NULL){}
+    QNamedProc(const char *name, const char *title): TNamed(name,title), fInputsNames(), fOutputsNames(), fParamsNames(), fProcName("Procedure",NULL), fProcedure(NULL){}
+    QNamedProc(const char *name, const char *title, void (*proc)(Double_t**, Double_t**, Double_t**),const char *procname=NULL): TNamed(name,title), fInputsNames(), fOutputsNames(), fParamsNames(), fProcName("Procedure",NULL){SetProc(proc,procname);}
     QNamedProc(const char *name, const char *title, const char *procname): TNamed(name,title), fInputsNames(), fOutputsNames(), fParamsNames(), fProcName("Procedure",procname), fProcedure(new QCINTProc(procname)){}
     QNamedProc(const char *name, const char *title, void *proc, const char *procname=NULL): TNamed(name,title), fInputsNames(), fOutputsNames(), fParamsNames(), fProcName("Procedure",procname), fProcedure(new QCINTProc(proc)){}
     QNamedProc(const QNamedProc &rhs):TNamed(rhs), fInputsNames(rhs.fInputsNames), fOutputsNames(rhs.fOutputsNames), fProcName(rhs.fProcName), fProcedure(NULL){if(rhs.fProcedure) fProcedure=rhs.fProcedure->Clone();}
+    virtual ~QNamedProc(){if(fProcedure) delete fProcedure;}
 
-    void AddInput(const char *name, const char *title=NULL, Int_t index=-1);
-    void AddOutput(const char *name, const char *title=NULL, Int_t index=-1);
-    void AddParam(const char *name, const char* title=NULL, Int_t index=-1);
+    void AddInput(const char *name, const char *title=NULL, Int_t index=-1, Double_t *buf=NULL);
+    void AddOutput(const char *name, const char *title=NULL, Int_t index=-1, Double_t *buf=NULL);
+    void AddParam(const char *name, const char* title=NULL, Int_t index=-1, Double_t *buf=NULL);
 
     void DelInput(Int_t index=-1){fInputsNames.Del(index); fProcedure->DelInput(index);}
     void DelOutput(Int_t index=-1){fOutputsNames.Del(index); fProcedure->DelOutput(index);}
     void DelParam(Int_t index=-1){fParamsNames.Del(index); fProcedure->DelParam(index);}
+
+    void Exec() const{fProcedure->Exec();}
 
     const char* GetProcName() const{return fProcName.GetValue();}
 
@@ -52,7 +56,7 @@ class QNamedProc: public TNamed
     void Browse(TBrowser *b);
     Bool_t IsFolder() const {return kTRUE;}
 
-    virtual ~QNamedProc(){delete fProcedure;}
+    friend Bool_t operator==(const QNamedProc &lhs, const QNamedProc &rhs);
 
   protected:
     QList<QNamedVar<TString> > fInputsNames;
@@ -62,7 +66,6 @@ class QNamedProc: public TNamed
     QProcedure *fProcedure; //!
 
   private:
-    QNamedProc():TNamed(){}
 
   ClassDef(QNamedProc,1) //Generic named value template class
 };

@@ -210,15 +210,15 @@ template <typename U> Int_t QList<U>::Del(const U* delus, Int_t nelements, Int_t
   return matches;
 }
 
-template <typename U> void QList<U>::Del(Int_t index)
+template <typename U> void QList<U>::Del(Int_t index, Int_t nelements)
 {
-  // This function deletes the *this element at position equal, to index. If index
+  // This function deletes nelements from the array starting at index index. If index
   // is not provided, the last element is deleted. The list is resized properly using
   // RedimList member function.
 
   PRINTF6(this,"\tvoid QList<",typeid(U).name(),">::Del(Int_t index<",index,">)\n")
 
-  RedimList(fNElements-1,index);
+  RedimList(fNElements-nelements,index);
 }
 
 template <typename U> void QList<U>::Browse(TBrowser *b)

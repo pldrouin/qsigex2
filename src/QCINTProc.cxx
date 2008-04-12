@@ -1,11 +1,16 @@
 #include "QCINTProc.h"
 
+//#define DEBUG
+//#define DEBUG2
+
 #include "debugger.h"
 
 ClassImp(QCINTProc)
 
-void QCINTProc::Exec()
+void QCINTProc::Exec() const
 {
+  PRINTF2(this,"\tQCINTProc::Exec()\n")
+  fMethodCall->Execute();
 }
 
 void QCINTProc::InitArgs()
@@ -35,6 +40,7 @@ void QCINTProc::SetProc(const char *procname)
   if(fMethodCall) delete fMethodCall;
   fMethodCall=new TMethodCall;
   fMethodCall->InitWithPrototype(procname,"Double_t**,Double_t**,Double_t**");
+  InitArgs();
   if(!fMethodCall->IsValid()) {
     fprintf(stderr,"QCINTProc::SetProc(const char *procname<'%s'>): No function found with the signature %s(const Double_t**, const Double_t**, Double_t**)\n",procname,procname);
   }
