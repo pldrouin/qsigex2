@@ -57,6 +57,9 @@ template <typename U> class QList: public TObject
   void Add(const QList<U>& newqlist, Int_t index=-1);
   void Add(const U& newelement,Int_t index=-1);
   void Add(const U* newelements, Int_t nelements, Int_t index=-1);
+  Int_t AddUnique(const QList<U>& newqlist, Int_t index=-1);
+  Int_t AddUnique(const U& newelement,Int_t index=-1);
+  Int_t AddUnique(const U* newelements, Int_t nelements, Int_t index=-1);
 
   void Set(const QList<U>& newqlist);
   void Set(const U& newelement);

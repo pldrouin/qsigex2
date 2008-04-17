@@ -90,6 +90,45 @@ template <typename U> void QList<U>::Add(const U* newelements, Int_t nelements, 
   }
 }
 
+template <typename U> Int_t QList<U>::AddUnique(const QList<U>& newqlist, Int_t index)
+{
+  // This functions has the same behaviour than the Add function with the same arguments,
+  // except that elements are added only if they are not found using the corresponding 
+  // FindFirst function. The function returns the value returned by FindFirst.
+
+  PRINTF6(this,"\tInt_t QList<",typeid(U).name(),">::AddUnique(const QList<U>& newqlist, Int_t index<",index,">)\n")
+
+  Int_t idx=FindFirst(newqlist);
+  if(idx != -1) Add(newqlist,index);  
+  return idx;
+}
+
+template <typename U> Int_t QList<U>::AddUnique(const U& newelement,Int_t index)
+{
+  // This functions has the same behaviour than the Add function with the same arguments,
+  // except that elements are added only if they are not found using the corresponding 
+  // FindFirst function. The function returns the value returned by FindFirst.
+
+  PRINTF6(this,"\tInt_t QList<",typeid(U).name(),">::AddUnique(const U& newelement,Int_t index<",index,">)\n")
+
+  Int_t idx=FindFirst(newelement);
+  if(idx != -1) Add(newelement,index);
+  return idx;
+}
+
+template <typename U> Int_t QList<U>::AddUnique(const U* newelements, Int_t nelements, Int_t index)
+{
+  // This functions has the same behaviour than the Add function with the same arguments,
+  // except that elements are added only if they are not found using the corresponding 
+  // FindFirst function. The function returns the value returned by FindFirst.
+
+  PRINTF8(this,"\tInt_t QList<",typeid(U).name(),">::AddUnique(const U* newelements, Int_t nelements<",nelements,">, Int_t index<",index,">)\n")
+
+  Int_t idx=FindFirst(newelements,nelements);
+  if(idx != -1) Add(newelements,nelements,index);
+  return idx;
+}
+
 template <typename U> void QList<U>::Set(const QList<U>& newqlist)
 {
   // This function sets the list to have the same values than another QList instance of

@@ -11,6 +11,7 @@
 #pragma link C++ class QList<QList<TString> >;
 #pragma link C++ class QList<QList<Int_t> >;
 #pragma link C++ class QList<QList<Double_t> >;
+#pragma link C++ class QList<QList<QList<TString> > >;
 #pragma link C++ class QList<QNamedVar<TString> >;
 #pragma link C++ class QList<QNamedVar<Double_t> >;
 #pragma link C++ class QList<QNamedProc>;
@@ -57,6 +58,7 @@
 #pragma link C++ class QSigExTFOps;
 #pragma link C++ class QSigExTHOps;
 #pragma link C++ class QSigExTTreePDF;
+#pragma link C++ class QSigExUtils;
 #pragma link C++ class QTTreeUtils;
 #pragma link C++ class QSigExChecks;
 #pragma link C++ class QSigExSystematics;

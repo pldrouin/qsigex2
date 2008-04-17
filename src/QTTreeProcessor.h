@@ -2,6 +2,7 @@
 #define _QTTREEPROCESSOR_
 
 #include "QNamedProc.h"
+#include "QSigExUtils.h"
 
 #define DEBUG
 #define DEBUG2
