@@ -9,9 +9,8 @@ ClassImp(QTTreeProcessor)
 
 void QTTreeProcessor::AddParam(const char *parname, Int_t index)
 {
-  fParams.RedimList(fParams.Count()+1,index);
-  fParams[index].SetName(parname);
-  fParams[index]=0.0;
+  fParamsNames.Add(parname,index);
+  fParams.Add(0.0,index);
 }
 
 void QTTreeProcessor::AddProc(const char *name, const char *title, Int_t index)
@@ -38,6 +37,28 @@ void QTTreeProcessor::AddProc(const char *name, const char *title, void *proc, c
   fProcs[index].SetProc(proc,procname);
 }
 
+Int_t QTTreeProcessor::Analyze()
+{
+  Int_t i,j;
+  QNamedProc *proc;
+  QList<TString> etreesfiles;  //Location of trees that already exist
+  QList<TString> etreesnames;  //Name of trees that already exist
+  TString sbuf;
+  TDirectory *curdir=gDirectory;
+
+  for(i=0; i<fProcs.Count(); i++) {
+    proc=&(fProcs[i]);
+
+    for(j=0; j<proc->GetNInputs(); j++) {
+      sbuf=proc->GetInput(j);
+
+      if(sbuf(0,3) == "[M]") etreesnames=sbuf(4,sbuf.Length());
+    }
+  }
+
+  return 0;
+}
+
 void QTTreeProcessor::DelParam(const char *paramname)
 {
   Int_t i;
@@ -53,7 +74,7 @@ void QTTreeProcessor::DelProc(const char *procname)
 Int_t QTTreeProcessor::FindParamIndex(const char *paramname) const
 {
   for(Int_t i=0; i<fParams.Count(); i++){
-    if(!strcmp(fParams[i].GetName(),paramname)) return i;
+    if(!strcmp(fParamsNames[i],paramname)) return i;
   }
   return -1;
 }
@@ -83,12 +104,9 @@ void QTTreeProcessor::SetParam(const char *paramname, Double_t value)
   if((i=FindParamIndex(paramname))!=-1) SetParam(i,value);
 }
 
-void QTTreeProcessor::Browse(TBrowser *b)
+void QTTreeProcessor::SetParams(Double_t *params)
 {
-  if(b) {
-    b->Add(&fProcs,"Processes");
-    b->Add(&fParams,"Input Parameters");
-  }
+  memcpy(fParams.GetArray(),params,fParams.Count()*sizeof(Double_t));
 }
 
 #include "debugger.h"

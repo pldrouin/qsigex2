@@ -11,8 +11,8 @@
 class QTTreeProcessor
 {
   public:
-    QTTreeProcessor(): fProcs(), fParams(){}
-    QTTreeProcessor(const QTTreeProcessor &rhs): fProcs(rhs.fProcs), fParams(rhs.fParams){}
+    QTTreeProcessor(): fProcs(), fParams(), fParamsNames(){}
+    QTTreeProcessor(const QTTreeProcessor &rhs): fProcs(rhs.fProcs), fParams(rhs.fParams), fParamsNames(rhs.fParamsNames){}
     virtual ~QTTreeProcessor(){}
 
     void AddParam(const char *parname, Int_t index=-1);
@@ -21,7 +21,9 @@ class QTTreeProcessor
     void AddProc(const char *name, const char *title, const char *procname, Int_t index=-1);
     void AddProc(const char *name, const char *title, void *proc, const char *procname=NULL, Int_t index=-1);
 
-    void DelParam(Int_t index=-1){fParams.Del(index);}
+    Int_t Analyze();
+
+    void DelParam(Int_t index=-1){fParams.Del(index); fParamsNames.Del(index);}
     void DelParam(const char *paramname);
     void DelProc(Int_t index=-1){fProcs.Del(index);}
     void DelProc(const char *procname);
@@ -39,12 +41,12 @@ class QTTreeProcessor
 
     void SetParam(Int_t index=-1, Double_t value=0){fParams[index]=value;}
     void SetParam(const char *paramname, Double_t value=0);
+    void SetParams(Double_t *params);
 
-    void Browse(TBrowser *b);
-    Bool_t IsFolder() const {return kTRUE;}
   private:
     QList<QNamedProc> fProcs;
-    QList<QNamedVar<Double_t> > fParams;
+    QList<Double_t> fParams;
+    QList<TString> fParamsNames;
     ClassDef(QTTreeProcessor,1)
 };
 

@@ -89,6 +89,9 @@ template <typename U> class QList: public TObject
   QList<Int_t> Find(const QList<U>& qlist,Int_t maxmatches=0) const;
   QList<Int_t> Find(const U& u,Int_t maxmatches=0) const;
   QList<Int_t> Find(const U* us, Int_t nelements, Int_t maxmatches=0) const;
+  Int_t FindFirst(const QList<U>& qlist) const;
+  Int_t FindFirst(const U& u) const;
+  Int_t FindFirst(const U* us, Int_t nelements) const;
 
   template<typename V> friend Bool_t operator==(const QList<V>& lhs,const QList<V>& rhs);
   template<typename V> friend Bool_t operator!=(const QList<V>& lhs,const QList<V>& rhs);

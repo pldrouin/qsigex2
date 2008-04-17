@@ -308,6 +308,58 @@ template <typename U> QList<Int_t> QList<U>::Find(const U* us, Int_t nelements, 
   return qlistindexes;
 }
 
+template <typename U> Int_t QList<U>::FindFirst(const QList<U>& qlist) const
+{
+  // This function browses the QList<U> U list in a similar manner to the Del member function with
+  // the same arguments. However, instead of deleting list parts and returning the number of
+  // deletions, it returns an Int_t containing the first matching index. -1 is returned if no match
+  // is found.
+
+  PRINTF4(this,"\tInt_t QList<",typeid(U).name(),">::Find(const QList<U>& qlist) const\n")
+
+  return FindFirst(qlist.fUArray,qlist.fNElements);
+}
+
+template <typename U> Int_t QList<U>::FindFirst(const U& u) const
+{
+  // This function browses the QList<U> U list in a similar manner to the Del member function with
+  // the same arguments. However, instead of deleting list parts and returning the number of
+  // deletions, it returns an Int_t containing the firsdt matching index. -1 is returned if no match
+  // is found.
+
+  PRINTF4(this,"\tInt_t QList<",typeid(U).name(),">::Find(const U& u) const\n")
+
+  return FindFirst(&u,1);
+}
+
+template <typename U> Int_t QList<U>::FindFirst(const U* us, Int_t nelements) const
+{
+  // This function browses the QList<U> U list in a similar manner to the Del member function with
+  // the same arguments. However, instead of deleting list parts and returning the number of
+  // deletions, it returns an Int_t containing the first matching index. -1 is returned if no match
+  // is found.
+
+  // The implementation of this function is similar to the one of the corresponding Del funcion,
+  // but this code has been chosen for an optimisation reason.
+
+  PRINTF6(this,"\tInt_t QList<",typeid(U).name(),">::Find(const U* us, Int_t nelements<",nelements,">) const\n")
+
+  Int_t counter=0;
+  Int_t pos=0;
+  while(pos<=fNElements-nelements && pos+counter<fNElements){
+    if(fUArray[pos+counter]==us[counter]){
+      counter++;
+      if(counter==nelements){
+	return pos;
+      }
+    } else {
+      counter=0;
+      pos++;
+    }
+  }
+  return -1;
+}
+
 template<typename V> Bool_t operator==(const QList<V>& lhs,const QList<V>& rhs)
 {
   // This friend function compare list values of 2 QList<V> instances, and returns
