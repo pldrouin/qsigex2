@@ -4,8 +4,8 @@
 #include "QNamedProc.h"
 #include "QSigExUtils.h"
 
-#define DEBUG
-#define DEBUG2
+//#define DEBUG
+//#define DEBUG2
 
 #include "debugger.h"
 
@@ -14,7 +14,7 @@ class QTTreeProcessor
   public:
     QTTreeProcessor(): fProcs(), fParams(), fParamsNames(){}
     QTTreeProcessor(const QTTreeProcessor &rhs): fProcs(rhs.fProcs), fParams(rhs.fParams), fParamsNames(rhs.fParamsNames){}
-    virtual ~QTTreeProcessor(){}
+    virtual ~QTTreeProcessor(){PRINTF2(this,"\tQTTreeProcessor::~QTTreeProcessor()\n")}
 
     void AddParam(const char *parname, Int_t index=-1);
     void AddProc(const char* name, const char* title=NULL, Int_t index=-1);

@@ -8,6 +8,9 @@
 #include "TSystem.h"
 #include "QList.h"
 
+//#define DEBUG
+//#define DEBUG2
+
 #include "debugger.h"
 
 class QSigExUtils{

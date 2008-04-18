@@ -1,7 +1,7 @@
-#define DEBUG
-#define DEBUG2
-
 #include "QTTreeProcessor.h"
+
+//#define DEBUG
+//#define DEBUG2
 
 #include "debugger.h"
 
@@ -15,24 +15,28 @@ void QTTreeProcessor::AddParam(const char *parname, Int_t index)
 
 void QTTreeProcessor::AddProc(const char *name, const char *title, Int_t index)
 {
+  PRINTF8(this,"\tQTTreeProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Int_t index<",index,"<)\n")
   fProcs.RedimList(fProcs.Count()+1,index);
   fProcs[index].SetNameTitle(name,title);
 }
 
 void QTTreeProcessor::AddProc(const char *name, const char *title, void (*proc)(Double_t**, Double_t**, Double_t**),const char *procname, Int_t index)
 {
+  PRINTF12(this,"\tQTTreeProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, void (*proc)(Double_t**, Double_t**, Double_t**)<",proc,">, const char *procname<'",procname,"'>, Int_t index<",index,"<)\n")
   AddProc(name,title,index);
   fProcs[index].SetProc(proc,procname);
 }
 
 void QTTreeProcessor::AddProc(const char *name, const char *title, const char *procname, Int_t index)
 {
+  PRINTF10(this,"\tQTTreeProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, const char *procname<'",procname,"'>, Int_t index<",index,"<)\n")
   AddProc(name,title,index);
   fProcs[index].SetProc(procname);
 }
 
 void QTTreeProcessor::AddProc(const char *name, const char *title, void *proc, const char *procname, Int_t index)
 {
+  PRINTF12(this,"\tQTTreeProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, void *proc<",proc,">, const char *procname<'",procname,"'>, Int_t index<",index,"<)\n")
   AddProc(name,title,index);
   fProcs[index].SetProc(proc,procname);
 }
