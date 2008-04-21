@@ -15,7 +15,7 @@ class QTTreeUtils{
     QTTreeUtils(){}
     virtual ~QTTreeUtils(){}
 
-    template <typename U> static U* AssignBAddress(const Char_t* bname, TTree* tree, U* dummy)
+    template <typename U> static U* AssignBAddress(const Char_t* bname, TTree* tree, U*)
     {
       //This template function creates a new buffer for branch which name is
       //bname if the current branch address is NULL. It returns the branch

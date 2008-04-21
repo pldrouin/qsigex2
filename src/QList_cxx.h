@@ -597,4 +597,5 @@ template <typename U> Int_t QList<U>::RedimList(Int_t newdim,Int_t index,const U
   return index;
 }
 
+#include "QList_Dict_cxx.h"
 #include "debugger.h"

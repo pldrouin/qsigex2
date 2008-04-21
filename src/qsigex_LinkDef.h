@@ -3,18 +3,18 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class QList<Bool_t>;
-#pragma link C++ class QList<Int_t>;
-#pragma link C++ class QList<Float_t>;
-#pragma link C++ class QList<Double_t>;
-#pragma link C++ class QList<TString>;
-#pragma link C++ class QList<QList<TString> >;
-#pragma link C++ class QList<QList<Int_t> >;
-#pragma link C++ class QList<QList<Double_t> >;
-#pragma link C++ class QList<QList<QList<TString> > >;
-#pragma link C++ class QList<QNamedVar<TString> >;
-#pragma link C++ class QList<QNamedVar<Double_t> >;
-#pragma link C++ class QList<QNamedProc>;
+#pragma link C++ class QList<Bool_t>-;
+#pragma link C++ class QList<Int_t>-;
+#pragma link C++ class QList<Float_t>-;
+#pragma link C++ class QList<Double_t>-;
+#pragma link C++ class QList<TString>-;
+#pragma link C++ class QList<QList<TString> >-;
+#pragma link C++ class QList<QList<Int_t> >-;
+#pragma link C++ class QList<QList<Double_t> >-;
+#pragma link C++ class QList<QList<QList<TString> > >-;
+#pragma link C++ class QList<QNamedVar<TString> >-;
+#pragma link C++ class QList<QNamedVar<Double_t> >-;
+#pragma link C++ class QList<QNamedProc>-;
 #pragma link C++ class QList<TObject*>-;
 #pragma link C++ class QList<Double_t*>-;
 
