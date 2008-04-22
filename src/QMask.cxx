@@ -50,6 +50,60 @@ void QMask::SetBit(UInt_t n, Bool_t value)
   }
 }
 
+const QMask& QMask::operator&=(const QMask &rhs)
+{
+
+  if(Count() > rhs.Count()) RedimList(rhs.Count());
+
+  for(Int_t i=0; i<rhs.Count(); i++) {
+    operator[](i)&=rhs[i];
+  }
+
+  return *this;
+}
+
+const QMask& QMask::operator|=(const QMask &rhs)
+{
+  if(Count() > rhs.Count()) {
+
+    for(Int_t i=0; i<rhs.Count(); i++) {
+      operator[](i)|=rhs[i];
+    }
+
+  } else {
+    Int_t size=Count();
+    RedimList(rhs.Count());
+
+    for(Int_t i=0; i<size; i++) {
+      operator[](i)|=rhs[i];
+    }
+    memcpy(GetArray()+size,rhs.GetArray()+size,Count()-size);
+  }
+
+  return *this;
+}
+
+const QMask& QMask::operator^=(const QMask &rhs)
+{
+  if(Count() > rhs.Count()) {
+
+    for(Int_t i=0; i<rhs.Count(); i++) {
+      operator[](i)^=rhs[i];
+    }
+
+  } else {
+    Int_t size=Count();
+    RedimList(rhs.Count());
+
+    for(Int_t i=0; i<size; i++) {
+      operator[](i)^=rhs[i];
+    }
+    memcpy(GetArray()+size,rhs.GetArray()+size,Count()-size);
+  }
+
+  return *this;
+}
+
 QMask QMask::operator>>(UInt_t n) const
 {
   QMask ret;
@@ -102,17 +156,12 @@ QMask operator&(const QMask &lhs, const QMask &rhs)
 
   if(lhs.Count() > rhs.Count()) {
     ret.RedimList(rhs.Count());
-
-    for(Int_t i=0; i<rhs.Count(); i++) {
-      ret[i]=lhs[i]&rhs[i];
-    }
-
   } else {
     ret.RedimList(lhs.Count());
+  }
 
-    for(Int_t i=0; i<lhs.Count(); i++) {
-      ret[i]=lhs[i]&rhs[i];
-    }
+  for(Int_t i=0; i<ret.Count(); i++) {
+    ret[i]=lhs[i]&rhs[i];
   }
 
   return ret;

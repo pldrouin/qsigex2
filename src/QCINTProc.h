@@ -39,7 +39,7 @@ class QCINTProc: public QProcedure
   protected:
     TMethodCall *fMethodCall;
 
-    ClassDef(QCINTProc,1)
+    ClassDef(QCINTProc,1) //Procedure class for CINT procedures having the format void (*proc)(Double_t** inputs, Double_t **outputs, Double_t **params)
 };
 
 #include "debugger.h"

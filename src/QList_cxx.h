@@ -99,7 +99,7 @@ template <typename U> Int_t QList<U>::AddUnique(const QList<U>& newqlist, Int_t 
   PRINTF6(this,"\tInt_t QList<",typeid(U).name(),">::AddUnique(const QList<U>& newqlist, Int_t index<",index,">)\n")
 
   Int_t idx=FindFirst(newqlist);
-  if(idx != -1) Add(newqlist,index);  
+  if(idx == -1) Add(newqlist,index);  
   return idx;
 }
 
@@ -112,7 +112,7 @@ template <typename U> Int_t QList<U>::AddUnique(const U& newelement,Int_t index)
   PRINTF6(this,"\tInt_t QList<",typeid(U).name(),">::AddUnique(const U& newelement,Int_t index<",index,">)\n")
 
   Int_t idx=FindFirst(newelement);
-  if(idx != -1) Add(newelement,index);
+  if(idx == -1) Add(newelement,index);
   return idx;
 }
 
@@ -125,7 +125,7 @@ template <typename U> Int_t QList<U>::AddUnique(const U* newelements, Int_t nele
   PRINTF8(this,"\tInt_t QList<",typeid(U).name(),">::AddUnique(const U* newelements, Int_t nelements<",nelements,">, Int_t index<",index,">)\n")
 
   Int_t idx=FindFirst(newelements,nelements);
-  if(idx != -1) Add(newelements,nelements,index);
+  if(idx == -1) Add(newelements,nelements,index);
   return idx;
 }
 
@@ -475,7 +475,7 @@ template <typename U> U& QList<U>::operator[](Int_t index) const
 
   try{
     if(index==-1) index=fNElements-1;
-    else if(index<0 || index>=fNElements) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed\n"; throw 4000;}
+    else if(index<0 || index>=fNElements) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed (" << index << ")\n"; throw 4000;}
     
     return fUArray[index];
   }catch(Int_t e){
@@ -533,7 +533,7 @@ template <typename U> Int_t QList<U>::RedimList(Int_t newdim,Int_t index)
     if(newdim<fNElements){
       Int_t dimdif=newdim-fNElements;
       if(index==-1) index=newdim;
-      else if(index<0 || index>newdim) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed\n"; throw 4000;}
+      else if(index<0 || index>newdim) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed (" << index << ")\n"; throw 4000;}
       Int_t i;
       for(i=index-dimdif;i<fNElements;i++){
 	fUArray[i+dimdif]=fUArray[i];
@@ -549,7 +549,7 @@ template <typename U> Int_t QList<U>::RedimList(Int_t newdim,Int_t index)
       Int_t dimdif=newdim-fNElements;
       U* newarray;
       if(index==-1) index=fNElements;
-      else if(index<0 || index>fNElements) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed\n"; throw 4000;}
+      else if(index<0 || index>fNElements) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed (" << index << ")\n"; throw 4000;}
       newarray=(U*)realloc(fUArray,newdim*sizeof(U));
       Int_t i;
       

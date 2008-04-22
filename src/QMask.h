@@ -18,6 +18,9 @@ class QMask: public QList<char>
     void SetBit(UInt_t n, Bool_t value);
     const QMask& operator=(const QMask &rhs){QList<char>::operator=(rhs); return *this;}
     const QMask& operator=(const QList<char> &rhs){QList<char>::operator=(rhs); return *this;}
+    const QMask& operator&=(const QMask &rhs);
+    const QMask& operator|=(const QMask &rhs);
+    const QMask& operator^=(const QMask &rhs);
     QMask operator>>(UInt_t n) const;
     QMask operator<<(UInt_t n) const;
 
@@ -26,7 +29,7 @@ class QMask: public QList<char>
     friend QMask operator^(const QMask &lhs, const QMask &rhs);
     friend QMask operator~(const QMask &rhs);
   protected:
-  ClassDef(QMask,0)
+  ClassDef(QMask,0) //Generic mask class
 };
 
 #include "debugger.h"

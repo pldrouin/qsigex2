@@ -67,7 +67,7 @@ class QNamedProc: public TNamed
 
   private:
 
-  ClassDef(QNamedProc,1) //Generic named value template class
+  ClassDef(QNamedProc,1) //QProcedure with named procedure, inputs, outputs and parameters
 };
 
 #include "debugger.h"

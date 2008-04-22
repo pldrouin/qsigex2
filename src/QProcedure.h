@@ -44,7 +44,7 @@ class QProcedure
     QList<Double_t*> fOutputsBufs;
     QList<Double_t*> fParamsBufs;
 
-    ClassDef(QProcedure,1)
+    ClassDef(QProcedure,1) //The procedure base class
 };
 
 #include "debugger.h"

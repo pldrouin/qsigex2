@@ -21,7 +21,7 @@ class QCompProc: public QProcedure
   private:
     void (*fProc)(Double_t**,Double_t**,Double_t**);
 
-    ClassDef(QCompProc,1)
+    ClassDef(QCompProc,1) //Procedure class for compiled procedures having the format void (*proc)(Double_t** inputs, Double_t **outputs, Double_t **params)
 };
 
 #include "debugger.h"

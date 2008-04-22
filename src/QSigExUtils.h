@@ -16,7 +16,7 @@
 class QSigExUtils{
   public:
     virtual ~QSigExUtils(){}
-    static QList<TString> DecodeObjName(const TString name);
+    static QList<TString> DecodeObjName(TString name);
     static TString DecodePathName(TString path);
 
   private:

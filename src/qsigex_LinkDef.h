@@ -16,6 +16,8 @@
 #pragma link C++ class QList<QNamedVar<TString> >-;
 #pragma link C++ class QList<QNamedVar<Double_t> >-;
 #pragma link C++ class QList<QNamedProc>-;
+#pragma link C++ class QList<QMask>-;
+#pragma link C++ class QList<QList<QMask> >-;
 #pragma link C++ class QList<TObject*>-;
 #pragma link C++ class QList<Double_t*>-;
 
