@@ -3,6 +3,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
+#pragma link C++ class QList<char>-;
 #pragma link C++ class QList<Bool_t>-;
 #pragma link C++ class QList<Int_t>-;
 #pragma link C++ class QList<Float_t>-;
@@ -24,6 +25,7 @@
 #pragma link C++ class QNamedVar<Float_t>;
 #pragma link C++ class QNamedVar<Double_t>;
 
+#pragma link C++ class QMask;
 #pragma link C++ class QProcedure;
 #pragma link C++ class QCompProc;
 #pragma link C++ class QCINTProc;

@@ -21,6 +21,7 @@ template <typename U> void QList<U>::Streamer(TBuffer &R__b)
 }
 
 #ifndef _QLIST_SPECIALS_
+template <> extern void QList<char>::Streamer(TBuffer &R__b);
 template <> extern void QList<Bool_t>::Streamer(TBuffer &R__b);
 template <> extern void QList<Int_t>::Streamer(TBuffer &R__b);
 template <> extern void QList<Float_t>::Streamer(TBuffer &R__b);
@@ -28,6 +29,28 @@ template <> extern void QList<Double_t>::Streamer(TBuffer &R__b);
 template <> extern void QList<Double_t*>::Streamer(TBuffer &R__b);
 template <> extern void QList<TObject*>::Streamer(TBuffer &R__b);
 #else
+template <> void QList<char>::Streamer(TBuffer &R__b)
+{
+  // Stream an object of class QList<char>.
+
+  UInt_t R__s, R__c;
+  if (R__b.IsReading()) {
+    Int_t nelements;
+    Version_t R__v = R__b.ReadVersion(&R__s, &R__c); if (R__v) { }
+    TObject::Streamer(R__b);
+    R__b >> nelements;
+    RedimList(nelements);
+    R__b.ReadFastArray(fUArray,fNElements);
+    R__b.CheckByteCount(R__s, R__c, QList<char>::IsA());
+  } else {
+    R__c = R__b.WriteVersion(QList<char>::IsA(), kTRUE);
+    TObject::Streamer(R__b);
+    R__b << fNElements;
+    R__b.WriteFastArray(fUArray,fNElements);
+    R__b.SetByteCount(R__c, kTRUE);
+  }
+}
+
 template <> void QList<Bool_t>::Streamer(TBuffer &R__b)
 {
   // Stream an object of class QList<Bool_t>.
