@@ -24,14 +24,10 @@ QList<TString> QSigExUtils::DecodeObjName(TString name)
     TString sbuf=name(0,index+5);
     sbuf=gSystem->ExpandPathName(sbuf.Data());
     if(!sbuf.Length()) return ret;
-    if(sbuf[0] != '/') sbuf = (TString)gSystem->pwd() + "/" + sbuf;
-    sbuf=DecodePathName(sbuf);
-    if(!sbuf.Length()) return ret;
+  //  if(sbuf[0] != '/') sbuf = (TString)gSystem->pwd() + "/" + sbuf;
+  //  sbuf=DecodePathName(sbuf);
+  //  if(!sbuf.Length()) return ret;
 
-    if(!sbuf.Length()) {
-      ret.Clear();
-      return ret;
-    }
     ret.RedimList(2);
     ret[0]=DecodePathName(name(index+6,name.Length()-index-6));
 
@@ -42,7 +38,8 @@ QList<TString> QSigExUtils::DecodeObjName(TString name)
     ret[1]=sbuf;
 
   } else {
-    ret.Add(DecodePathName(name));
+    ret.Add(name);
+//    ret.Add(DecodePathName(name));
 
     if(!ret[0].Length()) {
       ret.Clear();

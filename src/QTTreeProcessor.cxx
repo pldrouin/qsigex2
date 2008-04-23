@@ -16,6 +16,8 @@ QTTreeProcessor::~QTTreeProcessor()
   fParams=NULL;
   delete fParamsNames;
   fParamsNames=NULL;
+  delete fAnalysisDir;
+  fAnalysisDir=NULL;
   delete fITNames;
   fITNames=NULL;
   delete fOTNames;
@@ -80,7 +82,8 @@ Int_t QTTreeProcessor::Analyze()
   QList<QMask>   bdepends; //Dependencies of output buffers on parameters
   TString sbuf;
   QList<TString> donbuf;       //Decoded object name buffer
-  TDirectory *curdir=gDirectory;
+
+  *fAnalysisDir=gDirectory->GetPath();
 
   Int_t nprocs=fProcs->Count();
   Int_t ninputs, noutputs, nparams;
@@ -263,80 +266,16 @@ Int_t QTTreeProcessor::Analyze()
 
   fOTDepends->RedimList(fOTNames->Count());
 
+  //Loop over the output trees
   for(i=0; i<fOTDepends->Count(); i++) {
 
+    //If there is at least one output branch
     if((*fOBDepends)[i].Count() > 0) {
+      //Set the dependency mask for the tree to be the combination of the masks for its branches
       (*fOTDepends)[i]=(*fOBDepends)[i][0];
 
       for(j=1; j<(*fOBDepends)[i].Count(); j++) (*fOTDepends)[i]|=(*fOBDepends)[i][j];
     }
-  }
-
-
-  printf("Parameters:\n");
-  for(i=0; i<GetNParams(); i++) {
-    printf("%3i:\t%s\n",i,GetParamName(i));
-  }
-
-  for(i=0; i<nprocs; i++) {
-    proc=&((*fProcs)[i]);
-    printf("\n%03i Process '%s'\n",i,proc->GetName());
-
-    printf("Parameters:\n");
-    for(j=0; j<proc->GetNParams(); j++) {
-      printf("%3i:\t%s\n",j,proc->GetParam(j).GetName());
-    }
-
-    printf("\nInputs:\n");
-    for(j=0; j<proc->GetNInputs(); j++) {
-      printf("%3i",j);
-      if(allitrees[i][j].Count()>0) printf("\t%s",allitrees[i][j][0].Data());
-      if(allitrees[i][j].Count()==2) printf("\t%s",allitrees[i][j][1].Data());
-      printf("\t%s\n",proc->GetInput(j).GetName());
-    }
-
-    printf("\nOutputs:\n");
-    for(j=0; j<proc->GetNOutputs(); j++) {
-      printf("%3i",j);
-      if(allotrees[i][j].Count()>0) printf("\t%s",allotrees[i][j][0].Data());
-      if(allotrees[i][j].Count()==2) printf("\t%s",allotrees[i][j][1].Data());
-      printf("\t%s\n",proc->GetOutput(j).GetName());
-    }
-
-    printf("\nDependencies:\n");
-    (*fProcsDepends)[i].Print();
-    printf("\n");
-  }
-
-  printf("All Input Branches:\n");
-  for(i=0; i<fITNames->Count(); i++) {
-    printf("%3i Tree %s",i,(*fITNames)[i][0].Data());
-    if((*fITNames)[i].Count() ==2) printf(" %s",(*fITNames)[i][1].Data());
-    printf(":\n");
-
-    for(j=0; j<(*fIBNames)[i].Count(); j++) {
-      printf("\t%3i %s\n",j,(*fIBNames)[i][j].Data());
-    }
-    printf("\n");
-  }
-
-  printf("All Output Branches:\n");
-  for(i=0; i<fOTNames->Count(); i++) {
-    printf("%3i Tree %s",i,(*fOTNames)[i][0].Data());
-    if((*fOTNames)[i].Count() ==2) printf(" %s",(*fOTNames)[i][1].Data());
-    printf("\t");
-    (*fOTDepends)[i].Print();
-
-    for(j=0; j<(*fOBNames)[i].Count(); j++) {
-      printf("\t%3i %s\t",j,(*fOBNames)[i][j].Data());
-      (*fOBDepends)[i][j].Print();
-    }
-    printf("\n");
-  }
-
-  printf("All Output Buffers:\n");
-  for(i=0; i<iobufs.Count(); i++) {
-    printf("%3i %s\n",i,iobufs[i].Data());
   }
 
   return 0;
@@ -389,6 +328,7 @@ const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
   *fProcs=*rhs.fProcs;
   *fParams=*rhs.fParams;
   *fParamsNames=*rhs.fParamsNames;
+  *fAnalysisDir=*rhs.fAnalysisDir;
   *fITNames=*rhs.fITNames;
   *fOTNames=*rhs.fOTNames;
   *fIBNames=*rhs.fIBNames;
@@ -397,6 +337,94 @@ const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
   *fOTDepends=*rhs.fOTDepends;
   *fOBDepends=*rhs.fOBDepends;
   return *this;
+}
+
+void QTTreeProcessor::PrintAnalysisResults()
+{
+  if(!gDirectory->cd(*fAnalysisDir)) {
+    fprintf(stderr,"QTTreeProcessor::PrintAnalysisResults(): Error: Directory %s does not exist\n",fAnalysisDir->Data());
+    return;
+  }
+
+  printf("Analysis Directory: %s\n",fAnalysisDir->Data());
+
+  Int_t i,j;
+  printf("\nParameters:\n");
+  for(i=0; i<GetNParams(); i++) {
+    printf("%3i:\t%s\n",i,GetParamName(i));
+  }
+
+  Int_t nprocs=fProcs->Count();
+  QNamedProc *proc;
+  TString sbuf;
+  QList<TString> donbuf;
+
+  for(i=0; i<nprocs; i++) {
+    proc=&((*fProcs)[i]);
+    printf("\n%03i Process '%s'\n",i,proc->GetName());
+
+    printf("Parameters:\n");
+    for(j=0; j<proc->GetNParams(); j++) {
+      printf("%3i:\t%s\n",j,proc->GetParam(j).GetName());
+    }
+
+    printf("\nInputs:\n");
+    for(j=0; j<proc->GetNInputs(); j++) {
+      sbuf=proc->GetInput(j);
+      donbuf.Clear();
+      if(sbuf.Length()) donbuf=QSigExUtils::DecodeObjName(sbuf);
+      printf("%3i",j);
+      if(donbuf.Count()>0) printf("\t%s",donbuf[0].Data());
+      if(donbuf.Count()==2) printf("\t%s",donbuf[1].Data());
+      printf("\t%s\n",proc->GetInput(j).GetName());
+    }
+
+    printf("\nOutputs:\n");
+    for(j=0; j<proc->GetNOutputs(); j++) {
+      sbuf=proc->GetOutput(j);
+      donbuf.Clear();
+      if(sbuf.Length()) donbuf=QSigExUtils::DecodeObjName(sbuf);
+      printf("%3i",j);
+      if(donbuf.Count()>0) printf("\t%s",donbuf[0].Data());
+      if(donbuf.Count()==2) printf("\t%s",donbuf[1].Data());
+      printf("\t%s\n",proc->GetOutput(j).GetName());
+    }
+
+    printf("\nDependencies:\n");
+    (*fProcsDepends)[i].Print();
+    printf("\n");
+  }
+
+  printf("All Input Branches:\n");
+  for(i=0; i<fITNames->Count(); i++) {
+    printf("%3i Tree %s",i,(*fITNames)[i][0].Data());
+    if((*fITNames)[i].Count() ==2) printf(" %s",(*fITNames)[i][1].Data());
+    printf(":\n");
+
+    for(j=0; j<(*fIBNames)[i].Count(); j++) {
+      printf("\t%3i %s\n",j,(*fIBNames)[i][j].Data());
+    }
+    printf("\n");
+  }
+
+  printf("All Output Branches:\n");
+  for(i=0; i<fOTNames->Count(); i++) {
+    printf("%3i Tree %s",i,(*fOTNames)[i][0].Data());
+    if((*fOTNames)[i].Count() ==2) printf(" %s",(*fOTNames)[i][1].Data());
+    printf("\t");
+    (*fOTDepends)[i].Print();
+
+    for(j=0; j<(*fOBNames)[i].Count(); j++) {
+      printf("\t%3i %s\t",j,(*fOBNames)[i][j].Data());
+      (*fOBDepends)[i][j].Print();
+    }
+    printf("\n");
+  }
+
+  /*printf("All Output Buffers:\n");
+  for(i=0; i<iobufs.Count(); i++) {
+    printf("%3i %s\n",i,iobufs[i].Data());
+  }*/
 }
 
 void QTTreeProcessor::SetParam(const char *paramname, Double_t value)

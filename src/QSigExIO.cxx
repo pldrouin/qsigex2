@@ -161,7 +161,7 @@ void QSigExIO::Streamer(TBuffer &R__b)
     fDirectory.Streamer(R__b);
     fClassName.Streamer(R__b);
     R__b >> fObject;
-    dynamic_cast<TH1*>(fObject)->SetDirectory(0);
+    if(dynamic_cast<TH1*>(fObject)) dynamic_cast<TH1*>(fObject)->SetDirectory(0);
     R__b.CheckByteCount(R__s, R__c, QSigExIO::IsA());
   } else {
     R__c = R__b.WriteVersion(QSigExIO::IsA(), kTRUE);

@@ -13,8 +13,8 @@
 class QTTreeProcessor
 {
   public:
-    QTTreeProcessor(): fProcs(new QList<QNamedProc>), fParams(new QList<Double_t>), fParamsNames(new QList<TString>), fITNames(new QList<QList<TString> >), fOTNames(new QList<QList<TString> >), fIBNames(new QList<QList<TString> >), fOBNames(new QList<QList<TString> >), fProcsDepends(new QList<QMask>), fOTDepends(new QList<QMask>), fOBDepends(new QList<QList<QMask> >){}
-    QTTreeProcessor(const QTTreeProcessor &rhs): fProcs(new QList<QNamedProc>(*rhs.fProcs)), fParams(new QList<Double_t>(*rhs.fParams)), fParamsNames(new QList<TString>(*rhs.fParamsNames)), fITNames(new QList<QList<TString> >(*rhs.fITNames)), fOTNames(new QList<QList<TString> >(*rhs.fOTNames)), fIBNames(new QList<QList<TString> >(*rhs.fIBNames)), fOBNames(new QList<QList<TString> >(*rhs.fOBNames)), fProcsDepends(new QList<QMask>(*rhs.fProcsDepends)), fOTDepends(new QList<QMask>(*rhs.fOTDepends)), fOBDepends(new QList<QList<QMask> >(*rhs.fOBDepends)){}
+    QTTreeProcessor(): fProcs(new QList<QNamedProc>), fParams(new QList<Double_t>), fParamsNames(new QList<TString>), fAnalysisDir(new TString), fITNames(new QList<QList<TString> >), fOTNames(new QList<QList<TString> >), fIBNames(new QList<QList<TString> >), fOBNames(new QList<QList<TString> >), fProcsDepends(new QList<QMask>), fOTDepends(new QList<QMask>), fOBDepends(new QList<QList<QMask> >){}
+    QTTreeProcessor(const QTTreeProcessor &rhs): fProcs(new QList<QNamedProc>(*rhs.fProcs)), fParams(new QList<Double_t>(*rhs.fParams)), fParamsNames(new QList<TString>(*rhs.fParamsNames)), fAnalysisDir(new TString(*rhs.fAnalysisDir)), fITNames(new QList<QList<TString> >(*rhs.fITNames)), fOTNames(new QList<QList<TString> >(*rhs.fOTNames)), fIBNames(new QList<QList<TString> >(*rhs.fIBNames)), fOBNames(new QList<QList<TString> >(*rhs.fOBNames)), fProcsDepends(new QList<QMask>(*rhs.fProcsDepends)), fOTDepends(new QList<QMask>(*rhs.fOTDepends)), fOBDepends(new QList<QList<QMask> >(*rhs.fOBDepends)){}
     virtual ~QTTreeProcessor();
 
     void AddParam(const char *parname, Int_t index=-1);
@@ -43,6 +43,8 @@ class QTTreeProcessor
 
     const QTTreeProcessor& operator=(const QTTreeProcessor &rhs);
 
+    void PrintAnalysisResults();
+
     void SetParam(Int_t index=-1, Double_t value=0){fParams[index]=value;}
     void SetParam(const char *paramname, Double_t value=0);
     void SetParams(Double_t *params);
@@ -51,6 +53,7 @@ class QTTreeProcessor
     QList<QNamedProc> *fProcs; //->
     QList<Double_t> *fParams; //->
     QList<TString> *fParamsNames; //->
+    TString *fAnalysisDir;             //-> Directory returned by gDirectory->GetPath() during the last call of Analyze()
     QList<QList<TString> > *fITNames;  //-> Names of existing trees that are used as inputs
     QList<QList<TString> > *fOTNames;  //-> Names of generated trees
     QList<QList<TString> > *fIBNames;  //-> Names of existing branches that are read
