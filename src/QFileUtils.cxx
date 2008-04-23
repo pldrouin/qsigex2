@@ -1,12 +1,12 @@
 // Author: Pierre-Luc Drouin <http://www.physics.carleton.ca/~pldrouin>
 
-#include "QSigExUtils.h"
+#include "QFileUtils.h"
 
 #include "debugger.h"
 
-ClassImp(QSigExUtils)
+ClassImp(QFileUtils)
 
-QList<TString> QSigExUtils::DecodeObjName(TString name)
+QList<TString> QFileUtils::DecodeObjName(TString name)
 {
   QList<TString> ret;
   TString objpwd=gDirectory->GetPath();
@@ -50,7 +50,7 @@ QList<TString> QSigExUtils::DecodeObjName(TString name)
   return ret;
 }
 
-TString QSigExUtils::DecodePathName(TString path)
+TString QFileUtils::DecodePathName(TString path)
 {
   Int_t pos=0;
   Int_t index;

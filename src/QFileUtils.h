@@ -1,7 +1,7 @@
 // Author: Pierre-Luc Drouin <http://www.physics.carleton.ca/~pldrouin>
 
-#ifndef _QSIGEXUTILS_
-#define _QSIGEXUTILS_
+#ifndef _QFILEUTILS_
+#define _QFILEUTILS_
 
 #include "Rtypes.h"
 #include "TString.h"
@@ -13,18 +13,18 @@
 
 #include "debugger.h"
 
-class QSigExUtils{
+class QFileUtils{
   public:
-    virtual ~QSigExUtils(){}
+    virtual ~QFileUtils(){}
     static QList<TString> DecodeObjName(TString name);
     static TString DecodePathName(TString path);
 
   private:
-    QSigExUtils(){}
-    QSigExUtils(const QSigExUtils&){}
-    const QSigExUtils& operator=(const QSigExUtils&){return *this;}
+    QFileUtils(){}
+    QFileUtils(const QFileUtils&){}
+    const QFileUtils& operator=(const QFileUtils&){return *this;}
 
-    ClassDef(QSigExUtils,1) //Contains static member functions that handle TTree branches buffers
+    ClassDef(QFileUtils,1) //Contains static member functions that handle TTree branches buffers
 };
 
 #include "debugger.h"

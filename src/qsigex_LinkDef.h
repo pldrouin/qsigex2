@@ -62,7 +62,7 @@
 #pragma link C++ class QSigExTFOps;
 #pragma link C++ class QSigExTHOps;
 #pragma link C++ class QSigExTTreePDF;
-#pragma link C++ class QSigExUtils;
+#pragma link C++ class QFileUtils;
 #pragma link C++ class QTTreeUtils;
 #pragma link C++ class QSigExChecks;
 #pragma link C++ class QSigExSystematics;

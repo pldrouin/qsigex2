@@ -133,7 +133,7 @@ Int_t QTTreeProcessor::Analyze()
       //If the input is from a tree
       if(sbuf.Length()) {
 	//printf("Input from a tree\n");
-	donbuf=QSigExUtils::DecodeObjName(sbuf);
+	donbuf=QFileUtils::DecodeObjName(sbuf);
 
 	if(!donbuf.Count()) {
 	  fprintf(stderr,"QTTreeProcessor::Analyze(): Error: Invalid input object name: '%s'\n",sbuf.Data());
@@ -209,7 +209,7 @@ Int_t QTTreeProcessor::Analyze()
       //If the output is in a tree
       if(sbuf.Length()) {
 	//printf("Output to a tree\n");
-	donbuf=QSigExUtils::DecodeObjName(sbuf);
+	donbuf=QFileUtils::DecodeObjName(sbuf);
 
 	if(!donbuf.Count()) {
 	  fprintf(stderr,"QTTreeProcessor::Analyze(): Error: Invalid output object name: '%s'\n",sbuf.Data());
@@ -372,7 +372,7 @@ void QTTreeProcessor::PrintAnalysisResults()
     for(j=0; j<proc->GetNInputs(); j++) {
       sbuf=proc->GetInput(j);
       donbuf.Clear();
-      if(sbuf.Length()) donbuf=QSigExUtils::DecodeObjName(sbuf);
+      if(sbuf.Length()) donbuf=QFileUtils::DecodeObjName(sbuf);
       printf("%3i",j);
       if(donbuf.Count()>0) printf("\t%s",donbuf[0].Data());
       if(donbuf.Count()==2) printf("\t%s",donbuf[1].Data());
@@ -383,7 +383,7 @@ void QTTreeProcessor::PrintAnalysisResults()
     for(j=0; j<proc->GetNOutputs(); j++) {
       sbuf=proc->GetOutput(j);
       donbuf.Clear();
-      if(sbuf.Length()) donbuf=QSigExUtils::DecodeObjName(sbuf);
+      if(sbuf.Length()) donbuf=QFileUtils::DecodeObjName(sbuf);
       printf("%3i",j);
       if(donbuf.Count()>0) printf("\t%s",donbuf[0].Data());
       if(donbuf.Count()==2) printf("\t%s",donbuf[1].Data());
