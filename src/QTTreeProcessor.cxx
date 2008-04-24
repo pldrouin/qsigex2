@@ -14,6 +14,8 @@ QTTreeProcessor::~QTTreeProcessor()
   fProcs=NULL;
   delete fParams;
   fParams=NULL;
+  delete fLastParams;
+  fLastParams=NULL;
   delete fParamsNames;
   fParamsNames=NULL;
   delete fITNames;
@@ -46,6 +48,8 @@ QTTreeProcessor::~QTTreeProcessor()
   fOBBuffers=NULL;
   delete fIBCBuffers;
   fIBCBuffers=NULL;
+  delete fIBCBTypes;
+  fIBCBTypes=NULL;
   delete fBuffers;
   fBuffers=NULL;
 }
@@ -311,6 +315,10 @@ void QTTreeProcessor::DelProc(const char *procname)
   }
 }
 
+void QTTreeProcessor::Exec()
+{
+}
+
 Int_t QTTreeProcessor::FindParamIndex(const char *paramname) const
 {
   for(Int_t i=0; i<fParams->Count(); i++){
@@ -342,7 +350,7 @@ Int_t QTTreeProcessor::InitProcess()
 {
   TDirectory *curdir=gDirectory;
   TDirectory *dbuf;
-  Int_t i,j;
+  Int_t i,j,k;
   QList<TString> dpn;
   TTree *tbuf;
 
@@ -426,28 +434,29 @@ Int_t QTTreeProcessor::InitProcess()
 
   TLeaf *lbuf;
   const char* cabuf;
+  ClearIBCBuffers();
 
   //Loop over the input branches
   for(i=0; i<fITNames->Count(); i++) {
 
     //If the tree is located in a file
     if((*fITNames)[i].Count() ==2) {
-    
-    //If the file is already opened
-    if((dbuf=gDirectory->GetDirectory((*fITNames)[i][1]+":/"))) {
-      dbuf->cd();
 
-      //Else if the file is not opened
-    } else {
+      //If the file is already opened
+      if((dbuf=gDirectory->GetDirectory((*fITNames)[i][1]+":/"))) {
+	dbuf->cd();
 
-      if(gSystem->AccessPathName((*fITNames)[i][1],kReadPermission)) {
-	fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: File '%s' cannot be read\n",(*fITNames)[i][1].Data());
-	return 1;
+	//Else if the file is not opened
+      } else {
+
+	if(gSystem->AccessPathName((*fITNames)[i][1],kReadPermission)) {
+	  fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: File '%s' cannot be read\n",(*fITNames)[i][1].Data());
+	  return 1;
+	}
+
+	//Open the file
+	fIFiles->Add(new TFile((*fITNames)[i][1],"read"));
       }
-
-      //Open the file
-      fIFiles->Add(new TFile((*fITNames)[i][1],"read"));
-    }
     }
     //Decode the path to the object
     dpn=QFileUtils::DecodePathName((*fITNames)[i][0]);
@@ -461,7 +470,7 @@ Int_t QTTreeProcessor::InitProcess()
       }
       dbuf->cd();
     }
-    
+
     //Load the input tree
     if(!(tbuf=dynamic_cast<TTree*>(gDirectory->Get(dpn.GetLast())))) {
       fprintf(stderr,"QTTreeProcessor::InitProcess(): Tree '%s:/%s' does not exist\n",(*fITNames)[i][1].Data(),(*fITNames)[i][0].Data());
@@ -492,28 +501,117 @@ Int_t QTTreeProcessor::InitProcess()
       if(!strcmp(cabuf,"Double_t")) {
 	((TBranch*)(*fIBranches)[i][j])->SetAddress(&((*fIBBuffers)[i][j]));
 
-      } else if(!strcmp(cabuf,"Float_t")) {
-      
-      } else if(!strcmp(cabuf,"UInt_t")) {
-
-      } else if(!strcmp(cabuf,"Int_t")) {
-
-      } else if(!strcmp(cabuf,"UShort_t")) {
-
-      } else if(!strcmp(cabuf,"Short_t")) {
-
-      } else if(!strcmp(cabuf,"UChar_t")) {
-
-      } else if(!strcmp(cabuf,"Char_t")) {
-
-      } else if(!strcmp(cabuf,"Bool_t")) {
-
+	//Else if the input branch has a different basic data type, assign a different temporary buffer
       } else {
-	fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: The data type '%s' contained in branch '%s' from tree '%s:/%s' is not supported\n",cabuf,(*fIBNames)[i][j].Data(),(*fITNames)[i][1].Data(),(*fITNames)[i][0].Data());
-	return 1;
+
+	//Redim lists if this is the first input tree having branches with a different data type
+	if(!fIBCBuffers->Count()) {
+	  fIBCBuffers->RedimList(fITNames->Count());
+	  fIBCBTypes->RedimList(fITNames->Count());
+	}
+
+	//Redim lists if this is the first branch of the input tree having a  different data type
+	if(!(*fIBCBuffers)[i].Count()) {
+	  (*fIBCBuffers)[i].RedimList((*fIBNames)[i].Count(),-1,NULL);
+	  (*fIBCBTypes)[i].RedimList((*fIBNames)[i].Count(),-1,0);
+	}
+
+	if(!strcmp(cabuf,"Float_t")) {
+	  (*fIBCBuffers)[i][j]=malloc(sizeof(Float_t));
+	  (*fIBCBTypes)[i][j]=kFloat_t;
+
+	} else if(!strcmp(cabuf,"UInt_t")) {
+	  (*fIBCBuffers)[i][j]=malloc(sizeof(UInt_t));
+	  (*fIBCBTypes)[i][j]=kUInt_t;
+
+	} else if(!strcmp(cabuf,"Int_t")) {
+	  (*fIBCBuffers)[i][j]=malloc(sizeof(Int_t));
+	  (*fIBCBTypes)[i][j]=kInt_t;
+
+	} else if(!strcmp(cabuf,"UShort_t")) {
+	  (*fIBCBuffers)[i][j]=malloc(sizeof(UShort_t));
+	  (*fIBCBTypes)[i][j]=kUShort_t;
+
+	} else if(!strcmp(cabuf,"Short_t")) {
+	  (*fIBCBuffers)[i][j]=malloc(sizeof(Short_t));
+	  (*fIBCBTypes)[i][j]=kShort_t;
+
+	} else if(!strcmp(cabuf,"UChar_t")) {
+	  (*fIBCBuffers)[i][j]=malloc(sizeof(UChar_t));
+	  (*fIBCBTypes)[i][j]=kUChar_t;
+
+	} else if(!strcmp(cabuf,"Char_t")) {
+	  (*fIBCBuffers)[i][j]=malloc(sizeof(Char_t));
+	  (*fIBCBTypes)[i][j]=kChar_t;
+
+	} else if(!strcmp(cabuf,"Bool_t")) {
+	  (*fIBCBuffers)[i][j]=malloc(sizeof(Bool_t));
+	  (*fIBCBTypes)[i][j]=kBool_t;
+
+	} else {
+	  fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: The data type '%s' contained in branch '%s' from tree '%s:/%s' is not supported\n",cabuf,(*fIBNames)[i][j].Data(),(*fITNames)[i][1].Data(),(*fITNames)[i][0].Data());
+	  return 1;
+	}
+
+	((TBranch*)(*fIBranches)[i][j])->SetAddress((*fIBCBuffers)[i][j]);
       }
     }
   }
+
+  //Create output buffers
+  fBuffers->RedimList(fBuNames->Count());
+
+  Int_t nprocs=fProcs->Count();
+  QNamedProc *proc;
+  TString sbuf;
+
+  //Loop over the processes
+  for(i=0; i<nprocs; i++) {
+    proc=&((*fProcs)[i]);
+
+    //Loop over the parameters for the current process
+    for(j=0; j<proc->GetNParams(); j++) {
+      //Set the address to the assign buffer for this parameter
+      proc->SetParamBuf(j,&((*fParams)[fParamsNames->FindFirst(proc->GetParam(j).GetName())]));
+    }
+
+    //Loop over the inputs for the current process
+    for(j=0; j<proc->GetNInputs(); j++) {
+      sbuf=proc->GetInput(j);
+
+      //If the input is not a memory buffer
+      if(sbuf.Length()) {
+	//Get the buffer address from the input branches buffers list
+	k=fITNames->FindFirst(QFileUtils::DecodeObjName(sbuf)); //Tree index
+	proc->SetInputBuf(j,&((*fIBBuffers)[k][(*fIBNames)[k].FindFirst(proc->GetInput(j).GetName())]));
+
+	//Else if the input is a memory buffer
+      } else {
+	//Get the buffer address from the memory buffers list
+	proc->SetInputBuf(j,&((*fBuffers)[fBuNames->FindFirst(proc->GetInput(j).GetName())]));
+      }
+    }
+
+    //Loop over the output for the current process
+    for(j=0; j<proc->GetNOutputs(); j++) {
+      sbuf=proc->GetOutput(j);
+
+      //If the output is not a memory buffer
+      if(sbuf.Length()) {
+	//Get the buffer address from the output branches buffers list
+	k=fOTNames->FindFirst(QFileUtils::DecodeObjName(sbuf)); //Tree index
+	proc->SetOutputBuf(j,&((*fOBBuffers)[k][(*fOBNames)[k].FindFirst(proc->GetOutput(j).GetName())]));
+
+	//Else if the output is a memory buffer
+      } else {
+	//Get the buffer address from the memory buffers list
+	proc->SetOutputBuf(j,&((*fBuffers)[fBuNames->FindFirst(proc->GetOutput(j).GetName())]));
+      }
+    }
+  }
+
+  //Erase last parameters
+  fLastParams->Clear();
 
   curdir->cd();
   return 0;
@@ -651,6 +749,21 @@ void QTTreeProcessor::TerminateProcess()
   }
   fOFiles->Clear();
   fOBranches->Clear();
+  ClearIBCBuffers();
+}
+
+void QTTreeProcessor::ClearIBCBuffers()
+{
+  fIBCBTypes->Clear();
+  Int_t i,j;
+
+  for(i=0; i<fIBCBuffers->Count(); i++) {
+
+    for(j=0; j<(*fIBCBuffers)[i].Count(); j++) {
+      free((*fIBCBuffers)[i][j]);
+    }
+  }
+  fIBCBuffers->Clear();
 }
 
 #include "debugger.h"

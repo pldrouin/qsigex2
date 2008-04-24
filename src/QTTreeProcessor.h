@@ -16,8 +16,8 @@
 class QTTreeProcessor
 {
   public:
-    QTTreeProcessor(): fProcs(new QList<QNamedProc>), fParams(new QList<Double_t>), fParamsNames(new QList<TString>), fAnalysisDir(), fITNames(new QList<QList<TString> >), fOTNames(new QList<QList<TString> >), fIBNames(new QList<QList<TString> >), fOBNames(new QList<QList<TString> >), fBuNames(new QList<TString>), fIFiles(new QList<TObject*>), fOFiles(new QList<TObject*>), fIBranches(new QList<QList<TObject*> >), fOBranches(new QList<QList<TObject*> >), fProcsDepends(new QList<QMask>), fOTDepends(new QList<QMask>), fOBDepends(new QList<QList<QMask> >), fIBBuffers(new QList<QList<Double_t> >), fOBBuffers(new QList<QList<Double_t> >), fIBCBuffers(new QList<QList<void*> >), fBuffers(new QList<Double_t>) {}
-    QTTreeProcessor(const QTTreeProcessor &rhs): fProcs(new QList<QNamedProc>(*rhs.fProcs)), fParams(new QList<Double_t>(*rhs.fParams)), fParamsNames(new QList<TString>(*rhs.fParamsNames)), fAnalysisDir(rhs.fAnalysisDir), fITNames(new QList<QList<TString> >(*rhs.fITNames)), fOTNames(new QList<QList<TString> >(*rhs.fOTNames)), fIBNames(new QList<QList<TString> >(*rhs.fIBNames)), fOBNames(new QList<QList<TString> >(*rhs.fOBNames)), fBuNames(new QList<TString>(*rhs.fBuNames)), fIFiles(new QList<TObject*>), fOFiles(new QList<TObject*>), fIBranches(new QList<QList<TObject*> >), fOBranches(new QList<QList<TObject*> >), fProcsDepends(new QList<QMask>(*rhs.fProcsDepends)), fOTDepends(new QList<QMask>(*rhs.fOTDepends)), fOBDepends(new QList<QList<QMask> >(*rhs.fOBDepends)), fIBBuffers(new QList<QList<Double_t> >), fOBBuffers(new QList<QList<Double_t> >), fIBCBuffers(new QList<QList<void*> >), fBuffers(new QList<Double_t>){}
+    QTTreeProcessor(): fProcs(new QList<QNamedProc>), fParams(new QList<Double_t>), fLastParams(new QList<Double_t>), fParamsNames(new QList<TString>), fAnalysisDir(), fITNames(new QList<QList<TString> >), fOTNames(new QList<QList<TString> >), fIBNames(new QList<QList<TString> >), fOBNames(new QList<QList<TString> >), fBuNames(new QList<TString>), fIFiles(new QList<TObject*>), fOFiles(new QList<TObject*>), fIBranches(new QList<QList<TObject*> >), fOBranches(new QList<QList<TObject*> >), fProcsDepends(new QList<QMask>), fOTDepends(new QList<QMask>), fOBDepends(new QList<QList<QMask> >), fIBBuffers(new QList<QList<Double_t> >), fOBBuffers(new QList<QList<Double_t> >), fIBCBuffers(new QList<QList<void*> >), fIBCBTypes(new QList<QList<Int_t> >), fBuffers(new QList<Double_t>) {}
+    QTTreeProcessor(const QTTreeProcessor &rhs): fProcs(new QList<QNamedProc>(*rhs.fProcs)), fParams(new QList<Double_t>(*rhs.fParams)), fLastParams(new QList<Double_t>), fParamsNames(new QList<TString>(*rhs.fParamsNames)), fAnalysisDir(rhs.fAnalysisDir), fITNames(new QList<QList<TString> >(*rhs.fITNames)), fOTNames(new QList<QList<TString> >(*rhs.fOTNames)), fIBNames(new QList<QList<TString> >(*rhs.fIBNames)), fOBNames(new QList<QList<TString> >(*rhs.fOBNames)), fBuNames(new QList<TString>(*rhs.fBuNames)), fIFiles(new QList<TObject*>), fOFiles(new QList<TObject*>), fIBranches(new QList<QList<TObject*> >), fOBranches(new QList<QList<TObject*> >), fProcsDepends(new QList<QMask>(*rhs.fProcsDepends)), fOTDepends(new QList<QMask>(*rhs.fOTDepends)), fOBDepends(new QList<QList<QMask> >(*rhs.fOBDepends)), fIBBuffers(new QList<QList<Double_t> >), fOBBuffers(new QList<QList<Double_t> >), fIBCBuffers(new QList<QList<void*> >), fIBCBTypes(new QList<QList<Int_t> >), fBuffers(new QList<Double_t>){}
     virtual ~QTTreeProcessor();
 
     void AddParam(const char *parname, Int_t index=-1);
@@ -32,6 +32,8 @@ class QTTreeProcessor
     void DelParam(const char *paramname);
     void DelProc(Int_t index=-1){fProcs->Del(index); fProcsDepends->Del(index);}
     void DelProc(const char *procname);
+
+    void Exec();
 
     Int_t FindParamIndex(const char *paramname) const;
     Int_t FindProcIndex(const char *procname) const;
@@ -56,27 +58,44 @@ class QTTreeProcessor
 
     void TerminateProcess();
 
+  protected:
+    void ClearIBCBuffers();
+
   private:
-    QList<QNamedProc> *fProcs;           //->
-    QList<Double_t> *fParams;            //->
-    QList<TString> *fParamsNames;        //->
-    TString fAnalysisDir;                //   Directory returned by gDirectory->GetPath() during the last call of Analyze()
+    QList<QNamedProc> *fProcs;           //-> QNamedProc objects
+    QList<Double_t>   *fParams;          //-> Buffers for parameters values
+    QList<Double_t>   *fLastParams;      //!  Parameters value from last Exec() call
+    QList<TString>    *fParamsNames;     //-> Parameters names
+    TString           fAnalysisDir;      //   Directory returned by gDirectory->GetPath() during the last call of Analyze()
     QList<QList<TString> > *fITNames;    //-> Names of existing trees that are used as inputs
     QList<QList<TString> > *fOTNames;    //-> Names of generated trees
     QList<QList<TString> > *fIBNames;    //-> Names of existing branches that are read
     QList<QList<TString> > *fOBNames;    //-> Names of generated branches
     QList<TString>         *fBuNames;    //-> Names of output buffers
-    QList<TObject*> *fIFiles;            //! Input files
-    QList<TObject*> *fOFiles;            //! Output files
+    QList<TObject*>         *fIFiles;    //! Input files
+    QList<TObject*>         *fOFiles;    //! Output files
     QList<QList<TObject*> > *fIBranches; //! Input branches
     QList<QList<TObject*> > *fOBranches; //! Output branches
-    QList<QMask> *fProcsDepends;         //-> Dependencies of processes on parameters
-    QList<QMask> *fOTDepends;            //-> Dependencies of output trees on parameters
+    QList<QMask>         *fProcsDepends; //-> Dependencies of processes on parameters
+    QList<QMask>         *fOTDepends;    //-> Dependencies of output trees on parameters
     QList<QList<QMask> > *fOBDepends;    //-> Dependencies of output branches on parameters
     QList<QList<Double_t> > *fIBBuffers; //! Buffers for input branches
     QList<QList<Double_t> > *fOBBuffers; //! Buffers for output branches
     QList<QList<void*> >    *fIBCBuffers;//! Buffers for input branches containing a different data type
-    QList<Double_t> *fBuffers;           //! Buffers for output buffers
+    QList<QList<Int_t> >    *fIBCBTypes; //! Data type id of input branches containing a different data type
+    QList<Double_t>         *fBuffers;   //! Buffers for output buffers
+    enum {
+      kDouble_t,
+      kFloat_t,
+      kUInt_t,
+      kInt_t,
+      kUShort_t,
+      kShort_t,
+      kUChar_t,
+      kChar_t,
+      kBool_t
+    };
+
     ClassDef(QTTreeProcessor,1)          //The TTree processor class
 };
 
