@@ -317,6 +317,7 @@ void QTTreeProcessor::DelProc(const char *procname)
 
 void QTTreeProcessor::Exec()
 {
+  return;
 }
 
 Int_t QTTreeProcessor::FindParamIndex(const char *paramname) const
