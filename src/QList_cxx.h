@@ -399,6 +399,21 @@ template <typename U> Int_t QList<U>::FindFirst(const U* us, Int_t nelements) co
   return -1;
 }
 
+template <typename U> U& QList<U>::GetLast() const
+{
+  //Returns the last element of the list
+
+  try{
+
+    if(fNElements) return fUArray[fNElements-1];
+    cout << "QList<" << typeid(U).name() << ">: The list is empty\n"; throw 4000;
+
+  }catch(Int_t e){
+    cout << "Exception handled by QList::GetLast()\n";
+    throw e;
+  }
+}
+
 template<typename V> Bool_t operator==(const QList<V>& lhs,const QList<V>& rhs)
 {
   // This friend function compare list values of 2 QList<V> instances, and returns
@@ -475,7 +490,7 @@ template <typename U> U& QList<U>::operator[](Int_t index) const
 
   try{
     if(index==-1) index=fNElements-1;
-    else if(index<0 || index>=fNElements) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed (" << index << ")\n"; throw 4000;}
+    if(index<0 || index>=fNElements) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed (" << index << ")\n"; throw 4000;}
     
     return fUArray[index];
   }catch(Int_t e){
@@ -533,7 +548,7 @@ template <typename U> Int_t QList<U>::RedimList(Int_t newdim,Int_t index)
     if(newdim<fNElements){
       Int_t dimdif=newdim-fNElements;
       if(index==-1) index=newdim;
-      else if(index<0 || index>newdim) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed (" << index << ")\n"; throw 4000;}
+      if(index<0 || index>newdim) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed (" << index << ")\n"; throw 4000;}
       Int_t i;
       for(i=index-dimdif;i<fNElements;i++){
 	fUArray[i+dimdif]=fUArray[i];
@@ -549,7 +564,7 @@ template <typename U> Int_t QList<U>::RedimList(Int_t newdim,Int_t index)
       Int_t dimdif=newdim-fNElements;
       U* newarray;
       if(index==-1) index=fNElements;
-      else if(index<0 || index>fNElements) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed (" << index << ")\n"; throw 4000;}
+      if(index<0 || index>fNElements) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed (" << index << ")\n"; throw 4000;}
       newarray=(U*)realloc(fUArray,newdim*sizeof(U));
       Int_t i;
       

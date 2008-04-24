@@ -88,6 +88,7 @@ template <typename U> class QList: public TObject
   Int_t Count() const{PRINTF4(this,"\tInt_t& QList<",typeid(U).name(),">::Count()\n") return fNElements;}
 
   U* GetArray() const{return fUArray;}
+  U& GetLast() const;
   
   QList<Int_t> Find(const QList<U>& qlist,Int_t maxmatches=0) const;
   QList<Int_t> Find(const U& u,Int_t maxmatches=0) const;

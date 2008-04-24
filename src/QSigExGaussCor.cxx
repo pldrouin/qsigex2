@@ -197,7 +197,7 @@ Int_t QSigExGaussCor::Get()
 	      //Resize the list of correlated variable names
 	      vars.RedimList(vars.Count()+1);
 	      //Add the title of the TNamed object to the list of correlated variables
-	      vars[vars.Count()-1]=dynamic_cast<QNamedVar<TString>*>(nbuf)->GetValue();
+	      vars.GetLast()=dynamic_cast<QNamedVar<TString>*>(nbuf)->GetValue();
 
 	    //Else if there's no TNamed object in "Inputs" TDirectory, throw an exception  
 	    }else{

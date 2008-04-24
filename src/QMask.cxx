@@ -7,7 +7,7 @@ ClassImp(QMask)
 void QMask::Crop()
 {
   Int_t i;
-  for(i=Count()-1; i>=0 && operator[](i) == 0; i--){}
+  for(i=Count()-1; i>=0 && GetArray()[i] == 0; i--){}
   if(i>-1) RedimList(i+1);
 }
 
@@ -15,7 +15,7 @@ Bool_t QMask::GetBit(UInt_t n) const
 {
   Int_t nbytes=n/8;
   if(nbytes >= Count()) return kFALSE;
-  return (operator[](nbytes)>>(n%8))&1;
+  return (GetArray()[nbytes]>>(n%8))&1;
 }
 
 void QMask::Print(const Option_t *) const
@@ -41,12 +41,12 @@ void QMask::SetBit(UInt_t n, Bool_t value)
   if(value) {
 
     if(Count() < nbytes+1) RedimList(nbytes+1,-1,0);
-    operator[](nbytes)|=(1<<bshift);
+    GetArray()[nbytes]|=(1<<bshift);
 
   } else {
 
     if(Count() < nbytes+1) return;
-    operator[](nbytes)&=(~(1<<bshift));
+    GetArray()[nbytes]&=(~(1<<bshift));
   }
 }
 
@@ -56,7 +56,7 @@ const QMask& QMask::operator&=(const QMask &rhs)
   if(Count() > rhs.Count()) RedimList(rhs.Count());
 
   for(Int_t i=0; i<rhs.Count(); i++) {
-    operator[](i)&=rhs[i];
+    GetArray()[i]&=rhs[i];
   }
 
   return *this;
@@ -67,7 +67,7 @@ const QMask& QMask::operator|=(const QMask &rhs)
   if(Count() > rhs.Count()) {
 
     for(Int_t i=0; i<rhs.Count(); i++) {
-      operator[](i)|=rhs[i];
+      GetArray()[i]|=rhs[i];
     }
 
   } else {
@@ -75,7 +75,7 @@ const QMask& QMask::operator|=(const QMask &rhs)
     RedimList(rhs.Count());
 
     for(Int_t i=0; i<size; i++) {
-      operator[](i)|=rhs[i];
+      GetArray()[i]|=rhs[i];
     }
     memcpy(GetArray()+size,rhs.GetArray()+size,Count()-size);
   }
@@ -88,7 +88,7 @@ const QMask& QMask::operator^=(const QMask &rhs)
   if(Count() > rhs.Count()) {
 
     for(Int_t i=0; i<rhs.Count(); i++) {
-      operator[](i)^=rhs[i];
+      GetArray()[i]^=rhs[i];
     }
 
   } else {
@@ -96,7 +96,7 @@ const QMask& QMask::operator^=(const QMask &rhs)
     RedimList(rhs.Count());
 
     for(Int_t i=0; i<size; i++) {
-      operator[](i)^=rhs[i];
+      GetArray()[i]^=rhs[i];
     }
     memcpy(GetArray()+size,rhs.GetArray()+size,Count()-size);
   }
@@ -121,7 +121,7 @@ QMask QMask::operator>>(UInt_t n) const
       for(Int_t i=0; i<Count()-nbytes-1; i++) {
 	ret[i]=(GetArray()[i+nbytes]>>bshift)|(GetArray()[i+nbytes+1]<<8-bshift);
       }
-      ret[Count()-nbytes-1]=(GetArray()[Count()-1]>>bshift);
+      ret[Count()-nbytes-1]=(GetLast()>>bshift);
     }
   }
   return ret;
@@ -150,6 +150,17 @@ QMask QMask::operator<<(UInt_t n) const
   return ret;
 }
 
+QMask::operator Bool_t() const
+{
+  if(!Count()) return kFALSE;
+
+  for(Int_t i=0; i<Count(); i++) {
+
+    if(GetArray()[i] != 0) return kTRUE;
+  }
+  return kFALSE;
+}
+
 QMask operator&(const QMask &lhs, const QMask &rhs)
 {
   QMask ret;
@@ -161,7 +172,7 @@ QMask operator&(const QMask &lhs, const QMask &rhs)
   }
 
   for(Int_t i=0; i<ret.Count(); i++) {
-    ret[i]=lhs[i]&rhs[i];
+    ret.GetArray()[i]=lhs.GetArray()[i]&rhs.GetArray()[i];
   }
 
   return ret;
@@ -175,14 +186,14 @@ QMask operator|(const QMask &lhs, const QMask &rhs)
     ret=lhs;
 
     for(Int_t i=0; i<rhs.Count(); i++) {
-      ret[i]|=rhs[i];
+      ret.GetArray()[i]|=rhs.GetArray()[i];
     }
 
   } else {
     ret=rhs;
 
     for(Int_t i=0; i<lhs.Count(); i++) {
-      ret[i]|=lhs[i];
+      ret.GetArray()[i]|=lhs.GetArray()[i];
     }
   }
 
@@ -197,14 +208,14 @@ QMask operator^(const QMask &lhs, const QMask &rhs)
     ret=lhs;
 
     for(Int_t i=0; i<rhs.Count(); i++) {
-      ret[i]^=rhs[i];
+      ret.GetArray()[i]^=rhs.GetArray()[i];
     }
 
   } else {
     ret=rhs;
 
     for(Int_t i=0; i<lhs.Count(); i++) {
-      ret[i]^=lhs[i];
+      ret.GetArray()[i]^=lhs.GetArray()[i];
     }
   }
 
@@ -217,7 +228,7 @@ QMask operator~(const QMask &rhs)
   ret.RedimList(rhs.Count());
 
   for(Int_t i=0; i<rhs.Count(); i++) {
-    ret[i]=~rhs[i];
+    ret.GetArray()[i]=~rhs.GetArray()[i];
   }
 
   return ret;

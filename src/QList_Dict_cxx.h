@@ -26,6 +26,7 @@ template <> extern void QList<Bool_t>::Streamer(TBuffer &R__b);
 template <> extern void QList<Int_t>::Streamer(TBuffer &R__b);
 template <> extern void QList<Float_t>::Streamer(TBuffer &R__b);
 template <> extern void QList<Double_t>::Streamer(TBuffer &R__b);
+template <> extern void QList<void*>::Streamer(TBuffer &R__b);
 template <> extern void QList<Double_t*>::Streamer(TBuffer &R__b);
 template <> extern void QList<TObject*>::Streamer(TBuffer &R__b);
 #else
@@ -139,6 +140,12 @@ template <> void QList<Double_t>::Streamer(TBuffer &R__b)
   }
 }
 
+template <> void QList<void*>::Streamer(TBuffer &R__b)
+{
+  TBuffer *a;
+  a=&R__b;
+}
+
 template <> void QList<Double_t*>::Streamer(TBuffer &R__b)
 {
   TBuffer *a;
@@ -150,4 +157,5 @@ template <> void QList<TObject*>::Streamer(TBuffer &R__b)
   TBuffer *a;
   a=&R__b;
 }
+
 #endif

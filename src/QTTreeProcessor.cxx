@@ -16,8 +16,6 @@ QTTreeProcessor::~QTTreeProcessor()
   fParams=NULL;
   delete fParamsNames;
   fParamsNames=NULL;
-  delete fAnalysisDir;
-  fAnalysisDir=NULL;
   delete fITNames;
   fITNames=NULL;
   delete fOTNames;
@@ -26,12 +24,30 @@ QTTreeProcessor::~QTTreeProcessor()
   fIBNames=NULL;
   delete fOBNames;
   fOBNames=NULL;
+  delete fBuNames;
+  fBuNames=NULL;
+  delete fIFiles;
+  fIFiles=NULL;
+  delete fOFiles;
+  fOFiles=NULL;
+  delete fIBranches;
+  fIBranches=NULL;
+  delete fOBranches;
+  fOBranches=NULL;
   delete fProcsDepends;
   fProcsDepends=NULL;
   delete fOTDepends;
   fOTDepends=NULL;
   delete fOBDepends;
   fOBDepends=NULL;
+  delete fIBBuffers;
+  fIBBuffers=NULL;
+  delete fOBBuffers;
+  fOBBuffers=NULL;
+  delete fIBCBuffers;
+  fIBCBuffers=NULL;
+  delete fBuffers;
+  fBuffers=NULL;
 }
 
 void QTTreeProcessor::AddParam(const char *parname, Int_t index)
@@ -78,12 +94,11 @@ Int_t QTTreeProcessor::Analyze()
   QNamedProc *proc;
   QList<TString> params; //Parameters
   QList<QList< QList<TString> > > allitrees, allotrees;  //trees information for all processes
-  QList<TString> iobufs; //buffers
   QList<QMask>   bdepends; //Dependencies of output buffers on parameters
   TString sbuf;
   QList<TString> donbuf;       //Decoded object name buffer
 
-  *fAnalysisDir=gDirectory->GetPath();
+  fAnalysisDir=gDirectory->GetPath();
 
   Int_t nprocs=fProcs->Count();
   Int_t ninputs, noutputs, nparams;
@@ -158,7 +173,7 @@ Int_t QTTreeProcessor::Analyze()
 	    //printf("New input tree\n");
 	    //Add the name of the required branch
 	    fIBNames->RedimList(fITNames->Count());
-	    (*fIBNames)[fITNames->Count()-1].Add(proc->GetInput(j).GetName());
+	    fIBNames->GetLast().Add(proc->GetInput(j).GetName());
 
 	    //Else if the tree is already listed
 	  } else {
@@ -187,7 +202,7 @@ Int_t QTTreeProcessor::Analyze()
 	//Else if the input is from a buffer in memory
       } else {
 	//printf("Input from a memory buffer\n");
-	bidx=iobufs.FindFirst(proc->GetInput(j).GetName());
+	bidx=fBuNames->FindFirst(proc->GetInput(j).GetName());
 
 	//If the buffer has not been listed as an output for a previous process
 	if(bidx == -1) {
@@ -232,10 +247,10 @@ Int_t QTTreeProcessor::Analyze()
 	  //printf("New output tree\n");
 	  //Add the name of the output branch
 	  fOBNames->RedimList(fOTNames->Count());
-	  (*fOBNames)[fOTNames->Count()-1].Add(proc->GetOutput(j).GetName());
+	  fOBNames->GetLast().Add(proc->GetOutput(j).GetName());
 	  //Add a mask for the output branch and set it to the mask value for the current process
 	  fOBDepends->RedimList(fOTNames->Count());
-	  (*fOBDepends)[fOTNames->Count()-1].Add((*fProcsDepends)[i]);
+	  fOBDepends->GetLast().Add((*fProcsDepends)[i]);
 
 	  //Else if the tree is already listed
 	} else {
@@ -253,7 +268,7 @@ Int_t QTTreeProcessor::Analyze()
       } else {
 	//printf("Output to a memory buffer\n");
 	//Ensure the output memory buffer is in the list
-	bidx=iobufs.AddUnique(proc->GetOutput(j).GetName());
+	bidx=fBuNames->AddUnique(proc->GetOutput(j).GetName());
 	//Add an extra dependency mask if this is a new output branch
 	//Set the dependency mask value to the mask value for the current process
 	if(bidx==-1) bdepends.Add((*fProcsDepends)[i]);
@@ -323,30 +338,214 @@ QNamedProc& QTTreeProcessor::GetProc(const char *procname) const
   return (*fProcs)[0];
 }
 
+Int_t QTTreeProcessor::InitProcess()
+{
+  TDirectory *curdir=gDirectory;
+  TDirectory *dbuf;
+  Int_t i,j;
+  QList<TString> dpn;
+  TTree *tbuf;
+
+  fIFiles->Clear();
+  fOFiles->Clear();
+  fIBranches->Clear();
+  fOBranches->Clear();
+
+  fIBranches->RedimList(fITNames->Count());
+  fOBranches->RedimList(fOTNames->Count());
+  fIBBuffers->RedimList(fITNames->Count());
+  fOBBuffers->RedimList(fOTNames->Count());
+  fBuffers->RedimList(fBuNames->Count());
+
+  if(!(dbuf=gDirectory->GetDirectory(fAnalysisDir))) {
+    fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: Directory '%s' does not exist\n",fAnalysisDir.Data());
+    return 1;
+  }
+  dbuf->cd();
+
+  //Loop over the output trees
+  for(i=0; i<fOTNames->Count(); i++) {
+
+    //If the tree is located in a file
+    if((*fOTNames)[i].Count() == 2) {
+
+      //If the file is already opened
+      if((dbuf=gDirectory->GetDirectory((*fOTNames)[i][1]+":/"))) {
+	dbuf->cd();
+
+	if(!gDirectory->IsWritable()) {
+	  fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: File '%s' is not writable\n",(*fOTNames)[i][1].Data());
+	  return 1;
+	}
+
+	//Else if the file is not opened
+      } else {
+	if((gSystem->AccessPathName(gSystem->DirName((*fOTNames)[i][1]),kWritePermission) || gSystem->AccessPathName(gSystem->DirName((*fOTNames)[i][1]),kExecutePermission))
+	    && !gSystem->AccessPathName((*fOTNames)[i][1],kFileExists) && gSystem->AccessPathName((*fOTNames)[i][1],kWritePermission)) {
+	  fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: File '%s' cannot be opened for writing\n",(*fOTNames)[i][1].Data());
+	  return 1;
+	}
+
+	//Open the file
+	fOFiles->Add(new TFile((*fOTNames)[i][1],"update"));
+      }
+    }
+    //Decode the path to the object
+    dpn=QFileUtils::DecodePathName((*fOTNames)[i][0]);
+
+    //Access the directory where the tree has to be created and create directories if necessary
+    for(j=0; j<dpn.Count()-1; j++) {
+
+      if(!(dbuf=gDirectory->GetDirectory(dpn[j]))) {
+	dbuf=gDirectory->mkdir(dpn[j]);
+
+	if(!dbuf) {
+	  fprintf(stderr,"QTTreeProcessor::InitProcess(): Directory '%s' cannot be created in location '%s'\n",dpn[j].Data(),gDirectory->GetPath());
+	  return 1;
+	}
+      }
+      dbuf->cd();
+    }
+    //Create the output tree
+    tbuf=new TTree(dpn.GetLast(),dpn.GetLast());
+    dpn.Clear();
+    (*fOBranches)[i].RedimList((*fOBNames)[i].Count());
+    (*fOBBuffers)[i].RedimList((*fOBNames)[i].Count());
+
+    //Create the branches for this output tree
+    for(j=0; j<(*fOBNames)[i].Count(); j++) {
+      (*fOBranches)[i][j]=tbuf->Branch((*fOBNames)[i][j],&((*fOBBuffers)[i][j]),(*fOBNames)[i][j]+"/D");
+    }
+  }
+
+  if(!(dbuf=gDirectory->GetDirectory(fAnalysisDir))) {
+    fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: Directory '%s' does not exist\n",fAnalysisDir.Data());
+    return 1;
+  }
+  dbuf->cd();
+
+  TLeaf *lbuf;
+  const char* cabuf;
+
+  //Loop over the input branches
+  for(i=0; i<fITNames->Count(); i++) {
+
+    //If the tree is located in a file
+    if((*fITNames)[i].Count() ==2) {
+    
+    //If the file is already opened
+    if((dbuf=gDirectory->GetDirectory((*fITNames)[i][1]+":/"))) {
+      dbuf->cd();
+
+      //Else if the file is not opened
+    } else {
+
+      if(gSystem->AccessPathName((*fITNames)[i][1],kReadPermission)) {
+	fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: File '%s' cannot be read\n",(*fITNames)[i][1].Data());
+	return 1;
+      }
+
+      //Open the file
+      fIFiles->Add(new TFile((*fITNames)[i][1],"read"));
+    }
+    }
+    //Decode the path to the object
+    dpn=QFileUtils::DecodePathName((*fITNames)[i][0]);
+
+    //Access the directory from where the tree has to be read
+    for(j=0; j<dpn.Count()-1; j++) {
+
+      if((dbuf=gDirectory->GetDirectory(dpn[j]))) {
+	fprintf(stderr,"QTTreeProcessor::InitProcess(): Directory '%s' does not exist in location '%s'\n",dpn[j].Data(),gDirectory->GetPath());
+	return 1;
+      }
+      dbuf->cd();
+    }
+    
+    //Load the input tree
+    if(!(tbuf=dynamic_cast<TTree*>(gDirectory->Get(dpn.GetLast())))) {
+      fprintf(stderr,"QTTreeProcessor::InitProcess(): Tree '%s:/%s' does not exist\n",(*fITNames)[i][1].Data(),(*fITNames)[i][0].Data());
+      return 1;
+    }
+    dpn.Clear();
+    (*fIBranches)[i].RedimList((*fIBNames)[i].Count());
+    (*fIBBuffers)[i].RedimList((*fIBNames)[i].Count());
+
+    //Loop over the required branches for this input tree
+    for(j=0; j<(*fIBNames)[i].Count(); j++) {
+
+      if(!((*fIBranches)[i][j]=tbuf->GetBranch((*fIBNames)[i][j]))) {
+	fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: Branch '%s' does not exist in tree '%s:/%s'\n",(*fIBNames)[i][j].Data(),(*fITNames)[i][1].Data(),(*fITNames)[i][0].Data());
+	return 1;
+      }
+
+      //Get a pointer to the leaf named according to the branch name
+      if(!(lbuf=((TBranch*)(*fIBranches)[i][j])->GetLeaf((*fIBNames)[i][j]))) {
+	fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: There is no leaf '%s' contained in branch '%s' from tree '%s:/%s'\n",(*fIBNames)[i][j].Data(),(*fIBNames)[i][j].Data(),(*fITNames)[i][1].Data(),(*fITNames)[i][0].Data());
+	return 1;
+      }
+
+      //Get the data type for the current branch from the tree
+      cabuf=lbuf->GetTypeName();
+
+      //If the data type is a Double_t, the buffer is assigned directly to the branch
+      if(!strcmp(cabuf,"Double_t")) {
+	((TBranch*)(*fIBranches)[i][j])->SetAddress(&((*fIBBuffers)[i][j]));
+
+      } else if(!strcmp(cabuf,"Float_t")) {
+      
+      } else if(!strcmp(cabuf,"UInt_t")) {
+
+      } else if(!strcmp(cabuf,"Int_t")) {
+
+      } else if(!strcmp(cabuf,"UShort_t")) {
+
+      } else if(!strcmp(cabuf,"Short_t")) {
+
+      } else if(!strcmp(cabuf,"UChar_t")) {
+
+      } else if(!strcmp(cabuf,"Char_t")) {
+
+      } else if(!strcmp(cabuf,"Bool_t")) {
+
+      } else {
+	fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: The data type '%s' contained in branch '%s' from tree '%s:/%s' is not supported\n",cabuf,(*fIBNames)[i][j].Data(),(*fITNames)[i][1].Data(),(*fITNames)[i][0].Data());
+	return 1;
+      }
+    }
+  }
+
+  curdir->cd();
+  return 0;
+}
+
 const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
 {
   *fProcs=*rhs.fProcs;
   *fParams=*rhs.fParams;
   *fParamsNames=*rhs.fParamsNames;
-  *fAnalysisDir=*rhs.fAnalysisDir;
+  fAnalysisDir=rhs.fAnalysisDir;
   *fITNames=*rhs.fITNames;
   *fOTNames=*rhs.fOTNames;
   *fIBNames=*rhs.fIBNames;
   *fOBNames=*rhs.fOBNames;
+  *fBuNames=*rhs.fBuNames;
   *fProcsDepends=*rhs.fProcsDepends;
   *fOTDepends=*rhs.fOTDepends;
   *fOBDepends=*rhs.fOBDepends;
   return *this;
 }
 
-void QTTreeProcessor::PrintAnalysisResults()
+void QTTreeProcessor::PrintAnalysisResults() const
 {
-  if(!gDirectory->cd(*fAnalysisDir)) {
-    fprintf(stderr,"QTTreeProcessor::PrintAnalysisResults(): Error: Directory %s does not exist\n",fAnalysisDir->Data());
+  TDirectory *curdir=gDirectory;
+
+  if(!gDirectory->cd(fAnalysisDir)) {
+    fprintf(stderr,"QTTreeProcessor::PrintAnalysisResults(): Error: Directory %s does not exist\n",fAnalysisDir.Data());
     return;
   }
 
-  printf("Analysis Directory: %s\n",fAnalysisDir->Data());
+  printf("Analysis Directory: %s\n",fAnalysisDir.Data());
 
   Int_t i,j;
   printf("\nParameters:\n");
@@ -420,11 +619,7 @@ void QTTreeProcessor::PrintAnalysisResults()
     }
     printf("\n");
   }
-
-  /*printf("All Output Buffers:\n");
-  for(i=0; i<iobufs.Count(); i++) {
-    printf("%3i %s\n",i,iobufs[i].Data());
-  }*/
+  curdir->cd();
 }
 
 void QTTreeProcessor::SetParam(const char *paramname, Double_t value)
@@ -436,6 +631,26 @@ void QTTreeProcessor::SetParam(const char *paramname, Double_t value)
 void QTTreeProcessor::SetParams(Double_t *params)
 {
   memcpy(fParams->GetArray(),params,fParams->Count()*sizeof(Double_t));
+}
+
+void QTTreeProcessor::TerminateProcess()
+{
+  Int_t i;
+
+  for(i=0; i<fIFiles->Count(); i++) {
+    ((TFile*)(*fIFiles)[i])->Close();
+    delete ((TFile*)(*fIFiles)[i]);
+  }
+  fIFiles->Clear();
+  fIBranches->Clear();
+
+  for(i=0; i<fOFiles->Count(); i++) {
+    ((TFile*)(*fOFiles)[i])->Write();
+    ((TFile*)(*fOFiles)[i])->Close();
+    delete ((TFile*)(*fOFiles)[i]);
+  }
+  fOFiles->Clear();
+  fOBranches->Clear();
 }
 
 #include "debugger.h"

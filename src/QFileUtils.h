@@ -17,7 +17,8 @@ class QFileUtils{
   public:
     virtual ~QFileUtils(){}
     static QList<TString> DecodeObjName(TString name);
-    static TString DecodePathName(TString path);
+    static QList<TString> DecodePathName(const TString path);
+    static TString SimplifyPathName(TString path);
 
   private:
     QFileUtils(){}

@@ -245,7 +245,7 @@ template <typename U> Int_t QSigExProbs<U>::Get()
 		//Increment the number of valid inputs
 		m++;
 		//Add the input title to the list of inputs of the current PDF
-		axesnames[axesnames.Count()-1]+=qnvbuf->GetValue();
+		axesnames.GetLast()+=qnvbuf->GetValue();
 	      }
 	    }
 

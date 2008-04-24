@@ -23,6 +23,7 @@ class QMask: public QList<char>
     const QMask& operator^=(const QMask &rhs);
     QMask operator>>(UInt_t n) const;
     QMask operator<<(UInt_t n) const;
+    operator Bool_t() const;
 
     friend QMask operator&(const QMask &lhs, const QMask &rhs);
     friend QMask operator|(const QMask &lhs, const QMask &rhs);

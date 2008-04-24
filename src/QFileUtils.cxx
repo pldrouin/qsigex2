@@ -25,11 +25,11 @@ QList<TString> QFileUtils::DecodeObjName(TString name)
     sbuf=gSystem->ExpandPathName(sbuf.Data());
     if(!sbuf.Length()) return ret;
   //  if(sbuf[0] != '/') sbuf = (TString)gSystem->pwd() + "/" + sbuf;
-  //  sbuf=DecodePathName(sbuf);
+  //  sbuf=SimplifyPathName(sbuf);
   //  if(!sbuf.Length()) return ret;
 
     ret.RedimList(2);
-    ret[0]=DecodePathName(name(index+6,name.Length()-index-6));
+    ret[0]=SimplifyPathName(name(index+6,name.Length()-index-6));
 
     if(!ret[0].Length()) {
       ret.Clear();
@@ -39,7 +39,7 @@ QList<TString> QFileUtils::DecodeObjName(TString name)
 
   } else {
     ret.Add(name);
-//    ret.Add(DecodePathName(name));
+//    ret.Add(SimplifyPathName(name));
 
     if(!ret[0].Length()) {
       ret.Clear();
@@ -50,9 +50,24 @@ QList<TString> QFileUtils::DecodeObjName(TString name)
   return ret;
 }
 
-TString QFileUtils::DecodePathName(TString path)
+QList<TString> QFileUtils::DecodePathName(const TString path)
 {
+  QList<TString> ret;
+  Int_t index;
   Int_t pos=0;
+
+  while((index=path.Index("/",pos)) != kNPOS) {
+    if(index != pos) ret.Add(path(pos,index-pos));
+    pos=index+1;
+  }
+
+  if(pos<=path.Length()-1) ret.Add(path(pos,path.Length()-pos));
+
+  return ret;
+}
+
+TString QFileUtils::SimplifyPathName(TString path)
+{
   Int_t index;
   Int_t index2;
   Int_t counter;
@@ -60,7 +75,7 @@ TString QFileUtils::DecodePathName(TString path)
   path.ReplaceAll("//",2,"/",1);
   path.ReplaceAll("/./",3,"/",1);
 
-  while((index=path.Index("../",pos)) != kNPOS) {
+  while((index=path.Index("../",0)) != kNPOS) {
     index+=2;
     index2=index-1;
     counter=0;
