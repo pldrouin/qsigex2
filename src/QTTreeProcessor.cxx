@@ -38,6 +38,10 @@ QTTreeProcessor::~QTTreeProcessor()
   fOBranches=NULL;
   delete fProcsDepends;
   fProcsDepends=NULL;
+  delete fITRequired;
+  fITRequired=NULL;
+  delete fIBRequired;
+  fIBRequired=NULL;
   delete fOTDepends;
   fOTDepends=NULL;
   delete fOBDepends;
@@ -108,6 +112,8 @@ Int_t QTTreeProcessor::Analyze()
   Int_t ninputs, noutputs, nparams;
   Int_t pidx, iidx, oidx, bidx;
 
+  QList<QMask> procsddepends; //Direct dependencies of processes
+
   allitrees.RedimList(nprocs);
   allotrees.RedimList(nprocs);
 
@@ -115,8 +121,12 @@ Int_t QTTreeProcessor::Analyze()
   fOTNames->Clear();
   fIBNames->Clear();
   fOBNames->Clear();
+  fITRequired->Clear();
+  fIBRequired->Clear();
   fOTDepends->Clear();
   fOBDepends->Clear();
+
+  procsddepends.RedimList(fProcsDepends->Count());
 
   //Loop over the processes
   for(i=0; i<nprocs; i++) {
@@ -127,7 +137,6 @@ Int_t QTTreeProcessor::Analyze()
     nparams=proc->GetNParams();
     allitrees[i].RedimList(ninputs);
     allotrees[i].RedimList(noutputs);
-    (*fProcsDepends)[i].Clear(); //Set the mask to 0 for the current process
 
     //Loop over the parameters for the current process
     for(j=0; j<nparams; j++) {
@@ -141,8 +150,10 @@ Int_t QTTreeProcessor::Analyze()
 	return -1;
       }
       //Turn on the bit of the dependency mask for the current parameter
-      (*fProcsDepends)[i].SetBit(pidx,1);
+      procsddepends[i].SetBit(pidx,1);
     }
+
+    (*fProcsDepends)[i]=procsddepends[i];
 
     //Loop over the inputs for the current process
     for(j=0; j<ninputs; j++) {
@@ -283,18 +294,22 @@ Int_t QTTreeProcessor::Analyze()
 
   bdepends.Clear();
 
+  fITRequired->RedimList(fITNames->Count());
+
+  //Loop over the input trees
+  for(i=0; i<fITRequired->Count(); i++) {
+
+    //Set the dependency mask for the tree to be the combination of the masks for its branches
+    for(j=0; j<(*fIBRequired)[i].Count(); j++) (*fITRequired)[i]|=(*fIBRequired)[i][j];
+  }
+
   fOTDepends->RedimList(fOTNames->Count());
 
   //Loop over the output trees
   for(i=0; i<fOTDepends->Count(); i++) {
 
-    //If there is at least one output branch
-    if((*fOBDepends)[i].Count() > 0) {
-      //Set the dependency mask for the tree to be the combination of the masks for its branches
-      (*fOTDepends)[i]=(*fOBDepends)[i][0];
-
-      for(j=1; j<(*fOBDepends)[i].Count(); j++) (*fOTDepends)[i]|=(*fOBDepends)[i][j];
-    }
+    //Set the dependency mask for the tree to be the combination of the masks for its branches
+    for(j=0; j<(*fOBDepends)[i].Count(); j++) (*fOTDepends)[i]|=(*fOBDepends)[i][j];
   }
 
   return 0;
@@ -326,7 +341,11 @@ void QTTreeProcessor::Exec()
 
       if((*fParams)[i] != (*fLastParams)[i]) pardiffs.SetBit(i,1);
     }
+  } else {
+    pardiffs.FillMask(fParams->Count());
   }
+
+
 }
 
 Int_t QTTreeProcessor::FindParamIndex(const char *paramname) const
@@ -639,6 +658,8 @@ const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
   *fOBNames=*rhs.fOBNames;
   *fBuNames=*rhs.fBuNames;
   *fProcsDepends=*rhs.fProcsDepends;
+  *fITRequired=*rhs.fITRequired;
+  *fIBRequired=*rhs.fIBRequired;
   *fOTDepends=*rhs.fOTDepends;
   *fOBDepends=*rhs.fOBDepends;
   return *this;
@@ -706,10 +727,12 @@ void QTTreeProcessor::PrintAnalysisResults() const
   for(i=0; i<fITNames->Count(); i++) {
     printf("%3i Tree %s",i,(*fITNames)[i][0].Data());
     if((*fITNames)[i].Count() ==2) printf(" %s",(*fITNames)[i][1].Data());
-    printf(":\n");
+    printf("\t");
+    (*fITRequired)[i].Print();
 
     for(j=0; j<(*fIBNames)[i].Count(); j++) {
-      printf("\t%3i %s\n",j,(*fIBNames)[i][j].Data());
+      printf("\t%3i %s\t",j,(*fIBNames)[i][j].Data());
+      (*fIBRequired)[i][j].Print();
     }
     printf("\n");
   }

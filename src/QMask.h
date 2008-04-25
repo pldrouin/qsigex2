@@ -1,7 +1,7 @@
 #ifndef _QMASK_
 #define _QMASK_
 
-#include "Rtypes.h"
+#include "TMath.h"
 #include "QList.h"
 
 #include "debugger.h"
@@ -13,6 +13,7 @@ class QMask: public QList<char>
     QMask(const QMask &rhs): QList<char>(rhs){}
     virtual ~QMask(){}
     void Crop();
+    void FillMask(UInt_t nbits);
     Bool_t GetBit(UInt_t n) const;
     void Print(const Option_t* opt=NULL) const;
     void SetBit(UInt_t n, Bool_t value);

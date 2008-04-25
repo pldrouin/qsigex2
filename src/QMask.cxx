@@ -11,6 +11,40 @@ void QMask::Crop()
   if(i>-1) RedimList(i+1);
 }
 
+void QMask::FillMask(UInt_t nbits)
+{
+  Double_t nbytes=nbits/8.;
+  Int_t nwbytes=(Int_t)nbytes;
+  Int_t nnbytes=(Int_t)ceil(nbytes);
+  RedimList(nnbytes);
+
+  memset(GetArray(),255,nwbytes);
+
+  switch(nbits%8) {
+    case 1:
+      GetArray()[nwbytes]=1;
+      break;
+    case 2:
+      GetArray()[nwbytes]=3;
+      break;
+    case 3:
+      GetArray()[nwbytes]=7;
+      break;
+    case 4:
+      GetArray()[nwbytes]=15;
+      break;
+    case 5:
+      GetArray()[nwbytes]=31;
+      break;
+    case 6:
+      GetArray()[nwbytes]=63;
+      break;
+    case 7:
+      GetArray()[nwbytes]=127;
+      break;
+  }
+}
+
 Bool_t QMask::GetBit(UInt_t n) const
 {
   Int_t nbytes=n/8;
