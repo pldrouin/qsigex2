@@ -317,7 +317,16 @@ void QTTreeProcessor::DelProc(const char *procname)
 
 void QTTreeProcessor::Exec()
 {
-  return;
+  QMask pardiffs;
+  Int_t i;
+
+  if(fLastParams->Count() == fParams->Count()) {
+
+    for(i=0; i<fParams->Count(); i++) {
+
+      if((*fParams)[i] != (*fLastParams)[i]) pardiffs.SetBit(i,1);
+    }
+  }
 }
 
 Int_t QTTreeProcessor::FindParamIndex(const char *paramname) const

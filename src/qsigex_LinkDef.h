@@ -75,5 +75,4 @@
 #pragma link C++ function QF2EExtendedLikelihood;
 #pragma link C++ function QSigExGaussMapping;
 #pragma link C++ function erfinv;
-#pragma link C++ function Qtest1;
 #endif
