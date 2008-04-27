@@ -89,7 +89,7 @@ const QMask& QMask::operator&=(const QMask &rhs)
 
   if(Count() > rhs.Count()) RedimList(rhs.Count());
 
-  for(Int_t i=0; i<rhs.Count(); i++) {
+  for(Int_t i=0; i<Count(); i++) {
     GetArray()[i]&=rhs[i];
   }
 

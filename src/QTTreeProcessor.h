@@ -67,9 +67,9 @@ class QTTreeProcessor
     QList<Double_t>   *fLastParams;      //!  Parameters value from last Exec() call
     QList<TString>    *fParamsNames;     //-> Parameters names
     TString           fAnalysisDir;      //   Directory returned by gDirectory->GetPath() during the last call of Analyze()
-    QList<QList<TString> > *fITNames;    //-> Names of existing trees that are used as inputs
+    QList<QList<TString> > *fITNames;    //-> Names of trees that are used as inputs
     QList<QList<TString> > *fOTNames;    //-> Names of generated trees
-    QList<QList<TString> > *fIBNames;    //-> Names of existing branches that are read
+    QList<QList<TString> > *fIBNames;    //-> Names of branches that are read
     QList<QList<TString> > *fOBNames;    //-> Names of generated branches
     QList<TString>         *fBuNames;    //-> Names of output buffers
     QList<TObject*>         *fIFiles;    //! Input files
