@@ -54,7 +54,7 @@ class QTTreeProcessor
 
     void PrintAnalysisResults() const;
 
-    void SetParam(Int_t index=-1, Double_t value=0){fParams[index]=value;}
+    void SetParam(Int_t index=-1, Double_t value=0){(*fParams)[index]=value;}
     void SetParam(const char *paramname, Double_t value=0);
     void SetParams(Double_t *params);
 

@@ -603,15 +603,17 @@ void QTTreeProcessor::Exec()
       }
     }
 
+    //Save the parameters
+    (*fLastParams)=(*fParams);
   }
 }
 
 Int_t QTTreeProcessor::FindParamIndex(const char *paramname) const
 {
-  for(Int_t i=0; i<fParams->Count(); i++){
-    if(!strcmp((*fParamsNames)[i],paramname)) return i;
-  }
-  return -1;
+  Int_t ret=(*fParamsNames).FindFirst(paramname);
+
+  if(ret == -1) fprintf(stderr,"QTTreeProcessor::FindParamIndex: Error: parameter '%s' not found\n",paramname);
+  return ret;
 }
 
 Int_t QTTreeProcessor::FindProcIndex(const char *procname) const
@@ -755,7 +757,7 @@ Int_t QTTreeProcessor::InitProcess()
       //Access the directory from where the tree has to be read
       for(j=0; j<dpn.Count()-1; j++) {
 
-	if((dbuf=gDirectory->GetDirectory(dpn[j]))) {
+	if(!(dbuf=gDirectory->GetDirectory(dpn[j]))) {
 	  fprintf(stderr,"QTTreeProcessor::InitProcess(): Directory '%s' does not exist in location '%s'\n",dpn[j].Data(),gDirectory->GetPath());
 	  return 1;
 	}
