@@ -4,6 +4,59 @@
 
 ClassImp(QMask)
 
+QMask QMask::GetComplement(UInt_t nbits) const
+{
+  Int_t nwbytes=nbits/8;
+  Int_t mod=nbits%8;
+  Int_t nnbytes=nwbytes + (mod != 0);
+  QMask ret;
+  ret.RedimList(nnbytes);
+  Int_t i;
+
+  if(nnbytes <= Count()) {
+
+    for(i=0; i<nnbytes; i++) {
+      ret.GetArray()[i]=~GetArray()[i];
+    }
+
+  } else {
+
+    for(i=0; i<Count(); i++) {
+      ret.GetArray()[i]=~GetArray()[i];
+    }
+
+    for(i=Count(); i<nnbytes; i++) {
+      ret.GetArray()[i]=255;
+    }
+  }
+
+  switch(mod) {
+    case 1:
+      ret.GetArray()[nwbytes]&=1;
+      break;
+    case 2:
+      ret.GetArray()[nwbytes]&=3;
+      break;
+    case 3:
+      ret.GetArray()[nwbytes]&=7;
+      break;
+    case 4:
+      ret.GetArray()[nwbytes]&=15;
+      break;
+    case 5:
+      ret.GetArray()[nwbytes]&=31;
+      break;
+    case 6:
+      ret.GetArray()[nwbytes]&=63;
+      break;
+    case 7:
+      ret.GetArray()[nwbytes]&=127;
+      break;
+  }
+
+  return ret;
+}
+
 void QMask::Crop()
 {
   Int_t i;
@@ -13,14 +66,14 @@ void QMask::Crop()
 
 void QMask::FillMask(UInt_t nbits)
 {
-  Double_t nbytes=nbits/8.;
-  Int_t nwbytes=(Int_t)nbytes;
-  Int_t nnbytes=(Int_t)ceil(nbytes);
+  UInt_t nwbytes=nbits/8;
+  UInt_t mod=nbits%8;
+  UInt_t nnbytes=nwbytes + (mod != 0);
   RedimList(nnbytes);
 
   memset(GetArray(),255,nwbytes);
 
-  switch(nbits%8) {
+  switch(mod) {
     case 1:
       GetArray()[nwbytes]=1;
       break;
@@ -256,16 +309,37 @@ QMask operator^(const QMask &lhs, const QMask &rhs)
   return ret;
 }
 
-QMask operator~(const QMask &rhs)
+Bool_t operator&&(const QMask &lhs, const QMask &rhs)
 {
-  QMask ret;
-  ret.RedimList(rhs.Count());
+  if(lhs.Count() > rhs.Count()) {
 
-  for(Int_t i=0; i<rhs.Count(); i++) {
-    ret.GetArray()[i]=~rhs.GetArray()[i];
+    for(Int_t i=0; i<rhs.Count(); i++) {
+      if(lhs.GetArray()[i]&rhs.GetArray()[i]) return kTRUE;
+    }
+
+  } else {
+
+    for(Int_t i=0; i<lhs.Count(); i++) {
+      if(lhs.GetArray()[i]&rhs.GetArray()[i]) return kTRUE;
+    }
   }
 
-  return ret;
+  return kFALSE;
+}
+
+Bool_t operator||(const QMask &lhs, const QMask &rhs)
+{
+  Int_t i;
+
+  for(i=0; i<lhs.Count(); i++) {
+    if(lhs.GetArray()[i]) return kTRUE;
+  }
+
+  for(i=0; i<rhs.Count(); i++) {
+    if(rhs.GetArray()[i]) return kTRUE;
+  }
+
+  return kFALSE;
 }
 
 #include "debugger.h"

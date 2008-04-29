@@ -12,6 +12,7 @@ class QMask: public QList<char>
     QMask(): QList<char>(){}
     QMask(const QMask &rhs): QList<char>(rhs){}
     virtual ~QMask(){}
+    QMask GetComplement(UInt_t nbits) const;
     void Crop();
     void FillMask(UInt_t nbits);
     Bool_t GetBit(UInt_t n) const;
@@ -29,7 +30,8 @@ class QMask: public QList<char>
     friend QMask operator&(const QMask &lhs, const QMask &rhs);
     friend QMask operator|(const QMask &lhs, const QMask &rhs);
     friend QMask operator^(const QMask &lhs, const QMask &rhs);
-    friend QMask operator~(const QMask &rhs);
+    friend Bool_t operator&&(const QMask &lhs, const QMask &rhs);
+    friend Bool_t operator||(const QMask &lhs, const QMask &rhs);
   protected:
   ClassDef(QMask,0) //Generic mask class
 };
