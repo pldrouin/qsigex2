@@ -406,8 +406,8 @@ void QTTreeProcessor::Exec()
     static QList<Double_t*> ibbuffers; //Double_t buffers for input branches containing a different data type
     static QList<void*>    ibcbuffers; //buffers for input branches containing a different data type
     static QList<Char_t>   ibcbtypes; //data type id of input branches containing a different data type
-    static TEventList*     elist;     //Pointer to the eventlist for the current TTree
-    static QList<TObject*> ibhassel;  //list of TEventEntry objects for input branches
+    static TEntryList*     elist;     //Pointer to the eventlist for the current TTree
+    static QList<TObject*> ibhassel;  //list of TEntryList objects for input branches
     static TTree *tbuf;               //Tree buffer
     static Int_t nentries;            //Number of selected entries for the current input tree
     static Int_t nentrieslast;        //Number of selected entries for the previous input tree
@@ -437,8 +437,8 @@ void QTTreeProcessor::Exec()
 
       //Get a pointer to the event list associated to the tree
       //If there is an event list
-      if((elist=tbuf->GetEventList())) {
-	//Set the ownership to the tree (TTree::GetEventList sets the bit to kFALSE)
+      if((elist=tbuf->GetEntryList())) {
+	//Set the ownership to the tree (TTree::GetEntryList sets the bit to kFALSE)
 	elist->SetBit(kCanDelete, kTRUE);
       }
 
@@ -486,11 +486,11 @@ void QTTreeProcessor::Exec()
 	    ibbuffers.Add(&(*fIBBuffers)[i][j]);
 	    ibcbuffers.Add((*fIBCBuffers)[i][j]);
 	    ibcbtypes.Add((*fIBCBTypes)[i][j]);
-	    ibhassel.Add(elist);
 	  }
 
 	  //Add it to the list of needed input branches
 	  ibranches.Add((*fIBranches)[i][j]);
+	  ibhassel.Add(elist);
 
 	  bbuf2=kTRUE;
 	}
@@ -539,6 +539,70 @@ void QTTreeProcessor::Exec()
 	procs.Add(&(*fProcs)[i]);
       }
     }
+
+    //If at least one tree has to be read
+    if(nentrieslast != -1) {
+
+      QProgress progress(nentries);
+      //Loop over the entries
+      for(i=0; i<nentries; i++) {
+
+	//Load all triggered input branches
+	for(j=0; j<ibranches.Count(); j++) {
+	  ((TBranch*)ibranches.GetArray()[j])->GetEntry((elist=(TEntryList*)ibhassel.GetArray()[j]) ? elist->GetEntry(i) : i);
+	}
+
+	//Convert all buffers for branches containing a different data type
+	for(j=0; j<ibbuffers.Count(); j++) {
+
+	  switch(ibcbtypes.GetArray()[j]) {
+	    case kFloat_t:
+	      *(ibbuffers.GetArray()[j])=(Double_t)*((Float_t*)ibcbuffers.GetArray()[j]);
+	      break;
+	    case kUInt_t:
+	      *(ibbuffers.GetArray()[j])=(Double_t)*((UInt_t*)ibcbuffers.GetArray()[j]);
+	      break;
+	    case kInt_t:
+	      *(ibbuffers.GetArray()[j])=(Double_t)*((Int_t*)ibcbuffers.GetArray()[j]);
+	      break;
+	    case kUShort_t:
+	      *(ibbuffers.GetArray()[j])=(Double_t)*((UShort_t*)ibcbuffers.GetArray()[j]);
+	      break;
+	    case kShort_t:
+	      *(ibbuffers.GetArray()[j])=(Double_t)*((Short_t*)ibcbuffers.GetArray()[j]);
+	      break;
+	    case kUChar_t:
+	      *(ibbuffers.GetArray()[j])=(Double_t)*((UChar_t*)ibcbuffers.GetArray()[j]);
+	      break;
+	    case kChar_t:
+	      *(ibbuffers.GetArray()[j])=(Double_t)*((Char_t*)ibcbuffers.GetArray()[j]);
+	      break;
+	    case kBool_t:
+	      *(ibbuffers.GetArray()[j])=(Double_t)*((Bool_t*)ibcbuffers.GetArray()[j]);
+	  }
+	}
+
+	//Call all triggered processes
+	for(j=0; j<procs.Count(); j++) {
+	  ((QNamedProc*)procs.GetArray()[j])->Exec();
+	}
+
+	//Save all triggered output branches
+	for(j=0; j<obranches.Count(); j++) {
+	  ((TBranch*)obranches.GetArray()[j])->Fill();
+	}
+
+	progress(i+1);
+      }
+      progress(i,kTRUE);
+      printf("\n");
+
+      //Set the number of entries at the TTree level for each output branch
+      for(i=0; i<obranches.Count(); i++) {
+	((TBranch*)obranches.GetArray()[i])->GetTree()->SetEntries(nentries);
+      }
+    }
+
   }
 }
 

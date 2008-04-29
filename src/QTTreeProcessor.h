@@ -4,10 +4,11 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TLeaf.h"
-#include "TEventList.h"
+#include "TEntryList.h"
 #include "QNamedProc.h"
 #include "QFileUtils.h"
 #include "QMask.h"
+#include "QProgress.h"
 
 //#define DEBUG
 //#define DEBUG2
