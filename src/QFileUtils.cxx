@@ -21,8 +21,12 @@ QList<TString> QFileUtils::DecodeObjName(TString name)
   if(index+6==name.Length()) return ret;
 
   if(index != kNPOS) {
+    char *cabuf;
     TString sbuf=name(0,index+5);
-    sbuf=gSystem->ExpandPathName(sbuf.Data());
+    cabuf=gSystem->ExpandPathName(sbuf.Data());
+    sbuf=cabuf;
+    delete[] cabuf;
+
     if(!sbuf.Length()) return ret;
   //  if(sbuf[0] != '/') sbuf = (TString)gSystem->pwd() + "/" + sbuf;
   //  sbuf=SimplifyPathName(sbuf);

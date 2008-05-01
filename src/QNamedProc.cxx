@@ -54,7 +54,7 @@ const QNamedProc& QNamedProc::operator=(const QNamedProc& rhs)
   return *this;
 }
 
-void QNamedProc::SetProc(void (*proc)(Double_t**, Double_t**, Double_t**),const char *procname)
+void QNamedProc::SetProc(void (*proc)(Double_t**, Double_t**, Double_t**, const Int_t*),const char *procname)
 {
   *fProcName=procname;
   if(fProcedure) delete fProcedure;

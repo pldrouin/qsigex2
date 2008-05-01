@@ -112,12 +112,12 @@ void QMask::Print(const Option_t *) const
 
   for(i=Count()-1; i>=0; i--) {
     if(skip && operator[](i) == 0) continue;
-    else skip=kFALSE;
+    skip=kFALSE;
     
     for(j=7; j>=0; j--) printf("%i",GetBit(i*8+j));
     printf(" ");
   }
-  if(skip) printf("00000000");
+  if(skip) printf("(empty)");
   printf("\n");
 }
 

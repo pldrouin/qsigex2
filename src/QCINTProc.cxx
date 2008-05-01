@@ -16,10 +16,11 @@ void QCINTProc::Exec() const
 void QCINTProc::InitArgs()
 {
   if(fMethodCall) {
-    Long_t args[3];
+    Long_t args[4];
     args[0]=(Long_t)fInputsBufs.GetArray();
     args[1]=(Long_t)fOutputsBufs.GetArray();
     args[2]=(Long_t)fParamsBufs.GetArray();
+    args[3]=(Long_t)fN;
     fMethodCall->SetParamPtrs(args);
   }
 }
@@ -39,10 +40,10 @@ void QCINTProc::SetProc(const char *procname)
 {
   if(fMethodCall) delete fMethodCall;
   fMethodCall=new TMethodCall;
-  fMethodCall->InitWithPrototype(procname,"Double_t**,Double_t**,Double_t**");
+  fMethodCall->InitWithPrototype(procname,"Double_t**,Double_t**,Double_t**,const Int_t*");
   InitArgs();
   if(!fMethodCall->IsValid()) {
-    fprintf(stderr,"QCINTProc::SetProc(const char *procname<'%s'>): No function found with the signature %s(const Double_t**, const Double_t**, Double_t**)\n",procname,procname);
+    fprintf(stderr,"QCINTProc::SetProc(const char *procname<'%s'>): No function found with the signature %s(const Double_t**, const Double_t**, Double_t**, const Int_t*)\n",procname,procname);
   }
 }
 
