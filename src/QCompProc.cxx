@@ -7,10 +7,10 @@
 
 ClassImp(QCompProc)
 
-void QCompProc::Exec() const
+Bool_t QCompProc::Exec() const
 {
   PRINTF2(this,"\tQCompProc::Exec()\n")
-  fProc(fInputsBufs.GetArray(),fOutputsBufs.GetArray(),fParamsBufs.GetArray(),fN);
+  return fProc(fInputsBufs.GetArray(),fOutputsBufs.GetArray(),fParamsBufs.GetArray(),fN);
 }
 
 #include "debugger.h"

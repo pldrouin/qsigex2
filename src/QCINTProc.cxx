@@ -7,10 +7,12 @@
 
 ClassImp(QCINTProc)
 
-void QCINTProc::Exec() const
+Bool_t QCINTProc::Exec() const
 {
+  Long_t ret;
   PRINTF2(this,"\tQCINTProc::Exec()\n")
-  fMethodCall->Execute();
+  fMethodCall->Execute(&ret);
+  return (Bool_t)ret;
 }
 
 void QCINTProc::InitArgs()

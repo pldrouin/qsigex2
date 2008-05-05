@@ -16,6 +16,8 @@
 #define PRINTF10(a,b,c,d,e,f,g,h,i,j) cout << a << b << c << d << e << f << g << h << i << j;
 #define PRINTF11(a,b,c,d,e,f,g,h,i,j,k) cout << a << b << c << d << e << f << g << h << i << j << k;
 #define PRINTF12(a,b,c,d,e,f,g,h,i,j,k,l) cout << a << b << c << d << e << f << g << h << i << j << k << l;
+#define PRINTF13(a,b,c,d,e,f,g,h,i,j,k,l,m) cout << a << b << c << d << e << f << g << h << i << j << k << l << m;
+#define PRINTF14(a,b,c,d,e,f,g,h,i,j,k,l,m,n) cout << a << b << c << d << e << f << g << h << i << j << k << l << m << n;
 #define UNDEF
 
 #else
@@ -31,6 +33,8 @@
 #define PRINTF10(a,b,c,d,e,f,g,h,i,j)
 #define PRINTF11(a,b,c,d,e,f,g,h,i,j,k)
 #define PRINTF12(a,b,c,d,e,f,g,h,i,j,k,l)
+#define PRINTF13(a,b,c,d,e,f,g,h,i,j,k,l,m)
+#define PRINTF14(a,b,c,d,e,f,g,h,i,j,k,l,m,n)
 #define UNDEF
 #endif
 
@@ -49,6 +53,8 @@
 #undef PRINTF10
 #undef PRINTF11
 #undef PRINTF12
+#undef PRINTF13
+#undef PRINTF14
 #undef UNDEF
 
 #endif

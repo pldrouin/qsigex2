@@ -32,14 +32,14 @@ class QCINTProc: public QProcedure
     virtual void SetNOutputs(Int_t n){QProcedure::SetNOutputs(n); InitArgs();}
     virtual void SetNParams(Int_t n){QProcedure::SetNParams(n); InitArgs();}
 
-    virtual void Exec() const;
+    virtual Bool_t Exec() const;
     void InitArgs();
     void SetProc(void *proc);
     void SetProc(const char *procname);
   protected:
     TMethodCall *fMethodCall;
 
-    ClassDef(QCINTProc,1) //Procedure class for CINT procedures having the format void (*proc)(Double_t** inputs, Double_t **outputs, Double_t **params)
+    ClassDef(QCINTProc,1) //Procedure class for CINT procedures having the format Bool_t (*proc)(Double_t** inputs, Double_t **outputs, Double_t **params)
 };
 
 #include "debugger.h"

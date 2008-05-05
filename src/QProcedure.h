@@ -36,7 +36,7 @@ class QProcedure
     virtual void SetNOutputs(Int_t n){fOutputsBufs.RedimList(n,-1,NULL); fN[1]=fOutputsBufs.Count();}
     virtual void SetNParams(Int_t n){fParamsBufs.RedimList(n,-1,NULL); fN[2]=fParamsBufs.Count();}
 
-    virtual void Exec() const=0;
+    virtual Bool_t Exec() const=0;
 
     friend Bool_t operator==(const QProcedure &lhs, const QProcedure &rhs);
   protected:
