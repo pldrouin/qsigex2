@@ -17,6 +17,7 @@ class QCompProc: public QProcedure
     QProcedure* Clone() const{return new QCompProc(*this);}
 
     virtual Bool_t Exec() const;
+    void* GetProc() const{return (void*)fProc;}
     void SetProc(Bool_t (*proc)(Double_t**,Double_t**,Double_t**,const Int_t*)){fProc=proc;}
   private:
     Bool_t (*fProc)(Double_t**,Double_t**,Double_t**,const Int_t*);

@@ -34,8 +34,6 @@ QTTreeProcessor::~QTTreeProcessor()
   fOBNames=NULL;
   delete fBuNames;
   fBuNames=NULL;
-  delete fHists;
-  fHists=NULL;
   delete fITIndices;
   fITIndices=NULL;
   delete fIBIndices;
@@ -82,6 +80,22 @@ void QTTreeProcessor::AddParam(const char *parname, Double_t value, Int_t index)
   }
   fParamsNames->Add(parname,index);
   fParams->Add(value,index);
+}
+
+void QTTreeProcessor::AddHistProc(const char* name, const char* title, QDisTH *hist, Int_t index)
+{
+  switch(hist->GetDimension()) {
+    case 1:
+      AddProc(name,title,HistProc1,NULL,kFALSE,index);
+      break;
+    case 2:
+      AddProc(name,title,HistProc2,NULL,kFALSE,index);
+      break;
+    case 3:
+      AddProc(name,title,HistProc3,NULL,kFALSE,index);
+      break;
+  }
+  (*fProcs)[index].AddOutput("HistProcOutput",NULL,-1,(Double_t*)hist);
 }
 
 void QTTreeProcessor::AddProc(const char *name, const char *title, Bool_t selector, Int_t index)
@@ -266,6 +280,9 @@ Int_t QTTreeProcessor::Analyze()
 
     //Loop over the outputs for the current process
     for(j=0; j<noutputs; j++) {
+      
+      //If the current output is not a pointer to the QDisTH object for a histogram generator process
+      if(!strcmp(proc->GetOutput(j).GetName(),"HistProcOutput")) continue;
       sbuf=proc->GetOutput(j);
       //printf("Encoded Output: '%s'\t%s\n",sbuf.Data(),proc->GetOutput(j).GetName());
 
@@ -285,7 +302,7 @@ Int_t QTTreeProcessor::Analyze()
 	if(oidx == -1) {
 
 	  if(fITNames->FindFirst(donbuf) != -1) {
-	    fprintf(stderr,"QTTreeProcessor: Analyze(): Error with process '%s': Branch '%s' for tree '%s/%s' cannot be overwritten\n",proc->GetName(),proc->GetInput(j).GetName(),donbuf[1].Data(),donbuf[0].Data());
+	    fprintf(stderr,"QTTreeProcessor: Analyze(): Error with process '%s': Branch '%s' for tree '%s/%s' cannot be overwritten\n",proc->GetName(),proc->GetOutput(j).GetName(),donbuf[1].Data(),donbuf[0].Data());
 	    return -1;
 	  }
 	  //printf("New output tree\n");
@@ -456,17 +473,6 @@ Int_t QTTreeProcessor::Analyze()
   delete[] depprocs;
 
   return 0;
-}
-
-void QTTreeProcessor::DelHist(const char* histname)
-{
-  Int_t i;
-
-  if((i=FindHistIndex(histname)) == -1) {
-    fprintf(stderr,"QTTreeProcessor::DelHist: Error: Histogram '%s' does not exist\n",histname);
-    return;
-  }
-  DelHist(i);
 }
 
 void QTTreeProcessor::DelParam(const char *paramname)
@@ -772,19 +778,6 @@ void QTTreeProcessor::Exec()
     //Save the parameters
     (*fLastParams)=(*fParams);
   }
-}
-
-Int_t QTTreeProcessor::FindHistIndex(const char *paramname) const
-{
-  Int_t ret=-1;
-
-  for(Int_t i=0; i<fHists->Count(); i++) {
-
-    if(!strcmp((*fHists)[i]->GetName(),paramname)) ret=i; 
-  }
-
-  if(ret == -1) fprintf(stderr,"QTTreeProcessor::FindHistIndex: Error: parameter '%s' not found\n",paramname);
-  return ret;
 }
 
 Int_t QTTreeProcessor::FindParamIndex(const char *paramname) const
@@ -1093,6 +1086,9 @@ Int_t QTTreeProcessor::InitProcess()
 
     //Loop over the output for the current process
     for(j=0; j<proc->GetNOutputs(); j++) {
+ 
+      //If the current output is not a pointer to the QDisTH object for a histogram generator process
+      if(!strcmp(proc->GetOutput(j).GetName(),"HistProcOutput")) continue;
       sbuf=proc->GetOutput(j);
 
       //If the output is not a memory buffer
@@ -1127,7 +1123,6 @@ const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
   *fIBNames=*rhs.fIBNames;
   *fOBNames=*rhs.fOBNames;
   *fBuNames=*rhs.fBuNames;
-  *fHists=*rhs.fHists;
   *(fITIndices)=*rhs.fITIndices;
   *(fIBIndices)=*rhs.fIBIndices;
   *(fOTIndices)=*rhs.fOTIndices;
@@ -1307,6 +1302,24 @@ QList<Int_t> QTTreeProcessor::QDependentProcs::GetAllDepends() const
   }
 
   return ret;
+}
+
+Bool_t HistProc1(Double_t** inputs, Double_t** outputs, Double_t**, const Int_t*)
+{
+  ((QDisTH*)outputs[0])->Fill(*(inputs[0]));
+  return kTRUE;
+}
+
+Bool_t HistProc2(Double_t** inputs, Double_t** outputs, Double_t**, const Int_t*)
+{
+  ((QDisTH*)outputs[0])->Fill(*(inputs[0]),*(inputs[1]));
+  return kTRUE;
+}
+
+Bool_t HistProc3(Double_t** inputs, Double_t** outputs, Double_t**, const Int_t*)
+{
+  ((QDisTH*)outputs[0])->Fill(*(inputs[0]),*(inputs[1]),*(inputs[2]));
+  return kTRUE;
 }
 
 #include "debugger.h"

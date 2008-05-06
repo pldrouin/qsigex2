@@ -63,6 +63,8 @@ class QDisTH: public QDis
     return *this;
   }
 
+  operator TH1&(){return *(dynamic_cast<TH1*>(GetObject()));}
+
   QDis* CloneQDis() const
     {
       PRINTF2(this,"\tQDis* QDisTH::CloneQDis()\n")
@@ -70,7 +72,9 @@ class QDisTH: public QDis
       return new QDisTH(*this);
     }
 
-  Int_t Fill(Double_t x, Double_t y, Double_t z);
+  Int_t Fill(const Double_t &x);
+  Int_t Fill(const Double_t &x, const Double_t &y);
+  Int_t Fill(const Double_t &x, const Double_t &y, const Double_t &z);
   
   Int_t GetDimension(){return dynamic_cast<TH1*>(GetObject())->GetDimension();}
 

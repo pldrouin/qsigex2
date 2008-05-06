@@ -44,6 +44,8 @@ class QNamedProc: public TNamed
     Int_t GetNOutputs() const{return fOutputsNames->Count();}
     Int_t GetNParams() const{return fParamsNames->Count();}
 
+    void* GetProc() const{return fProcedure->GetProc();}
+
     const QNamedProc& operator=(const QNamedProc& rhs);
     void SetInputBuf(Int_t index, Double_t *buf){fProcedure->SetInputBuf(index,buf);}
     void SetOutputBuf(Int_t index, Double_t *buf){fProcedure->SetOutputBuf(index,buf);}

@@ -41,8 +41,8 @@ class QDis: public TNamed, public QTObjectIO
       PRINTF2(this,"\tQDis::QDis()\n")
     }
   QDis(const Char_t* classname):QTObjectIO(classname){}
-  QDis(const Char_t* classname, const Char_t* filename, const Char_t* objectname):QTObjectIO(classname, filename,objectname){}
-  QDis(const Char_t* classname, const TObject& rhs):QTObjectIO(classname, rhs){}
+  QDis(const Char_t* classname, const Char_t* filename, const Char_t* objectname):QTObjectIO(classname, filename,objectname){SetNameTitleToObject();}
+  QDis(const Char_t* classname, const TObject& rhs):QTObjectIO(classname, rhs){SetNameTitleToObject();}
   
   virtual ~QDis();
 
@@ -70,6 +70,9 @@ class QDis: public TNamed, public QTObjectIO
     }
 
   virtual Int_t GetDimension()=0;
+
+ protected:
+  void SetNameTitleToObject();
 
  private:
   QDis(const QDis& rhs): TNamed(rhs),QTObjectIO(rhs.GetClassName()){*this=rhs;}

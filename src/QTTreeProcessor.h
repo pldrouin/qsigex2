@@ -16,15 +16,19 @@
 
 #include "debugger.h"
 
+Bool_t HistProc1(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns);
+Bool_t HistProc2(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns);
+Bool_t HistProc3(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns);
+
 class QTTreeProcessor
 {
   public:
-    QTTreeProcessor(): fProcs(new QList<QNamedProc>), fSelProcs(new QList<Bool_t>), fParams(new QList<Double_t>), fLastParams(new QList<Double_t>), fParamsNames(new QList<TString>), fAnalysisDir(), fITNames(new QList<QList<TString> >), fOTNames(new QList<QList<TString> >), fIBNames(new QList<QList<TString> >), fOBNames(new QList<QList<TString> >), fBuNames(new QList<TString>), fHists(new QList<TObject*>), fITIndices(new QList<QList<Int_t> >), fIBIndices(new QList<QList<Int_t> >), fOTIndices(new QList<QList<Int_t> >), fOBIndices(new QList<QList<Int_t> >), fSelDepProcs(new QList<Bool_t>), fOBSProc(new QList<QList<Bool_t> >), fProcsParDepends(new QList<QMask>), fProcsTDepends(new QList<QList<Int_t> >), fProcsBDepends(new QList<QList<Int_t> >), fIFiles(new QList<TObject*>), fOFiles(new QList<TObject*>), fIBranches(new QList<QList<TObject*> >), fOBranches(new QList<QList<TObject*> >), fIBBuffers(new QList<QList<Double_t> >), fOBBuffers(new QList<QList<Double_t> >), fIBCBuffers(new QList<QList<void*> >), fIBCBTypes(new QList<QList<Char_t> >), fBuffers(new QList<Double_t>) {}
-    QTTreeProcessor(const QTTreeProcessor &rhs): fProcs(new QList<QNamedProc>(*rhs.fProcs)), fSelProcs(new QList<Bool_t>(*rhs.fSelProcs)), fParams(new QList<Double_t>(*rhs.fParams)), fLastParams(new QList<Double_t>), fParamsNames(new QList<TString>(*rhs.fParamsNames)), fAnalysisDir(rhs.fAnalysisDir), fITNames(new QList<QList<TString> >(*rhs.fITNames)), fOTNames(new QList<QList<TString> >(*rhs.fOTNames)), fIBNames(new QList<QList<TString> >(*rhs.fIBNames)), fOBNames(new QList<QList<TString> >(*rhs.fOBNames)), fBuNames(new QList<TString>(*rhs.fBuNames)), fHists(new QList<TObject*>(*rhs.fHists)), fITIndices(new QList<QList<Int_t> >(*rhs.fITIndices)), fIBIndices(new QList<QList<Int_t> >(*rhs.fIBIndices)), fOTIndices(new QList<QList<Int_t> >(*rhs.fOTIndices)), fOBIndices(new QList<QList<Int_t> >(*rhs.fOBIndices)), fSelDepProcs(new QList<Bool_t>(*rhs.fSelDepProcs)), fOBSProc(new QList<QList<Bool_t> >(*rhs.fOBSProc)), fProcsParDepends(new QList<QMask>(*rhs.fProcsParDepends)), fProcsTDepends(new QList<QList<Int_t> >(*rhs.fProcsTDepends)), fProcsBDepends(new QList<QList<Int_t> >(*rhs.fProcsBDepends)), fIFiles(new QList<TObject*>), fOFiles(new QList<TObject*>), fIBranches(new QList<QList<TObject*> >), fOBranches(new QList<QList<TObject*> >), fIBBuffers(new QList<QList<Double_t> >), fOBBuffers(new QList<QList<Double_t> >), fIBCBuffers(new QList<QList<void*> >), fIBCBTypes(new QList<QList<Char_t> >), fBuffers(new QList<Double_t>){}
+    QTTreeProcessor(): fProcs(new QList<QNamedProc>), fSelProcs(new QList<Bool_t>), fParams(new QList<Double_t>), fLastParams(new QList<Double_t>), fParamsNames(new QList<TString>), fAnalysisDir(), fITNames(new QList<QList<TString> >), fOTNames(new QList<QList<TString> >), fIBNames(new QList<QList<TString> >), fOBNames(new QList<QList<TString> >), fBuNames(new QList<TString>), fITIndices(new QList<QList<Int_t> >), fIBIndices(new QList<QList<Int_t> >), fOTIndices(new QList<QList<Int_t> >), fOBIndices(new QList<QList<Int_t> >), fSelDepProcs(new QList<Bool_t>), fOBSProc(new QList<QList<Bool_t> >), fProcsParDepends(new QList<QMask>), fProcsTDepends(new QList<QList<Int_t> >), fProcsBDepends(new QList<QList<Int_t> >), fIFiles(new QList<TObject*>), fOFiles(new QList<TObject*>), fIBranches(new QList<QList<TObject*> >), fOBranches(new QList<QList<TObject*> >), fIBBuffers(new QList<QList<Double_t> >), fOBBuffers(new QList<QList<Double_t> >), fIBCBuffers(new QList<QList<void*> >), fIBCBTypes(new QList<QList<Char_t> >), fBuffers(new QList<Double_t>) {}
+    QTTreeProcessor(const QTTreeProcessor &rhs): fProcs(new QList<QNamedProc>(*rhs.fProcs)), fSelProcs(new QList<Bool_t>(*rhs.fSelProcs)), fParams(new QList<Double_t>(*rhs.fParams)), fLastParams(new QList<Double_t>), fParamsNames(new QList<TString>(*rhs.fParamsNames)), fAnalysisDir(rhs.fAnalysisDir), fITNames(new QList<QList<TString> >(*rhs.fITNames)), fOTNames(new QList<QList<TString> >(*rhs.fOTNames)), fIBNames(new QList<QList<TString> >(*rhs.fIBNames)), fOBNames(new QList<QList<TString> >(*rhs.fOBNames)), fBuNames(new QList<TString>(*rhs.fBuNames)), fITIndices(new QList<QList<Int_t> >(*rhs.fITIndices)), fIBIndices(new QList<QList<Int_t> >(*rhs.fIBIndices)), fOTIndices(new QList<QList<Int_t> >(*rhs.fOTIndices)), fOBIndices(new QList<QList<Int_t> >(*rhs.fOBIndices)), fSelDepProcs(new QList<Bool_t>(*rhs.fSelDepProcs)), fOBSProc(new QList<QList<Bool_t> >(*rhs.fOBSProc)), fProcsParDepends(new QList<QMask>(*rhs.fProcsParDepends)), fProcsTDepends(new QList<QList<Int_t> >(*rhs.fProcsTDepends)), fProcsBDepends(new QList<QList<Int_t> >(*rhs.fProcsBDepends)), fIFiles(new QList<TObject*>), fOFiles(new QList<TObject*>), fIBranches(new QList<QList<TObject*> >), fOBranches(new QList<QList<TObject*> >), fIBBuffers(new QList<QList<Double_t> >), fOBBuffers(new QList<QList<Double_t> >), fIBCBuffers(new QList<QList<void*> >), fIBCBTypes(new QList<QList<Char_t> >), fBuffers(new QList<Double_t>){}
     virtual ~QTTreeProcessor();
 
-    void AddHist(QDisTH *hist, Int_t index=-1){fHists->Add(hist,index);}
     void AddParam(const char *parname, Double_t value=0, Int_t index=-1);
+    void AddHistProc(const char* name, const char* title, QDisTH *hist, Int_t index=-1);
     void AddProc(const char* name, const char* title=NULL, Bool_t selector=kFALSE, Int_t index=-1);
     void AddProc(const char *name, const char *title, Bool_t (*proc)(Double_t**, Double_t**, Double_t**, const Int_t*),const char *procname=NULL, Bool_t selector=kFALSE, Int_t index=-1);
     void AddProc(const char *name, const char *title, const char *procname, Bool_t selector=kFALSE, Int_t index=-1);
@@ -32,8 +36,6 @@ class QTTreeProcessor
 
     Int_t Analyze();
 
-    void DelHist(Int_t index){fHists->Del(index);}
-    void DelHist(const char* histname);
     void DelParam(Int_t index=-1){fParams->Del(index); fParamsNames->Del(index);}
     void DelParam(const char *paramname);
     void DelProc(Int_t index=-1){fProcs->Del(index); fSelProcs->Del(index);}
@@ -41,7 +43,6 @@ class QTTreeProcessor
 
     void Exec();
 
-    Int_t FindHistIndex(const char *histname) const;
     Int_t FindParamIndex(const char *paramname) const;
     Int_t FindProcIndex(const char *procname) const;
 
@@ -80,7 +81,6 @@ class QTTreeProcessor
     QList<QList<TString> > *fIBNames;    //-> Names of branches that are read
     QList<QList<TString> > *fOBNames;    //-> Names of generated branches
     QList<TString>         *fBuNames;    //-> Names of output buffers
-    QList<TObject*>        *fHists;      //! QDisTH Objects
     QList<QList<Int_t> >   *fITIndices;  //-> Indices of trees that are used as input for each process
     QList<QList<Int_t> > *fIBIndices;    //-> Indices of branches that are used as input for each process
     QList<QList<Int_t> >   *fOTIndices;  //-> Indices of trees that are used as output for each process

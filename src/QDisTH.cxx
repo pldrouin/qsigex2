@@ -24,7 +24,7 @@ ClassImp(QDisTH)
 
 QTHOps QDisTH::fQTHOps; //fQTHOps will perform operations on the pdf
 
-QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, Float_t zlow, Float_t zhigh)
+QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, Float_t zlow, Float_t zhigh):QDis()
 {
 
   if(nbinsy==0) {
@@ -36,9 +36,10 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xl
   } else {
     SetObject("TH3F",new TH3F(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh));
   }
+  SetNameTitleToObject();
 }
 
-QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *xbins, Int_t nbinsy, Float_t *ybins, Int_t nbinsz, Float_t *zbins)
+QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *xbins, Int_t nbinsy, Float_t *ybins, Int_t nbinsz, Float_t *zbins):QDis()
 {
 
   if(nbinsy==0) {
@@ -50,9 +51,10 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *x
   } else {
     SetObject("TH3F",new TH3F(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins));
   }
+  SetNameTitleToObject();
 }
 
-QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, Double_t zlow, Double_t zhigh)
+QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, Double_t zlow, Double_t zhigh):QDis()
 {
 
   if(nbinsy==0) {
@@ -64,9 +66,10 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t x
   } else {
     SetObject("TH3D",new TH3D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh));
   }
+  SetNameTitleToObject();
 }
 
-QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy, Double_t *ybins, Int_t nbinsz, Double_t *zbins)
+QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy, Double_t *ybins, Int_t nbinsz, Double_t *zbins):QDis()
 {
 
   if(nbinsy==0) {
@@ -78,19 +81,22 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *
   } else {
     SetObject("TH3D",new TH3D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins));
   }
+  SetNameTitleToObject();
 }
 
-Int_t QDisTH::Fill(Double_t x, Double_t y, Double_t z)
+Int_t QDisTH::Fill(const Double_t &x)
 {
-  switch(GetDimension()) {
-    case 1:
-      return dynamic_cast<TH1*>(GetObject())->Fill(x);
-    case 2:
-      return dynamic_cast<TH2*>(GetObject())->Fill(y);
-    case 3:
-      return dynamic_cast<TH3*>(GetObject())->Fill(z);
-  }
-  return -1;
+  return dynamic_cast<TH1*>(GetObject())->Fill(x);
+}
+
+Int_t QDisTH::Fill(const Double_t &x, const Double_t &y)
+{
+  return dynamic_cast<TH2*>(GetObject())->Fill(x,y);
+}
+
+Int_t QDisTH::Fill(const Double_t &x, const Double_t &y, const Double_t &z)
+{
+  return dynamic_cast<TH3*>(GetObject())->Fill(x,y,z);
 }
 
 Double_t QDisTH::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const

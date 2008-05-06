@@ -42,7 +42,6 @@ class QSigExStruct: public TDirectoryFile
 
     QSigExStruct& operator=(const QSigExStruct &rhs){fprintf(stderr,"Warning: TDirectoryFile::operator= function is private and cannot be called by derived class QSigExStruct. Address of rhs object: %p\n",&rhs); return *this;}
 
-    void Add(TObject *obj){TDirectoryFile::Add(obj);}
     void Delete();
     void Delete(const char* namecycle);
 

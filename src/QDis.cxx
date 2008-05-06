@@ -30,4 +30,11 @@ QDis::~QDis()
 
 }
 
+void QDis::SetNameTitleToObject()
+{
+  TNamed *nptr=dynamic_cast<TNamed*>(GetObject());
+
+  if(nptr) SetNameTitle(nptr->GetName(),nptr->GetTitle());
+}
+
 #include "debugger.h"
