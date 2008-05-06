@@ -47,7 +47,7 @@ class QDis: public TNamed, public QTObjectIO
   virtual ~QDis();
 
   virtual Double_t ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const=0;
-  virtual Double_t Derivative(const Double_t &x) const {return 0;};
+  virtual Double_t Derivative(const Double_t&) const {return 0;};
   
 
   virtual QDis* CloneQDis() const=0;

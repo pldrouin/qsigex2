@@ -734,7 +734,7 @@ Double_t QSigExChecks::PlotLikelihoodFunction(Int_t ipar, Int_t jpar, Char_t* ou
     }
   }
 
-  TFile *fout = new TFile("/home/juergen/ncd/sigex/sigex/QSigexChecks.root","recreate");
+//  TFile *fout = new TFile("/home/juergen/ncd/sigex/sigex/QSigexChecks.root","recreate");
 
   // set up TGraphs
   TGraph2D *aGraph = new  TGraph2D("logL","log(L)",nPoints*mPoints, par1, par2, logL);

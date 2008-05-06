@@ -73,7 +73,7 @@ class QTObjectIO
 
   void SaveAs(const Char_t* filename, const Char_t* directory=NULL);
 
-  void SetObject(const Char_t *classname, TObject *object){fClassName=classname; TryCast(object,fClassName); fObject=object;}
+  void SetObject(const Char_t *classname, TObject *object);
 
   const QTObjectIO& operator=(const QTObjectIO& newqio);
 

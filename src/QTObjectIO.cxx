@@ -99,7 +99,7 @@ void QTObjectIO::SaveAs(const Char_t* filename, const Char_t* directory)
   Save();
 }
 
-void SetObject(const Char_t *classname, TObject *object)
+void QTObjectIO::SetObject(const Char_t *classname, TObject *object)
 {
   fClassName=classname;
   TryCast(object,fClassName);

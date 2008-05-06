@@ -92,14 +92,14 @@ void QSigExFlux2Events::GetFluxToEventMapping()
     const Int_t minfields = 7;  
     const Int_t maxfields = 9;  
     //set the column/index numbers for the inputs associated with the "flux2events"
-    const Int_t activeindex = 1;
+    //const Int_t activeindex = 1;
     const Int_t classindex  = 2;
     const Int_t nameindex   = 3;
     const Int_t objectindex = 4;
     const Int_t fileindex   = 5;
     const Int_t xfluxindex  = 6;
-    const Int_t yfluxindex  = 7;
-    const Int_t zfluxindex  = 8;
+    //const Int_t yfluxindex  = 7;
+    //const Int_t zfluxindex  = 8;
     
     TDirectory* flux2eventsdir;
 
@@ -201,7 +201,7 @@ Int_t QSigExFlux2Events::Get()
     //Create mapping of fluxes to events
     GetFluxToEventMapping();
 
-    TDirectory *dirbuf;
+    //TDirectory *dirbuf;
     
     //create an instance of the dataholder used to pass info to the fitter
     QSigExF2EDataHolder f2edataholder;

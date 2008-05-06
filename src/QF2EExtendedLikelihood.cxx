@@ -7,7 +7,7 @@
 
 #include "debugger.h"
 
-void QF2EExtendedLikelihood(Int_t &npar, Double_t *gin,Double_t &f, Double_t *par,Int_t iflag)
+void QF2EExtendedLikelihood(Int_t, Double_t,Double_t &f, Double_t *par,Int_t iflag)
 {
   PRINTF11("\t\tvoid QF2EExtendedLikelihood(Int_t &npar<",npar,">, Double_t *gin<",gin,">,Double_t &f<",f,">, Double_t *par<",par,">,Int_t iflag<",iflag,">)\n")
 
@@ -66,7 +66,7 @@ void QF2EExtendedLikelihood(Int_t &npar, Double_t *gin,Double_t &f, Double_t *pa
 	  throw 1;
 	}
 
-	Int_t ioffset = parindices[0];
+//	Int_t ioffset = parindices[0];
 // 	if(itree==1){
 // 	cout << "Tree " << itree;
 // 	cout << " Event " << i << "/" << NuNData;

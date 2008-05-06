@@ -20,7 +20,7 @@
 
 ClassImp(QSigExStdPDFs)
 
-QDis* QSigExStdPDFs::GetFunction(const QList<TString>& pdfentry, TDirectory* fluxdir, const TCut& fgcuts, QList<TString>* inputs, Bool_t *pdfneedscuts)
+QDis* QSigExStdPDFs::GetFunction(const QList<TString>& pdfentry, TDirectory* fluxdir, const TCut& , QList<TString>* inputs, Bool_t *pdfneedscuts)
 {
   //This protected function uses the pdf card file formatted entry pdfentry to
   //create a function used in QSigExPDFs::Get() to produce a marginal PDF. The

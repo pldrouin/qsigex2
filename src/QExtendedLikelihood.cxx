@@ -7,7 +7,7 @@
 
 #include "debugger.h"
 
-void QExtendedLikelihood(Int_t &npar, Double_t *gin,Double_t &f, Double_t *par,Int_t iflag)
+void QExtendedLikelihood(Int_t&, Double_t*,Double_t &f, Double_t *par,Int_t)
 {
   PRINTF11("\t\tvoid QExtendedLikelihood(Int_t &npar<",npar,">, Double_t *gin<",gin,">,Double_t &f<",f,">, Double_t *par<",par,">,Int_t iflag<",iflag,">)\n")
 

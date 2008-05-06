@@ -76,13 +76,14 @@ QTTreeProcessor::~QTTreeProcessor()
   fBuffers=NULL;
 }
 
-void AddHistInput(Int_t histindex, const char* variable, const char* tree, Int_t index)
+void QTTreeProcessor::AddHistInput(Int_t histindex, const char* variable, const char* tree, Int_t index)
 {
   (*fHInputsNames)[histindex].RedimList((*fHInputsNames)[histindex].Count()+1,index);
-  (*fHInputsNames)[histindex][index].SetNameTitle(variable,tree);
+  (*fHInputsNames)[histindex][index].SetName(variable);
+  (*fHInputsNames)[histindex][index]=tree;
 }
 
-void AddHistInput(const char* histname, const char* variable, const char* tree, Int_t index)
+void QTTreeProcessor::AddHistInput(const char* histname, const char* variable, const char* tree, Int_t index)
 {
   Int_t i;
 
@@ -808,7 +809,7 @@ Int_t QTTreeProcessor::FindHistIndex(const char *paramname) const
 {
   Int_t ret=-1;
 
-  for(Int_t i=0; i<fHists->Cout(); i++) {
+  for(Int_t i=0; i<fHists->Count(); i++) {
 
     if(!strcmp((*fHists)[i]->GetName(),paramname)) ret=i; 
   }
