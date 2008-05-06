@@ -36,8 +36,6 @@ QTTreeProcessor::~QTTreeProcessor()
   fBuNames=NULL;
   delete fHists;
   fHists=NULL;
-  delete fHInputsNames;
-  fHInputsNames=NULL;
   delete fITIndices;
   fITIndices=NULL;
   delete fIBIndices;
@@ -74,24 +72,6 @@ QTTreeProcessor::~QTTreeProcessor()
   fIBCBTypes=NULL;
   delete fBuffers;
   fBuffers=NULL;
-}
-
-void QTTreeProcessor::AddHistInput(Int_t histindex, const char* variable, const char* tree, Int_t index)
-{
-  (*fHInputsNames)[histindex].RedimList((*fHInputsNames)[histindex].Count()+1,index);
-  (*fHInputsNames)[histindex][index].SetName(variable);
-  (*fHInputsNames)[histindex][index]=tree;
-}
-
-void QTTreeProcessor::AddHistInput(const char* histname, const char* variable, const char* tree, Int_t index)
-{
-  Int_t i;
-
-  if((i=FindHistIndex(histname)) == -1) {
-    fprintf(stderr,"QTTreeProcessor::AddHistInput: Error: Histogram '%s' does not exist\n",histname);
-    return;
-  }
-  AddHistInput(i,variable,tree,index);
 }
 
 void QTTreeProcessor::AddParam(const char *parname, Double_t value, Int_t index)
@@ -487,17 +467,6 @@ void QTTreeProcessor::DelHist(const char* histname)
     return;
   }
   DelHist(i);
-}
-
-void QTTreeProcessor::DelHistInput(const char* histname, Int_t index)
-{
-  Int_t i;
-
-  if((i=FindHistIndex(histname)) == -1) {
-    fprintf(stderr,"QTTreeProcessor::DelHistInput: Error: Histogram '%s' does not exist\n",histname);
-    return;
-  }
-  DelHistInput(i,index);
 }
 
 void QTTreeProcessor::DelParam(const char *paramname)
@@ -1159,7 +1128,6 @@ const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
   *fOBNames=*rhs.fOBNames;
   *fBuNames=*rhs.fBuNames;
   *fHists=*rhs.fHists;
-  *fHInputsNames=*rhs.fHInputsNames;
   *(fITIndices)=*rhs.fITIndices;
   *(fIBIndices)=*rhs.fIBIndices;
   *(fOTIndices)=*rhs.fOTIndices;
