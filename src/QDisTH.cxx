@@ -1,7 +1,7 @@
 // Author: Pierre-Luc Drouin <http://www.pldrouin.net>
 // Copyright Carleton University
 
-#include "QSigExDisTH.h"
+#include "QDisTH.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -10,42 +10,111 @@
 
 //////////////////////////////////////////////////////////////////////
 //                                                                  //
-// QSigExDisTH                                                      //
+// QDisTH                                                           //
 //                                                                  //
 // This class creates a probability density function from a TH      //
-// object. The class is derived from abstract base class QSigExDis  //
+// object. The class is derived from abstract base class QDis       //
 // that gives a common interface to all type of p.d.f.. It          //
 // implements a Normalize function that allows to normalize the     //
 // initial function using complex cuts.                             //
 //                                                                  //
 //////////////////////////////////////////////////////////////////////
 
-ClassImp(QSigExDisTH)
+ClassImp(QDisTH)
 
-QSigExTHOps QSigExDisTH::fQSigExTHOps; //fQSigExTHOps will perform operations on the pdf
+QTHOps QDisTH::fQTHOps; //fQTHOps will perform operations on the pdf
 
-Double_t QSigExDisTH::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const
+QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, Float_t zlow, Float_t zhigh)
+{
+
+  if(nbinsy=0) {
+    SetObject("TH1F",new TH1F(name,title,nbinsx,xlow,xhigh));
+
+  } else if(nbinsz=0) {
+    SetObject("TH2F",new TH2F(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh));
+
+  } else {
+    SetObject("TH3F",new TH3F(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh.nbinsz,zlow,zhigh));
+  }
+}
+
+QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *xbins, Int_t nbinsy, Float_t *ybins, Int_t nbinsz, Float_t *zbins)
+{
+
+  if(nbinsy=0) {
+    SetObject("TH1F",new TH1F(name,title,nbinsx,xbins));
+
+  } else if(nbinsz=0) {
+    SetObject("TH2F",new TH2F(name,title,nbinsx,xbins,nbinsy,ybins));
+
+  } else {
+    SetObject("TH3F",new TH3F(name,title,nbinsx,xbins,nbinsy,ybins.nbinsz,zbins));
+  }
+}
+
+QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, Double_t zlow, Double_t zhigh)
+{
+
+  if(nbinsy=0) {
+    SetObject("TH1D",new TH1D(name,title,nbinsx,xlow,xhigh));
+
+  } else if(nbinsz=0) {
+    SetObject("TH2D",new TH2D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh));
+
+  } else {
+    SetObject("TH3D",new TH3D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh.nbinsz,zlow,zhigh));
+  }
+}
+
+QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy, Double_t *ybins, Int_t nbinsz, Double_t *zbins)
+{
+
+  if(nbinsy=0) {
+    SetObject("TH1D",new TH1D(name,title,nbinsx,xlow,xhigh));
+
+  } else if(nbinsz=0) {
+    SetObject("TH2D",new TH2D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh));
+
+  } else {
+    SetObject("TH3D",new TH3D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh.nbinsz,zlow,zhigh));
+  }
+}
+
+Int_t Fill(Double_t x, Double_t y, Double_t z)
+{
+  switch(GetDimension()) {
+    case 1:
+      return dynamic_cast<TH1*>(fObject)->Fill(x);
+    case 2:
+      return dynamic_cast<TH2*>(fObject)->Fill(y);
+    case 3:
+      return dynamic_cast<TH3*>(fObject)->Fill(z);
+  }
+  return -1;
+}
+
+Double_t QDisTH::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const
 {
  //This function returns the probability density associated with a point which
  //coordinates are (x,y,z). For p.d.f. with less than 3 dimensions, the
  //arguments of extra dimensions are optional. Before calling this function,
- //the user must call QSigExDisTH::Normalize() to normalize the p.d.f. properly. 
+ //the user must call QDisTH::Normalize() to normalize the p.d.f. properly. 
 
-  PRINTF2(this,"\tDouble_t QSigExDisTH::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const\n")  
+  PRINTF2(this,"\tDouble_t QDisTH::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const\n")  
 
   try{
     
-    fQSigExTHOps.SetTH(dynamic_cast<TH1*>(GetObject())); //Set the pdf.  GetObject() is a QSigExIO method.
+    fQTHOps.SetTH(dynamic_cast<TH1*>(GetObject())); //Set the pdf.  GetObject() is a QTObjectIO method.
 
-    return fQSigExTHOps.Freq(x,y,z);
+    return fQTHOps.Freq(x,y,z);
     
   } catch (Int_t i){
-    cout << "Exception handled by QSigExDisTH1D::ProbDensity\n";
+    cout << "Exception handled by QDisTH1D::ProbDensity\n";
     throw i;
   }    
 }
 
-void QSigExDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullintegral, Double_t* cutintegral, Double_t* error)
+void QDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullintegral, Double_t* cutintegral, Double_t* error)
 {
  //This function normalizes the PDF according to the normalization
  //flags normflags and the cuts defined via the cutexpr string. This
@@ -72,7 +141,7 @@ void QSigExDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullin
  //function integral and the integral of function between cuts
  //respectively.
 
-  PRINTF12(this,"\tvoid QSigExDisTH::Normalize(Option_t* cutexpr<",cutexpr,">, Int_t normflags<",normflags,">, Double_t* fullintegral<",fullintegral,">, Double_t* cutintegral<",cutintegral,">, Double_t* error<",error,">)\n")
+  PRINTF12(this,"\tvoid QDisTH::Normalize(Option_t* cutexpr<",cutexpr,">, Int_t normflags<",normflags,">, Double_t* fullintegral<",fullintegral,">, Double_t* cutintegral<",cutintegral,">, Double_t* error<",error,">)\n")
 
   try{
     TH1* histo;                 //Histogram pointer
@@ -130,10 +199,10 @@ void QSigExDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullin
       }
     }
 
-    fQSigExTHOps.SetTH(histo);  //set the pdf.  GetObject is a QSigExIO method.
+    fQTHOps.SetTH(histo);  //set the pdf.  GetObject is a QTObjectIO method.
 
     //Compute the full integral of the histogram
-    if(fullintegral) *fullintegral=fQSigExTHOps.BinIntegral();
+    if(fullintegral) *fullintegral=fQTHOps.BinIntegral();
 
     //If the histogram has to be normalized as a conditional PDF
     if(nfix){
@@ -165,7 +234,7 @@ void QSigExDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullin
 	//Set fcoord to the index of the first fixed dimension
 	fcoord=dim-nfix;
 	//Compute the integral of the conditional PDF for a given fixed bin
-	scutintbuf=fQSigExTHOps.LimIntegral(cutexpr,&serror,binranges);
+	scutintbuf=fQTHOps.LimIntegral(cutexpr,&serror,binranges);
 	//Add the integral value to the total
 	cutintbuf+=scutintbuf;
 
@@ -222,7 +291,7 @@ void QSigExDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullin
       //If histogram has not to be normalized as a conditional PDF
     } else {
       //Compute the integral of the histogram
-      cutintbuf=fQSigExTHOps.LimIntegral(cutexpr,error);
+      cutintbuf=fQTHOps.LimIntegral(cutexpr,error);
 
       //If the integral value is not 0, normalize the PDF
       if (cutintbuf) histo->Scale(1/cutintbuf);
@@ -231,7 +300,7 @@ void QSigExDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullin
     if(cutintegral) *cutintegral=cutintbuf;
 
   }catch(Int_t e){
-    cout << "Exception handled by QSigExDisTH::Normalize\n";
+    cout << "Exception handled by QDisTH::Normalize\n";
     throw e;
   }
 }

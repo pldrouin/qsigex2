@@ -1,8 +1,8 @@
 // Author: Pierre-Luc Drouin <http://www.pldrouin.net>, Osama Moussa <http://www.physics.carleton.ca/~omoussa>
 // Copyright Carleton University
 
-#ifndef _QSIGEXTHOPS_   //not sure why the leading underscore is ok here...   
-#define _QSIGEXTHOPS_
+#ifndef _QTHOPS_   //not sure why the leading underscore is ok here...   
+#define _QTHOPS_
 
 #include "Rtypes.h"
 #include "TH1.h"  //Root class TH1
@@ -18,25 +18,25 @@ using std::cout;
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// QSigExTHOps                                                          //
+// QTHOps                                                               //
 //                                                                      //
 // Class performing calculations on histograms                          //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-class QSigExTHOps
+class QTHOps
 {
  public:
   //constructor, initializes member variable fTH
-  QSigExTHOps(const TH1* fTHIn):fTH(const_cast<TH1*>(fTHIn)){PRINTF4(this,"\tQSigExTHOps::QSigExTHOps(const TH1* fTHIn<",fTHIn,">)\n") } 
+  QTHOps(const TH1* fTHIn):fTH(const_cast<TH1*>(fTHIn)){PRINTF4(this,"\tQTHOps::QTHOps(const TH1* fTHIn<",fTHIn,">)\n") } 
 
   //constructor with no arguments initializes fTH to NULL
-  QSigExTHOps():fTH(NULL){PRINTF2(this,"\tQSigExTHOps::QSigExTHOps()\n") }
+  QTHOps():fTH(NULL){PRINTF2(this,"\tQTHOps::QTHOps()\n") }
 
-  QSigExTHOps(const QSigExTHOps& rhs):fTH(rhs.fTH){}
+  QTHOps(const QTHOps& rhs):fTH(rhs.fTH){}
 
   //destructor
-  virtual ~QSigExTHOps(){PRINTF2(this,"\tQSigExTHOps::~QSigExTHOps()\n") }
+  virtual ~QTHOps(){PRINTF2(this,"\tQTHOps::~QTHOps()\n") }
 
   //Functions to return values in bins, and integrals...
   Double_t Freq(Double_t x, Double_t y=0, Double_t z=0) const; 
@@ -48,17 +48,17 @@ class QSigExTHOps
   Double_t LimIntegral(Double_t xlo,Double_t xhi,Double_t ylo=0,Double_t yhi=0, Double_t zlo=0, Double_t zhi=0) const; 
 
   //function to return a pointer to the histogram fTH.
-  const TH1* GetTH() const{PRINTF2(this,"\tconst TH1* QSigExTHOps::GetTH()\n") return fTH;}
+  const TH1* GetTH() const{PRINTF2(this,"\tconst TH1* QTHOps::GetTH()\n") return fTH;}
 
 
-  void SetTH(const TH1* th){PRINTF4(this,"\tvoid QSigExTHOps::SetTH2(const TH2* th2<",th2,">)\n") fTH=th; if(!fTH){ cout << "QSigExTHOps::SetTH: Passed pointer NULL\n"; throw 1;}}
+  void SetTH(const TH1* th){PRINTF4(this,"\tvoid QTHOps::SetTH2(const TH2* th2<",th2,">)\n") fTH=th; if(!fTH){ cout << "QTHOps::SetTH: Passed pointer NULL\n"; throw 1;}}
 
 
  protected:
   void CheckTH() const;
  private:
   const TH1* fTH; //!
-  ClassDef(QSigExTHOps,1) //Performs calculations on histograms
+  ClassDef(QTHOps,1) //Performs calculations on histograms
 };
 
 #include "debugger.h"

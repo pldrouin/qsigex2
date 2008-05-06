@@ -11,7 +11,7 @@
 #include "TBranch.h"
 #include "TFormula.h"
 #include "QSigExDirHandler.h"
-#include "QSigExDis.h"
+#include "QDis.h"
 #include "QProgress.h"
 #include "QTTreeUtils.h"
 #include "arrayutils.h"
@@ -30,7 +30,7 @@
 // This class uses the marginal PDFs stored in "PDFs" QSigExStruct to //
 // compute the marginal probability densities of the events stored in //
 // "Event Info" QSigExStruct. Each PDF can be an instance of any class//
-// derived from QSigExDis class. The output of this function is a set //
+// derived from QDis class. The output of this function is a set      //
 // of TTree objects (one per flux group) located in "Probs/PDFsProbs" //
 // QSigExStruct.                                                      //
 //                                                                    //

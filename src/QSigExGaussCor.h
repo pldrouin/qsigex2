@@ -11,7 +11,7 @@
 #include "TMatrixDSym.h"
 #include "QSigExDirHandler.h"
 #include "QList.h"
-#include "QSigExDisTH.h"
+#include "QDisTH.h"
 #include "QSigExGaussMapping.h"
 #include "QTTreeUtils.h"
 #include "QProgress.h"
@@ -37,7 +37,7 @@
 //                                                                    //
 // The class QSigExGaussCor loops over the flux groups in "PDFs"      //
 // QSigExStruct and finds the ones that have a clean TTree named      //
-// "Event Info". For each flux group, it finds QSigExDisTH1F PDFs and //
+// "Event Info". For each flux group, it finds QDisTH PDFs and        //
 // produces a y(x) mapping function with gaussian distribution (TF1   //
 // object). Then, it uses the set of y(x) functions and the clean     //
 // TTree belonging to the flux group to compute the covariance matrix //

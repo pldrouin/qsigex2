@@ -23,7 +23,7 @@
 //                                                                    //
 // The class QSigExGaussCor loops over the flux groups in "PDFs"      //
 // TDirectory and finds the ones that have a clean TTree named        //
-// "Event Info". For each flux group, it finds QSigExDisTH PDFs and   //
+// "Event Info". For each flux group, it finds QDisTH PDFs and        //
 // produces a y(x) mapping function with gaussian distribution (TF1   //
 // object). Then, it uses the set of y(x) functions and the clean     //
 // TTree belonging to the flux group to compute the covariance matrix //
@@ -111,7 +111,7 @@ void QSigExGaussCor::LoadCardFile(const Char_t* cardfilename)
 Int_t QSigExGaussCor::Get()
 {
   //This function uses the "Event Info" TTree objects in flux group directories
-  //and QSigExDisTH* PDFs in pdf directories to create TMatrixDSym covariance matrices
+  //and QDisTH* PDFs in pdf directories to create TMatrixDSym covariance matrices
   //in flux group directories after to have produced "GaussMapping" TF1 objects
   //(y(x) mapping functions) and "TMatrixIndex" QNamedVar objects (matrix indexes)
   //in PDF directories
@@ -121,7 +121,7 @@ Int_t QSigExGaussCor::Get()
   //Call FormatDir()
   FormatDir();
 
-  QSigExDisTH *qthbuf; //PDF buffer
+  QDisTH *qthbuf; //PDF buffer
   TH1 *thbuf; //TH1 buffer
   TF1 *tfbuf; //TF1 buffer
   TObject* nbuf; //QNamedVar buffer
@@ -183,10 +183,10 @@ Int_t QSigExGaussCor::Get()
 	  strbuf="GaussMapping_";
 	  strbuf+=pdir->GetName();
 
-	  //If there's an "Inputs" TDirectory in pdir and if there's a QSigExDisTH
+	  //If there's an "Inputs" TDirectory in pdir and if there's a QDisTH
 	  //object with the same name than pdir in pdir (save pointers)
 	  if((idir=dynamic_cast<TDirectory*>(pdir->Get("Inputs"))) &&
-	      (qthbuf=dynamic_cast<QSigExDisTH*>(pdir->Get(pdir->GetName()))) &&
+	      (qthbuf=dynamic_cast<QDisTH*>(pdir->Get(pdir->GetName()))) &&
 	      qthbuf->GetDimension()==1){
 	    //Fill ilist with the list of objects in ilist TDirectory
 	    GetObjs(&ilist,idir);

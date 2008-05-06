@@ -6,7 +6,7 @@
 #include "TDirectory.h"
 #include "QDatReader.h"
 #include "QList.h"
-#include "QSigExDis.h"
+#include "QDis.h"
 #include "QSigExF2EDataHolder.h"
 
 //#define DEBUG
@@ -27,7 +27,7 @@
 
 ClassImp(QSigExF2EDataHolder)
 
-QSigExDis**  QSigExF2EDataHolder::fFlux2Events=NULL;
+QDis**  QSigExF2EDataHolder::fFlux2Events=NULL;
 TString** QSigExF2EDataHolder::fAxesNames=NULL;
 TString* QSigExF2EDataHolder::fFluxes=NULL;
 Int_t** QSigExF2EDataHolder::fAxesIndex=NULL;
@@ -56,11 +56,11 @@ Int_t QSigExF2EDataHolder::AddMapping(TList* aF2EList)
 
 	TDirectory *af2emapdir = dynamic_cast<TDirectory*> (aF2EList->At(i));
 	// cout << "jw <QSigExF2EDataHolder::AddMapping> " << af2emapdir->GetName() << endl;
-	QSigExDis *af2emap = NULL;
-	if((af2emap=dynamic_cast<QSigExDis*>(af2emapdir->Get(af2emapdir->GetName())))){
+	QDis *af2emap = NULL;
+	if((af2emap=dynamic_cast<QDis*>(af2emapdir->Get(af2emapdir->GetName())))){
 
-	  // store the address of the QSigExDis mapping object.
-	  fFlux2Events=(QSigExDis**)realloc(fFlux2Events,fNEntries*sizeof(QSigExDis*));
+	  // store the address of the QDis mapping object.
+	  fFlux2Events=(QDis**)realloc(fFlux2Events,fNEntries*sizeof(QDis*));
 	  fFlux2Events[fNEntries-1]=af2emap;
 
 	  // remember the tree, so we can retrieve the correct mapping

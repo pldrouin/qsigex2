@@ -1,7 +1,7 @@
 // Author: Pierre-Luc Drouin <http://www.pldrouin.net>
 // Copyright Carleton University
 
-#include "QSigExDisTF.h"
+#include "QDisTF.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -10,58 +10,58 @@
 
 //////////////////////////////////////////////////////////////////////
 //                                                                  //
-// QSigExDisTF                                                      //
+// QDisTF                                                           //
 //                                                                  //
 // This class creates a probability density function from a TF      //
-// object. The class is derived from abstract base class QSigExDis  //
+// object. The class is derived from abstract base class QDis       //
 // that gives a common interface to all type of p.d.f.. It          //
 // implements a Normalize function that allows to normalize the     //
 // initial function using complex cuts.                             //
 //                                                                  //
 //////////////////////////////////////////////////////////////////////
 
-ClassImp(QSigExDisTF)
+ClassImp(QDisTF)
 
-QSigExTFOps QSigExDisTF::fQSigExTFOps; //fQSigExTFOps will perform operations on the pdf
+QTFOps QDisTF::fQTFOps; //fQTFOps will perform operations on the pdf
 
-Double_t QSigExDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const
+Double_t QDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const
 {
   //This function returns the probability density associated with a point which
   //coordinates are (x,y,z). For p.d.f. with less than 3 dimensions, the
   //arguments of extra dimensions are optional. Before calling this function,
-  //the user must call QSigExDisTF::Normalize() to normalize the p.d.f. properly. 
+  //the user must call QDisTF::Normalize() to normalize the p.d.f. properly. 
 
-  PRINTF2(this,"\tDouble_t QSigExDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const\n")
+  PRINTF2(this,"\tDouble_t QDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const\n")
 
   try{
-    fQSigExTFOps.SetTF(dynamic_cast<TF1*>(GetObject())); //Set the pdf.  GetObject() is a QSigExIO method.
+    fQTFOps.SetTF(dynamic_cast<TF1*>(GetObject())); //Set the pdf.  GetObject() is a QTObjectIO method.
 
-    return fQSigExTFOps.Freq(x,y,z);
+    return fQTFOps.Freq(x,y,z);
 
   } catch (Int_t i){
-    cout << "Exception handled by QSigExDisTF::ProbDensity\n";
+    cout << "Exception handled by QDisTF::ProbDensity\n";
     throw i;
   }
 }
 
 
-Double_t QSigExDisTF::Derivative(const Double_t &x) const
+Double_t QDisTF::Derivative(const Double_t &x) const
 {
   // This function returns the derivative of the pdf at x
   // this function only works for one dimensional pdfs
 
    try{
-    fQSigExTFOps.SetTF(dynamic_cast<TF1*>(GetObject())); //Set the pdf.  GetObject() is a QSigExIO method.
+    fQTFOps.SetTF(dynamic_cast<TF1*>(GetObject())); //Set the pdf.  GetObject() is a QTObjectIO method.
 
-    return fQSigExTFOps.Derivative(x);
+    return fQTFOps.Derivative(x);
 
   } catch (Int_t i){
-    cout << "Exception handled by QSigExDisTF::Derivative\n";
+    cout << "Exception handled by QDisTF::Derivative\n";
     throw i;
   } 
 }
 
-void QSigExDisTF::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullintegral, Double_t* cutintegral, Double_t* error)
+void QDisTF::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullintegral, Double_t* cutintegral, Double_t* error)
 {
   //This function normalizes the p.d.f. according to the cuts defined via
   //cutexpr string. This string is a standard ROOT selection expression that
@@ -74,7 +74,7 @@ void QSigExDisTF::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullin
 
   try{
     if(normflags){
-      cout << "Error: QSigExDisTF::Normalize: Unknown flag(s)\n";
+      cout << "Error: QDisTF::Normalize: Unknown flag(s)\n";
       throw 1;
     }
 
@@ -82,14 +82,14 @@ void QSigExDisTF::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullin
 
     TString objformula=obj->GetExpFormula();
 
-    fQSigExTFOps.SetTF(dynamic_cast<TF1*>(GetObject()));  //set the pdf.  GetObject is a QSigExIO method.
+    fQTFOps.SetTF(dynamic_cast<TF1*>(GetObject()));  //set the pdf.  GetObject is a QTObjectIO method.
 
-    Double_t cutintbuf=fQSigExTFOps.LimIntegral(cutexpr,error);
+    Double_t cutintbuf=fQTFOps.LimIntegral(cutexpr,error);
 
     if(fullintegral){
       Double_t xmin,xmax,ymin,ymax,zmin,zmax;
       obj->GetRange(xmin,ymin,zmin,xmax,ymax,zmax);
-      *fullintegral=fQSigExTFOps.LimIntegral(xmin,xmax,ymin,ymax,zmin,zmax);
+      *fullintegral=fQTFOps.LimIntegral(xmin,xmax,ymin,ymax,zmin,zmax);
     }
     if(cutintegral) *cutintegral=cutintbuf;
 
@@ -103,7 +103,7 @@ void QSigExDisTF::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullin
       obj->Compile();
     }
   } catch (Int_t e){
-    cout << "Exception handled by QSigExDisTF::Normalize\n";
+    cout << "Exception handled by QDisTF::Normalize\n";
     throw e;
   }
 }

@@ -5,8 +5,8 @@
 #define _QSIGEXSTDPDFS_
 
 #include "QSigExPDFs.h"
-#include "QSigExDisTH.h"
-#include "QSigExDisTF.h"
+#include "QDisTH.h"
+#include "QDisTF.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -17,8 +17,8 @@
 //                                                                      //
 // QSigExStdPDFs                                                        //
 //                                                                      //
-// This class is a QSigExPDFs class that produces QSigExDisTH and/or    //
-// QSigExDisTF marginal PDFs from TH* and/or TF* functions respective-  //
+// This class is a QSigExPDFs class that produces QDisTH and/or         //
+// QDisTF marginal PDFs from TH* and/or TF* functions respective-       //
 // ly. See QSigExPDFs documentation for more details.                   //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ class QSigExStdPDFs: public QSigExPDFs{
   virtual ~QSigExStdPDFs(){}
 
  protected:
-  QSigExDis* GetFunction(const QList<TString>& pdfentry, TDirectory* fluxdir, const TCut& fgcuts, QList<TString>* inputs, Bool_t *pdfneedscuts);
+  QDis* GetFunction(const QList<TString>& pdfentry, TDirectory* fluxdir, const TCut& fgcuts, QList<TString>* inputs, Bool_t *pdfneedscuts);
   const Char_t* GetPDFName(Int_t i);
 
  private:

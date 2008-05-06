@@ -18,7 +18,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "Rtypes.h"
-#include "QSigExDis.h"
+#include "QDis.h"
 
 #define DEBUG
 #define DEBUG2
@@ -51,14 +51,14 @@ class QSigExF2EDataHolder
   Int_t GetAxesIndex(Int_t aMapping, Int_t aAxes){return fAxesIndex[aMapping][aAxes];};
   Int_t GetNAxes(Int_t aMapping){return fNAxes[aMapping];};
   Int_t GetTreeIndex(Int_t aMapping){return fTreeIndex[aMapping];};
-  QSigExDis* GetMapping(Int_t aMapping){return fFlux2Events[aMapping];};
+  QDis* GetMapping(Int_t aMapping){return fFlux2Events[aMapping];};
 
   virtual ~QSigExF2EDataHolder(){fNInstances--;}
 
  private:
   QSigExF2EDataHolder(const QSigExF2EDataHolder &);
   void CheckRights();
-  static QSigExDis **fFlux2Events; //!
+  static QDis **fFlux2Events; //!
   static TString** fAxesNames; //!
   static TString* fFluxes; //!
 

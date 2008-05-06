@@ -1,8 +1,8 @@
 // Author: Pierre-Luc Drouin <http://www.pldrouin.net>
 // Copyright Carleton University
 
-#ifndef _QSIGEXIO_
-#define _QSIGEXIO_
+#ifndef _QTOBJECTIO_
+#define _QTOBJECTIO_
 
 #include <iostream>
 #include <typeinfo>
@@ -26,34 +26,46 @@ using std::cout;
 
 ////////////////////////////////////////////////////////////////////////
 //                                                                    //
-// QSigExIO                                                           //
+// QTObjectIO                                                         //
 //                                                                    //
 // This class is responsible or reading and writing ROOT objects in   //
 // ROOT files. It can be used only with objects which are independent //
 // of the TFile once they have been loaded by their streamer. It      //
 // means, for example, that a TTree object cannot be loaded in memory //
-// using QSigExIO.                                                    //
+// using QTObjectIO.                                                  //
 //                                                                    //
 ////////////////////////////////////////////////////////////////////////
 
-class QSigExIO
+class QTObjectIO
 {
  public:
-  QSigExIO():fFilename(),fDirectory(),fClassName(),fObject(NULL){}
-  QSigExIO(const Char_t* classname):fFilename(),fDirectory(),fClassName(classname),fObject(NULL){}
-  QSigExIO(const Char_t* classname, const TObject& object):fFilename(),fDirectory(),fClassName(classname),fObject(NULL){*this=object;}
+  QTObjectIO():fFilename(),fDirectory(),fClassName(),fObject(NULL){}
+  QTObjectIO(const Char_t* classname):fFilename(),fDirectory(),fClassName(classname),fObject(NULL){}
+  QTObjectIO(const Char_t* classname, const TObject& object):fFilename(),fDirectory(),fClassName(classname),fObject(NULL){*this=object;}
 
-  QSigExIO(const Char_t* classname, const Char_t* filename, const Char_t* objectname):fFilename(),fDirectory(),fClassName(classname),fObject(NULL)
+  QTObjectIO(const Char_t* classname, const Char_t* filename, const Char_t* objectname):fFilename(),fDirectory(),fClassName(classname),fObject(NULL)
     {
-      PRINTF6(this,"\tQSigExIO::QSigExIO(const Char_t* filename<",filename,">, const Char_t* objectname<",objectname,">)\n")
+      PRINTF6(this,"\tQTObjectIO::QTObjectIO(const Char_t* filename<",filename,">, const Char_t* objectname<",objectname,">)\n")
       Load(filename,objectname);
     }
 
-  virtual ~QSigExIO()
+  virtual ~QTObjectIO()
     {
-      PRINTF2(this,"\tQSigExIO::~QSigExIO()\n")
+      PRINTF2(this,"\tQTObjectIO::~QTObjectIO()\n")
       Clear();
     }
+
+  void Clear();
+
+  QTObjectIO* Clone() const
+    {
+      PRINTF2(this,"\tQTObjectIO* QTObjectIO::Clone()\n")
+      return (new QTObjectIO(*this));
+    }
+
+  const Char_t* GetClassName() const{return fClassName.Data();}
+
+  TObject* GetObject() const;
 
   void Load(const Char_t* filename, const Char_t* objectname);
 
@@ -61,38 +73,29 @@ class QSigExIO
 
   void SaveAs(const Char_t* filename, const Char_t* directory=NULL);
 
-  const QSigExIO& operator=(const QSigExIO& newqio);
+  void SetObject(const Char_t *classname, TObject *object){fClassName=classname; TryCast(object,fClassName); fObject=object;}
 
-  const QSigExIO& operator=(const TObject& newobject)
+  const QTObjectIO& operator=(const QTObjectIO& newqio);
+
+  const QTObjectIO& operator=(const TObject& newobject)
     {
-      PRINTF2(this,"\tQSigExIO& QSigExIO::operator=(const TObject& newobject)\n")
+      PRINTF2(this,"\tQTObjectIO& QTObjectIO::operator=(const TObject& newobject)\n")
       TryCast(&newobject,fClassName);
       fObject=newobject.Clone();
       return *this;
     }
 
-  TObject* GetObject() const;
-  const Char_t* GetClassName() const{return fClassName.Data();}
-
-  QSigExIO* Clone() const
-    {
-      PRINTF2(this,"\tQSigExIO* QSigExIO::Clone()\n")
-      return (new QSigExIO(*this));
-    }
-
-  void Clear();
-
  protected:
   TObject* TryCast(const TObject* uptr, const Char_t* classname) const;
 
  private:
-  QSigExIO(const QSigExIO& newqio){*this=newqio;}
+  QTObjectIO(const QTObjectIO& newqio){*this=newqio;}
   TString fFilename; //ROOT filename
   TString fDirectory; //Path to object
   TString fClassName; //Class name or base class of the object
   TObject* fObject; //Object pointer
 
-  ClassDef(QSigExIO,1) //Allows to load a TObject from a ROOT file and to perform basic IO operations on it
+  ClassDef(QTObjectIO,1) //Allows to load a TObject from a ROOT file and to perform basic IO operations on it
 };
 
 #include "debugger.h"

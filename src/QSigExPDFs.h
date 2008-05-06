@@ -13,8 +13,7 @@
 #include "TFile.h"
 #include "TROOT.h"
 #include "QSigExDirHandler.h"
-#include "QSigExIO.h"
-#include "QSigExDis.h"
+#include "QDis.h"
 #include "QFormulaUtils.h"
 #include "QNamedVar.h"
 
@@ -62,7 +61,7 @@ class QSigExPDFs: public QSigExDirHandler{
 
  protected:
   virtual void FormatDir();
-  virtual QSigExDis* GetFunction(const QList<TString>& pdfentry, TDirectory* fluxdir, const TCut& fgcuts, QList<TString>* inputs, Bool_t *pdfneedscuts)=0;
+  virtual QDis* GetFunction(const QList<TString>& pdfentry, TDirectory* fluxdir, const TCut& fgcuts, QList<TString>* inputs, Bool_t *pdfneedscuts)=0;
   virtual const Char_t* GetPDFName(Int_t i)=0;
   void CheckCuts() const;
 

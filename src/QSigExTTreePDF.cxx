@@ -13,7 +13,7 @@
 // QSigExTTreePDF                                                     //
 //                                                                    //
 // This class is a QSigExPDFs derived class that creates 1d           //
-// QSigExDisTH marginal PDFs from raw TTree objects. For each flux    //
+// QDisTH marginal PDFs from raw TTree objects. For each flux         //
 // group, it also creates a clean TTree which branches are those used //
 // to create the marginal PDFs.                                       //
 //                                                                    //
@@ -22,16 +22,16 @@
 
 ClassImp(QSigExTTreePDF)
 
-QSigExDis* QSigExTTreePDF::GetFunction(const QList<TString>& pdfentry, TDirectory* fluxdir, const TCut& fgcuts, QList<TString>* inputs, Bool_t *pdfneedscuts)
+QDis* QSigExTTreePDF::GetFunction(const QList<TString>& pdfentry, TDirectory* fluxdir, const TCut& fgcuts, QList<TString>* inputs, Bool_t *pdfneedscuts)
 {
   //This protected function uses the pdf card file formatted entry pdfentry, a
   //pointer to the TDirectory of the PDF flux group and the combined cuts fgcuts
   //to create a function used in QSigExPDFs::Get() to produce a marginal PDF
   //object. In order to create this function, it loads a raw TTree object from a
   //ROOT file for the PDF flux group, creates a new TTree using the combined
-  //cuts and puts it in fluxdir. Finally, it creates a new 1d QSigExDisTH object from
-  //this new TTree. GetFunction() returns a QSigExDis pointer to this new object.
-  //inputs is filled with the coordinate name of the QSigExDisTH function.
+  //cuts and puts it in fluxdir. Finally, it creates a new 1d QDisTH object from
+  //this new TTree. GetFunction() returns a QDis pointer to this new object.
+  //inputs is filled with the coordinate name of the QDisTH function.
   //pdfneedscuts is set to kFALSE since the function applies cuts on the
   //raw TTree. The clean TTree can be used by other QSigExDirHandler classes to
   //take into account the correlations between PDFs variables.
@@ -40,7 +40,7 @@ QSigExDis* QSigExTTreePDF::GetFunction(const QList<TString>& pdfentry, TDirector
   //pdf  [...]  [objname]  [filename]  [c1] [nbins] 
   //where [...] are the fields defined in QSigExPDFs::LoadCardFile, [objname]
   //the name of the object in the ROOT file [filename], where [c1] is the
-  //coordinate name and where [nbins] is the number of bins for the new QSigExDisTH
+  //coordinate name and where [nbins] is the number of bins for the new QDisTH
   //function. The [typeid] field defined in QSigExPDFs must be equal to "TTree".
   //If not, the pdf entry is ignored and GetFunction returns NULL.
 
@@ -62,7 +62,7 @@ QSigExDis* QSigExTTreePDF::GetFunction(const QList<TString>& pdfentry, TDirector
     const Int_t firstcoordindex = 7;   //First coordinate
     
     
-    QSigExDis* pdfbuf=NULL;
+    QDis* pdfbuf=NULL;
     
     if(pdfentry[pdftypeindex]=="TTree"){    
       CheckCardNFields(pdfentry.Count()-1,minfields,maxfields);
@@ -122,14 +122,14 @@ QSigExDis* QSigExTTreePDF::GetFunction(const QList<TString>& pdfentry, TDirector
 		     ctbuf->GetMinimum(pdfentry[firstcoordindex]),
 		     ctbuf->GetMaximum(pdfentry[firstcoordindex]));
       
-      //Create a new PDF (QSigExDisTH) using the TH1F instance
+      //Create a new PDF (QDisTH) using the TH1F instance
       //(it's copied)
-      pdfbuf=new QSigExDisTH("TH1F",*thbuf);
+      pdfbuf=new QDisTH("TH1F",*thbuf);
       //Delete the TH1F instance 
       thbuf->Delete();
      
       //Get a pointer to the new TH1F object
-      thbuf=dynamic_cast<TH1F*>(dynamic_cast<QSigExDisTH*>(pdfbuf)->GetObject());
+      thbuf=dynamic_cast<TH1F*>(dynamic_cast<QDisTH*>(pdfbuf)->GetObject());
 
       //Append the TH1F instance of the PDF to fluxdir
       thbuf->SetDirectory(fluxdir);
@@ -138,7 +138,7 @@ QSigExDis* QSigExTTreePDF::GetFunction(const QList<TString>& pdfentry, TDirector
       
       //Remove the TH1F instamce of the PDF from fluxdir
       thbuf->SetDirectory(NULL);
-      //Set the name of the PDF (QSigExDisTH)
+      //Set the name of the PDF (QDisTH)
       pdfbuf->SetName(thbuf->GetName());
       
     }

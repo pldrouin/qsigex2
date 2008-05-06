@@ -5,7 +5,7 @@
 #define _QSIGEXTTREEPDF_
 
 #include "QSigExPDFs.h"
-#include "QSigExDisTH.h"
+#include "QDisTH.h"
 #include "QTTreeUtils.h"
 
 //#define DEBUG
@@ -19,7 +19,7 @@
 // QSigExTTreePDF                                                     //
 //                                                                    //
 // This class is a QSigExPDFs derived class that creates 1d           //
-// QSigExDisTH marginal PDFs from raw TTree objects. For each flux    //
+// QDisTH marginal PDFs from raw TTree objects. For each flux         //
 // group, it also creates a clean TTree which branches are those used //
 // to create the marginal PDFs.                                       //
 //                                                                    //
@@ -48,7 +48,7 @@ class QSigExTTreePDF: public QSigExPDFs{
   virtual ~QSigExTTreePDF(){}
 
  protected:
-  QSigExDis* GetFunction(const QList<TString>& pdfentry, TDirectory* fluxdir, const TCut& fgcuts, QList<TString>* inputs, Bool_t *pdfneedscuts);
+  QDis* GetFunction(const QList<TString>& pdfentry, TDirectory* fluxdir, const TCut& fgcuts, QList<TString>* inputs, Bool_t *pdfneedscuts);
   const Char_t* GetPDFName(Int_t i);
 
  private:

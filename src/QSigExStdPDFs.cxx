@@ -12,20 +12,20 @@
 //                                                                      //
 // QSigExStdPDFs                                                        //
 //                                                                      //
-// This class is a QSigExPDFs class that produces QSigExDisTH and/or    //
-// QSigExDisTF marginal PDFs from TH* and/or TF* functions respective-  //
+// This class is a QSigExPDFs class that produces QDisTH and/or         //
+// QDisTF marginal PDFs from TH* and/or TF* functions respective-       //
 // ly. See QSigExPDFs documentation for more details.                   //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
 ClassImp(QSigExStdPDFs)
 
-QSigExDis* QSigExStdPDFs::GetFunction(const QList<TString>& pdfentry, TDirectory* fluxdir, const TCut& fgcuts, QList<TString>* inputs, Bool_t *pdfneedscuts)
+QDis* QSigExStdPDFs::GetFunction(const QList<TString>& pdfentry, TDirectory* fluxdir, const TCut& fgcuts, QList<TString>* inputs, Bool_t *pdfneedscuts)
 {
   //This protected function uses the pdf card file formatted entry pdfentry to
   //create a function used in QSigExPDFs::Get() to produce a marginal PDF. The
   //input function can be a TH1F, TH1D, TF1, TH2F, TH2D or TF2 object.
-  //GetFunction() returns a QSigExDis pointer to an object of type QSigExDisTH or QSigExDisTF,
+  //GetFunction() returns a QDis pointer to an object of type QDisTH or QDisTF,
   //depending on the input function class. It fills inputs with the list of
   //coordinates in the PDF domain.  pdfneedscuts is set to kTRUE since the
   //function doesn't apply cuts on the output function.
@@ -50,36 +50,36 @@ QSigExDis* QSigExStdPDFs::GetFunction(const QList<TString>& pdfentry, TDirectory
 
       fluxdir=NULL;
       
-      QSigExDis* pdfbuf=NULL;
+      QDis* pdfbuf=NULL;
       
       //Create an instance of the appropriate PDF type
       if(pdfentry[pdftypeindex]=="TH1F" ||
 	  pdfentry[pdftypeindex]=="TH1D"){
-	//QSigExDisTH1*
+	//QDisTH1*
 	CheckCardNFields(pdfentry.Count()-1,minfields,minfields);
-	pdfbuf=new QSigExDisTH(pdfentry[pdftypeindex],pdfentry[filenameindex],pdfentry[objnameindex]);
+	pdfbuf=new QDisTH(pdfentry[pdftypeindex],pdfentry[filenameindex],pdfentry[objnameindex]);
       } else if(pdfentry[pdftypeindex]=="TF1"){
-	//QSigExDisTF1
+	//QDisTF1
 	CheckCardNFields(pdfentry.Count()-1,minfields,minfields);
-	pdfbuf=new QSigExDisTF(pdfentry[pdftypeindex],pdfentry[filenameindex],pdfentry[objnameindex]);
+	pdfbuf=new QDisTF(pdfentry[pdftypeindex],pdfentry[filenameindex],pdfentry[objnameindex]);
       } else if(pdfentry[pdftypeindex]=="TH2F" ||
 	  pdfentry[pdftypeindex]=="TH2D"){
-	//QSigExDisTH2*
+	//QDisTH2*
 	CheckCardNFields(pdfentry.Count()-1,minfields,minfields+1);
-	pdfbuf=new QSigExDisTH(pdfentry[pdftypeindex],pdfentry[filenameindex],pdfentry[objnameindex]);
+	pdfbuf=new QDisTH(pdfentry[pdftypeindex],pdfentry[filenameindex],pdfentry[objnameindex]);
       } else if(pdfentry[pdftypeindex]=="TF2"){
-	//QSigExDisTF2
+	//QDisTF2
 	CheckCardNFields(pdfentry.Count()-1,minfields,minfields+1);
-	pdfbuf=new QSigExDisTF(pdfentry[pdftypeindex],pdfentry[filenameindex],pdfentry[objnameindex]);
+	pdfbuf=new QDisTF(pdfentry[pdftypeindex],pdfentry[filenameindex],pdfentry[objnameindex]);
       } else if(pdfentry[pdftypeindex]=="TH3F" ||
 	  pdfentry[pdftypeindex]=="TH3D"){
-	//QSigExDisTH2*
+	//QDisTH2*
 	CheckCardNFields(pdfentry.Count()-1,minfields,minfields+2);
-	pdfbuf=new QSigExDisTH(pdfentry[pdftypeindex],pdfentry[filenameindex],pdfentry[objnameindex]);
+	pdfbuf=new QDisTH(pdfentry[pdftypeindex],pdfentry[filenameindex],pdfentry[objnameindex]);
       } else if(pdfentry[pdftypeindex]=="TF3"){
-	//QSigExDisTF3
+	//QDisTF3
 	CheckCardNFields(pdfentry.Count()-1,minfields,minfields+2);
-	pdfbuf=new QSigExDisTF(pdfentry[pdftypeindex],pdfentry[filenameindex],pdfentry[objnameindex]);
+	pdfbuf=new QDisTF(pdfentry[pdftypeindex],pdfentry[filenameindex],pdfentry[objnameindex]);
       }
       
       if(pdfbuf){

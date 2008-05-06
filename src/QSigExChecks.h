@@ -22,7 +22,7 @@
 #include "TString.h"
 #include "TMatrixDSym.h"
 
-#include "QSigExDis.h"
+#include "QDis.h"
 
 #define DEBUG
 #define DEBUG2
@@ -109,7 +109,7 @@ class QSigExChecks
   TString *fFluxName;
 
   Int_t fnF2EMaps;
-  QSigExDis  **fF2EMap;     //!
+  QDis  **fF2EMap;     //!
   TString    **fF2EFluxName; //!
   Int_t      *fF2EFluxIndex; //!
   TString    **fF2EEvtName; //!

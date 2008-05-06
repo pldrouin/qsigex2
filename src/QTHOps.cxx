@@ -1,7 +1,7 @@
 // Author: Pierre-Luc Drouin <http://www.pldrouin.net>, Osama Moussa <http://www.physics.carleton.ca/~omoussa>
 // Copyright Carleton University
 
-#include "QSigExTHOps.h"
+#include "QTHOps.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -10,17 +10,17 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// QSigExTHOps                                                          //
+// QTHOps                                                               //
 //                                                                      //
 // Class performing calculations on histograms                          //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-ClassImp(QSigExTHOps)
+ClassImp(QTHOps)
 
-Double_t QSigExTHOps::Freq(Double_t x, Double_t y, Double_t z) const
+Double_t QTHOps::Freq(Double_t x, Double_t y, Double_t z) const
 {
-  //PRINTF4(this,"\tInt_t QSigExTHOps::Freq(Double_t x<",x,">, Double_t y<",y,">, Double_t z<",z,">)\n")
+  //PRINTF4(this,"\tInt_t QTHOps::Freq(Double_t x<",x,">, Double_t y<",y,">, Double_t z<",z,">)\n")
 
   CheckTH(); //make sure there is actually an active histogram
 
@@ -30,7 +30,7 @@ Double_t QSigExTHOps::Freq(Double_t x, Double_t y, Double_t z) const
       (thbuf->GetYaxis())->FindFixBin(y),(thbuf->GetZaxis())->FindFixBin(z));
 }
 
-Double_t QSigExTHOps::BinIntegral(Int_t xbinlo, Int_t xbinhi, Int_t ybinlo, Int_t ybinhi, Int_t zbinlo, Int_t zbinhi) const
+Double_t QTHOps::BinIntegral(Int_t xbinlo, Int_t xbinhi, Int_t ybinlo, Int_t ybinhi, Int_t zbinlo, Int_t zbinhi) const
 {
 
   CheckTH(); //check that there is an active histogram
@@ -59,7 +59,7 @@ Double_t QSigExTHOps::BinIntegral(Int_t xbinlo, Int_t xbinhi, Int_t ybinlo, Int_
   }
 }
 
-Double_t QSigExTHOps::LimIntegral(Option_t* domain, Double_t* error, Int_t** binranges) const
+Double_t QTHOps::LimIntegral(Option_t* domain, Double_t* error, Int_t** binranges) const
 {
   PRINTF8(this,"\tDouble_t QTH1Ops::LimIntegral(Option_t* domain<",domain,">, Double_t* error<",error,">, const Int_t** binranges<",binranges,">) const\n")
 
@@ -170,7 +170,7 @@ Double_t QSigExTHOps::LimIntegral(Option_t* domain, Double_t* error, Int_t** bin
 
 }
 
-Double_t QSigExTHOps::LimIntegral(Double_t xlo, Double_t xhi, Double_t ylo, Double_t yhi, Double_t zlo, Double_t zhi) const
+Double_t QTHOps::LimIntegral(Double_t xlo, Double_t xhi, Double_t ylo, Double_t yhi, Double_t zlo, Double_t zhi) const
 {
   //This function integrates fTH between the values valloX, valloY and 
   //valhiX, valhiY.
@@ -189,12 +189,12 @@ Double_t QSigExTHOps::LimIntegral(Double_t xlo, Double_t xhi, Double_t ylo, Doub
   return BinIntegral(xbinlo,xbinhi,ybinlo,ybinhi,zbinlo,zbinhi);
 }
 
-void QSigExTHOps::CheckTH() const
+void QTHOps::CheckTH() const
 {
   // Throws an exception if no instance is associated with fTH.
 
   if(!fTH){
-    cout << "Error: QSigExTHOps::CheckTH(): fTH==NULL. fTH must hold the address of a TH1*. Use a try-catch exception handler block if you want that your program to handle this exception and not abort.\n";
+    cout << "Error: QTHOps::CheckTH(): fTH==NULL. fTH must hold the address of a TH1*. Use a try-catch exception handler block if you want that your program to handle this exception and not abort.\n";
     throw 1;
   }
 }

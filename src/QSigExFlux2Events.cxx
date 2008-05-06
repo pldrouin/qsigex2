@@ -3,8 +3,8 @@
 
 #include "QSigExFlux2Events.h"
 #include "QSigExF2EDataHolder.h"
-#include "QSigExDis.h"
-#include "QSigExDisTF.h"
+#include "QDis.h"
+#include "QDisTF.h"
 
 #include "TList.h"
 
@@ -115,13 +115,13 @@ void QSigExFlux2Events::GetFluxToEventMapping()
 
      //first check that we loaded in all of the lines correctly.
      CheckCardNFields(anEntry.Count(),minfields,maxfields);
-     QSigExDis* flux2evtsbuf=NULL;
+     QDis* flux2evtsbuf=NULL;
      if(anEntry[classindex]=="TF1"){
 //        cout << "<QSigExFlux2Events::GetFluxToEventMapping> "
 // 	    << anEntry[nameindex].Data() 
 // 	    << " " << anEntry[objectindex]
 // 	    << " " << anEntry[fileindex].Data() << endl;
-       flux2evtsbuf=new QSigExDisTF(anEntry[classindex], anEntry[fileindex], anEntry[objectindex]);
+       flux2evtsbuf=new QDisTF(anEntry[classindex], anEntry[fileindex], anEntry[objectindex]);
      }
      else {
        cout << "<QSigExFlux2Events::GetFluxToEventMapping> ERROR: only implemented for TF1 objects." << endl;

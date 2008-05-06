@@ -29,8 +29,8 @@
 #include "TMinuit.h"
 #include "math.h"
 
-#include "QSigExDis.h"
-#include "QSigExDisTF.h"
+#include "QDis.h"
+#include "QDisTF.h"
 #include "QF2EExtendedLikelihood.h"
 
 ClassImp(QSigExChecks)
@@ -193,23 +193,23 @@ void QSigExChecks::GetF2EMaps(TFile *aFile, Char_t* aDir)
   Int_t nNewF2EMaps = ls->GetEntries();
   if(fnF2EMaps==0){
     fnF2EMaps=nNewF2EMaps;
-    fF2EMap       = new QSigExDis*[fnF2EMaps];
+    fF2EMap       = new QDis*[fnF2EMaps];
     fF2EFluxName  = new TString*[fnF2EMaps];
     fF2EFluxIndex = new Int_t[fnF2EMaps];
     fF2EEvtName   = new TString*[fnF2EMaps];
   }
   else {
-    QSigExDis** newfF2EMap    = new QSigExDis*[fnF2EMaps+nNewF2EMaps];
+    QDis** newfF2EMap    = new QDis*[fnF2EMaps+nNewF2EMaps];
     TString** newfF2EFluxName = new TString*[fnF2EMaps+nNewF2EMaps];
     TString** newfF2EEvtName  = new TString*[fnF2EMaps+nNewF2EMaps];
     Int_t* newfF2EFluxIndex   = new Int_t[fnF2EMaps+nNewF2EMaps];
 
-    memset(newfF2EMap,0,fnF2EMaps+nNewF2EMaps*sizeof(QSigExDis*));
+    memset(newfF2EMap,0,fnF2EMaps+nNewF2EMaps*sizeof(QDis*));
     memset(newfF2EFluxName,0,fnF2EMaps+nNewF2EMaps*sizeof(TString*));
     memset(newfF2EEvtName,0,fnF2EMaps+nNewF2EMaps*sizeof(TString*));
     memset(newfF2EFluxIndex,0,fnF2EMaps+nNewF2EMaps*sizeof(Int_t));
 
-    memcpy(newfF2EMap,fF2EMap,fnF2EMaps*sizeof(QSigExDis*));
+    memcpy(newfF2EMap,fF2EMap,fnF2EMaps*sizeof(QDis*));
     memcpy(newfF2EFluxIndex,fF2EFluxIndex,fnF2EMaps*sizeof(Int_t));
     memcpy(newfF2EEvtName,fF2EEvtName,fnF2EMaps*sizeof(TString*));
     memcpy(newfF2EFluxName,fF2EFluxName,fnF2EMaps*sizeof(TString*));
@@ -233,7 +233,7 @@ void QSigExChecks::GetF2EMaps(TFile *aFile, Char_t* aDir)
 
     fF2EEvtName[i] = new TString(ls->At(i-i0)->GetName());
     gDirectory->cd(fF2EEvtName[i]->Data());
-    fF2EMap[i] = dynamic_cast<QSigExDis*>(gDirectory->Get(gDirectory->GetName()));//(fF2EFluxName[i].Data()));
+    fF2EMap[i] = dynamic_cast<QDis*>(gDirectory->Get(gDirectory->GetName()));//(fF2EFluxName[i].Data()));
 
     gDirectory->cd("Inputs");
     

@@ -18,7 +18,7 @@
 // This class uses the marginal PDFs stored in "PDFs" TDirectory to   //
 // compute the marginal probability densities of the events stored in //
 // "Event Info" TDirectory. Each PDF can be an instance of any class  //
-// derived from QSigExDis class. The output of this function is a set //
+// derived from QDis class. The output of this function is a set      //
 // of TTree objects (one per flux group) located in "Probs/PDFsProbs" //
 // TDirectory.                                                        //
 //                                                                    //
@@ -74,7 +74,7 @@ template <typename U> void QSigExProbs<U>::LoadCardFile(const Char_t* cardfilena
 
 template <typename U> Int_t QSigExProbs<U>::Get()
 {
-  //This function loads the marginal PDFs (QSigExDis derived objects) stored in the
+  //This function loads the marginal PDFs (QDis derived objects) stored in the
   //PDFs subfolders of "PDFs" TDirectory and the clean TTree located in "Event
   //Info" TDirectory. It loops over the events in the TTree and computes for
   //each one the marginal probability densities (one probability density per
@@ -146,10 +146,10 @@ template <typename U> Int_t QSigExProbs<U>::Get()
     Int_t nfgroups; //Number of flux groups
     TList pdfsm; //List of PDF directories in a syst. group TDirectory
     TDirectory *pdfdir; //Pointer to a PDF TDirectory in a syst. group 
-    QSigExDis *pdf; //Pointer to a PDF (QSigExDis derived object)
+    QDis *pdf; //Pointer to a PDF (QDis derived object)
     TString strbuf,strbuf2; //2 TString buffers
     
-    TList pdfs; //List of PDF pointers (QSigExDis pointers)
+    TList pdfs; //List of PDF pointers (QDis pointers)
     Int_t npdfs; //Number of PDFs
     TList anlist; //List of objects in an "Inputs" TDirectory
     QNamedVar<TString>* qnvbuf; //QNamedVar buffer for inputs;
@@ -205,7 +205,7 @@ template <typename U> Int_t QSigExProbs<U>::Get()
 	    !pdfdir->FindObject(pdfdir->GetName());
 
 	  //If there's a PDF in the PDF TDirectory
-	  if((pdf=dynamic_cast<QSigExDis*>(pdfdir->Get(pdfdir->GetName())))){
+	  if((pdf=dynamic_cast<QDis*>(pdfdir->Get(pdfdir->GetName())))){
 	    //If the PDF was already loaded, allow the list pdfs to delete it
 	    if(candelete) pdf->SetBit(kCanDelete);
 	    //Add the PDF to the list of pdfs
@@ -222,7 +222,7 @@ template <typename U> Int_t QSigExProbs<U>::Get()
 	  //Else if there's no PDF in the PDF TDirectory, throw an exception
 	  }else{
 	    cout << "Error: TDirectory" << pdfdir->GetName() << 
-	      "doesn't contain a QSigExDis object of the same name\n";
+	      "doesn't contain a QDis object of the same name\n";
 	    throw 1;
 	  }
 
@@ -251,9 +251,9 @@ template <typename U> Int_t QSigExProbs<U>::Get()
 
 	    //If the number of inputs is not equal to the number of dimensions
 	    //of the current PDF, throw an exception
-	    if(m!=((QSigExDis*)(pdfs.At(pdfs.GetSize()-1)))->GetDimension()){
+	    if(m!=((QDis*)(pdfs.At(pdfs.GetSize()-1)))->GetDimension()){
 	      cout << "Error: The number of inputs in TDirectory " <<
-	       	pdfdir->GetName() << " doesn't match the dimension of the QSigExDis object\n";
+	       	pdfdir->GetName() << " doesn't match the dimension of the QDis object\n";
 	      throw 1;
 	    }
 	    //Clear anlist and delete its objects 
@@ -295,7 +295,7 @@ template <typename U> Int_t QSigExProbs<U>::Get()
     //Loop over the PDFs
     for(j=0;j<pdfs.GetSize();j++){
       //Get a pointer to the current PDF
-      pdf=(QSigExDis*)(pdfs.At(j));
+      pdf=(QDis*)(pdfs.At(j));
       //      cout << "PDF " << pdf->GetName() << endl;
 
       //Loop over the dimensions of the current PDF
@@ -423,10 +423,10 @@ template <typename U> Int_t QSigExProbs<U>::Get()
       //Loop over the PDFs
       for(j=0;j<npdfs;j++){
 	//Get a pointer to the current PDF
-	pdf=(QSigExDis*)(pdfs.At(j));
+	pdf=(QDis*)(pdfs.At(j));
 	//if(e<10) cout << "\tPDF " << pdf->GetName() << endl;
 	//if(e<10) cout << "\t\tInput: " << *(piaddrs[j*MAXNDIMPDF]) << "\t" << *(piaddrs[j*MAXNDIMPDF+1]) << "\t" << *(piaddrs[j*MAXNDIMPDF+2]) << endl;
-	//Compute the current PDF output using QSigExDis::ProbDensity and the
+	//Compute the current PDF output using QDis::ProbDensity and the
 	//current PDF inputs addresses
 	*(poaddrs[j])=pdf->ProbDensity(*(piaddrs[j*MAXNDIMPDF]),
 	    *(piaddrs[j*MAXNDIMPDF+1]),*(piaddrs[j*MAXNDIMPDF+2]));

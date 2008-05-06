@@ -34,6 +34,10 @@ QTTreeProcessor::~QTTreeProcessor()
   fOBNames=NULL;
   delete fBuNames;
   fBuNames=NULL;
+  delete fHists;
+  fHists=NULL;
+  delete fHInputsNames;
+  fHInputsNames=NULL;
   delete fITIndices;
   fITIndices=NULL;
   delete fIBIndices;
@@ -72,8 +76,29 @@ QTTreeProcessor::~QTTreeProcessor()
   fBuffers=NULL;
 }
 
+void AddHistInput(Int_t histindex, const char* variable, const char* tree, Int_t index)
+{
+  (*fHInputsNames)[histindex].RedimList((*fHInputsNames)[histindex].Count()+1,index);
+  (*fHInputsNames)[histindex][index].SetNameTitle(variable,tree);
+}
+
+void AddHistInput(const char* histname, const char* variable, const char* tree, Int_t index)
+{
+  Int_t i;
+
+  if((i=FindHistIndex(histname)) == -1) {
+    fprintf(stderr,"QTTreeProcessor::AddHistInput: Error: Histogram '%s' does not exist\n",histname);
+    return;
+  }
+  AddHistInput(i,variable,tree,index);
+}
+
 void QTTreeProcessor::AddParam(const char *parname, Double_t value, Int_t index)
 {
+  if(fParamsNames->FindFirst(parname) != -1) {
+    fprintf(stderr,"QTTreeProcessor::AddParam: Error: Parameter '%s' already exists\n",parname);
+    return;
+  }
   fParamsNames->Add(parname,index);
   fParams->Add(value,index);
 }
@@ -452,6 +477,28 @@ Int_t QTTreeProcessor::Analyze()
   return 0;
 }
 
+void QTTreeProcessor::DelHist(const char* histname)
+{
+  Int_t i;
+
+  if((i=FindHistIndex(histname)) == -1) {
+    fprintf(stderr,"QTTreeProcessor::DelHist: Error: Histogram '%s' does not exist\n",histname);
+    return;
+  }
+  DelHist(i);
+}
+
+void QTTreeProcessor::DelHistInput(const char* histname, Int_t index)
+{
+  Int_t i;
+
+  if((i=FindHistIndex(histname)) == -1) {
+    fprintf(stderr,"QTTreeProcessor::DelHistInput: Error: Histogram '%s' does not exist\n",histname);
+    return;
+  }
+  DelHistInput(i,index);
+}
+
 void QTTreeProcessor::DelParam(const char *paramname)
 {
   Int_t i;
@@ -755,6 +802,19 @@ void QTTreeProcessor::Exec()
     //Save the parameters
     (*fLastParams)=(*fParams);
   }
+}
+
+Int_t QTTreeProcessor::FindHistIndex(const char *paramname) const
+{
+  Int_t ret=-1;
+
+  for(Int_t i=0; i<fHists->Cout(); i++) {
+
+    if(!strcmp((*fHists)[i]->GetName(),paramname)) ret=i; 
+  }
+
+  if(ret == -1) fprintf(stderr,"QTTreeProcessor::FindHistIndex: Error: parameter '%s' not found\n",paramname);
+  return ret;
 }
 
 Int_t QTTreeProcessor::FindParamIndex(const char *paramname) const
@@ -1097,6 +1157,8 @@ const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
   *fIBNames=*rhs.fIBNames;
   *fOBNames=*rhs.fOBNames;
   *fBuNames=*rhs.fBuNames;
+  *fHists=*rhs.fHists;
+  *fHInputsNames=*rhs.fHInputsNames;
   *(fITIndices)=*rhs.fITIndices;
   *(fIBIndices)=*rhs.fIBIndices;
   *(fOTIndices)=*rhs.fOTIndices;

@@ -1,7 +1,7 @@
 // Author: Pierre-Luc Drouin <http://www.pldrouin.net>, Osama Moussa <http://www.physics.carleton.ca/~omoussa>
 // Copyright Carleton University
 
-#include "QSigExTFOps.h"
+#include "QTFOps.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -10,30 +10,30 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// QSigExTFOps                                                          //
+// QTFOps                                                               //
 //                                                                      //
 // Class performing calculations on histograms                          //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-ClassImp(QSigExTFOps)
+ClassImp(QTFOps)
 
-Double_t QSigExTFOps::Freq(Double_t x, Double_t y, Double_t z) const
+Double_t QTFOps::Freq(Double_t x, Double_t y, Double_t z) const
 {
-  PRINTF8(this,"\tInt_t QSigExTFOps::Freq(Double_t x<",x,">, Double_t y<",y,">, Double_t z<",z,">)\n")
+  PRINTF8(this,"\tInt_t QTFOps::Freq(Double_t x<",x,">, Double_t y<",y,">, Double_t z<",z,">)\n")
 
   CheckTF(); //make sure there is actually an active histogram
 
   return (Double_t)const_cast<TF1*>(fTF)->Eval(x,y,z);
 }
 
-Double_t QSigExTFOps::Derivative(Double_t x) const
+Double_t QTFOps::Derivative(Double_t x) const
 {
-  PRINTF4(this,"\tInt_t QSigExTFOps::Derivative(Double_t x<",x,">)\n")
+  PRINTF4(this,"\tInt_t QTFOps::Derivative(Double_t x<",x,">)\n")
 
   CheckTF(); //make sure there is actually an active histogram
   if(fTF->GetNdim()>1){
-    cout <<"ERROR <QSigExTFOps::Derivative> only available for 1D TF objects.\n";
+    cout <<"ERROR <QTFOps::Derivative> only available for 1D TF objects.\n";
     throw 222;
   }
 
@@ -41,7 +41,7 @@ Double_t QSigExTFOps::Derivative(Double_t x) const
 }
 
 
-Double_t QSigExTFOps::LimIntegral(Double_t xlo, Double_t xhi, Double_t ylo, Double_t yhi, Double_t zlo, Double_t zhi) const
+Double_t QTFOps::LimIntegral(Double_t xlo, Double_t xhi, Double_t ylo, Double_t yhi, Double_t zlo, Double_t zhi) const
 {
 
   CheckTF(); //check that there is an active histogram
@@ -63,9 +63,9 @@ Double_t QSigExTFOps::LimIntegral(Double_t xlo, Double_t xhi, Double_t ylo, Doub
   }
 }
 
-Double_t QSigExTFOps::LimIntegral(Option_t* domain, Double_t* error)
+Double_t QTFOps::LimIntegral(Option_t* domain, Double_t* error)
 {
-  PRINTF6(this,"\tDouble_t QSigExTFOps::LimIntegral(Option_t* domain<",domain,">, Double_t* error<",error,">) const\n")
+  PRINTF6(this,"\tDouble_t QTFOps::LimIntegral(Option_t* domain<",domain,">, Double_t* error<",error,">) const\n")
 
   error=NULL;
 
@@ -101,12 +101,12 @@ Double_t QSigExTFOps::LimIntegral(Option_t* domain, Double_t* error)
 
 }
 
-void QSigExTFOps::CheckTF() const
+void QTFOps::CheckTF() const
 {
   // Throws an exception if no instance is associated with fTF.
 
   if(!fTF){
-    cout << "Error: QSigExTFOps::CheckTF(): fTF==NULL. fTF must hold the address of a TF1*. Use a try-catch exception handler block if you want that your program to handle this exception and not abort.\n";
+    cout << "Error: QTFOps::CheckTF(): fTF==NULL. fTF must hold the address of a TF1*. Use a try-catch exception handler block if you want that your program to handle this exception and not abort.\n";
     throw 1;
   }
 }

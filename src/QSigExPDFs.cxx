@@ -132,8 +132,8 @@ void QSigExPDFs::LoadCardFile(const Char_t* cardfilename)
   //
   //1: The PDF entry is active
   //2: The PDF should not be normalized
-  //More significant bits are passed to the function QSigExDis::Normalize. Please
-  //refer to the documentation of the QSigExDis derived classes.
+  //More significant bits are passed to the function QDis::Normalize. Please
+  //refer to the documentation of the QDis derived classes.
   //
   //About the PDFs inputs:
   //Depending on the type of PDF, a pdf entry contains one ore more fields that
@@ -167,7 +167,7 @@ Int_t QSigExPDFs::Get()
   //This function uses the PDF entries stored in the internal member variables
   //of this class to load, apply cuts, normalize and store a set of marginal
   //PDFs in a subfolder of "PDFs" TDirectory in the TDirectory structure. The
-  //resulting PDFs are instances of a class derived from QSigExDis. 
+  //resulting PDFs are instances of a class derived from QDis. 
   //
   //Each PDF is located in a TDirectory having the same name than the PDF. This
   //TDirectory is stored in another TDirectory named according to the PDF
@@ -256,7 +256,7 @@ Int_t QSigExPDFs::Get()
     TDirectory* inputspdir; //Inputs TDirectory pointer
     QList<TString> inputs;
     Int_t ninputs;       //Number of inputs
-    QSigExDis* pdfbuf;        //QSigExDis buffer
+    QDis* pdfbuf;        //QDis buffer
     Bool_t pdfneedscuts;
 
     TObject* nbuf;      //QNamedVar buffer
@@ -266,7 +266,7 @@ Int_t QSigExPDFs::Get()
     TString cutsexpr;    //A cuts TString buffer
 
     TCut pdfcuts;        //Cuts for a specific pdf
-    const Char_t* labels[3]={"x","y","z"}; //variable names for QSigExDis* objs
+    const Char_t* labels[3]={"x","y","z"}; //variable names for QDis* objs
     QList<Int_t> eqfound; //Buffer for matching equivalences
 
     //Loop over the pdf lines in the card file
