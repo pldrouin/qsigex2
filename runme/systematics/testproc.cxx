@@ -22,9 +22,9 @@ int main()
 
   ttp.AddParam("VShiftXM");
   ttp.AddParam("VShiftXW",4);
-  ttp.AddParam("VShiftYM");
+  ttp.AddParam("VShiftYM",1);
   ttp.AddParam("VShiftYW",4);
-  ttp.AddParam("VShiftZM");
+  ttp.AddParam("VShiftZM",2);
   ttp.AddParam("VShiftZW",4);
   ttp.AddParam("VScaleM",1);
   ttp.AddParam("VScaleW",0.1);
@@ -55,7 +55,7 @@ int main()
   ttp.GetProc("VShift").AddOutput("Zcoord","results.root:VShift");
 
   ttp.GetProc("VScale").AddInput("Xcoord","results.root:VShift");
-  ttp.GetProc("VScale").AddInput("Ycoord","results.root:VShift");
+  ttp.GetProc("VScale").AddInput("Xcoord","results.root:VShift");
   ttp.GetProc("VScale").AddInput("Zcoord","results.root:VShift");
   ttp.GetProc("VScale").AddOutput("Xcoord","results.root:VScale");
   ttp.GetProc("VScale").AddOutput("Ycoord","results.root:VScale");
@@ -68,9 +68,15 @@ int main()
 
   ttp.GetProc("radpdf").AddInput("Radius","results.root:SmearedMC");
 
+  printf("Analyze\n");
   ttp.Analyze();
+  printf("InitProcess\n");
   ttp.InitProcess();
+  printf("Exec\n");
   ttp.Exec();
+  //ttp.SetParam(6,1.1);
+  //ttp.Exec();
+  printf("Terminate\n");
   ttp.TerminateProcess();
 
   TFile pdfsf("pdfs.root","recreate");

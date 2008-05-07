@@ -18,6 +18,8 @@ QTTreeProcessor::~QTTreeProcessor()
   fProcs=NULL;
   delete fSelProcs;
   fSelProcs=NULL;
+  delete fHistProcs;
+  fHistProcs=NULL;
   delete fParams;
   fParams=NULL;
   delete fLastParams;
@@ -62,10 +64,14 @@ QTTreeProcessor::~QTTreeProcessor()
   fProcsBDepends=NULL;
   delete fIBBuffers;
   fIBBuffers=NULL;
+  delete fOwnsIBBuffers;
+  fOwnsIBBuffers=NULL;
   delete fOBBuffers;
   fOBBuffers=NULL;
   delete fIBCBuffers;
   fIBCBuffers=NULL;
+  delete fOwnsIBCBuffers;
+  fOwnsIBCBuffers=NULL;
   delete fIBCBTypes;
   fIBCBTypes=NULL;
   delete fBuffers;
@@ -95,6 +101,7 @@ void QTTreeProcessor::AddHistProc(const char* name, const char* title, QDisTH *h
       AddProc(name,title,HistProc3,NULL,kFALSE,index);
       break;
   }
+  (*fHistProcs)[index]=kTRUE;
   (*fProcs)[index].AddOutput("HistProcOutput",NULL,-1,(Double_t*)hist);
 }
 
@@ -103,6 +110,7 @@ void QTTreeProcessor::AddProc(const char *name, const char *title, Bool_t select
   PRINTF10(this,"\tQTTreeProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
   fProcs->RedimList(fProcs->Count()+1,index);
   fSelProcs->Add(selector,index);
+  fHistProcs->RedimList(fProcs->Count(),index,kFALSE);
   (*fProcs)[index].SetNameTitle(name,title);
 }
 
@@ -592,6 +600,12 @@ void QTTreeProcessor::Exec()
 	procs.Add(&(*fProcs)[i]);
 	seldepprocs.Add((*fSelDepProcs)[i]);
 
+	//If the process is generating a histogram
+	if((*fHistProcs)[i]) {
+	  //Reset it
+	  ((TH1&)*((QDisTH*)(*fProcs)[i].GetOutputBuf(0))).Reset();
+	}
+
 	//Loop over the input branches of the current process
 	nj=(*fITIndices)[i].Count();
 	for(j=0; j<nj; j++) {
@@ -672,7 +686,7 @@ void QTTreeProcessor::Exec()
 	    //If the current input branch uses a different data type
 	    if(fIBCBuffers->Count() && (*fIBCBuffers)[i].Count() && (*fIBCBuffers)[i][j]) {
 	      //Add the buffer addresses and the data type id
-	      ibbuffers.Add(&(*fIBBuffers)[i][j]);
+	      ibbuffers.Add((*fIBBuffers)[i][j]);
 	      ibcbuffers.Add((*fIBCBuffers)[i][j]);
 	      ibcbtypes.Add((*fIBCBTypes)[i][j]);
 	    }
@@ -821,9 +835,13 @@ Int_t QTTreeProcessor::InitProcess()
   fIBranches->Clear();
   fOBranches->Clear();
 
+  ClearIBCBuffers();
+  ClearIBBuffers();
+
   fIBranches->RedimList(fITNames->Count());
   fOBranches->RedimList(fOTNames->Count());
   fIBBuffers->RedimList(fITNames->Count());
+  fOwnsIBBuffers->RedimList(fITNames->Count());
   fOBBuffers->RedimList(fOTNames->Count());
   fBuffers->RedimList(fBuNames->Count());
 
@@ -896,7 +914,6 @@ Int_t QTTreeProcessor::InitProcess()
 
   TLeaf *lbuf;
   const char* cabuf;
-  ClearIBCBuffers();
 
   //Loop over the input trees
   for(i=0; i<fITNames->Count(); i++) {
@@ -943,7 +960,8 @@ Int_t QTTreeProcessor::InitProcess()
       }
       dpn.Clear();
       (*fIBranches)[i].RedimList((*fIBNames)[i].Count());
-      (*fIBBuffers)[i].RedimList((*fIBNames)[i].Count());
+      (*fIBBuffers)[i].RedimList((*fIBNames)[i].Count(),-1,NULL);
+      (*fOwnsIBBuffers)[i].RedimList((*fIBNames)[i].Count(),-1,kFALSE);
 
       //Loop over the required branches for this input tree
       for(j=0; j<(*fIBNames)[i].Count(); j++) {
@@ -964,53 +982,62 @@ Int_t QTTreeProcessor::InitProcess()
 
 	//If the data type is a Double_t, the buffer is assigned directly to the branch
 	if(!strcmp(cabuf,"Double_t")) {
-	  ((TBranch*)(*fIBranches)[i][j])->SetAddress(&((*fIBBuffers)[i][j]));
+
+	  //If there is no buffer assigned to the branch
+	  if(!((TBranch*)(*fIBranches)[i][j])->GetAddress()) {
+	    //Create a new buffer
+	    (*fIBBuffers)[i][j]=new Double_t;
+	    (*fOwnsIBBuffers)[i][j]=kTRUE;
+	    ((TBranch*)(*fIBranches)[i][j])->SetAddress((*fIBBuffers)[i][j]);
+
+	    //Else if there is already a buffer assigned to the branch
+	  } else {
+	    //Get the buffer address from the branch
+	    (*fIBBuffers)[i][j]=(Double_t*)((TBranch*)(*fIBranches)[i][j])->GetAddress();
+	  }
 
 	  //Else if the input branch has a different basic data type, assign a different temporary buffer
 	} else {
+	  //Create a new Double_t buffer for the branch
+	  (*fIBBuffers)[i][j]=new Double_t;
+	  (*fOwnsIBBuffers)[i][j]=kTRUE;
 
 	  //Redim lists if this is the first input tree having branches with a different data type
 	  if(!fIBCBuffers->Count()) {
 	    fIBCBuffers->RedimList(fITNames->Count());
+	    fOwnsIBCBuffers->RedimList(fITNames->Count());
 	    fIBCBTypes->RedimList(fITNames->Count());
 	  }
 
 	  //Redim lists if this is the first branch of the input tree having a  different data type
 	  if(!(*fIBCBuffers)[i].Count()) {
 	    (*fIBCBuffers)[i].RedimList((*fIBNames)[i].Count(),-1,NULL);
+	    (*fOwnsIBCBuffers)[i].RedimList((*fIBNames)[i].Count(),-1,kFALSE);
 	    (*fIBCBTypes)[i].RedimList((*fIBNames)[i].Count(),-1,0);
 	  }
 
 	  if(!strcmp(cabuf,"Float_t")) {
-	    (*fIBCBuffers)[i][j]=malloc(sizeof(Float_t));
 	    (*fIBCBTypes)[i][j]=kFloat_t;
 
 	  } else if(!strcmp(cabuf,"UInt_t")) {
-	    (*fIBCBuffers)[i][j]=malloc(sizeof(UInt_t));
 	    (*fIBCBTypes)[i][j]=kUInt_t;
 
 	  } else if(!strcmp(cabuf,"Int_t")) {
-	    (*fIBCBuffers)[i][j]=malloc(sizeof(Int_t));
 	    (*fIBCBTypes)[i][j]=kInt_t;
 
 	  } else if(!strcmp(cabuf,"UShort_t")) {
-	    (*fIBCBuffers)[i][j]=malloc(sizeof(UShort_t));
 	    (*fIBCBTypes)[i][j]=kUShort_t;
 
 	  } else if(!strcmp(cabuf,"Short_t")) {
-	    (*fIBCBuffers)[i][j]=malloc(sizeof(Short_t));
 	    (*fIBCBTypes)[i][j]=kShort_t;
 
 	  } else if(!strcmp(cabuf,"UChar_t")) {
-	    (*fIBCBuffers)[i][j]=malloc(sizeof(UChar_t));
 	    (*fIBCBTypes)[i][j]=kUChar_t;
 
 	  } else if(!strcmp(cabuf,"Char_t")) {
-	    (*fIBCBuffers)[i][j]=malloc(sizeof(Char_t));
 	    (*fIBCBTypes)[i][j]=kChar_t;
 
 	  } else if(!strcmp(cabuf,"Bool_t")) {
-	    (*fIBCBuffers)[i][j]=malloc(sizeof(Bool_t));
 	    (*fIBCBTypes)[i][j]=kBool_t;
 
 	  } else {
@@ -1018,7 +1045,42 @@ Int_t QTTreeProcessor::InitProcess()
 	    return 1;
 	  }
 
-	  ((TBranch*)(*fIBranches)[i][j])->SetAddress((*fIBCBuffers)[i][j]);
+	  //If there is no buffer associated to that branch
+	  if(!((TBranch*)(*fIBranches)[i][j])->GetAddress()) {
+
+	    //Create a new buffer having the proper size and assign it to the branch
+	    switch((*fIBCBTypes)[i][j]) {
+	      case kFloat_t:
+		(*fIBCBuffers)[i][j]=malloc(sizeof(Float_t));
+		break;
+	      case kUInt_t:
+		(*fIBCBuffers)[i][j]=malloc(sizeof(UInt_t));
+		break;
+	      case kInt_t:
+		(*fIBCBuffers)[i][j]=malloc(sizeof(Int_t));
+		break;
+	      case kUShort_t:
+		(*fIBCBuffers)[i][j]=malloc(sizeof(UShort_t));
+		break;
+	      case kShort_t:
+		(*fIBCBuffers)[i][j]=malloc(sizeof(Short_t));
+		break;
+	      case kUChar_t:
+		(*fIBCBuffers)[i][j]=malloc(sizeof(UChar_t));
+		break;
+	      case kChar_t:
+		(*fIBCBuffers)[i][j]=malloc(sizeof(Char_t));
+		break;
+	      case kBool_t:
+		(*fIBCBuffers)[i][j]=malloc(sizeof(Bool_t));
+	    }
+	    ((TBranch*)(*fIBranches)[i][j])->SetAddress((*fIBCBuffers)[i][j]);
+	    (*fOwnsIBCBuffers)[i][j]=kTRUE;
+
+	    //Else if there is already a buffer for this branch
+	  } else {
+	    (*fIBCBuffers)[i][j]=((TBranch*)(*fIBranches)[i][j])->GetAddress();
+	  }
 	}
       }
 
@@ -1067,14 +1129,14 @@ Int_t QTTreeProcessor::InitProcess()
 	//If there are input buffers for this tree (i.e. the tree is not also listed as an output tree)
 	if((*fIBBuffers)[k].Count()) {
 	//Get the buffer address from the input branches buffers list
-	proc->SetInputBuf(j,&((*fIBBuffers)[k][(*fIBNames)[k].FindFirst(proc->GetInput(j).GetName())]));
+	proc->SetInputBuf(j,(*fIBBuffers)[k][(*fIBNames)[k].FindFirst(proc->GetInput(j).GetName())]);
 
 	//Else if there are no input buffers
 	} else {
 	  //Find the object in the list of outputs
 	  k=fOTNames->FindFirst(donbuf);
 	  //Get the buffer address from the output branches buffers list
-	  proc->SetInputBuf(j,&((*fOBBuffers)[k][(*fIBNames)[k].FindFirst(proc->GetInput(j).GetName())]));
+	  proc->SetInputBuf(j,&((*fOBBuffers)[k][(*fOBNames)[k].FindFirst(proc->GetInput(j).GetName())]));
 	}
 
 	//Else if the input is a memory buffer
@@ -1264,6 +1326,20 @@ void QTTreeProcessor::TerminateProcess()
   ClearIBCBuffers();
 }
 
+void QTTreeProcessor::ClearIBBuffers()
+{
+  Int_t i,j;
+
+  for(i=0; i<fIBBuffers->Count(); i++) {
+
+    for(j=0; j<(*fIBBuffers)[i].Count(); j++) {
+      if((*fOwnsIBBuffers)[i][j]) free((*fIBBuffers)[i][j]);
+    }
+  }
+  fIBBuffers->Clear();
+  fOwnsIBBuffers->Clear();
+}
+
 void QTTreeProcessor::ClearIBCBuffers()
 {
   fIBCBTypes->Clear();
@@ -1272,10 +1348,11 @@ void QTTreeProcessor::ClearIBCBuffers()
   for(i=0; i<fIBCBuffers->Count(); i++) {
 
     for(j=0; j<(*fIBCBuffers)[i].Count(); j++) {
-      free((*fIBCBuffers)[i][j]);
+      if((*fOwnsIBCBuffers)[i][j]) free((*fIBCBuffers)[i][j]);
     }
   }
   fIBCBuffers->Clear();
+  fOwnsIBCBuffers->Clear();
 }
 
 QList<Int_t> QTTreeProcessor::QDependentProcs::GetAllDepends() const

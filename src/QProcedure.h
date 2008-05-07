@@ -28,7 +28,9 @@ class QProcedure
     Int_t GetNOutputs() const{return fOutputsBufs.Count();}
     Int_t GetNParams() const{return fParamsBufs.Count();}
 
-    virtual void* GetProc() const=0;
+    Double_t* GetInputBuf(Int_t index){return fInputsBufs[index];}
+    Double_t* GetOutputBuf(Int_t index){return fOutputsBufs[index];}
+    Double_t* GetParamBuf(Int_t index){return fParamsBufs[index];}
 
     void SetInputBuf(Int_t index, Double_t *buf){fInputsBufs[index]=buf;}
     void SetOutputBuf(Int_t index, Double_t *buf){fOutputsBufs[index]=buf;}

@@ -28,8 +28,6 @@ class QCINTProc: public QProcedure
     virtual void DelOutput(Int_t index=-1){QProcedure::DelOutput(index); InitArgs();}
     virtual void DelParam(Int_t index=-1){QProcedure::DelParam(index); InitArgs();}
 
-    void* GetProc() const{return NULL;}
-
     virtual void SetNInputs(Int_t n){QProcedure::SetNInputs(n); InitArgs();}
     virtual void SetNOutputs(Int_t n){QProcedure::SetNOutputs(n); InitArgs();}
     virtual void SetNParams(Int_t n){QProcedure::SetNParams(n); InitArgs();}

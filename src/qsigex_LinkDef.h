@@ -25,6 +25,7 @@
 #pragma link C++ class QList<TObject*>-;
 #pragma link C++ class QList<QList<TObject*> >-;
 #pragma link C++ class QList<Double_t*>-;
+#pragma link C++ class QList<QList<Double_t*> >-;
 
 #pragma link C++ class QNamedVar<TString>;
 #pragma link C++ class QNamedVar<UShort_t>;
