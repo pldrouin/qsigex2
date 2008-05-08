@@ -41,9 +41,9 @@ class QDis: public TNamed, public QTObjectIO
     {
       PRINTF2(this,"\tQDis::QDis()\n")
     }
-  QDis(const Char_t* classname):QTObjectIO(classname), fCutExpr(), fNormFlags(0), fLastModified(){}
-  QDis(const Char_t* classname, const Char_t* filename, const Char_t* objectname):QTObjectIO(classname, filename,objectname), fCutExpr(), fNormFlags(0), fLastModified(){SetNameTitleToObject();}
-  QDis(const Char_t* classname, const TObject& rhs):QTObjectIO(classname, rhs), fCutExpr(), fNormFlags(0), fLastModified(){SetNameTitleToObject();}
+  QDis(const Char_t* classname):QTObjectIO(classname), fCutExpr(), fNormFlags(0){}
+  QDis(const Char_t* classname, const Char_t* filename, const Char_t* objectname):QTObjectIO(classname, filename,objectname), fCutExpr(), fNormFlags(0){SetNameTitleToObject();}
+  QDis(const Char_t* classname, const TObject& rhs):QTObjectIO(classname, rhs), fCutExpr(), fNormFlags(0){SetNameTitleToObject();}
   
   virtual ~QDis();
 
@@ -62,7 +62,6 @@ class QDis: public TNamed, public QTObjectIO
     QTObjectIO::operator=(dynamic_cast<const QTObjectIO&>(rhs));
     fCutExpr=rhs.fCutExpr;
     fNormFlags=rhs.fNormFlags;
-    fLastModified=rhs.fLastModified;
     return *this;}
 
   void Draw(Option_t *option=""){GetObject()->Draw(option);}
@@ -77,19 +76,15 @@ class QDis: public TNamed, public QTObjectIO
   virtual Int_t GetDimension()=0;
 
   const Option_t* GetCutExpr() const{return fCutExpr;}
-  const TTimeStamp& GetModTime() const{return fLastModified;}
   Int_t GetNormFlags() const{return fNormFlags;}
 
   void SetCutExpr(Option_t *cutexpr=NULL){fCutExpr=cutexpr;}
   void SetNormFlags(Int_t normflags=0){fNormFlags=normflags;}
 
-  void UpdateModTime(){fLastModified.Set();}
-
  protected:
   void SetNameTitleToObject();
   TString fCutExpr;
   Int_t fNormFlags;
-  TTimeStamp fLastModified;
 
  private:
   QDis(const QDis& rhs): TNamed(rhs),QTObjectIO(rhs.GetClassName()){*this=rhs;}

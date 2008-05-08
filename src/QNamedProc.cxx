@@ -7,18 +7,18 @@
 
 ClassImp(QNamedProc)
 
-void QNamedProc::AddInput(const char *name, const char *title, Int_t index, Double_t *buf)
+void QNamedProc::AddIVar(const char *name, const char *title, Int_t index, Double_t *buf)
 {
   QNamedVar<TString> var(name,title);
   fInputsNames->Add(var,index);
-  fProcedure->AddInput(index,buf);
+  fProcedure->AddIVar(index,buf);
 }
 
-void QNamedProc::AddOutput(const char *name, const char *title, Int_t index, Double_t *buf)
+void QNamedProc::AddOVar(const char *name, const char *title, Int_t index, Double_t *buf)
 {
   QNamedVar<TString> var(name,title);
   fOutputsNames->Add(var,index); 
-  fProcedure->AddOutput(index,buf);
+  fProcedure->AddOVar(index,buf);
 }
 
 void QNamedProc::AddParam(const char *name, const char *title, Int_t index, Double_t *buf)
@@ -54,7 +54,7 @@ const QNamedProc& QNamedProc::operator=(const QNamedProc& rhs)
   return *this;
 }
 
-void QNamedProc::SetProc(Bool_t (*proc)(Double_t**, Double_t**, Double_t**, const Int_t*),const char *procname)
+void QNamedProc::SetProc(Bool_t (*proc)(QProcArgs&),const char *procname)
 {
   *fProcName=procname;
   if(fProcedure) delete fProcedure;

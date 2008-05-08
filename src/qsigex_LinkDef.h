@@ -26,6 +26,7 @@
 #pragma link C++ class QList<QList<TObject*> >-;
 #pragma link C++ class QList<Double_t*>-;
 #pragma link C++ class QList<QList<Double_t*> >-;
+#pragma link C++ class QList<QProcObj*>-;
 
 #pragma link C++ class QNamedVar<TString>;
 #pragma link C++ class QNamedVar<UShort_t>;
@@ -34,6 +35,8 @@
 #pragma link C++ class QNamedVar<Double_t>;
 
 #pragma link C++ class QMask;
+#pragma link C++ class QProcObj;
+#pragma link C++ class QProcArgs;
 #pragma link C++ class QProcedure;
 #pragma link C++ class QCompProc;
 #pragma link C++ class QCINTProc;

@@ -5,12 +5,12 @@
 TRandom2 rnd;
 
 int main();
-Bool_t GIShift(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns);
-Bool_t GCShift(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns);
-Bool_t GIScale(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns);
-Bool_t GCScale(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns);
+Bool_t GIShift(QProcArgs& args);
+Bool_t GCShift(QProcArgs& args);
+Bool_t GIScale(QProcArgs& args);
+Bool_t GCScale(QProcArgs& args);
 
-Bool_t Radius(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns);
+Bool_t Radius(QProcArgs& args);
 
 int main()
 {
@@ -34,7 +34,7 @@ int main()
   ttp.AddProc("VShift","VShift",GIShift);
   ttp.AddProc("VScale","VScale",GCScale);
   ttp.AddProc("Radius","Radius",Radius,NULL,kTRUE);
-  ttp.AddHist("radpdf","radpdf",radius,kTRUE);
+//  ttp.AddHist("radpdf","radpdf",radius,kTRUE);
 
   ttp.GetProc("VShift").AddParam("VShiftXM");
   ttp.GetProc("VShift").AddParam("VShiftXW");
@@ -47,26 +47,26 @@ int main()
   ttp.GetProc("Radius").AddParam("Rmin");
   ttp.GetProc("Radius").AddParam("Rmax");
 
-  ttp.GetProc("VShift").AddInput("Xcoord","mc_CALIB_010278.root:t");
-  ttp.GetProc("VShift").AddInput("Ycoord","mc_CALIB_010278.root:t");
-  ttp.GetProc("VShift").AddInput("Zcoord","mc_CALIB_010278.root:t");
-  ttp.GetProc("VShift").AddOutput("Xcoord","results.root:VShift");
-  ttp.GetProc("VShift").AddOutput("Ycoord","results.root:VShift");
-  ttp.GetProc("VShift").AddOutput("Zcoord","results.root:VShift");
+  ttp.GetProc("VShift").AddIVar("Xcoord","mc_CALIB_010278.root:t");
+  ttp.GetProc("VShift").AddIVar("Ycoord","mc_CALIB_010278.root:t");
+  ttp.GetProc("VShift").AddIVar("Zcoord","mc_CALIB_010278.root:t");
+  ttp.GetProc("VShift").AddOVar("Xcoord","results.root:VShift");
+  ttp.GetProc("VShift").AddOVar("Ycoord","results.root:VShift");
+  ttp.GetProc("VShift").AddOVar("Zcoord","results.root:VShift");
 
-  ttp.GetProc("VScale").AddInput("Xcoord","results.root:VShift");
-  ttp.GetProc("VScale").AddInput("Ycoord","results.root:VShift");
-  ttp.GetProc("VScale").AddInput("Zcoord","results.root:VShift");
-  ttp.GetProc("VScale").AddOutput("Xcoord","results.root:VScale");
-  ttp.GetProc("VScale").AddOutput("Ycoord","results.root:VScale");
-  ttp.GetProc("VScale").AddOutput("Zcoord","results.root:VScale");
+  ttp.GetProc("VScale").AddIVar("Xcoord","results.root:VShift");
+  ttp.GetProc("VScale").AddIVar("Ycoord","results.root:VShift");
+  ttp.GetProc("VScale").AddIVar("Zcoord","results.root:VShift");
+  ttp.GetProc("VScale").AddOVar("Xcoord","results.root:VScale");
+  ttp.GetProc("VScale").AddOVar("Ycoord","results.root:VScale");
+  ttp.GetProc("VScale").AddOVar("Zcoord","results.root:VScale");
 
-  ttp.GetProc("Radius").AddInput("Xcoord","results.root:VScale");
-  ttp.GetProc("Radius").AddInput("Ycoord","results.root:VScale");
-  ttp.GetProc("Radius").AddInput("Zcoord","results.root:VScale");
-  ttp.GetProc("Radius").AddOutput("Radius","results.root:SmearedMC");
+  ttp.GetProc("Radius").AddIVar("Xcoord","results.root:VScale");
+  ttp.GetProc("Radius").AddIVar("Ycoord","results.root:VScale");
+  ttp.GetProc("Radius").AddIVar("Zcoord","results.root:VScale");
+  ttp.GetProc("Radius").AddOVar("Radius","results.root:SmearedMC");
 
-  ttp.GetHist("radpdf").AddInput("Radius","results.root:SmearedMC");
+//  ttp.GetHist("radpdf").AddIVar("Radius","results.root:SmearedMC");
 
   printf("Analyze\n");
   ttp.Analyze();
@@ -88,48 +88,48 @@ int main()
   return 0;
 }
 
-Bool_t GIShift(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns)
+Bool_t GIShift(QProcArgs& args)
 {
 
-  for(Int_t i=0; i<ns[0]; i++) {
-    *(outputs[i])=*(inputs[i])+rnd.Gaus(*(params[2*i]),*(params[2*i+1]));
+  for(Int_t i=0; i<args.GetNIVars(); i++) {
+    args.OVar(i)=args.IVar(i)+rnd.Gaus(args.Param(2*i),args.Param(2*i+1));
   }
   return kTRUE;
 }
 
-Bool_t GCShift(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns)
+Bool_t GCShift(QProcArgs& args)
 {
-  for(Int_t i=0; i<ns[0]; i++) {
-    *(outputs[i])=*(inputs[i])+rnd.Gaus(*(params[0]),*(params[1]));
+  for(Int_t i=0; i<args.GetNIVars(); i++) {
+    args.OVar(i)=args.IVar(i)+rnd.Gaus(args.Param(0),args.Param(1));
   }
   return kTRUE;
 }
 
-Bool_t GIScale(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns)
+Bool_t GIScale(QProcArgs& args)
 {
-  for(Int_t i=0; i<ns[0]; i++) {
-    *(outputs[i])=*(inputs[i])*rnd.Gaus(*(params[2*i]),*(params[2*i+1]));
+  for(Int_t i=0; i<args.GetNIVars(); i++) {
+    args.OVar(i)=args.IVar(i)*rnd.Gaus(args.Param(2*i),args.Param(2*i+1));
   }
   return kTRUE;
 }
 
-Bool_t GCScale(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns)
+Bool_t GCScale(QProcArgs& args)
 {
-  for(Int_t i=0; i<ns[0]; i++) {
-    *(outputs[i])=*(inputs[i])*rnd.Gaus(*(params[0]),*(params[1]));
+  for(Int_t i=0; i<args.GetNIVars(); i++) {
+    args.OVar(i)=args.IVar(i)*rnd.Gaus(args.Param(0),args.Param(1));
   }
   return kTRUE;
 }
 
-Bool_t Radius(Double_t** inputs, Double_t** outputs, Double_t** params, const Int_t* ns){
-  *(outputs[0])=TMath::Sqrt(*(inputs[0])**(inputs[0])+*(inputs[1])**(inputs[1])+*(inputs[2])**(inputs[2]));
+Bool_t Radius(QProcArgs& args){
+  args.OVar(0)=TMath::Sqrt(args.IVar(0)*args.IVar(0)+args.IVar(1)*args.IVar(1)+args.IVar(2)*args.IVar(2));
 
-  switch(ns[2]) {
+  switch(args.GetNParams()) {
     case 2:
-      if(*(outputs[0])<*(params[0]) || *(outputs[0])>*(params[1])) return kFALSE;
+      if(args.OVar(0)<args.Param(0) || args.OVar(0)>args.Param(1)) return kFALSE;
       break;
     case 1:
-      if(*(outputs[0])>*(params[0])) return kFALSE;
+      if(args.OVar(0)>args.Param(0)) return kFALSE;
       break;
   }
   return kTRUE;
