@@ -16,7 +16,7 @@ int main()
 {
   QTTreeProcessor ttp;
 
-  QDisTH *radius=new QDisTH("radpdf","radpdf",10,0.,100.);
+  QDisTH *radius=new QDisTH("radpdf","radpdf",50,0.,500.);
   ((TH1&)*radius).GetXaxis()->SetTitle("Radius [cm]");
   ((TH1&)*radius).GetYaxis()->SetTitle("Number of events");
 
@@ -34,7 +34,7 @@ int main()
   ttp.AddProc("VShift","VShift",GIShift);
   ttp.AddProc("VScale","VScale",GCScale);
   ttp.AddProc("Radius","Radius",Radius,NULL,kTRUE);
-  ttp.AddHistProc("radpdf","radpdf",radius);
+  ttp.AddHist("radpdf","radpdf",radius,kTRUE);
 
   ttp.GetProc("VShift").AddParam("VShiftXM");
   ttp.GetProc("VShift").AddParam("VShiftXW");
@@ -55,7 +55,7 @@ int main()
   ttp.GetProc("VShift").AddOutput("Zcoord","results.root:VShift");
 
   ttp.GetProc("VScale").AddInput("Xcoord","results.root:VShift");
-  ttp.GetProc("VScale").AddInput("Xcoord","results.root:VShift");
+  ttp.GetProc("VScale").AddInput("Ycoord","results.root:VShift");
   ttp.GetProc("VScale").AddInput("Zcoord","results.root:VShift");
   ttp.GetProc("VScale").AddOutput("Xcoord","results.root:VScale");
   ttp.GetProc("VScale").AddOutput("Ycoord","results.root:VScale");
@@ -66,16 +66,17 @@ int main()
   ttp.GetProc("Radius").AddInput("Zcoord","results.root:VScale");
   ttp.GetProc("Radius").AddOutput("Radius","results.root:SmearedMC");
 
-  ttp.GetProc("radpdf").AddInput("Radius","results.root:SmearedMC");
+  ttp.GetHist("radpdf").AddInput("Radius","results.root:SmearedMC");
 
   printf("Analyze\n");
   ttp.Analyze();
   printf("InitProcess\n");
+  ttp.PrintAnalysisResults();
   ttp.InitProcess();
   printf("Exec\n");
   ttp.Exec();
-  //ttp.SetParam(6,1.1);
-  //ttp.Exec();
+  ttp.SetParam(6,1.1);
+  ttp.Exec();
   printf("Terminate\n");
   ttp.TerminateProcess();
 

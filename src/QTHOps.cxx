@@ -63,7 +63,7 @@ Double_t QTHOps::LimIntegral(Option_t* domain, Double_t* error, Int_t** binrange
 {
   PRINTF8(this,"\tDouble_t QTH1Ops::LimIntegral(Option_t* domain<",domain,">, Double_t* error<",error,">, const Int_t** binranges<",binranges,">) const\n")
 
-  if(!domain){
+  if(!domain || !strlen(domain)){
     if(error) *error=0;
     return BinIntegral();
   }

@@ -75,7 +75,7 @@ Double_t QTFOps::LimIntegral(Option_t* domain, Double_t* error)
   const TF1* obj=dynamic_cast<const TF1*>(fTF);
   obj->GetRange(xmin,ymin,zmin,xmax,ymax,zmax);
 
-  if(!domain) return LimIntegral(xmin,xmax,ymin,ymax,zmin,zmax);
+  if(!domain || !strlen(domain)) return LimIntegral(xmin,xmax,ymin,ymax,zmin,zmax);
 
   TString objformula=obj->GetExpFormula();
   TString newformula="(";

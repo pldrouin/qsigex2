@@ -363,7 +363,9 @@ Int_t QSigExPDFs::Get()
 	  //Normalize the PDF using the cuts and according to what indicated by the act flag
 	  if(!(actbuf & kDisSkipNorm)){
 	    cout << "\nNormalize pdf " << pdfbuf->GetName() << "\n";
-	    pdfbuf->Normalize(cutsexpr,actbuf>>2,&buf1,&buf2,&buf3);
+	    pdfbuf->SetCutExpr(cutsexpr);
+	    pdfbuf->SetNormFlags(actbuf>>2);
+	    pdfbuf->Normalize(&buf1,&buf2,&buf3);
 	    cout << "Full integral: " << buf1 << "\n";
 	    if(buf3==0){
 	      cout << "Normalization integral: " << buf2 << "\n";

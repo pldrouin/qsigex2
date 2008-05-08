@@ -78,8 +78,7 @@ class QDisTH: public QDis
   
   Int_t GetDimension(){return dynamic_cast<TH1*>(GetObject())->GetDimension();}
 
-  void Normalize(Option_t* cutexpr=NULL, Int_t normflags=0, Double_t* fullintegral=NULL,
-		 Double_t* cutintegral=NULL, Double_t* error=NULL);
+  void Normalize(Double_t* fullintegral=NULL, Double_t* cutintegral=NULL, Double_t* error=NULL);
 
   Double_t ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const;
 

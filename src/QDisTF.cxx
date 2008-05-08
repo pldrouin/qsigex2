@@ -61,19 +61,19 @@ Double_t QDisTF::Derivative(const Double_t &x) const
   } 
 }
 
-void QDisTF::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullintegral, Double_t* cutintegral, Double_t* error)
+void QDisTF::Normalize(Double_t* fullintegral, Double_t* cutintegral, Double_t* error)
 {
   //This function normalizes the p.d.f. according to the cuts defined via
-  //cutexpr string. This string is a standard ROOT selection expression that
+  //SetCutExpr. This string is a standard ROOT selection expression that
   //contains x and/or y and/or z variables. The second and third arguments
   //(optional) are filled with the total function integral and the integral of
   //function between cuts respectively. The fourth argument, when provided, is
   //set to 0. 
 
-  PRINTF12(this,"\tvoid QDSigExisTF::Normalize(Option_t* cutexpr<",cutexpr,">, Int_t normflags<",normflags,">, Double_t* fullintegral<",fullintegral,">, Double_t* cutintegral<",cutintegral,">, Double_t* error<",error,">)\n")
+  PRINTF8(this,"\tvoid QDSigExisTF::Normalize(Double_t* fullintegral<",fullintegral,">, Double_t* cutintegral<",cutintegral,">, Double_t* error<",error,">)\n")
 
   try{
-    if(normflags){
+    if(fNormFlags){
       cout << "Error: QDisTF::Normalize: Unknown flag(s)\n";
       throw 1;
     }
@@ -84,7 +84,7 @@ void QDisTF::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullintegra
 
     fQTFOps.SetTF(dynamic_cast<TF1*>(GetObject()));  //set the pdf.  GetObject is a QTObjectIO method.
 
-    Double_t cutintbuf=fQTFOps.LimIntegral(cutexpr,error);
+    Double_t cutintbuf=fQTFOps.LimIntegral(fCutExpr,error);
 
     if(fullintegral){
       Double_t xmin,xmax,ymin,ymax,zmin,zmax;

@@ -120,10 +120,10 @@ Double_t QDisTH::ProbDensity(const Double_t &x,const Double_t &y,const Double_t 
   }    
 }
 
-void QDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullintegral, Double_t* cutintegral, Double_t* error)
+void QDisTH::Normalize(Double_t* fullintegral, Double_t* cutintegral, Double_t* error)
 {
  //This function normalizes the PDF according to the normalization
- //flags normflags and the cuts defined via the cutexpr string. This
+ //flags sets by SetNormFlags and the cuts defined via SetCutExpr. This
  //string is a standard ROOT selection expression that contains x
  //and/or y and/or z variables. The normalization flag values are the
  //following:
@@ -147,12 +147,12 @@ void QDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullintegra
  //function integral and the integral of function between cuts
  //respectively.
 
-  PRINTF12(this,"\tvoid QDisTH::Normalize(Option_t* cutexpr<",cutexpr,">, Int_t normflags<",normflags,">, Double_t* fullintegral<",fullintegral,">, Double_t* cutintegral<",cutintegral,">, Double_t* error<",error,">)\n")
+  PRINTF8(this,"\tvoid QDisTH::Normalize(Double_t* fullintegral<",fullintegral,">, Double_t* cutintegral<",cutintegral,">, Double_t* error<",error,">)\n")
 
   try{
     TH1* histo;                 //Histogram pointer
     Double_t cutintbuf;         //Buffer for integral value(s)
-    Int_t nfix=normflags&3;     //Number of fixed coordinates for a conditional PDF
+    Int_t nfix=fNormFlags&3;     //Number of fixed coordinates for a conditional PDF
 
     histo=dynamic_cast<TH1*>(GetObject());
     
@@ -167,7 +167,7 @@ void QDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullintegra
     nbins[2]=(dim>2 ? histo->GetNbinsZ() : 1);
 
     //Normalization of histograms with variable size for which the bin content corresponds to a number of events
-    if(normflags&4){
+    if(fNormFlags&4){
       TAxis *vbsaxis[3];                  //array of axis using variable bin width
       Int_t i;                            //iterator
       Double_t binwidth;                  //buffer for variable bin width/area/volume
@@ -193,7 +193,7 @@ void QDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullintegra
 	      i++;
 	    }
 
-	    //If computer bin width is not 0
+	    //If computed bin width is not 0
 	    if(binwidth){
 	      //Get the bin index
 	      bin=histo->GetBin(biniter[0],biniter[1],biniter[2]);
@@ -240,7 +240,7 @@ void QDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullintegra
 	//Set fcoord to the index of the first fixed dimension
 	fcoord=dim-nfix;
 	//Compute the integral of the conditional PDF for a given fixed bin
-	scutintbuf=fQTHOps.LimIntegral(cutexpr,&serror,binranges);
+	scutintbuf=fQTHOps.LimIntegral(fCutExpr,&serror,binranges);
 	//Add the integral value to the total
 	cutintbuf+=scutintbuf;
 
@@ -297,7 +297,7 @@ void QDisTH::Normalize(Option_t* cutexpr, Int_t normflags, Double_t* fullintegra
       //If histogram has not to be normalized as a conditional PDF
     } else {
       //Compute the integral of the histogram
-      cutintbuf=fQTHOps.LimIntegral(cutexpr,error);
+      cutintbuf=fQTHOps.LimIntegral(fCutExpr,error);
 
       //If the integral value is not 0, normalize the PDF
       if (cutintbuf) histo->Scale(1/cutintbuf);
