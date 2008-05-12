@@ -35,20 +35,22 @@ class QProcedure
     void DelOObj(Int_t index=-1){fArgs.DelOObj(index);}
     void DelParam(Int_t index=-1){fArgs.DelParam(index);}
 
-    Int_t GetNIVars() const{return fArgs.GetNIVars();}
-    Int_t GetNIObjs() const{return fArgs.GetNIObjs();}
-    Int_t GetNOVars() const{return fArgs.GetNOVars();}
-    Int_t GetNOObjs() const{return fArgs.GetNOObjs();}
-    Int_t GetNParams() const{return fArgs.GetNParams();}
+    const Int_t& GetNIVars() const{return fArgs.GetNIVars();}
+    const Int_t& GetNIObjs() const{return fArgs.GetNIObjs();}
+    const Int_t& GetNOVars() const{return fArgs.GetNOVars();}
+    const Int_t& GetNOObjs() const{return fArgs.GetNOObjs();}
+    const Int_t& GetNParams() const{return fArgs.GetNParams();}
 
     Double_t& IVar(Int_t i) const{return fArgs.IVar(i);}
-    QProcObj*& IObj(Int_t i) const{return fArgs.IObj(i);}
+    QProcObj* IObj(Int_t i) const{return fArgs.IObj(i);}
     Double_t& OVar(Int_t i) const{return fArgs.OVar(i);}
-    QProcObj*& OObj(Int_t i) const{return fArgs.OObj(i);}
+    QProcObj* OObj(Int_t i) const{return fArgs.OObj(i);}
     Double_t& Param(Int_t i) const{return fArgs.Param(i);}
 
     void SetIVarPtr(Int_t index, Double_t *buf){fArgs.SetIVarPtr(index,buf);}
+    void SetIObjPtr(Int_t index, QProcObj *obj){fArgs.SetIObjPtr(index,obj);}
     void SetOVarPtr(Int_t index, Double_t *buf){fArgs.SetOVarPtr(index,buf);}
+    void SetOObjPtr(Int_t index, QProcObj *obj){fArgs.SetOObjPtr(index,obj);}
     void SetParamPtr(Int_t index, Double_t *buf){fArgs.SetParamPtr(index,buf);}
 
     void SetNIVars(Int_t n){fArgs.SetNIVars(n);}
@@ -59,6 +61,7 @@ class QProcedure
 
     virtual Bool_t Exec()=0;
 
+    friend class QNamedProc;
     friend Bool_t operator==(const QProcedure &lhs, const QProcedure &rhs){return (lhs.fArgs==rhs.fArgs);}
   protected:
     QProcArgs fArgs;

@@ -85,7 +85,7 @@ template <typename U> class QList: public TObject
 
   const QList<U>& operator-=(const U& delu){PRINTF4(this,"\tconst QList<U>& QList<",typeid(U).name(),">::operator-=(const U& delu)\n") Del(&delu); return *this;}
 
-  Int_t Count() const{PRINTF4(this,"\tInt_t& QList<",typeid(U).name(),">::Count()\n") return fNElements;}
+  const Int_t& Count() const{PRINTF4(this,"\tInt_t& QList<",typeid(U).name(),">::Count()\n") return fNElements;}
 
   U* GetArray() const{return fUArray;}
   U& GetLast() const;

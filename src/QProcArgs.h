@@ -12,15 +12,17 @@ class QProcArgs
     QProcArgs(const QProcArgs& qprocargs):fIBuffers(qprocargs.fIBuffers), fIObjects(qprocargs.fIObjects), fOBuffers(qprocargs.fOBuffers), fOObjects(qprocargs.fOObjects), fPBuffers(qprocargs.fPBuffers){}
     virtual ~QProcArgs(){}
     virtual const QProcArgs& operator=(const QProcArgs& rhs);
-    Int_t GetNIVars() const{return fIBuffers.Count();}
-    Int_t GetNIObjs() const{return fIObjects.Count();}
-    Int_t GetNOVars() const{return fOBuffers.Count();}
-    Int_t GetNOObjs() const{return fOObjects.Count();}
-    Int_t GetNParams() const{return fPBuffers.Count();}
+    const QList<QProcObj*>& GetListOfIObjs() const{return fIObjects;}
+    const QList<QProcObj*>& GetListOfOObjs() const{return fOObjects;}
+    const Int_t& GetNIVars() const{return fIBuffers.Count();}
+    const Int_t& GetNIObjs() const{return fIObjects.Count();}
+    const Int_t& GetNOVars() const{return fOBuffers.Count();}
+    const Int_t& GetNOObjs() const{return fOObjects.Count();}
+    const Int_t& GetNParams() const{return fPBuffers.Count();}
     Double_t& IVar(Int_t i) const{return *fIBuffers[i];}
-    QProcObj*& IObj(Int_t i) const{return fIObjects[i];}
+    QProcObj* IObj(Int_t i) const{return fIObjects[i];}
     Double_t& OVar(Int_t i) const{return *fOBuffers[i];}
-    QProcObj*& OObj(Int_t i) const{return fOObjects[i];}
+    QProcObj* OObj(Int_t i) const{return fOObjects[i];}
     Double_t& Param(Int_t i) const{return *fPBuffers[i];}
 
   protected:
@@ -40,7 +42,9 @@ class QProcArgs
     void DelOObj(Int_t index=-1){fOObjects.Del(index);}
     void DelParam(Int_t index=-1){fPBuffers.Del(index);}
     void SetIVarPtr(Int_t index, Double_t *buf){fIBuffers[index]=buf;}
+    void SetIObjPtr(Int_t index, QProcObj *obj){fIObjects[index]=obj;}
     void SetOVarPtr(Int_t index, Double_t *buf){fOBuffers[index]=buf;}
+    void SetOObjPtr(Int_t index, QProcObj *obj){fOObjects[index]=obj;}
     void SetParamPtr(Int_t index, Double_t *buf){fPBuffers[index]=buf;}
     void SetNIVars(Int_t n){fIBuffers.RedimList(n,-1,NULL);}
     void SetNIObjs(Int_t n){fIObjects.RedimList(n,-1,NULL);}

@@ -10,15 +10,25 @@ ClassImp(QNamedProc)
 void QNamedProc::AddIVar(const char *name, const char *title, Int_t index, Double_t *buf)
 {
   QNamedVar<TString> var(name,title);
-  fInputsNames->Add(var,index);
+  fIVarsNames->Add(var,index);
   fProcedure->AddIVar(index,buf);
+}
+
+void QNamedProc::AddIObj(QProcObj *obj, Int_t index)
+{
+  fProcedure->AddIObj(index,obj);
 }
 
 void QNamedProc::AddOVar(const char *name, const char *title, Int_t index, Double_t *buf)
 {
   QNamedVar<TString> var(name,title);
-  fOutputsNames->Add(var,index); 
+  fOVarsNames->Add(var,index); 
   fProcedure->AddOVar(index,buf);
+}
+
+void QNamedProc::AddOObj(QProcObj *obj, Int_t index)
+{
+  fProcedure->AddOObj(index,obj);
 }
 
 void QNamedProc::AddParam(const char *name, const char *title, Int_t index, Double_t *buf)
@@ -31,8 +41,10 @@ void QNamedProc::AddParam(const char *name, const char *title, Int_t index, Doub
 void QNamedProc::Browse(TBrowser *b)
 {
   if(b) {
-    b->Add(fInputsNames,"Inputs");
-    b->Add(fOutputsNames,"Outputs");
+    b->Add(fIVarsNames,"Input Variables");
+//    b->Add(const_cast<TObject*>((const TObject*)&(fProcedure->fArgs.GetListOfIObjs())),"Input Objects");
+    b->Add(fOVarsNames,"Output Variables");
+//    b->Add(const_cast<TObject*>((const TObject*)&(fProcedure->fArgs.GetListOfOObjs())),"Output Objects");
     b->Add(fParamsNames,"Parameters");
     b->Add(fProcName);
   }
@@ -41,8 +53,8 @@ void QNamedProc::Browse(TBrowser *b)
 const QNamedProc& QNamedProc::operator=(const QNamedProc& rhs)
 {
   SetNameTitle(rhs.GetName(),rhs.GetTitle());
-  *fInputsNames=*(rhs.fInputsNames);
-  *fOutputsNames=*(rhs.fOutputsNames);
+  *fIVarsNames=*(rhs.fIVarsNames);
+  *fOVarsNames=*(rhs.fOVarsNames);
   *fParamsNames=*(rhs.fParamsNames);
   *fProcName=*(rhs.fProcName);
 
@@ -80,7 +92,7 @@ Bool_t operator==(const QNamedProc &lhs, const QNamedProc &rhs)
 {
   if(lhs.fProcedure!=NULL ^ rhs.fProcedure!=NULL) return 0;
   if(lhs.fProcedure && rhs.fProcedure && !(*(lhs.fProcedure)==*(rhs.fProcedure))) return 0;
-  if(*(lhs.fProcName)!=*(rhs.fProcName) || *(lhs.fInputsNames)!=*(rhs.fInputsNames) || *(lhs.fOutputsNames)!=*(rhs.fOutputsNames) || *(lhs.fParamsNames)!=*(rhs.fParamsNames)) return 0;
+  if(*(lhs.fProcName)!=*(rhs.fProcName) || *(lhs.fIVarsNames)!=*(rhs.fIVarsNames) || *(lhs.fOVarsNames)!=*(rhs.fOVarsNames) || *(lhs.fParamsNames)!=*(rhs.fParamsNames)) return 0;
   return 1;
 }
 

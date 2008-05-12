@@ -15,7 +15,7 @@ class QProcObj
   private:
     TTimeStamp fLastModified;
 
-    ClassDef(QProcObj,0)
+    ClassDef(QProcObj,1)
 };
 
 #endif

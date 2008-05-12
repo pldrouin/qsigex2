@@ -12,6 +12,7 @@
 #include "TDirectory.h"
 #include "TTimeStamp.h"
 #include "QTObjectIO.h"
+#include "QProcObj.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -34,16 +35,16 @@ using std::cout;
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-class QDis: public TNamed, public QTObjectIO
+class QDis: public TNamed, public QTObjectIO, public QProcObj
 {
  public:
   QDis():QTObjectIO(), fCutExpr(), fNormFlags(0)
     {
       PRINTF2(this,"\tQDis::QDis()\n")
     }
-  QDis(const Char_t* classname):QTObjectIO(classname), fCutExpr(), fNormFlags(0){}
-  QDis(const Char_t* classname, const Char_t* filename, const Char_t* objectname):QTObjectIO(classname, filename,objectname), fCutExpr(), fNormFlags(0){SetNameTitleToObject();}
-  QDis(const Char_t* classname, const TObject& rhs):QTObjectIO(classname, rhs), fCutExpr(), fNormFlags(0){SetNameTitleToObject();}
+  QDis(const Char_t* classname):QTObjectIO(classname), QProcObj(), fCutExpr(), fNormFlags(0){}
+  QDis(const Char_t* classname, const Char_t* filename, const Char_t* objectname):QTObjectIO(classname, filename,objectname), QProcObj(), fCutExpr(), fNormFlags(0){SetNameTitleToObject();}
+  QDis(const Char_t* classname, const TObject& rhs):QTObjectIO(classname, rhs), QProcObj(), fCutExpr(), fNormFlags(0){SetNameTitleToObject();}
   
   virtual ~QDis();
 
@@ -87,7 +88,7 @@ class QDis: public TNamed, public QTObjectIO
   Int_t fNormFlags;
 
  private:
-  QDis(const QDis& rhs): TNamed(rhs),QTObjectIO(rhs.GetClassName()){*this=rhs;}
+  QDis(const QDis& rhs): TNamed(rhs),QTObjectIO(rhs.GetClassName()), QProcObj(rhs){*this=rhs;}
 
   ClassDef(QDis,1) //Abstract class of QDis* classes
 };
