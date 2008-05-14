@@ -60,10 +60,10 @@ QTTreeProcessor::~QTTreeProcessor()
   fOTSProc=NULL;
   delete fProcsParDepends;
   fProcsParDepends=NULL;
-  delete fProcsTDepends;
-  fProcsTDepends=NULL;
-  delete fProcsBDepends;
-  fProcsBDepends=NULL;
+  delete fBPDepends;
+  fBPDepends=NULL;
+  delete fObjsPDepends;
+  fObjsPDepends=NULL;
   delete fIBBuffers;
   fIBBuffers=NULL;
   delete fOwnsIBBuffers;
@@ -176,13 +176,14 @@ void QTTreeProcessor::Analyze()
   fAnalysisDir=gDirectory->GetPath();
 
   Int_t nprocs=fProcs->Count();
-  Int_t ninputs, noutputs, nparams;
+  Int_t nivars, niobjs, novars, noobjs, nparams;
   Int_t pidx, iidx, oidx, ibidx, obidx;
 
   fITNames->Clear();
   fOTNames->Clear();
   fIBNames->Clear();
   fOBNames->Clear();
+  fBPDepends->Clear();
   fITIndices->Clear();
   fIBIndices->Clear();
   fOTIndices->Clear();
@@ -197,14 +198,19 @@ void QTTreeProcessor::Analyze()
   QList<Int_t> blastproc;          //Index of last process having recorded its output in a given memory buffer
   fProcsParDepends->RedimList(nprocs);
   fSelDepProcs->RedimList(nprocs);
+  fIObjects->RedimList(nprocs);
+  fOObjects->RedimList(nprocs);
+  fObjsPDepends->RedimList(nprocs);
 
   //Section 1: First pass over all processes. Setting as many inputs, outputs and dependencies as possible and doing some checks
   //Loop over the processes
   for(i=0; i<nprocs; i++) {
     proc=&((*fProcs)[i]);
     //printf("Process '%s'\n",proc->GetName());
-    ninputs=proc->GetNIVars();
-    noutputs=proc->GetNOVars();
+    nivars=proc->GetNIVars();
+    niobjs=proc->GetNIObjs();
+    novars=proc->GetNOVars();
+    noobjs=proc->GetNOObjs();
     nparams=proc->GetNParams();
 
     (*fProcsParDepends)[i].Clear();
@@ -225,9 +231,9 @@ void QTTreeProcessor::Analyze()
       (*fProcsParDepends)[i].SetBit(pidx,1);
     }
 
-    //Loop over the inputs for the current process
+    //Loop over the input variables for the current process
     k=0;
-    for(j=0; j<ninputs; j++) {
+    for(j=0; j<nivars; j++) {
       sbuf=proc->GetIVarNameTitle(j);
       //printf("Encoded Input: '%s'\t%s\n",sbuf.Data(),proc->GetIVarNameTitle(j).GetName());
 
@@ -254,6 +260,10 @@ void QTTreeProcessor::Analyze()
 	  //Add the name of the required branch
 	  fIBNames->RedimList(fITNames->Count());
 	  fIBNames->GetLast().Add(proc->GetIVarNameTitle(j).GetName());
+	  //Add the current process to the list of processes that depend on the current input branch
+	  fBPDepends->RedimList(fITNames->Count());
+	  fBPDepends->GetLast().RedimList(1);
+	  fBPDepends->GetLast().GetLast().SetBit(i,kTRUE);
 	  iidx=fITNames->Count()-1;
 	  ibidx=0;
 
@@ -263,7 +273,12 @@ void QTTreeProcessor::Analyze()
 	  //Ensure the required branch is in the list
 	  ibidx=(*fIBNames)[iidx].AddUnique(proc->GetIVarNameTitle(j).GetName());
 
-	  if(ibidx == -1) ibidx=(*fIBNames)[iidx].Count()-1;
+	  if(ibidx == -1) {
+	    ibidx=(*fIBNames)[iidx].Count()-1;
+	    (*fBPDepends)[iidx].RedimList((*fIBNames)[iidx].Count());
+	  }
+	  //Add the current process to the list of processes that depend on the current input branch
+	  (*fBPDepends)[iidx][ibidx].SetBit(i,kTRUE);
 	}
 	(*fITIndices)[i].Add(iidx);
 	(*fIBIndices)[i].Add(ibidx);
@@ -317,8 +332,18 @@ void QTTreeProcessor::Analyze()
     //If the current process is a selector process, adds it to fSelDepProcs
     (*fSelDepProcs)[i]|=(*fSelProcs)[i];
 
-    //Loop over the outputs for the current process
-    for(j=0; j<noutputs; j++) {
+    //Loop over the input objects for the current process
+    (*fIObjects)[i].Clear();
+    (*fObjsPDepends)[i].Clear();
+    for(j=0; j<niobjs; j++) {
+      //Add the object
+      (*fIObjects)[i].Add(proc->IObj(j));
+      (*fObjsPDepends)[i].RedimList((*fObjsPDepends)[i].Count()+1);
+      (*fObjsPDepends)[i].GetLast().SetBit(i,kTRUE);
+    }
+
+    //Loop over the output variables for the current process
+    for(j=0; j<novars; j++) {
 
       sbuf=proc->GetOVarNameTitle(j);
       //printf("Encoded Output: '%s'\t%s\n",sbuf.Data(),proc->GetOVarNameTitle(j).GetName());
@@ -385,6 +410,13 @@ void QTTreeProcessor::Analyze()
 	  blastproc[oidx]=i;
 	}
       }
+    }
+ 
+    //Loop over the output objects for the current process
+    (*fOObjects)[i].Clear();
+    for(j=0; j<noobjs; j++) {
+      //Add the object
+      (*fOObjects)[i].Add(proc->OObj(j));
     }
   }
 
@@ -479,53 +511,49 @@ void QTTreeProcessor::Analyze()
   } while(haschanged);
   mbuf.Clear();
 
-  //Section 6: Setting direct and indirect branch dependencies
-  *fProcsTDepends=*fITIndices;
-  *fProcsBDepends=*fIBIndices;
-  Bool_t inputfound;
+  //Section 6: Updating input branches and input objects dependencies to take into account indirect dependencies
+ 
+  //Loop over all processes
+  for(i=0; i<nprocs; i++) {
+    proc=&((*fProcs)[i]);
+    //printf("%03i Process '%s'\n",i,proc->GetName());
+    dpidx=depprocs[i].GetAllDepends();
 
-  do {
-    haschanged=kFALSE;
-    //printf("Looping2...\n");
+    //Loop over all input trees
+    for(j=0; j<fITNames->Count(); j++) {
 
-    //Loop over the processes
-    for(i=0; i<nprocs; i++) {
-      proc=&((*fProcs)[i]);
-      //printf("%03i Process '%s'\n",i,proc->GetName());
-      dpidx=depprocs[i].GetAllDepends();
+      //Loop over all input branches
+      for(k=0; k<(*fIBNames)[j].Count(); k++) {
 
-      //Loop over the dependent processes
-      for(j=0; j<dpidx.Count(); j++) {
-	inputfound=kFALSE;
+	//If the current process is triggered by the input branch
+	if((*fBPDepends)[j][k].GetBit(i)) {
 
-	//Loop over the input branches the current process depends on
-	for(k=0; k<(*fProcsTDepends)[i].Count(); k++) {
-
-	  //Loop over the input branches the dependent process depends on
-	  for(l=0; l<(*fProcsTDepends)[dpidx[j]].Count(); l++) {
-
-	    //If the input branch of the current process is found among the branches of the dependent process
-	    if((*fProcsTDepends)[i][k] == (*fProcsTDepends)[dpidx[j]][l] && (*fProcsBDepends)[i][k] == (*fProcsBDepends)[dpidx[j]][l]) {
-	      inputfound=kTRUE;
-	      break;
-	    }
+	  //Loop over dependent processes
+	  for(l=0; l<dpidx.Count(); l++) {
+	    //Add the dependent process to the dependencies list of the current branch
+	    (*fBPDepends)[j][k].SetBit(dpidx[l],kTRUE);
 	  }
-
-	  //If the input has not been found
-	  if(!inputfound) {
-	    //Add it to the list of branches the dependent process depends on
-	    (*fProcsTDepends)[dpidx[j]].Add((*fProcsTDepends)[i][k]);
-	    (*fProcsBDepends)[dpidx[j]].Add((*fProcsBDepends)[i][k]);
-
-	    //If the process index of the dependent process is smaller than the current process index
-	    if(dpidx[j]<i) haschanged=kTRUE;
-	  }
-	} 
+	}
       }
     }
 
-  } while(haschanged);
+    //Loop over all processes
+    for(j=0; j<nprocs; j++) {
 
+      //Loop over all input objects
+      for(k=0; k<(*fObjsPDepends)[j].Count(); k++) {
+
+	//If the current process is triggered by the input branch
+	if((*fObjsPDepends)[j][k].GetBit(i)) {
+
+	  //Loop over dependent processes
+	  for(l=0; l<dpidx.Count(); l++) {
+	    (*fObjsPDepends)[j][k].SetBit(dpidx[l],kTRUE);
+	  }
+	}
+      }
+    }
+  }
   dpidx.Clear();
 
   delete[] depprocs;
@@ -547,29 +575,61 @@ void QTTreeProcessor::DelProc(const char *procname)
 
 void QTTreeProcessor::Exec()
 {
-  static QMask pardiffs;
+  static QMask pardiffs; //Modified parameters since the last call
+  static QMask depmods;  //Required processes due to modified input branches or input objects
+  static TTimeStamp lastexec(0,0); //Time of last execution
   static Bool_t firstrun;
   pardiffs.Clear();
+  depmods.Clear();
   static QList<Bool_t>         neededit; //Needed input trees 
   static QList<QList<Bool_t> > neededib; //Needed input branches 
   static QList<Bool_t>         neededot; //Needed output trees
   static QList<QList<Bool_t> > neededob; //Needed output branches
-  static Int_t i;
+  static Int_t i,j;
+  static Int_t nj;
 
+  //fLastParams gets cleared by the function Analyze, so this is how the first run is identified
   if(fLastParams->Count() == fParams->Count()) {
 
+    //Loop over parameters
     for(i=0; i<fParams->Count(); i++) {
 
+      //If the current parameter value has changed, set the correspongind bit in the parameter mask
       if((*fParams)[i] != (*fLastParams)[i]) pardiffs.SetBit(i,1);
     }
+
+    //Loop over all input trees
+    for(i=0; i<fIBranches->Count(); i++) {
+      nj=(*fIBranches)[i].Count();
+
+      //Loop over all input branches
+      for(j=0; j<nj; j++) {
+
+	//If the current input branch has been modified after the last run, add its mask to the mask of required processes.
+	//!!! This only works if the input branch is a QProcBranch object !!!
+	if(dynamic_cast<QProcBranch*>((*fIBranches)[i][j]) && dynamic_cast<QProcBranch*>((*fIBranches)[i][j])->NewerThan(lastexec)) depmods|=(*fBPDepends)[i][j];
+      }
+    }
+
+    //Loop over all processes
+    for(i=0; i<fIObjects->Count(); i++) {
+      nj=(*fIObjects)[i].Count();
+
+      //Loop over all input objects for the current process
+      for(j=0; j<nj; j++) {
+
+	//If the current input object has been modified after the last run, add its mask to the mask of required processes
+	if((*fIObjects)[i][j]->NewerThan(lastexec)) depmods|=(*fObjsPDepends)[i][j];
+      }
+    }
+
+    lastexec.Set();
     firstrun=kFALSE;
   } else {
-    pardiffs.FillMask(fParams->Count());
-
     neededit.RedimList(fITNames->Count());
     neededib.RedimList(fITNames->Count());
 
-    //Loop over the input trees
+    //Loop over input trees
     for(i=0; i<neededib.Count(); i++) {
       neededib[i].RedimList((*fIBNames)[i].Count());
     }
@@ -577,7 +637,7 @@ void QTTreeProcessor::Exec()
     neededot.RedimList(fOTNames->Count());
     neededob.RedimList(fOTNames->Count());
 
-    //Loop over the output trees
+    //Loop over output trees
     for(i=0; i<neededob.Count(); i++) {
       neededob[i].RedimList((*fOBNames)[i].Count());
     }
@@ -588,9 +648,10 @@ void QTTreeProcessor::Exec()
   pardiffs.Print();
 
   //If at least one of the parameters has changed
-  if(pardiffs) {
+  if(pardiffs || depmods || firstrun) {
     static QList<TObject*> ibranches; //List for needed input branches
     static QList<TObject*> obranches; //List for output branches needing update
+    static QList<QProcObj*> oobjects; //List for output objects needing update
     static QList<Bool_t>   obsproc;   //Indicate if output branches needing update are dependent or not on a selector process
     static QList<TObject*> otrees;    //List for output trees needing update
     static QList<TObject*> procs;     //List of needed processes
@@ -610,11 +671,11 @@ void QTTreeProcessor::Exec()
     static Int_t nentries;            //Number of entries used in the events loop
     static Bool_t eventselected;
 
-    static Int_t j,k;
-    static Int_t nj;
+    static Int_t k;
 
     ibranches.Clear();
     obranches.Clear();
+    oobjects.Clear();
     obsproc.Clear();
     otrees.Clear();
     procs.Clear();
@@ -641,7 +702,7 @@ void QTTreeProcessor::Exec()
 
     memset(neededot.GetArray(),0,neededot.Count()*sizeof(Bool_t));
 
-    //Loop over the input trees
+    //Loop over the output trees
     for(i=0; i<neededob.Count(); i++) {
       memset(neededob[i].GetArray(),0,neededob[i].Count()*sizeof(Bool_t));
     }
@@ -650,7 +711,7 @@ void QTTreeProcessor::Exec()
     for(i=0; i<fProcs->Count(); i++) {
 
       //If the current process has never been run or if it is triggered by the parameters mask
-      if(firstrun || ((*fProcsParDepends)[i] && pardiffs)) {
+      if(((*fProcsParDepends)[i] && pardiffs) || depmods.GetBit(i) || firstrun) {
 	printf("Process '%s' will be called\n",(*fProcs)[i].GetName());
 	//Add it to the list of needed processes
 	procs.Add(&(*fProcs)[i]);
@@ -672,6 +733,13 @@ void QTTreeProcessor::Exec()
 	  neededot[k]=kTRUE;
 	  //Add the current output branch to the list of needed output branches
 	  neededob[k][(*fOBIndices)[i][j]]=kTRUE;
+	}
+
+	//Loop over the output objets of the current process
+	nj=(*fOObjects)[i].Count();
+	for(j=0; j<nj; j++) {
+	  //Ensure the output object is in the list of needed output objects
+	  oobjects.AddUnique((*fOObjects)[i][j]);
 	}
 
 	//Loop over the input branches of the current process
@@ -784,6 +852,12 @@ void QTTreeProcessor::Exec()
     //If at least one tree containing all events has to be read
     if(nentries != -1) {
 
+      //Loop over needed output objects
+      for(i=0; i<oobjects.Count(); i++) {
+	//Initialize the object
+	oobjects[i]->InitProcObj();
+      }
+
       QProgress progress(nentries);
       //Loop over the entries
       for(i=0; i<nentries; i++) {
@@ -840,7 +914,7 @@ void QTTreeProcessor::Exec()
 	  //If the process does not depend on a selector process or if the entry is selected, execute it
 	  if(!seldepprocs[j] || (eventselected && (doselection || i < nesetlast))) ((QNamedProc*)procs.GetArray()[j])->Exec();
 	}
-	
+
 	//Assertion: Output branches are filled when it does not depend directly or indirectly on a selector process or
 	//when an event is selected or when loading an entry from an existing tree containing only selected events.
 	//Save all triggered output branches
@@ -856,7 +930,22 @@ void QTTreeProcessor::Exec()
       progress(i,kTRUE);
       printf("\n");
 
-      //Loop over all output trees
+
+      //Loop over needed output objects
+      for(i=0; i<oobjects.Count(); i++) {
+	//Terminate the object
+	oobjects[i]->TerminateProcObj();
+	//Update the modification time for the object
+	oobjects[i]->UpdateModTime();
+      }
+
+      //Loop over needed output branches
+      for(i=0; i<obranches.Count(); i++) {
+	//Update the modification time for the output branch
+	dynamic_cast<QProcBranch*>(obranches[i])->UpdateModTime();
+      }
+
+      //Loop over neeeded output trees
       for(i=0; i<otrees.Count(); i++) {
 	//Get a pointer to the current tree
 	tbuf=(TTree*)otrees.GetArray()[i];
@@ -971,7 +1060,7 @@ Int_t QTTreeProcessor::InitProcess()
       dbuf->cd();
     }
     //Create the output tree
-    tbuf=new TTree(dpn.GetLast(),dpn.GetLast());
+    tbuf=new QProcTree(dpn.GetLast(),dpn.GetLast());
     dpn.Clear();
     (*fOBranches)[i].RedimList((*fOBNames)[i].Count());
     (*fOBBuffers)[i].RedimList((*fOBNames)[i].Count());
@@ -1270,8 +1359,8 @@ const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
   *fITSProc=*rhs.fITSProc;
   *fOTSProc=*rhs.fOTSProc;
   *fProcsParDepends=*rhs.fProcsParDepends;
-  *fProcsTDepends=*rhs.fProcsTDepends;
-  *fProcsBDepends=*rhs.fProcsBDepends;
+  *fBPDepends=*rhs.fBPDepends;
+  *fObjsPDepends=*rhs.fObjsPDepends;
   return *this;
 }
 
@@ -1312,7 +1401,7 @@ void QTTreeProcessor::PrintAnalysisResults() const
       printf("%3i:\t%s\n",j,proc->GetParam(j).GetName());
     }
 
-    printf("\nInputs:\n");
+    printf("\nInput Variables:\n");
     k=0;
     for(j=0; j<proc->GetNIVars(); j++) {
       sbuf=proc->GetIVarNameTitle(j);
@@ -1326,7 +1415,22 @@ void QTTreeProcessor::PrintAnalysisResults() const
       printf("\n");
     }
 
-    printf("\nOutputs:\n");
+    printf("\nInput Objects:\n");
+    for(j=0; j<(*fIObjects)[i].Count(); j++) {
+      printf("%3i\t",j);
+      if(dynamic_cast<TObject*>((*fIObjects)[i][j])) printf("%s\t",dynamic_cast<TObject*>((*fIObjects)[i][j])->GetName());
+      else printf("%p\t",(*fIObjects)[i][j]);
+      (*fObjsPDepends)[i][j].Print();
+    }
+
+    printf("\nOutput Objects:\n");
+    for(j=0; j<(*fOObjects)[i].Count(); j++) {
+      printf("%3i\t",j);
+      if(dynamic_cast<TObject*>((*fOObjects)[i][j])) printf("%s\n",dynamic_cast<TObject*>((*fOObjects)[i][j])->GetName());
+      else printf("%p\n",(*fOObjects)[i][j]);
+    }
+
+    printf("\nOutput Variables:\n");
     k=0;
     for(j=0; j<proc->GetNOVars(); j++) {
       sbuf=proc->GetOVarNameTitle(j);
@@ -1357,7 +1461,8 @@ void QTTreeProcessor::PrintAnalysisResults() const
     printf("\n");
 
     for(j=0; j<(*fIBNames)[i].Count(); j++) {
-      printf("\t%3i %s\n",j,(*fIBNames)[i][j].Data());
+      printf("\t%3i %s\t",j,(*fIBNames)[i][j].Data());
+      (*fBPDepends)[i][j].Print();
     }
     printf("\n");
   }

@@ -78,9 +78,13 @@ class QDisTH: public QDis
   
   Int_t GetDimension(){return dynamic_cast<TH1*>(GetObject())->GetDimension();}
 
+  void InitProcObj(){((TH1*)GetObject())->Reset();}
+
   void Normalize(Double_t* fullintegral=NULL, Double_t* cutintegral=NULL, Double_t* error=NULL);
 
   Double_t ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const;
+
+  void TerminateProcObj(){Normalize(); UpdateModTime();}
 
  private:
   static QTHOps fQTHOps; //!
