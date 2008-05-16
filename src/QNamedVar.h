@@ -51,6 +51,7 @@ template <typename U> class QNamedVar: public TObject
 
   protected:
     void SetValtoStr(TString &val, const char* str){val=str;}
+    void SetValtoStr(Bool_t &val, const char* str){int i; sscanf(str,"%i",&i); val=i;}
     void SetValtoStr(char &val, const char* str){sscanf(str,"%c",&val);}
     void SetValtoStr(short int &val, const char* str){sscanf(str,"%hd",&val);}
     void SetValtoStr(unsigned short int &val, const char* str){sscanf(str,"%hu",&val);}

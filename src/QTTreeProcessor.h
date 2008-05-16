@@ -24,7 +24,7 @@ class QTTreeProcessor: public TNamed
     QTTreeProcessor(const QTTreeProcessor &rhs): TNamed(rhs), fProcs(new QList<QNamedProc>(*rhs.fProcs)), fSelProcs(new QList<Bool_t>(*rhs.fSelProcs)), fNAEProcs(0), fParams(new QList<Double_t>(*rhs.fParams)), fLastParams(new QList<Double_t>), fParamsNames(new QList<TString>(*rhs.fParamsNames)), fAnalysisDir(rhs.fAnalysisDir), fITNames(new QList<QList<TString> >(*rhs.fITNames)), fOTNames(new QList<QList<TString> >(*rhs.fOTNames)), fIBNames(new QList<QList<TString> >(*rhs.fIBNames)), fOBNames(new QList<QList<TString> >(*rhs.fOBNames)), fBuNames(new QList<TString>(*rhs.fBuNames)), fITIndices(new QList<QList<Int_t> >(*rhs.fITIndices)), fIBIndices(new QList<QList<Int_t> >(*rhs.fIBIndices)), fOTIndices(new QList<QList<Int_t> >(*rhs.fOTIndices)), fOBIndices(new QList<QList<Int_t> >(*rhs.fOBIndices)), fAITrees(new QList<Bool_t>(*rhs.fAITrees)), fSelDepProcs(new QList<Bool_t>(*rhs.fSelDepProcs)), fITSProc(new QList<Bool_t>(*rhs.fITSProc)), fOTSProc(new QList<Bool_t>(*rhs.fOTSProc)), fProcsParDepends(new QList<QMask>(*rhs.fProcsParDepends)), fBPDepends(new QList<QList<QMask> >(*rhs.fBPDepends)), fObjsPDepends(new QList<QList<QMask> >(*rhs.fObjsPDepends)), fIFiles(new QList<TObject*>), fOFiles(new QList<TObject*>), fIBranches(new QList<QList<TObject*> >), fIObjects(new QList<QList<QProcObj*> >(*rhs.fIObjects)), fOBranches(new QList<QList<TObject*> >), fOObjects(new QList<QList<QProcObj*> >(*rhs.fOObjects)), fIBBuffers(new QList<QList<Double_t*> >), fOwnsIBBuffers(new QList<QList<Bool_t> >), fOBBuffers(new QList<QList<Double_t> >), fIBCBuffers(new QList<QList<void*> >), fOwnsIBCBuffers(new QList<QList<Bool_t> >), fIBCBTypes(new QList<QList<Char_t> >), fBuffers(new QList<Double_t>){}
     virtual ~QTTreeProcessor();
 
-    void AddParam(const char *parname, Double_t value=0, Int_t index=-1);
+    void AddParam(const char *parname, const Double_t &value=0, Int_t index=-1);
     void AddProc(const char* name, const char* title=NULL, Bool_t selector=kFALSE, Int_t index=-1);
     void AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname=NULL, Bool_t selector=kFALSE, Int_t index=-1);
     void AddProc(const char *name, const char *title, const char *procname, Bool_t selector=kFALSE, Int_t index=-1);
@@ -41,7 +41,7 @@ class QTTreeProcessor: public TNamed
     void DelProc(Int_t index=-1){if(index==-1) index=fProcs->Count()-1; fProcs->Del(index); fSelProcs->Del(index); if(index < fNAEProcs) fNAEProcs--;}
     void DelProc(const char *procname);
 
-    void Exec();
+    void Exec() const;
 
     Int_t FindParamIndex(const char *paramname) const;
     Int_t FindProcIndex(const char *procname) const;
@@ -55,14 +55,14 @@ class QTTreeProcessor: public TNamed
     QNamedProc& GetProc(Int_t index) const{return (*fProcs)[index];}
     QNamedProc& GetProc(const char *procname) const;
 
-    Int_t InitProcess();
+    void InitProcess();
 
     const QTTreeProcessor& operator=(const QTTreeProcessor &rhs);
 
     void PrintAnalysisResults() const;
 
-    void SetParam(Int_t index=-1, Double_t value=0){(*fParams)[index]=value;}
-    void SetParam(const char *paramname, Double_t value=0);
+    void SetParam(Int_t index=-1, const Double_t &value=0){(*fParams)[index]=value;}
+    void SetParam(const char *paramname, const Double_t &value=0);
     void SetParams(Double_t *params);
 
     void TerminateProcess();

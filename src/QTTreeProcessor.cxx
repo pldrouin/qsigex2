@@ -80,7 +80,7 @@ QTTreeProcessor::~QTTreeProcessor()
   fBuffers=NULL;
 }
 
-void QTTreeProcessor::AddParam(const char *parname, Double_t value, Int_t index)
+void QTTreeProcessor::AddParam(const char *parname, const Double_t &value, Int_t index)
 {
   if(fParamsNames->FindFirst(parname) != -1) {
     fprintf(stderr,"QTTreeProcessor::AddParam: Error: Parameter '%s' already exists\n",parname);
@@ -573,7 +573,7 @@ void QTTreeProcessor::DelProc(const char *procname)
   }
 }
 
-void QTTreeProcessor::Exec()
+void QTTreeProcessor::Exec() const
 {
   static QMask pardiffs; //Modified parameters since the last call
   static QMask depmods;  //Required processes due to modified input branches or input objects
@@ -623,7 +623,6 @@ void QTTreeProcessor::Exec()
       }
     }
 
-    lastexec.Set();
     firstrun=kFALSE;
   } else {
     neededit.RedimList(fITNames->Count());
@@ -956,6 +955,7 @@ void QTTreeProcessor::Exec()
 
     //Save the parameters
     (*fLastParams)=(*fParams);
+    lastexec.Set();
   }
 }
 
@@ -986,7 +986,7 @@ QNamedProc& QTTreeProcessor::GetProc(const char *procname) const
   return GetProc(0);
 }
 
-Int_t QTTreeProcessor::InitProcess()
+void QTTreeProcessor::InitProcess()
 {
   TDirectory *curdir=gDirectory;
   TDirectory *dbuf;
@@ -1015,7 +1015,7 @@ Int_t QTTreeProcessor::InitProcess()
 
     if(!(dbuf=gDirectory->GetDirectory(fAnalysisDir))) {
       fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: Directory '%s' does not exist\n",fAnalysisDir.Data());
-      return 1;
+      throw 1;
     }
     dbuf->cd();
 
@@ -1028,7 +1028,7 @@ Int_t QTTreeProcessor::InitProcess()
 
 	if(!gDirectory->IsWritable()) {
 	  fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: File '%s' is not writable\n",(*fOTNames)[i][1].Data());
-	  return 1;
+	  throw 1;
 	}
 
 	//Else if the file is not opened
@@ -1036,7 +1036,7 @@ Int_t QTTreeProcessor::InitProcess()
 	if((gSystem->AccessPathName(gSystem->DirName((*fOTNames)[i][1]),kWritePermission) || gSystem->AccessPathName(gSystem->DirName((*fOTNames)[i][1]),kExecutePermission))
 	    && !gSystem->AccessPathName((*fOTNames)[i][1],kFileExists) && gSystem->AccessPathName((*fOTNames)[i][1],kWritePermission)) {
 	  fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: File '%s' cannot be opened for writing\n",(*fOTNames)[i][1].Data());
-	  return 1;
+	  throw 1;
 	}
 
 	//Open the file
@@ -1054,7 +1054,7 @@ Int_t QTTreeProcessor::InitProcess()
 
 	if(!dbuf) {
 	  fprintf(stderr,"QTTreeProcessor::InitProcess(): Directory '%s' cannot be created in location '%s'\n",dpn[j].Data(),gDirectory->GetPath());
-	  return 1;
+	  throw 1;
 	}
       }
       dbuf->cd();
@@ -1079,7 +1079,7 @@ Int_t QTTreeProcessor::InitProcess()
 
     if(!(dbuf=gDirectory->GetDirectory(fAnalysisDir))) {
       fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: Directory '%s' does not exist\n",fAnalysisDir.Data());
-      return 1;
+      throw 1;
     }
     dbuf->cd();
 
@@ -1098,7 +1098,7 @@ Int_t QTTreeProcessor::InitProcess()
 
 	  if(gSystem->AccessPathName((*fITNames)[i][1],kReadPermission)) {
 	    fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: File '%s' cannot be read\n",(*fITNames)[i][1].Data());
-	    return 1;
+	    throw 1;
 	  }
 
 	  //Open the file
@@ -1113,7 +1113,7 @@ Int_t QTTreeProcessor::InitProcess()
 
 	if(!(dbuf=gDirectory->GetDirectory(dpn[j]))) {
 	  fprintf(stderr,"QTTreeProcessor::InitProcess(): Directory '%s' does not exist in location '%s'\n",dpn[j].Data(),gDirectory->GetPath());
-	  return 1;
+	  throw 1;
 	}
 	dbuf->cd();
       }
@@ -1121,7 +1121,7 @@ Int_t QTTreeProcessor::InitProcess()
       //Load the input tree
       if(!(tbuf=dynamic_cast<TTree*>(gDirectory->Get(dpn.GetLast())))) {
 	fprintf(stderr,"QTTreeProcessor::InitProcess(): Tree '%s:%s' does not exist\n",(*fITNames)[i][1].Data(),(*fITNames)[i][0].Data());
-	return 1;
+	throw 1;
       }
       dpn.Clear();
       (*fIBranches)[i].RedimList((*fIBNames)[i].Count());
@@ -1133,13 +1133,13 @@ Int_t QTTreeProcessor::InitProcess()
 
 	if(!((*fIBranches)[i][j]=tbuf->GetBranch((*fIBNames)[i][j]))) {
 	  fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: Branch '%s' does not exist in tree '%s:%s'\n",(*fIBNames)[i][j].Data(),(*fITNames)[i][1].Data(),(*fITNames)[i][0].Data());
-	  return 1;
+	  throw 1;
 	}
 
 	//Get a pointer to the leaf named according to the branch name
 	if(!(lbuf=((TBranch*)(*fIBranches)[i][j])->GetLeaf((*fIBNames)[i][j]))) {
 	  fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: There is no leaf '%s' contained in branch '%s' from tree '%s:%s'\n",(*fIBNames)[i][j].Data(),(*fIBNames)[i][j].Data(),(*fITNames)[i][1].Data(),(*fITNames)[i][0].Data());
-	  return 1;
+	  throw 1;
 	}
 
 	//Get the data type for the current branch from the tree
@@ -1207,7 +1207,7 @@ Int_t QTTreeProcessor::InitProcess()
 
 	  } else {
 	    fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: The data type '%s' contained in branch '%s' from tree '%s:%s' is not supported\n",cabuf,(*fIBNames)[i][j].Data(),(*fITNames)[i][1].Data(),(*fITNames)[i][0].Data());
-	    return 1;
+	    throw 1;
 	  }
 
 	  //If there is no buffer associated to that branch
@@ -1334,11 +1334,11 @@ Int_t QTTreeProcessor::InitProcess()
   fLastParams->Clear();
 
   curdir->cd();
-  return 0;
 }
 
 const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
 {
+  TNamed::operator=(rhs);
   *fProcs=*rhs.fProcs;
   *fSelProcs=*rhs.fSelProcs;
   fNAEProcs=rhs.fNAEProcs;
@@ -1483,10 +1483,14 @@ void QTTreeProcessor::PrintAnalysisResults() const
   curdir->cd();
 }
 
-void QTTreeProcessor::SetParam(const char *paramname, Double_t value)
+void QTTreeProcessor::SetParam(const char *paramname, const Double_t &value)
 {
   Int_t i;
   if((i=FindParamIndex(paramname))!=-1) SetParam(i,value);
+  else {
+    fprintf(stderr,"QTTreeProcessor::SetParam: Error: Parameter '%s' does not exist\n",paramname);
+    throw 1;
+  }
 }
 
 void QTTreeProcessor::SetParams(Double_t *params)
