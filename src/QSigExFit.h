@@ -1,8 +1,9 @@
 #ifndef _QSIGEXFIT_
 #define _QSIGEXFIT_
 
+#include "G__ci.h"
 #include "TMinuit.h"
-#include "QTTreeProcList.h"
+#include "QProcList.h"
 #include "QSigExFitParam.h"
 
 class QSigExFit: public TNamed
@@ -36,14 +37,14 @@ class QSigExFit: public TNamed
     void SetMinimName(const char* minimname){fMinimName=minimname;}
     void SetMinosMaxCalls(Int_t ncalls){fMinosMaxCalls=ncalls;}
     void SetNMinimArgs(Int_t n){fMinimArgs->RedimList(n);}
-    void SetProcessor(const QTTreeProcList* processor){fQTPL=processor; Init();}
+    void SetProcessor(const QProcList* processor){fQTPL=processor; Init();}
 
     const QSigExFit& operator=(const QSigExFit &rhs){TNamed::operator=(rhs); return *this;}
 
     void Browse(TBrowser *b);
     Bool_t IsFolder() const {return kTRUE;}
   protected:
-    const QTTreeProcList *fQTPL; //!
+    const QProcList *fQTPL; //!
     void (*fCompiledFunc)(Int_t&, Double_t*, Double_t&f, Double_t*, Int_t); //! Pointer to a compiled minimization function
     void *fInterpretedFunc;  //! Pointer to an interpreted minimization function
     QList<QSigExFitParam> fParams;

@@ -29,7 +29,6 @@
 #pragma link C++ class QList<Double_t*>-;
 #pragma link C++ class QList<QList<Double_t*> >-;
 #pragma link C++ class QList<QProcObj*>-;
-#pragma link C++ class QList<QList<QProcObj*> >-;
 
 #pragma link C++ class QNamedVar<Bool_t>;
 #pragma link C++ class QNamedVar<TString>;
@@ -47,8 +46,11 @@
 #pragma link C++ class QNamedProc;
 #pragma link C++ class QProcTree;
 #pragma link C++ class QProcBranch;
+#pragma link C++ class QDependentProcs;
+#pragma link C++ class QProcessor;
 #pragma link C++ class QTTreeProcessor;
-#pragma link C++ class QTTreeProcList;
+#pragma link C++ class QProcObjProcessor;
+#pragma link C++ class QProcList;
 
 #pragma link C++ class QProgress;
 #pragma link C++ class QDis;

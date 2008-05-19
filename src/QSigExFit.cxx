@@ -7,12 +7,12 @@ void QSigExFit::Init()
   if(fQTPL) {
     Int_t i,j,k,l;
 
-    //For each combination of 2 different QTTreeProcessor objects
-    for(i=0; i<fQTPL->GetNQTTreeProcs(); i++) {
+    //For each combination of 2 different QProcessor objects
+    for(i=0; i<fQTPL->GetNQProcs(); i++) {
 
-      for(j=i+1; j<fQTPL->GetNQTTreeProcs(); j++) {
+      for(j=i+1; j<fQTPL->GetNQProcs(); j++) {
 
-	//For each combination of parameters for the two QTTreeProcessor objects
+	//For each combination of parameters for the two QProcessor objects
 	for(k=0; k<(*fQTPL)[i].GetNParams(); k++) {
 
 	  for(l=0; l<(*fQTPL)[j].GetNParams(); l++) {
@@ -29,10 +29,10 @@ void QSigExFit::Init()
 
     fParams.Clear();
 
-    //Loop over all QTTreeProcessor objects
-    for(i=0; i<fQTPL->GetNQTTreeProcs(); i++) {
+    //Loop over all QProcessor objects
+    for(i=0; i<fQTPL->GetNQProcs(); i++) {
 
-      //Loop over all parameters for the current QTTreeProcessor object
+      //Loop over all parameters for the current QProcessor object
       for(j=0; j<(*fQTPL)[i].GetNParams(); j++) {
 	fParams.RedimList(fParams.Count()+1);
 	fParams.GetLast().SetName((*fQTPL)[i].GetParamName(j));
@@ -98,7 +98,7 @@ void QSigExFit::InitFit()
     }
   }
 
-  gQTTreeProcList=fQTPL;
+  gQProcList=fQTPL;
 }
 
 Int_t QSigExFit::FindMinimArg(const char* name)

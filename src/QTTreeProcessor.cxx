@@ -7,10 +7,6 @@
 
 ClassImp(QTTreeProcessor)
 
-Int_t QTTreeProcessor::QDependentProcs::fInitIdx=-1;
-QList<void*> QTTreeProcessor::QDependentProcs::fQPDObjs;
-QList<Int_t> QTTreeProcessor::QDependentProcs::fPCalled;
-
 QTTreeProcessor::~QTTreeProcessor()
 {
   PRINTF2(this,"\tQTTreeProcessor::~QTTreeProcessor()\n")
@@ -18,12 +14,8 @@ QTTreeProcessor::~QTTreeProcessor()
   fProcs=NULL;
   delete fSelProcs;
   fSelProcs=NULL;
-  delete fParams;
-  fParams=NULL;
   delete fLastParams;
   fLastParams=NULL;
-  delete fParamsNames;
-  fParamsNames=NULL;
   delete fITNames;
   fITNames=NULL;
   delete fOTNames;
@@ -38,10 +30,14 @@ QTTreeProcessor::~QTTreeProcessor()
   fITIndices=NULL;
   delete fIBIndices;
   fIBIndices=NULL;
+  delete fIOIndices;
+  fIOIndices=NULL;
   delete fOTIndices;
   fOTIndices=NULL;
   delete fOBIndices;
   fOBIndices=NULL;
+  delete fOOIndices;
+  fOOIndices=NULL;
   delete fAITrees;
   fAITrees=NULL;
   delete fIFiles;
@@ -50,8 +46,12 @@ QTTreeProcessor::~QTTreeProcessor()
   fOFiles=NULL;
   delete fIBranches;
   fIBranches=NULL;
+  delete fIObjects;
+  fIObjects=NULL;
   delete fOBranches;
   fOBranches=NULL;
+  delete fOObjects;
+  fOObjects=NULL;
   delete fSelDepProcs;
   fSelDepProcs=NULL;
   delete fITSProc;
@@ -78,16 +78,6 @@ QTTreeProcessor::~QTTreeProcessor()
   fIBCBTypes=NULL;
   delete fBuffers;
   fBuffers=NULL;
-}
-
-void QTTreeProcessor::AddParam(const char *parname, const Double_t &value, Int_t index)
-{
-  if(fParamsNames->FindFirst(parname) != -1) {
-    fprintf(stderr,"QTTreeProcessor::AddParam: Error: Parameter '%s' already exists\n",parname);
-    throw 1;
-  }
-  fParamsNames->Add(parname,index);
-  fParams->Add(value,index);
 }
 
 void QTTreeProcessor::AddProc(const char *name, const char *title, Bool_t selector, Int_t index)
@@ -184,23 +174,28 @@ void QTTreeProcessor::Analyze()
   fIBNames->Clear();
   fOBNames->Clear();
   fBPDepends->Clear();
+  fObjsPDepends->Clear();
   fITIndices->Clear();
   fIBIndices->Clear();
+  fIOIndices->Clear();
   fOTIndices->Clear();
   fOBIndices->Clear();
+  fOOIndices->Clear();
+  fIObjects->Clear();
+  fOObjects->Clear();
 
   fITIndices->RedimList(nprocs);
   fIBIndices->RedimList(nprocs);
+  fIOIndices->RedimList(nprocs);
   fOTIndices->RedimList(nprocs);
   fOBIndices->RedimList(nprocs);
+  fOOIndices->RedimList(nprocs);
   QDependentProcs *depprocs=new QDependentProcs[nprocs]; //QDependentProcs objects contain a list of processes that should be triggered
   QList<QList<Int_t> > oblastproc; //Index of last process having recorded its output in a given branch
+  QList<Int_t> oolastproc;         //Index of last process having recorded its output in a given object
   QList<Int_t> blastproc;          //Index of last process having recorded its output in a given memory buffer
   fProcsParDepends->RedimList(nprocs);
   fSelDepProcs->RedimList(nprocs);
-  fIObjects->RedimList(nprocs);
-  fOObjects->RedimList(nprocs);
-  fObjsPDepends->RedimList(nprocs);
 
   //Section 1: First pass over all processes. Setting as many inputs, outputs and dependencies as possible and doing some checks
   //Loop over the processes
@@ -332,14 +327,26 @@ void QTTreeProcessor::Analyze()
     //If the current process is a selector process, adds it to fSelDepProcs
     (*fSelDepProcs)[i]|=(*fSelProcs)[i];
 
-    //Loop over the input objects for the current process
-    (*fIObjects)[i].Clear();
-    (*fObjsPDepends)[i].Clear();
+    //Loop over input objects for the current process
+    (*fIOIndices)[i].RedimList(niobjs);
     for(j=0; j<niobjs; j++) {
       //Add the object
-      (*fIObjects)[i].Add(proc->IObj(j));
-      (*fObjsPDepends)[i].RedimList((*fObjsPDepends)[i].Count()+1);
-      (*fObjsPDepends)[i].GetLast().SetBit(i,kTRUE);
+      iidx=fIObjects->AddUnique(proc->IObj(j));
+
+      if(iidx == -1) {
+	iidx=fIObjects->Count()-1;
+        fObjsPDepends->RedimList(fObjsPDepends->Count()+1);
+      }
+      (*fIOIndices)[i][j]=iidx;
+      (*fObjsPDepends)[iidx].SetBit(i,kTRUE);
+
+      oidx=fOObjects->FindFirst(proc->IObj(j));
+
+      //If the object has been updated by a previous process
+      if(oidx != -1) {
+	//Add the index of the current process to the dependent process list of the last process that updated the current input object
+	depprocs[oolastproc[oidx]].AddDepend(i);
+      }
     }
 
     //Loop over the output variables for the current process
@@ -412,11 +419,14 @@ void QTTreeProcessor::Analyze()
       }
     }
  
-    //Loop over the output objects for the current process
-    (*fOObjects)[i].Clear();
+    //Loop over output objects for the current process
+    (*fOOIndices)[i].RedimList(noobjs);
     for(j=0; j<noobjs; j++) {
       //Add the object
-      (*fOObjects)[i].Add(proc->OObj(j));
+      oidx=fOObjects->AddUnique(proc->OObj(j));
+
+      if(oidx == -1) oidx=fOObjects->Count()-1;
+      (*fOOIndices)[i][j]=oidx;
     }
   }
 
@@ -537,19 +547,15 @@ void QTTreeProcessor::Analyze()
       }
     }
 
-    //Loop over all processes
-    for(j=0; j<nprocs; j++) {
+    //Loop over all input objects
+    for(j=0; j<fObjsPDepends->Count(); j++) {
 
-      //Loop over all input objects
-      for(k=0; k<(*fObjsPDepends)[j].Count(); k++) {
+      //If the current process is triggered by the input object
+      if((*fObjsPDepends)[j].GetBit(i)) {
 
-	//If the current process is triggered by the input branch
-	if((*fObjsPDepends)[j][k].GetBit(i)) {
-
-	  //Loop over dependent processes
-	  for(l=0; l<dpidx.Count(); l++) {
-	    (*fObjsPDepends)[j][k].SetBit(dpidx[l],kTRUE);
-	  }
+	//Loop over dependent processes
+	for(k=0; k<dpidx.Count(); k++) {
+	  (*fObjsPDepends)[j].SetBit(dpidx[k],kTRUE);
 	}
       }
     }
@@ -557,12 +563,6 @@ void QTTreeProcessor::Analyze()
   dpidx.Clear();
 
   delete[] depprocs;
-}
-
-void QTTreeProcessor::DelParam(const char *paramname)
-{
-  Int_t i;
-  if((i=FindParamIndex(paramname))!=-1) DelParam(i);
 }
 
 void QTTreeProcessor::DelProc(const char *procname)
@@ -585,6 +585,7 @@ void QTTreeProcessor::Exec() const
   static QList<QList<Bool_t> > neededib; //Needed input branches 
   static QList<Bool_t>         neededot; //Needed output trees
   static QList<QList<Bool_t> > neededob; //Needed output branches
+  static QList<Bool_t>         neededoo; //Needed output objects
   static Int_t i,j;
   static Int_t nj;
 
@@ -611,16 +612,11 @@ void QTTreeProcessor::Exec() const
       }
     }
 
-    //Loop over all processes
+    //Loop over all input objects
     for(i=0; i<fIObjects->Count(); i++) {
-      nj=(*fIObjects)[i].Count();
 
-      //Loop over all input objects for the current process
-      for(j=0; j<nj; j++) {
-
-	//If the current input object has been modified after the last run, add its mask to the mask of required processes
-	if((*fIObjects)[i][j]->NewerThan(lastexec)) depmods|=(*fObjsPDepends)[i][j];
-      }
+      //If the current input object has been modified after the last run, add its mask to the mask of required processes
+      if((*fIObjects)[i]->NewerThan(lastexec)) depmods|=(*fObjsPDepends)[i];
     }
 
     firstrun=kFALSE;
@@ -635,6 +631,7 @@ void QTTreeProcessor::Exec() const
 
     neededot.RedimList(fOTNames->Count());
     neededob.RedimList(fOTNames->Count());
+    neededoo.RedimList(fOObjects->Count());
 
     //Loop over output trees
     for(i=0; i<neededob.Count(); i++) {
@@ -700,6 +697,7 @@ void QTTreeProcessor::Exec() const
     }
 
     memset(neededot.GetArray(),0,neededot.Count()*sizeof(Bool_t));
+    memset(neededoo.GetArray(),0,neededoo.Count()*sizeof(Bool_t));
 
     //Loop over the output trees
     for(i=0; i<neededob.Count(); i++) {
@@ -734,14 +732,14 @@ void QTTreeProcessor::Exec() const
 	  neededob[k][(*fOBIndices)[i][j]]=kTRUE;
 	}
 
-	//Loop over the output objets of the current process
-	nj=(*fOObjects)[i].Count();
+	//Loop over output objets of the current process
+	nj=(*fOOIndices)[i].Count();
 	for(j=0; j<nj; j++) {
-	  //Ensure the output object is in the list of needed output objects
-	  oobjects.AddUnique((*fOObjects)[i][j]);
+	  //Add the current object to the list of needed output objects
+	  neededoo[(*fOOIndices)[i][j]]=kTRUE;
 	}
 
-	//Loop over the input branches of the current process
+	//Loop over input branches of the current process
 	nj=(*fITIndices)[i].Count();
 	for(j=0; j<nj; j++) {
 	  //Add the tree of the current input branch to the list of needed input trees
@@ -779,6 +777,16 @@ void QTTreeProcessor::Exec() const
 	    obsproc.Add((*fOTSProc)[i]);
 	  }
 	}
+      }
+    }
+
+    //Loop over all output objects
+    for(i=0; i<neededoo.Count(); i++) {
+
+      //If the current output object is needed
+      if(neededoo[i]) {
+	//Add it to the list of needed output objects
+	oobjects.Add((*fOObjects)[i]);
       }
     }
 
@@ -957,14 +965,6 @@ void QTTreeProcessor::Exec() const
     (*fLastParams)=(*fParams);
     lastexec.Set();
   }
-}
-
-Int_t QTTreeProcessor::FindParamIndex(const char *paramname) const
-{
-  Int_t ret=(*fParamsNames).FindFirst(paramname);
-
-  if(ret == -1) fprintf(stderr,"QTTreeProcessor::FindParamIndex: Error: parameter '%s' not found\n",paramname);
-  return ret;
 }
 
 Int_t QTTreeProcessor::FindProcIndex(const char *procname) const
@@ -1342,19 +1342,21 @@ const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
   *fProcs=*rhs.fProcs;
   *fSelProcs=*rhs.fSelProcs;
   fNAEProcs=rhs.fNAEProcs;
-  *fParams=*rhs.fParams;
-  *fParamsNames=*rhs.fParamsNames;
   fAnalysisDir=rhs.fAnalysisDir;
   *fITNames=*rhs.fITNames;
   *fOTNames=*rhs.fOTNames;
   *fIBNames=*rhs.fIBNames;
   *fOBNames=*rhs.fOBNames;
   *fBuNames=*rhs.fBuNames;
-  *(fITIndices)=*rhs.fITIndices;
-  *(fIBIndices)=*rhs.fIBIndices;
-  *(fOTIndices)=*rhs.fOTIndices;
-  *(fOBIndices)=*rhs.fOBIndices;
-  *(fAITrees)=*rhs.fAITrees;
+  *fITIndices=*rhs.fITIndices;
+  *fIBIndices=*rhs.fIBIndices;
+  *fIOIndices=*rhs.fIOIndices;
+  *fOTIndices=*rhs.fOTIndices;
+  *fOBIndices=*rhs.fOBIndices;
+  *fOOIndices=*rhs.fOOIndices;
+  *fAITrees=*rhs.fAITrees;
+  *fIObjects=*rhs.fIObjects;
+  *fOObjects=*rhs.fIObjects;
   *fSelDepProcs=*rhs.fSelDepProcs;
   *fITSProc=*rhs.fITSProc;
   *fOTSProc=*rhs.fOTSProc;
@@ -1416,18 +1418,11 @@ void QTTreeProcessor::PrintAnalysisResults() const
     }
 
     printf("\nInput Objects:\n");
-    for(j=0; j<(*fIObjects)[i].Count(); j++) {
+    for(j=0; j<(*fIOIndices)[i].Count(); j++) {
       printf("%3i\t",j);
-      if(dynamic_cast<TObject*>((*fIObjects)[i][j])) printf("%s\t",dynamic_cast<TObject*>((*fIObjects)[i][j])->GetName());
-      else printf("%p\t",(*fIObjects)[i][j]);
-      (*fObjsPDepends)[i][j].Print();
-    }
-
-    printf("\nOutput Objects:\n");
-    for(j=0; j<(*fOObjects)[i].Count(); j++) {
-      printf("%3i\t",j);
-      if(dynamic_cast<TObject*>((*fOObjects)[i][j])) printf("%s\n",dynamic_cast<TObject*>((*fOObjects)[i][j])->GetName());
-      else printf("%p\n",(*fOObjects)[i][j]);
+      if(dynamic_cast<TObject*>((*fIObjects)[(*fIOIndices)[i][j]])) printf("%s",dynamic_cast<TObject*>((*fIObjects)[(*fIOIndices)[i][j]])->GetName());
+      else printf("%p",(*fIObjects)[(*fIOIndices)[i][j]]);
+      printf(" (%i)\n",(*fIOIndices)[i][j]);
     }
 
     printf("\nOutput Variables:\n");
@@ -1442,6 +1437,14 @@ void QTTreeProcessor::PrintAnalysisResults() const
       printf("\t%s",proc->GetOVarNameTitle(j).GetName());
       if(donbuf.Count()>0) {printf(" (%i.%i)",(*fOTIndices)[i][k],(*fOBIndices)[i][k]); k++;}
       printf("\n");
+    }
+
+    printf("\nOutput Objects:\n");
+    for(j=0; j<(*fOOIndices)[i].Count(); j++) {
+      printf("%3i\t",j);
+      if(dynamic_cast<TObject*>((*fOObjects)[(*fOOIndices)[i][j]])) printf("%s",dynamic_cast<TObject*>((*fOObjects)[(*fOOIndices)[i][j]])->GetName());
+      else printf("%p",(*fOObjects)[(*fOOIndices)[i][j]]);
+      printf(" (%i)\n",(*fOOIndices)[i][j]);
     }
 
     printf("\nDependencies:\n");
@@ -1467,6 +1470,14 @@ void QTTreeProcessor::PrintAnalysisResults() const
     printf("\n");
   }
 
+  printf("\nAll Input Objects:\n");
+  for(i=0; i<fIObjects->Count(); i++) {
+    printf("%3i\t",i);
+    if(dynamic_cast<TObject*>((*fIObjects)[i])) printf("%s\t",dynamic_cast<TObject*>((*fIObjects)[i])->GetName());
+    else printf("%p\t",(*fIObjects)[i]);
+    (*fObjsPDepends)[i].Print();
+  }
+
   printf("All Output Branches:\n");
   for(i=0; i<fOTNames->Count(); i++) {
     printf("%3i Tree %s",i,(*fOTNames)[i][0].Data());
@@ -1480,22 +1491,14 @@ void QTTreeProcessor::PrintAnalysisResults() const
     }
     printf("\n");
   }
-  curdir->cd();
-}
 
-void QTTreeProcessor::SetParam(const char *paramname, const Double_t &value)
-{
-  Int_t i;
-  if((i=FindParamIndex(paramname))!=-1) SetParam(i,value);
-  else {
-    fprintf(stderr,"QTTreeProcessor::SetParam: Error: Parameter '%s' does not exist\n",paramname);
-    throw 1;
+  printf("\nAll Output Objects:\n");
+  for(i=0; i<fOObjects->Count(); i++) {
+    printf("%3i\t",i);
+    if(dynamic_cast<TObject*>((*fOObjects)[i])) printf("%s\n",dynamic_cast<TObject*>((*fOObjects)[i])->GetName());
+    else printf("%p\n",(*fOObjects)[i]);
   }
-}
-
-void QTTreeProcessor::SetParams(Double_t *params)
-{
-  memcpy(fParams->GetArray(),params,fParams->Count()*sizeof(Double_t));
+  curdir->cd();
 }
 
 void QTTreeProcessor::TerminateProcess()
@@ -1575,32 +1578,6 @@ Int_t QTTreeProcessor::PSProcIndexToIndex(Int_t index){
   }
 
   return index;
-}
-
-QList<Int_t> QTTreeProcessor::QDependentProcs::GetAllDepends() const
-{
-  QList<Int_t> ret;
-
-  if(fInitIdx == -1) {
-    fInitIdx=fIdx;
-
-  } else {
-    ret.Add(fIdx);
-  }
-
-  for(Int_t i=0; i<fDepends.Count(); i++) {
-    if(fDepends[i] != fInitIdx && fPCalled.FindFirst(fDepends[i]) == -1) {
-      fPCalled.Add(fDepends[i]);
-      ret.Add(((QDependentProcs*)fQPDObjs[fDepends[i]])->GetAllDepends());
-    }
-  }
-
-  if(fInitIdx == fIdx) {
-    fPCalled.Clear();
-    fInitIdx=-1;
-  }
-
-  return ret;
 }
 
 #include "debugger.h"
