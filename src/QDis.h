@@ -48,7 +48,7 @@ class QDis: public TNamed, public QTObjectIO, public QProcObj
   
   virtual ~QDis();
 
-  virtual Double_t ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const=0;
+  virtual Double_t ProbDensity(const Double_t &x,const Double_t &y=0,const Double_t &z=0) const=0;
   virtual Double_t Derivative(const Double_t&) const {return 0;};
   
 

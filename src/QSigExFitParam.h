@@ -12,14 +12,15 @@ class QSigExFitParam: public QNamedVar<Double_t>
     QSigExFitParam(const QSigExFitParam& rhs): QNamedVar<Double_t>(rhs), fStartVal(new QNamedVar<Double_t>(*rhs.fStartVal)), fMinVal(new QNamedVar<Double_t>(*rhs.fMinVal)), fMaxVal(new QNamedVar<Double_t>(*rhs.fMaxVal)), fStepVal(new QNamedVar<Double_t>(*rhs.fStepVal)), fFixed(new QNamedVar<Bool_t>(*rhs.fFixed)), fPlusFitError(new QNamedVar<Double_t>(*rhs.fPlusFitError)), fMinusFitError(new QNamedVar<Double_t>(*rhs.fMinusFitError)){}
     virtual ~QSigExFitParam();
 
-    const Double_t& GetStartVal(){return fStartVal->GetValue();}
-    const Double_t& GetMinVal(){return fMinVal->GetValue();}
-    const Double_t& GetMaxVal(){return fMaxVal->GetValue();}
-    const Double_t& GetMinusFitError(){return fMinusFitError->GetValue();}
-    const Double_t& GetPlusFitError(){return fPlusFitError->GetValue();}
-    const Double_t& GetStepVal(){return fStepVal->GetValue();}
-    Bool_t IsFixed(){return fFixed->GetValue();}
+    const Double_t& GetStartVal(){return *fStartVal;}
+    const Double_t& GetMinVal(){return *fMinVal;}
+    const Double_t& GetMaxVal(){return *fMaxVal;}
+    const Double_t& GetMinusFitError(){return *fMinusFitError;}
+    const Double_t& GetPlusFitError(){return *fPlusFitError;}
+    const Double_t& GetStepVal(){return *fStepVal;}
+    Bool_t IsFixed(){return *fFixed;}
 
+    void Setup(const Double_t &startval, const Double_t& stepval, const Double_t& minval=-1.7e308, const Double_t &maxval=1.7e308, Bool_t fix=kFALSE){*fStartVal=startval; *fStepVal=stepval; *fMinVal=minval; *fMaxVal=maxval; *fFixed=fix;}
     void SetFix(Bool_t fix=kTRUE){*fFixed=fix;}
     void SetStartVal(const Double_t& startval){*fStartVal=startval;}
     void SetMinVal(const Double_t& minval=-1.7e308){*fMinVal=minval;}
@@ -34,6 +35,10 @@ class QSigExFitParam: public QNamedVar<Double_t>
 
     friend class QSigExFit;
   protected:
+    operator Double_t&(){return QNamedVar<Double_t>::operator Double_t&();}
+    Double_t& MinusFitError(){return *fMinusFitError;}
+    Double_t& PlusFitError(){return *fPlusFitError;}
+
     QNamedVar<Double_t> *fStartVal; //->
     QNamedVar<Double_t> *fMinVal; //->
     QNamedVar<Double_t> *fMaxVal; //->

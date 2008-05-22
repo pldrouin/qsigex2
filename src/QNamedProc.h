@@ -38,7 +38,7 @@ class QNamedProc: public TNamed
 
     Bool_t Exec() const{return fProcedure->Exec();}
 
-    const char* GetProcName() const{return fProcName->GetValue();}
+    const char* GetProcName() const{return (TString&)*fProcName;}
 
     QNamedVar<TString>& GetIVarNameTitle(Int_t index) const{return (*fIVarsNames)[index];}
     QNamedVar<TString>& GetOVarNameTitle(Int_t index) const{return (*fOVarsNames)[index];}

@@ -122,7 +122,7 @@ template <typename U> class QList: public TObject
       }
 
       if(!fIsChild){
-	for(Int_t i=0;i<fNElements;i++) fUArray[i].~U();
+	for(Int_t i=0;i<fNElements;i++) {fUArray[i].~U();}
 	free(fUArray);
       }
 

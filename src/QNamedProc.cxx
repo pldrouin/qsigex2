@@ -92,7 +92,7 @@ Bool_t operator==(const QNamedProc &lhs, const QNamedProc &rhs)
 {
   if(lhs.fProcedure!=NULL ^ rhs.fProcedure!=NULL) return 0;
   if(lhs.fProcedure && rhs.fProcedure && !(*(lhs.fProcedure)==*(rhs.fProcedure))) return 0;
-  if(*(lhs.fProcName)!=*(rhs.fProcName) || *(lhs.fIVarsNames)!=*(rhs.fIVarsNames) || *(lhs.fOVarsNames)!=*(rhs.fOVarsNames) || *(lhs.fParamsNames)!=*(rhs.fParamsNames)) return 0;
+  if(*lhs.fProcName!=*rhs.fProcName || *(lhs.fIVarsNames)!=*(rhs.fIVarsNames) || *(lhs.fOVarsNames)!=*(rhs.fOVarsNames) || *(lhs.fParamsNames)!=*(rhs.fParamsNames)) return 0;
   return 1;
 }
 

@@ -14,6 +14,10 @@ QSigExFitParam::~QSigExFitParam()
   fStepVal=NULL;
   delete fFixed;
   fFixed=NULL;
+  delete fPlusFitError;
+  fPlusFitError=NULL;
+  delete fMinusFitError;
+  fMinusFitError=NULL;
 }
 
 void QSigExFitParam::Browse(TBrowser *b)

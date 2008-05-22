@@ -88,7 +88,9 @@ void QProcObjProcessor::Analyze()
   for(i=0; i<nprocs; i++) {
     proc=&((*fProcs)[i]);
     //printf("Process '%s'\n",proc->GetName());
+    if(proc->GetNIVars() != 0) fprintf(stderr,"QProcObjProcessor::Analyze(): Warning: Process '%s' contains input variables. These entries will be ignored\n",proc->GetName());
     niobjs=proc->GetNIObjs();
+    if(proc->GetNOVars() != 0) fprintf(stderr,"QProcObjProcessor::Analyze(): Warning: Process '%s' contains output variables. These entries will be ignored\n",proc->GetName());
     noobjs=proc->GetNOObjs();
     nparams=proc->GetNParams();
 
@@ -216,7 +218,6 @@ void QProcObjProcessor::Exec() const
 {
   static QMask pardiffs; //Modified parameters since the last call
   static QMask depmods;  //Required processes due to modified input objects
-  static TTimeStamp lastexec(0,0); //Time of last execution
   static Bool_t firstrun;
   pardiffs.Clear();
   depmods.Clear();
@@ -224,8 +225,8 @@ void QProcObjProcessor::Exec() const
   static Int_t i,j;
   static Int_t nj;
 
-  //fLastParams gets cleared by the function Analyze, so this is how the first run is identified
-  if(fLastParams->Count() == fParams->Count()) {
+  //fLastExec gets cleared by the function Analyze, so this is how the first run is identified
+  if(fLastExec.GetSec() != 0) {
 
     //Loop over parameters
     for(i=0; i<fParams->Count(); i++) {
@@ -238,7 +239,7 @@ void QProcObjProcessor::Exec() const
     for(i=0; i<fIObjects->Count(); i++) {
 
       //If the current input object has been modified after the last run, add its mask to the mask of required processes
-      if((*fIObjects)[i]->NewerThan(lastexec)) depmods|=(*fObjsPDepends)[i];
+      if((*fIObjects)[i]->NewerThan(fLastExec)) depmods|=(*fObjsPDepends)[i];
     }
 
     firstrun=kFALSE;
@@ -247,8 +248,8 @@ void QProcObjProcessor::Exec() const
     firstrun=kTRUE;
   }
 
-  printf("Mask for the current parameters: ");
-  pardiffs.Print();
+  //printf("Mask for the current parameters: ");
+  //pardiffs.Print();
 
   //If at least one of the parameters has changed
   if(pardiffs || depmods || firstrun) {
@@ -265,7 +266,7 @@ void QProcObjProcessor::Exec() const
 
       //If the current process has never been run or if it is triggered by the parameters mask
       if(((*fProcsParDepends)[i] && pardiffs) || depmods.GetBit(i) || firstrun) {
-	printf("Process '%s' will be called\n",(*fProcs)[i].GetName());
+	//printf("Process '%s' will be called\n",(*fProcs)[i].GetName());
 	//Add it to the list of needed processes
 	procs.Add(&(*fProcs)[i]);
 
@@ -310,7 +311,7 @@ void QProcObjProcessor::Exec() const
 
     //Save the parameters
     (*fLastParams)=(*fParams);
-    lastexec.Set();
+    fLastExec.Set();
   }
 }
 
@@ -335,6 +336,7 @@ QNamedProc& QProcObjProcessor::GetProc(const char *procname) const
 
 void QProcObjProcessor::InitProcess()
 {
+  TerminateProcess();
   Int_t i,j;
   QList<TString> dpn;
 
@@ -355,11 +357,12 @@ void QProcObjProcessor::InitProcess()
 
   //Erase last parameters
   fLastParams->Clear();
+  fLastExec.SetSec(0);
 }
 
 const QProcObjProcessor& QProcObjProcessor::operator=(const QProcObjProcessor &rhs)
 {
-  TNamed::operator=(rhs);
+  QStdProcessor::operator=(rhs);
   *fProcs=*rhs.fProcs;
   *fIOIndices=*rhs.fIOIndices;
   *fOOIndices=*rhs.fOOIndices;

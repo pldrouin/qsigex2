@@ -425,7 +425,7 @@ template<typename V> Bool_t operator==(const QList<V>& lhs,const QList<V>& rhs)
   PRINTF5("\tBool_t operator==(const QList<",typeid(V).name(),">& lhs,const QList<",typeid(V).name(),">& rhs)\n")
 
   if(lhs.fNElements!=rhs.fNElements) return false;
-  for(Int_t i=0;i<lhs.fNElements;i++) if(lhs.fUArray[i]!=rhs.fUArray[i]) return false;
+  for(Int_t i=0;i<lhs.fNElements;i++) if(!(lhs.fUArray[i]==rhs.fUArray[i])) return false;
   return true;
 }
 

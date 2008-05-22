@@ -1,60 +1,56 @@
 #ifndef _QSIGEXFIT_
 #define _QSIGEXFIT_
 
-#include "G__ci.h"
-#include "TMinuit.h"
-#include "QProcList.h"
+#include "TMatrixDSym.h"
+#include "QList.h"
+#include "QProcessor.h"
+#include "QProcDouble.h"
 #include "QSigExFitParam.h"
 
-class QSigExFit: public TNamed
+class QSigExFit: public TObject
 {
   public:
-    QSigExFit(): TNamed(), fQTPL(NULL), fCompiledFunc(NULL), fInterpretedFunc(NULL), fParams(), fMinuit(NULL), fFCNError("Min Function Error",1.0), fMinimName("Minimizer Name","MIGrad"), fMinimArgs(new QList<QNamedVar<Double_t> >), fMinosMaxCalls("Minos Max Calls",-1), fMinuitStatus("Minuit Status",""), fFCNMin("Minimization Function Minimum",1.7e308){}
-    QSigExFit(const QSigExFit &rhs): TNamed(rhs), fQTPL(rhs.fQTPL), fCompiledFunc(NULL), fInterpretedFunc(NULL), fParams(rhs.fParams), fMinuit(NULL), fFCNError(rhs.fFCNError), fMinimName(rhs.fMinimName), fMinimArgs(new QList<QNamedVar<Double_t> >(*rhs.fMinimArgs)), fMinosMaxCalls(rhs.fMinosMaxCalls), fMinuitStatus(rhs.fMinuitStatus), fFCNMin(rhs.fFCNMin){};
-    virtual ~QSigExFit(){if(fMinuit) delete fMinuit; fMinuit=NULL;};
+    QSigExFit(): TObject(), fQProcessor(NULL), fQPD(NULL), fParams(), fFCNError("Min Function Error",1.0), fFCNMin("Minimization Function Minimum",1.7e308), fCorMatrix(NULL) {}
+    QSigExFit(const QSigExFit &rhs): TObject(rhs), fQProcessor(rhs.fQProcessor), fQPD(rhs.fQPD), fParams(rhs.fParams), fFCNError(rhs.fFCNError), fFCNMin(rhs.fFCNMin), fCorMatrix(NULL) {};
+    virtual ~QSigExFit();
+
+    void ExecProc() const{fQProcessor->Exec();}
+
+    Int_t FindParamIndex(const char *paramname) const;
+
+    virtual Double_t Fit()=0;
+
+    const TMatrixDSym& GetCorMatrix() const{return *fCorMatrix;}
+    const static QSigExFit& GetCurInstance(){return *fCurInstance;}
+    const Double_t& GetFCNError() const{return fFCNError;}
+    const Double_t& GetFCNMin() const{return fFCNMin;}
+    const QProcDouble& GetProcOutput() const{return *fQPD;}
 
     void Init();
-    void InitFit();
+    virtual void InitFit()=0;
 
-    Int_t FindMinimArg(const char* name);
-
-    Double_t Fit();
-
-    const Double_t& GetFCNError(){return fFCNError.GetValue();}
-    const Double_t& GetFCNMin(){return fFCNMin.GetValue();}
-    const Double_t& GetMinimArg(Int_t index){return (*fMinimArgs)[index].GetValue();}
-    const char* GetMinimName(){return fMinimName.GetValue();}
-    const Int_t& GetMinosMaxCalls(){return fMinosMaxCalls.GetValue();}
-    const char* GetMinuitStatus(){return fMinuitStatus.GetValue();}
-
-    QSigExFitParam& Param(Int_t index){return fParams[index];}
-
-    void SetFCN(void (*fcn)(Int_t&, Double_t*, Double_t&f, Double_t*, Int_t));
-    void SetFCN(void* fcn);
+    QSigExFitParam& Param(Int_t index) const{return fParams[index];}
+    QSigExFitParam& Param(const char* paramname) const;
 
     void SetFCNError(Double_t fcnerror){fFCNError=fcnerror;}
-    void SetMinimArg(Int_t index, const char* name, const Double_t& value){(*fMinimArgs)[index].SetName(name); (*fMinimArgs)[index]=value;}
-    void SetMinimName(const char* minimname){fMinimName=minimname;}
-    void SetMinosMaxCalls(Int_t ncalls){fMinosMaxCalls=ncalls;}
-    void SetNMinimArgs(Int_t n){fMinimArgs->RedimList(n);}
-    void SetProcessor(const QProcList* processor){fQTPL=processor; Init();}
+    static void SetParams(Double_t *params); //SHOULD ONLY BE CALLED DURING THE FIT
+    void SetProcessor(QProcessor* processor){fQProcessor=processor; Init();}
+    void SetProcOutput(const QProcDouble* procobj){fQPD=procobj;}
 
-    const QSigExFit& operator=(const QSigExFit &rhs){TNamed::operator=(rhs); return *this;}
+    const QSigExFit& operator=(const QSigExFit &rhs){TObject::operator=(rhs); return *this;}
 
-    void Browse(TBrowser *b);
-    Bool_t IsFolder() const {return kTRUE;}
   protected:
-    const QProcList *fQTPL; //!
-    void (*fCompiledFunc)(Int_t&, Double_t*, Double_t&f, Double_t*, Int_t); //! Pointer to a compiled minimization function
-    void *fInterpretedFunc;  //! Pointer to an interpreted minimization function
+    Double_t& ParamFitVal(Int_t i){return (Double_t&)fParams[i];}
+    Double_t& ParamMinusFitError(Int_t i){return fParams[i].MinusFitError();}
+    Double_t& ParamPlusFitError(Int_t i){return fParams[i].PlusFitError();}
+
+    QProcessor *fQProcessor; //!
+    const QProcDouble *fQPD; //!
     QList<QSigExFitParam> fParams;
-    TMinuit *fMinuit;              //!
     QNamedVar<Double_t> fFCNError; //Minimization function error used to compute asymmetric errors
-    QNamedVar<TString> fMinimName; //Minimizer name
-    QList<QNamedVar<Double_t> > *fMinimArgs; //->Minimizer arguments
-    QNamedVar<Int_t> fMinosMaxCalls;  //Maximum number of calls of MINOS
-    QNamedVar<TString> fMinuitStatus; //TMinuit Status
-    QNamedVar<Double_t> fFCNMin;      //Minimum value reached for the minimization function
+    QNamedVar<Double_t> fFCNMin;   //Minimum value reached for the minimization function
+    TMatrixDSym *fCorMatrix;
+    static const QSigExFit   *fCurInstance; //!
   private:
     ClassDef(QSigExFit,1)
 };

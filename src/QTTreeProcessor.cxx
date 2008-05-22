@@ -118,40 +118,40 @@ void QTTreeProcessor::AddProc(const char *name, const char *title, void *proc, c
   (*fProcs)[index].SetProc(proc,procname);
 }
 
-void QTTreeProcessor::AddPSProc(const char *name, const char *title, Int_t index)
+void QTTreeProcessor::AddPSProc(const char *name, const char *title, Bool_t selectedonly, Int_t index)
 {
-  PRINTF8(this,"\tQTTreeProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Int_t index<",index,">)\n")
+  PRINTF10(this,"\tQTTreeProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
 
   index=PSProcIndexToIndex(index);
   fProcs->RedimList(fProcs->Count()+1,index);
-  fSelProcs->Add(kFALSE,index);
+  fSelProcs->Add(selectedonly,index);
   (*fProcs)[index].SetNameTitle(name,title);
 }
 
-void QTTreeProcessor::AddPSProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname, Int_t index)
+void QTTreeProcessor::AddPSProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname, Bool_t selectedonly, Int_t index)
 {
-  PRINTF12(this,"\tQTTreeProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t (*proc)(QProcArgs&)<",proc,">, const char *procname<'",procname,"'>, Int_t index<",index,">)\n")
+  PRINTF14(this,"\tQTTreeProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t (*proc)(QProcArgs&)<",proc,">, const char *procname<'",procname,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
 
   index=PSProcIndexToIndex(index);
-  AddPSProc(name,title,index);
+  AddPSProc(name,title,selectedonly,index);
   (*fProcs)[index].SetProc(proc,procname);
 }
 
-void QTTreeProcessor::AddPSProc(const char *name, const char *title, const char *procname, Int_t index)
+void QTTreeProcessor::AddPSProc(const char *name, const char *title, const char *procname, Bool_t selectedonly, Int_t index)
 {
-  PRINTF10(this,"\tQTTreeProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, const char *procname<'",procname,"'>, Int_t index<",index,">)\n")
+  PRINTF12(this,"\tQTTreeProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, const char *procname<'",procname,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
 
   index=PSProcIndexToIndex(index);
-  AddPSProc(name,title,index);
+  AddPSProc(name,title,selectedonly,index);
   (*fProcs)[index].SetProc(procname);
 }
 
-void QTTreeProcessor::AddPSProc(const char *name, const char *title, void *proc, const char *procname, Int_t index)
+void QTTreeProcessor::AddPSProc(const char *name, const char *title, void *proc, const char *procname, Bool_t selectedonly, Int_t index)
 {
-  PRINTF12(this,"\tQTTreeProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, void *proc<",proc,">, const char *procname<'",procname,"'>, Int_t index<",index,">)\n")
+  PRINTF14(this,"\tQTTreeProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, void *proc<",proc,">, const char *procname<'",procname,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
 
   index=PSProcIndexToIndex(index);
-  AddPSProc(name,title,index);
+  AddPSProc(name,title,selectedonly,index);
   (*fProcs)[index].SetProc(proc,procname);
 }
 
@@ -473,17 +473,17 @@ void QTTreeProcessor::Analyze()
     }
   }
 
-  //Section 4: All selector processes should be called if a given selector process is called. For this reason it is better if selector processes don't have any output (reduce I/O)
-  //Loop over all processses that can be selector processes
-  for(i=0; i<fNAEProcs; i++) {
+  //Section 4: All selector processes (and post-selection processes that explicitely process only selected events) should be called if a given selector process is called. For this reason it is better if selector processes don't have any output (reduce I/O)
+  //Loop over all processses
+  for(i=0; i<nprocs; i++) {
 
-    //If the current process is a selector process
+    //If the current process is a selector process or if it is a post-selection process that explicitely processes only selected events
     if((*fSelProcs)[i]) {
 
-      //Loop over all processes that can be selector processes
-      for(j=0; j<fNAEProcs; j++) {
+      //Loop over all processes
+      for(j=0; j<nprocs; j++) {
 
-	//If the process j is also a selector process, add it to the list of dependent processes for selector process i
+	//If the process j is also a selector process or if it is a post-selection process that explicitely processes only selected events, add it to the list of dependent processes for selector process i
 	if((*fSelProcs)[j]) depprocs[i].AddDepend(j);
       }
     }
@@ -577,7 +577,6 @@ void QTTreeProcessor::Exec() const
 {
   static QMask pardiffs; //Modified parameters since the last call
   static QMask depmods;  //Required processes due to modified input branches or input objects
-  static TTimeStamp lastexec(0,0); //Time of last execution
   static Bool_t firstrun;
   pardiffs.Clear();
   depmods.Clear();
@@ -590,7 +589,7 @@ void QTTreeProcessor::Exec() const
   static Int_t nj;
 
   //fLastParams gets cleared by the function Analyze, so this is how the first run is identified
-  if(fLastParams->Count() == fParams->Count()) {
+  if(fLastExec.GetSec() != 0) {
 
     //Loop over parameters
     for(i=0; i<fParams->Count(); i++) {
@@ -608,7 +607,7 @@ void QTTreeProcessor::Exec() const
 
 	//If the current input branch has been modified after the last run, add its mask to the mask of required processes.
 	//!!! This only works if the input branch is a QProcBranch object !!!
-	if(dynamic_cast<QProcBranch*>((*fIBranches)[i][j]) && dynamic_cast<QProcBranch*>((*fIBranches)[i][j])->NewerThan(lastexec)) depmods|=(*fBPDepends)[i][j];
+	if(dynamic_cast<QProcBranch*>((*fIBranches)[i][j]) && dynamic_cast<QProcBranch*>((*fIBranches)[i][j])->NewerThan(fLastExec)) depmods|=(*fBPDepends)[i][j];
       }
     }
 
@@ -616,7 +615,7 @@ void QTTreeProcessor::Exec() const
     for(i=0; i<fIObjects->Count(); i++) {
 
       //If the current input object has been modified after the last run, add its mask to the mask of required processes
-      if((*fIObjects)[i]->NewerThan(lastexec)) depmods|=(*fObjsPDepends)[i];
+      if((*fIObjects)[i]->NewerThan(fLastExec)) depmods|=(*fObjsPDepends)[i];
     }
 
     firstrun=kFALSE;
@@ -640,8 +639,8 @@ void QTTreeProcessor::Exec() const
     firstrun=kTRUE;
   }
 
-  printf("Mask for the current parameters: ");
-  pardiffs.Print();
+  //printf("Mask for the current parameters: ");
+  //pardiffs.Print();
 
   //If at least one of the parameters has changed
   if(pardiffs || depmods || firstrun) {
@@ -709,15 +708,15 @@ void QTTreeProcessor::Exec() const
 
       //If the current process has never been run or if it is triggered by the parameters mask
       if(((*fProcsParDepends)[i] && pardiffs) || depmods.GetBit(i) || firstrun) {
-	printf("Process '%s' will be called\n",(*fProcs)[i].GetName());
+	//printf("Process '%s' will be called\n",(*fProcs)[i].GetName());
 	//Add it to the list of needed processes
 	procs.Add(&(*fProcs)[i]);
 	selprocs.Add((*fSelProcs)[i]);
-	if((*fSelProcs)[i]) doselection=kTRUE;
 	seldepprocs.Add((*fSelDepProcs)[i]);
 
 	//If the current process is processing all events
 	if(i < fNAEProcs) {
+	  if((*fSelProcs)[i]) doselection=kTRUE;
 	  //Increment the number of triggered processes that process all events
 	  naeprocs++;
 	}
@@ -769,7 +768,7 @@ void QTTreeProcessor::Exec() const
 
 	  //If the current output branch is needed
 	  if(neededob[i][j]) {
-	    printf("Branch '%s' (%p) from tree '%s%s' will be filled\n",((TBranch*)(*fOBranches)[i][j])->GetName(),(*fOBranches)[i][j],tbuf->GetDirectory()->GetPath(),tbuf->GetName());
+	    //printf("Branch '%s' (%p) from tree '%s%s' will be filled\n",((TBranch*)(*fOBranches)[i][j])->GetName(),(*fOBranches)[i][j],tbuf->GetDirectory()->GetPath(),tbuf->GetName());
 	    //Delete the baskets for the output branch
 	    ((TBranch*)(*fOBranches)[i][j])->DeleteBaskets("all");
 	    //Add it to the list of needed output branches
@@ -806,7 +805,7 @@ void QTTreeProcessor::Exec() const
 
 	  //If the branch is needed and it is not also an output branch
 	  if(neededib[i][j] && obranches.FindFirst((TBranch*)(*fIBranches)[i][j]) == -1) {
-	    printf("Branch '%s' (%p) from tree '%s%s' needs to be loaded\n",((TBranch*)(*fIBranches)[i][j])->GetName(),(*fIBranches)[i][j],tbuf->GetDirectory()->GetPath(),tbuf->GetName());
+	    //printf("Branch '%s' (%p) from tree '%s%s' needs to be loaded\n",((TBranch*)(*fIBranches)[i][j])->GetName(),(*fIBranches)[i][j],tbuf->GetDirectory()->GetPath(),tbuf->GetName());
 
 	    //If the current input branch uses a different data type
 	    if(fIBCBuffers->Count() && (*fIBCBuffers)[i].Count() && (*fIBCBuffers)[i][j]) {
@@ -830,7 +829,7 @@ void QTTreeProcessor::Exec() const
 	  if(!(*fITSProc)[i]) {
 	    //Get the number of entries for the current tree
 	    neaet=tbuf->GetEntries();
-	    printf("Number of entries in tree '%s%s' that should contain all events: %i\n",tbuf->GetDirectory()->GetPath(),tbuf->GetName(),neaet);
+	    //printf("Number of entries in tree '%s%s' that should contain all events: %i\n",tbuf->GetDirectory()->GetPath(),tbuf->GetName(),neaet);
 
 	    //If the number of entries for the current input tree does not match the number of entries for the previous triggered input tree
 	    if(neaet != neaetlast && neaetlast != -1) {
@@ -842,7 +841,7 @@ void QTTreeProcessor::Exec() const
 	  } else {
 	    //Get the number of entries for the current tree
 	    neset=tbuf->GetEntries();
-	    printf("Number of entries in tree '%s%s' that should contain selected events: %i\n",tbuf->GetDirectory()->GetPath(),tbuf->GetName(),neset);
+	    //printf("Number of entries in tree '%s%s' that should contain selected events: %i\n",tbuf->GetDirectory()->GetPath(),tbuf->GetName(),neset);
 
 	    //If the number of entries for the current input tree does not match the number of entries for the previous triggered input tree
 	    if(neset != nesetlast && nesetlast != -1) {
@@ -865,7 +864,7 @@ void QTTreeProcessor::Exec() const
 	oobjects[i]->InitProcObj();
       }
 
-      QProgress progress(nentries);
+      //QProgress progress(nentries);
       //Loop over the entries
       for(i=0; i<nentries; i++) {
 	//printf("Entry %i/%i\n",i,nentries);
@@ -932,10 +931,10 @@ void QTTreeProcessor::Exec() const
 	}
 	//printf("\n");
 
-	progress(i+1);
+	//progress(i+1);
       }
-      progress(i,kTRUE);
-      printf("\n");
+      //progress(i,kTRUE);
+      //printf("\n");
 
 
       //Loop over needed output objects
@@ -963,7 +962,7 @@ void QTTreeProcessor::Exec() const
 
     //Save the parameters
     (*fLastParams)=(*fParams);
-    lastexec.Set();
+    fLastExec.Set();
   }
 }
 
@@ -988,6 +987,7 @@ QNamedProc& QTTreeProcessor::GetProc(const char *procname) const
 
 void QTTreeProcessor::InitProcess()
 {
+  TerminateProcess();
   TDirectory *curdir=gDirectory;
   TDirectory *dbuf;
   Int_t i,j,k;
@@ -1332,13 +1332,14 @@ void QTTreeProcessor::InitProcess()
 
   //Erase last parameters
   fLastParams->Clear();
+  fLastExec.SetSec(0);
 
   curdir->cd();
 }
 
 const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
 {
-  TNamed::operator=(rhs);
+  QStdProcessor::operator=(rhs);
   *fProcs=*rhs.fProcs;
   *fSelProcs=*rhs.fSelProcs;
   fNAEProcs=rhs.fNAEProcs;

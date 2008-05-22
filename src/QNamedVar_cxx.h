@@ -12,4 +12,10 @@ template <typename U> void QNamedVar<U>::ls(Option_t *) const
     << Int_t(TestBit(kCanDelete)) << " at: "<<this<< endl;
 }
 
+template<typename V> Bool_t operator==(const QNamedVar<V> &lhs, const QNamedVar<V> &rhs)
+{
+  if(lhs.fVal != rhs.fVal || lhs.fName != rhs.fName) return kFALSE;
+  return kTRUE;
+}
+
 #include "debugger.h"

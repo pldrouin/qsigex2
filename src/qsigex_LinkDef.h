@@ -39,6 +39,7 @@
 
 #pragma link C++ class QMask;
 #pragma link C++ class QProcObj;
+#pragma link C++ class QProcDouble;
 #pragma link C++ class QProcArgs;
 #pragma link C++ class QProcedure;
 #pragma link C++ class QCompProc;
@@ -48,6 +49,7 @@
 #pragma link C++ class QProcBranch;
 #pragma link C++ class QDependentProcs;
 #pragma link C++ class QProcessor;
+#pragma link C++ class QStdProcessor;
 #pragma link C++ class QTTreeProcessor;
 #pragma link C++ class QProcObjProcessor;
 #pragma link C++ class QProcList;
@@ -62,7 +64,8 @@
 #pragma link C++ class QFileUtils;
 #pragma link C++ class QTTreeUtils;
 
-#pragma link C++ class QSigExFit;
 #pragma link C++ class QSigExFitParam;
+#pragma link C++ class QSigExFit;
+#pragma link C++ class QSigExFitMinuit;
 
 #endif

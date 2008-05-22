@@ -31,13 +31,13 @@ template <typename U> class QNamedVar: public TObject
 
     const QNamedVar& operator=(const char *valstr) {SetValtoStr(fVal,valstr); return *this;}
 
-    operator U() const{PRINTF6(this,"\tQNamedVar<",typeid(U).name(),">::operator ",typeid(U).name(),"() const\n") PRINTF3("Returned val=",fVal,"\n") return fVal;}
+    operator const U&() const{PRINTF6(this,"\tQNamedVar<",typeid(U).name(),">::operator ",typeid(U).name(),"() const\n") PRINTF3("Returned val=",fVal,"\n") return fVal;}
+    virtual operator U&() {PRINTF6(this,"\tQNamedVar<",typeid(U).name(),">::operator ",typeid(U).name(),"() const\n") PRINTF3("Returned val=",fVal,"\n") return fVal;}
 
     void Copy(TObject &obj) const{TObject::Copy(obj); dynamic_cast<QNamedVar<U>&>(obj).fVal = fVal;}
 
     const char* GetName() const{return fName.Data();}
     const char* GetTitle() const{fTitle=""; fTitle+=fVal; return fTitle;}
-    const U& GetValue() const{return fVal;}
 
     ULong_t Hash() const{return fName.Hash();}
 
@@ -48,6 +48,8 @@ template <typename U> class QNamedVar: public TObject
     Int_t Sizeof() const{return fName.Sizeof()+sizeof(U);}
 
     virtual ~QNamedVar(){}
+
+    template<typename V> friend Bool_t operator==(const QNamedVar<V> &lhs, const QNamedVar<V> &rhs);
 
   protected:
     void SetValtoStr(TString &val, const char* str){val=str;}
