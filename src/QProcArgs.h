@@ -62,7 +62,7 @@ class QProcArgs
     QList<QProcObj*> fOObjects;
     QList<Double_t*> fPBuffers;
 
-    ClassDef(QProcArgs,0)
+    ClassDef(QProcArgs,0) //Encapsulated container for QProcedure arguments
 };
 
 #endif

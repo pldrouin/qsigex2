@@ -68,7 +68,7 @@ class QTTreeProcessor: public QStdProcessor
   private:
     QList<QNamedProc> *fProcs;           //-> QNamedProc objects
     QList<Bool_t>     *fSelProcs;        //-> List of selector processes / of post-selection processes that explicitely process only selected events
-    Int_t             fNAEProcs;         //   Number of processes that process all entries in the trees
+    Int_t             fNAEProcs;         //   Number of non-post-selection processes
     QList<Double_t>   *fLastParams;      //!  Parameters value from last Exec() call
     mutable TTimeStamp fLastExec;         //!  Time stamp from last Exec() call
     TString           fAnalysisDir;      //   Directory returned by gDirectory->GetPath() during the last call of Analyze()
@@ -115,7 +115,7 @@ class QTTreeProcessor: public QStdProcessor
       kBool_t
     };
 
-    ClassDef(QTTreeProcessor,1)          //The TTree processor class
+    ClassDef(QTTreeProcessor,1) //Events and objects processor
 };
 
 #include "debugger.h"

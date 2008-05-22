@@ -67,7 +67,7 @@ class QProcObjProcessor: public QStdProcessor
     QList<QProcObj*>         *fIObjects; //! Input objects 
     QList<QProcObj*>         *fOObjects; //! Output objects 
 
-    ClassDef(QProcObjProcessor,1)          //The TTree processor class
+    ClassDef(QProcObjProcessor,1) //QProcObj processor
 };
 
 #include "debugger.h"

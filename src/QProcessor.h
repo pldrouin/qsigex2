@@ -37,7 +37,7 @@ class QProcessor: public TNamed
   protected:
   private:
 
-    ClassDef(QProcessor,1)          //The TTree processor class
+    ClassDef(QProcessor,1) //Virtual abstract base class for processor classes
 };
 
 #include "debugger.h"

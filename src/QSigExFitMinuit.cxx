@@ -32,7 +32,7 @@ Double_t QSigExFitMinuit::Fit()
   Double_t dbuf1,dbuf2,dbuf3,dbuf4; 
   Int_t ibuf1;
   TString strbuf;
-  Double_t dummyd=0;
+  //Double_t dummyd=0;
 
   fCurInstance=this;
 
@@ -41,7 +41,7 @@ Double_t QSigExFitMinuit::Fit()
   // Reinitialize floating parameters values
   for (i=0; i<numpar; i++){
     if(!fParams[i].IsFixed()) {
-      fMinuit->mnparm(i, fParams[i].GetName(), dbuf4, fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+      fMinuit->mnparm(i, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
     }
   }
 
@@ -66,8 +66,8 @@ Double_t QSigExFitMinuit::Fit()
   ierflg = 0; 
 
   //Print the covariance matrix
-  cout << "\nParameter correlations calculated by MIGRAD:"<<"\n";
-  fMinuit->mnexcm("SHOW COR",&dummyd,0,ierflg);
+  //cout << "\nParameter correlations calculated by MIGRAD:"<<"\n";
+  //fMinuit->mnexcm("SHOW COR",&dummyd,0,ierflg);
 
   //Calculate non-symmetric errors with MINOS:
   //Minuit calculates errors by finding the change in the parameter value 
@@ -107,10 +107,10 @@ Double_t QSigExFitMinuit::Fit()
   //Get the covariance matrix from TMinuit
   fMinuit->mnemat(covmat,numfpar);
   //Store the matrix in a TMatrixDSym object
-  if(fCorMatrix) {
-    delete fCorMatrix;
+  if(fCovMatrix) {
+    delete fCovMatrix;
   }
-  fCorMatrix=new TMatrixDSym(numfpar,covmat);
+  fCovMatrix=new TMatrixDSym(numfpar,covmat);
   //Delete the covariance matrix array
   delete[] covmat;
 
@@ -126,7 +126,7 @@ void QSigExFitMinuit::InitFit()
   fMinuit=new TMinuit(fParams.Count());
 
   //Set parameters to use for Minuit SET PRINT command:
-  Double_t level=0;                       // -1 tells minuit we want minimal printout.
+  Double_t level=fVerbose-1; // -1 tells minuit we want minimal printout.
   Int_t ierflg;
   //Execute the minuit SET PRINT command:
   fMinuit->mnexcm( "SET PRINT", &level, 1, ierflg );  

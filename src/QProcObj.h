@@ -19,8 +19,7 @@ class QProcObj
 
   private:
     TTimeStamp fLastModified;
-
-    ClassDef(QProcObj,1)
+    ClassDef(QProcObj,1) //Object for QProcArgs arguments with modification time, init and terminate member functions
 };
 
 #endif

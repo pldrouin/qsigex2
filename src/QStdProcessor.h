@@ -40,7 +40,7 @@ class QStdProcessor: public QProcessor
     QList<TString>    *fParamsNames;     //-> Parameters names
   private:
 
-    ClassDef(QStdProcessor,1)          //The TTree processor class
+    ClassDef(QStdProcessor,1) //QProcessor class for standard processors (virtual abstract base class)
 };
 
 #include "debugger.h"

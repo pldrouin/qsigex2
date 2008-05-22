@@ -44,7 +44,7 @@ class QSigExFitMinuit: public QSigExFit
     QNamedVar<Int_t> fMinosMaxCalls;  //Maximum number of calls of MINOS
     QNamedVar<TString> fMinuitStatus; //TMinuit Status
   private:
-    ClassDef(QSigExFitMinuit,1)
+    ClassDef(QSigExFitMinuit,1) //QSigExFit using TMinuit minimizer
 };
 
 #endif

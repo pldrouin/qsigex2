@@ -6,9 +6,9 @@ const QSigExFit* QSigExFit::fCurInstance;
 
 QSigExFit::~QSigExFit()
 {
-  if(fCorMatrix) {
-    delete fCorMatrix;
-    fCorMatrix=NULL;
+  if(fCovMatrix) {
+    delete fCovMatrix;
+    fCovMatrix=NULL;
   }
 }
 
@@ -49,6 +49,11 @@ QSigExFitParam& QSigExFit::Param(const char* paramname) const
   }
 
   return Param(i);
+}
+
+void QSigExFit::PrintParams() const
+{
+  for(Int_t i=0; i<fParams.Count(); i++) fParams[i].Print();
 }
 
 void QSigExFit::SetParams(Double_t *params)

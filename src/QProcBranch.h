@@ -14,7 +14,7 @@ class QProcBranch: public TBranch, public QProcObj
   protected:
   private:
     QProcBranch(const QProcBranch &): TBranch(), QProcObj(){}
-  ClassDef(QProcBranch,1)
+    ClassDef(QProcBranch,1) //TBranch with QProcObj properties
 };
 
 #endif

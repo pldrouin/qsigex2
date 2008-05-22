@@ -45,7 +45,7 @@ class QProcList: public QProcessor
     QList<TString>  *fParamsNames; //-> List of Parameter Names
     QList<QList<Int_t> > *fParamsMapping; //-> Maps QProcessor objects parameters to QProcList parameters
   private:
-    ClassDef(QProcList,1)
+    ClassDef(QProcList,1) //Processor of processor objects
 };
 
 extern const QProcList *gQProcList;

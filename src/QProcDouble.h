@@ -12,6 +12,7 @@ class QProcDouble: public QProcObj
     virtual ~QProcDouble(){}
     void InitProcObj(){fDouble=0;}
     operator const Double_t&() const{return fDouble;}
+    operator Double_t&() {return fDouble;}
     const QProcDouble& operator=(const QProcDouble &rhs){fDouble=rhs.fDouble; return *this;}
     const QProcDouble& operator=(const Double_t& rhs){fDouble=rhs; return *this;}
     const QProcDouble& operator+=(const Double_t& rhs){fDouble+=rhs; return *this;}
@@ -20,7 +21,7 @@ class QProcDouble: public QProcObj
     const QProcDouble& operator/=(const Double_t& rhs){fDouble+=rhs; return *this;}
   protected:
     Double_t fDouble;
-    ClassDef(QProcDouble,1)
+    ClassDef(QProcDouble,1) //Double_t with QProcObj properties
 };
 
 #endif

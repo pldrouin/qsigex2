@@ -25,7 +25,7 @@ class QFileUtils{
     QFileUtils(const QFileUtils&){}
     const QFileUtils& operator=(const QFileUtils&){return *this;}
 
-    ClassDef(QFileUtils,1) //Contains static member functions that handle TTree branches buffers
+    ClassDef(QFileUtils,1) //Contains static member functions that do path name decoding
 };
 
 #include "debugger.h"

@@ -20,7 +20,7 @@ class QProcTree: public TTree
   protected:
   private:
     QProcTree(const QProcTree&): TTree(){}
-    ClassDef(QProcTree,1)
+    ClassDef(QProcTree,1) //TTree that creates QProcBranch branches
 };
 
 #endif

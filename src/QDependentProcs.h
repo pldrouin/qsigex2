@@ -22,7 +22,7 @@ class QDependentProcs
     static QList<void*> fQPDObjs;
     static QList<Int_t> fPCalled;
 
-    ClassDef(QDependentProcs,1)
+    ClassDef(QDependentProcs,1) //List direct and indirent dependencies for QNamedProc objects. NEVER USE MORE THAN ONE SET OF INSTANCES!
 };
 
 #endif

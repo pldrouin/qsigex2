@@ -10,8 +10,8 @@
 class QSigExFit: public TObject
 {
   public:
-    QSigExFit(): TObject(), fQProcessor(NULL), fQPD(NULL), fParams(), fFCNError("Min Function Error",1.0), fFCNMin("Minimization Function Minimum",1.7e308), fCorMatrix(NULL) {}
-    QSigExFit(const QSigExFit &rhs): TObject(rhs), fQProcessor(rhs.fQProcessor), fQPD(rhs.fQPD), fParams(rhs.fParams), fFCNError(rhs.fFCNError), fFCNMin(rhs.fFCNMin), fCorMatrix(NULL) {};
+    QSigExFit(): TObject(), fQProcessor(NULL), fQPD(NULL), fParams(), fFCNError("Min Function Error",1.0), fFCNMin("Minimization Function Minimum",1.7e308), fCovMatrix(NULL), fVerbose(0) {}
+    QSigExFit(const QSigExFit &rhs): TObject(rhs), fQProcessor(rhs.fQProcessor), fQPD(rhs.fQPD), fParams(rhs.fParams), fFCNError(rhs.fFCNError), fFCNMin(rhs.fFCNMin), fCovMatrix(new TMatrixDSym(*rhs.fCovMatrix)), fVerbose(0) {};
     virtual ~QSigExFit();
 
     void ExecProc() const{fQProcessor->Exec();}
@@ -20,7 +20,7 @@ class QSigExFit: public TObject
 
     virtual Double_t Fit()=0;
 
-    const TMatrixDSym& GetCorMatrix() const{return *fCorMatrix;}
+    const TMatrixDSym& GetCovMatrix() const{return *fCovMatrix;}
     const static QSigExFit& GetCurInstance(){return *fCurInstance;}
     const Double_t& GetFCNError() const{return fFCNError;}
     const Double_t& GetFCNMin() const{return fFCNMin;}
@@ -32,10 +32,13 @@ class QSigExFit: public TObject
     QSigExFitParam& Param(Int_t index) const{return fParams[index];}
     QSigExFitParam& Param(const char* paramname) const;
 
+    void PrintParams() const;
+
     void SetFCNError(Double_t fcnerror){fFCNError=fcnerror;}
     static void SetParams(Double_t *params); //SHOULD ONLY BE CALLED DURING THE FIT
     void SetProcessor(QProcessor* processor){fQProcessor=processor; Init();}
     void SetProcOutput(const QProcDouble* procobj){fQPD=procobj;}
+    void SetVerbose(Int_t verbose=0){fVerbose=verbose;}
 
     const QSigExFit& operator=(const QSigExFit &rhs){TObject::operator=(rhs); return *this;}
 
@@ -49,10 +52,11 @@ class QSigExFit: public TObject
     QList<QSigExFitParam> fParams;
     QNamedVar<Double_t> fFCNError; //Minimization function error used to compute asymmetric errors
     QNamedVar<Double_t> fFCNMin;   //Minimum value reached for the minimization function
-    TMatrixDSym *fCorMatrix;
+    TMatrixDSym *fCovMatrix;
+    Int_t fVerbose;
     static const QSigExFit   *fCurInstance; //!
   private:
-    ClassDef(QSigExFit,1)
+    ClassDef(QSigExFit,1) //Base fitter class that using QProcessor objects
 };
 
 #endif
