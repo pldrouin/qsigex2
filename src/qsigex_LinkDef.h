@@ -29,6 +29,7 @@
 #pragma link C++ class QList<Double_t*>-;
 #pragma link C++ class QList<QList<Double_t*> >-;
 #pragma link C++ class QList<QProcObj*>-;
+#pragma link C++ class QList<QProcArray*>-;
 
 #pragma link C++ class QNamedVar<Bool_t>;
 #pragma link C++ class QNamedVar<TString>;

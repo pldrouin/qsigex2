@@ -12,6 +12,7 @@ class QProcArray: public QProcObj
     const QProcArray& operator=(const QProcArray &rhs){QProcObj::operator=(rhs); return *this;}
     virtual Int_t Fill()=0;
     virtual Double_t* GetBuffer() const=0;
+    virtual Long64_t GetEntries() const=0;
     virtual Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0)=0;
     virtual void ResetArray()=0;
     virtual void UnloadArray()=0;

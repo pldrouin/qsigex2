@@ -70,7 +70,7 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 	  dbuf=gDirectory->mkdir(dpn[i]);
 
 	  if(!dbuf) {
-	    fprintf(stderr,"QProcBranchHandler::LoadBranch: Directory '%s' cannot be created in location '%s'\n",dpn[i].Data(),gDirectory->GetPath());
+	    fprintf(stderr,"QProcBranchHandler::LoadBranch: Error: Directory '%s' cannot be created in location '%s'\n",dpn[i].Data(),gDirectory->GetPath());
 	    throw 1;
 	  }
 	}
@@ -83,6 +83,28 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 	tbuf=new QProcTree(dpn.GetLast(),dpn.GetLast());
       }
       dpn.Clear();
+
+      //If the branch already exists
+      if((bbuf=tbuf->GetBranch(bname))) {
+
+	//If the branch is a QProcBranch
+	if(dynamic_cast<QProcBranch*>(bbuf)) {
+	  return dynamic_cast<QProcBranch*>(bbuf);
+
+	//Else if the branch is a TBranch
+	} else {
+	  //If there is no wrapper that have been created for that branch, create one
+	  if((i=fTBObjs.FindFirst(bbuf)) == -1) {
+	    fTBObjs.Add(bbuf);
+	    fQPTBWObjs.Add((TObject*)new QProcTBranchWrapper(bbuf));
+	    fNObjReqTB.Add(0);
+	    i=fQPTBWObjs.Count()-1;
+	  }
+	  //Return a pointer to the wrapper
+	  fNObjReqTB[i]++;
+	  return (QProcTBranchWrapper*)fQPTBWObjs[i];
+	}
+      }
 
       //Create the branch
       return dynamic_cast<QProcBranch*>(tbuf->Branch(bname,NULL,bname+"/D"));
@@ -103,7 +125,7 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 	    fNObjReqOFiles[i]++;
 	  }
 
-	  //If the file has been opened previously by QProcBranchHandler  in read-only mode
+	  //If the file has been opened previously by QProcBranchHandler in read-only mode
 	  if((i=fIFiles.FindFirst(dbuf)) != -1) {
 	    //Increment the number of input branches that require that file
 	    fNObjReqIFiles[i]++;
@@ -173,52 +195,62 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 
 void QProcBranchHandler::UnloadBranch(TBranch *branch)
 {
+//  printf("void QProcBranchHandler::UnloadBranch(TBranch *branch<'%s'>)\n",branch->GetName());
   //Get a pointer to the file were is stored the tree associated to the branch
   TFile *fbuf=branch->GetTree()->GetCurrentFile();
   Int_t i;
 
-  //If the branch is a wrapper to a TBranch object
-  if((i=fQPTBWObjs.FindFirst((TObject*)branch))){
+  //If the branch is a TBranch with a wrapper object
+  if((i=fTBObjs.FindFirst((TObject*)branch)) != -1){
+//    printf("The branch is a TBranch with a wrapper object\n");
     fNObjReqTB[i]--;
 
     if(!fNObjReqTB[i]) {
+//      printf("Deleting the wrapper object...\t");
       delete (QProcTBranchWrapper*)fQPTBWObjs[i];
       fTBObjs.Del(i);
       fQPTBWObjs.Del(i);
       fNObjReqTB.Del(i);
+//      printf("Done\n");
     }
   }
 
   //If the file is an input file loaded by this class
   if((i=fIFiles.FindFirst((TObject*)fbuf)) != -1) {
+//    printf("Associated file is an input file loaded by this class\n");
     //Decrement the number of objects requiring this file
     fNObjReqIFiles[i]--;
 
     //If no object requires this files anymore
     if(!fNObjReqIFiles[i]) {
+//      printf("Closing and deleting the input file...\t");
       fbuf->Close();
       delete fbuf;
       fIFiles.Del(i);
       fNObjReqIFiles.Del(i);
+//      printf("Done\n");
     }
   }
 
   //If the file is an output file loaded by this class
   if((i=fOFiles.FindFirst((TObject*)fbuf)) != -1) {
+//    printf("Associated file is an output file loaded by this class\n");
     //Decrement the number of objects requiring this file
     fNObjReqOFiles[i]--;
 
     //If no object requires this files anymore
     if(!fNObjReqOFiles[i]) {
+//      printf("Saving, closing and deleting the output file...\t");
       fbuf->Write();
       fbuf->Close();
       delete fbuf;
       fOFiles.Del(i);
       fNObjReqOFiles.Del(i);
+//      printf("Done\n");
     }
   }
-  printf("Status of QProcBranchHandler:\n");
-  printf("Number of input files: %i\n",fIFiles.Count());
-  printf("Number of output files: %i\n",fOFiles.Count());
-  printf("Number of TBranch objects: %i\n",fTBObjs.Count());
+//  printf("Status of QProcBranchHandler:\n");
+//  printf("Number of input files: %i\n",fIFiles.Count());
+//  printf("Number of output files: %i\n",fOFiles.Count());
+//  printf("Number of TBranch objects: %i\n",fTBObjs.Count());
 }

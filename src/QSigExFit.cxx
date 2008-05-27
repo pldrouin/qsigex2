@@ -12,6 +12,17 @@ QSigExFit::~QSigExFit()
   }
 }
 
+Int_t QSigExFit::FindFreeParamIndex(const char *paramname) const
+{
+  Int_t ret=FindParamIndex(paramname);
+  if(ret != -1) {
+    ret=fParams[ret].GetFreeParamIndex();
+    if(ret == -1) fprintf(stderr,"QProcessor::FindFreeParamIndex: Error: parameter '%s' is not free\n",paramname);
+  }
+
+  return ret;
+}
+
 Int_t QSigExFit::FindParamIndex(const char *paramname) const
 {
   Int_t ret=-1;

@@ -11,16 +11,18 @@
 class QProcTBranchWrapper: public QProcArray
 {
   public:
-    QProcTBranchWrapper(TBranch *branch): QProcArray(), fBranch(branch), fBuffer(NULL), fOwnsBuffer(kFALSE), fCBType(0), fCBuffer(NULL) {}
+    QProcTBranchWrapper(TBranch *branch): QProcArray(), fBranch(branch), fBuffer(NULL), fOwnsBuffer(kFALSE), fCBType(0), fCBuffer(NULL) {SetBuffer();}
     virtual ~QProcTBranchWrapper();
     Int_t Fill();
     TBranch* GetBranch(){return fBranch;}
     Double_t* GetBuffer() const{return fBuffer;}
+    Long64_t GetEntries() const{return fBranch->GetEntries();}
     Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0);
     void InitProcObj(){ResetArray();}
     Bool_t NewerThan(const TTimeStamp &) const{return kFALSE;}
     void UpdateModTime(){}
     void ResetArray(){fBranch->DeleteBaskets("all");}
+    void TerminateProcObj(){fBranch->GetTree()->SetEntries(fBranch->GetEntries());}
     void UnloadArray();
 
   protected:

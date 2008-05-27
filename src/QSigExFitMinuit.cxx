@@ -32,7 +32,6 @@ Double_t QSigExFitMinuit::Fit()
   Double_t dbuf1,dbuf2,dbuf3,dbuf4; 
   Int_t ibuf1;
   TString strbuf;
-  //Double_t dummyd=0;
 
   fCurInstance=this;
 
@@ -48,12 +47,9 @@ Double_t QSigExFitMinuit::Fit()
   //**** Call the minimizer ****
   fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
 
-  Int_t numfpar=0; //Number of floating parameters
-
   // set fit parameters to result from this run of the minimizer
   for (i=0; i<numpar; i++){
     if(!fParams[i].IsFixed()) {
-      numfpar++;
       fMinuit->mnpout(i,strbuf,dbuf4,dbuf1,dbuf2,dbuf3,ibuf1); //dbuf4 contains the fitted value
       fMinuit->mnparm(i, fParams[i].GetName(), dbuf4, fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
     }
@@ -67,6 +63,7 @@ Double_t QSigExFitMinuit::Fit()
 
   //Print the covariance matrix
   //cout << "\nParameter correlations calculated by MIGRAD:"<<"\n";
+  //Double_t dummyd=0;
   //fMinuit->mnexcm("SHOW COR",&dummyd,0,ierflg);
 
   //Calculate non-symmetric errors with MINOS:
@@ -103,6 +100,7 @@ Double_t QSigExFitMinuit::Fit()
     fMinuit->mnerrs(i,ParamPlusFitError(i),ParamMinusFitError(i),dbuf1,dbuf2);
   }
 
+  Int_t numfpar=fMinuit->GetNumFreePars();        //Number of floating parameters
   Double_t *covmat=new Double_t[numfpar*numfpar]; //covariance matrix array
   //Get the covariance matrix from TMinuit
   fMinuit->mnemat(covmat,numfpar);
@@ -121,6 +119,7 @@ void QSigExFitMinuit::InitFit()
 {
   Int_t i;
   Double_t dbuf;
+  Int_t numfpar=0;
 
   if(fMinuit) delete fMinuit;
   fMinuit=new TMinuit(fParams.Count());
@@ -165,15 +164,19 @@ void QSigExFitMinuit::InitFit()
 
   //Loop through parameters, and initialize a variable in Minuit for each one.
   for (i=0; i<fParams.Count(); i++){
-
     //mnparm implements a parameter definition with a parameter number,
     //name, starting value, step size, min and max values, and an error flag.
 
     fMinuit->mnparm(i, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+
     //If the parameter is fixed, tell to TMinuit
     if(fParams[i].IsFixed()){
+      ParamFreeParamIndex(i)=-1;
       dbuf=i+1;
       fMinuit->mnexcm("FIX",&dbuf,1,ierflg);     //fix the parameter with that index
+
+    } else {
+      ParamFreeParamIndex(i)=numfpar++;
     }
   }
 }

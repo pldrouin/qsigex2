@@ -17,10 +17,11 @@ class QProcBranch: public QProcArray, public TBranch
     virtual ~QProcBranch();
     Int_t Fill();
     Double_t* GetBuffer() const{return fBuffer;}
+    Long64_t GetEntries() const{return TBranch::GetEntries();}
     Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0);
     void InitProcObj(){ResetArray();}
     void ResetArray(){DeleteBaskets("all");}
-    void TerminateProcObj(){UpdateModTime();}
+    void TerminateProcObj(){UpdateModTime(); GetTree()->SetEntries(TBranch::GetEntries());}
     void UnloadArray();
 
   protected:

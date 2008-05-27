@@ -30,6 +30,7 @@ template <> extern void QList<void*>::Streamer(TBuffer &R__b);
 template <> extern void QList<Double_t*>::Streamer(TBuffer &R__b);
 template <> extern void QList<TObject*>::Streamer(TBuffer &R__b);
 template <> extern void QList<QProcObj*>::Streamer(TBuffer &R__b);
+template <> extern void QList<QProcArray*>::Streamer(TBuffer &R__b);
 #else
 template <> void QList<char>::Streamer(TBuffer &R__b)
 {
@@ -145,5 +146,6 @@ template <> void QList<void*>::Streamer(TBuffer &){}
 template <> void QList<Double_t*>::Streamer(TBuffer &){}
 template <> void QList<TObject*>::Streamer(TBuffer &){}
 template <> void QList<QProcObj*>::Streamer(TBuffer &){}
+template <> void QList<QProcArray*>::Streamer(TBuffer &){}
 
 #endif

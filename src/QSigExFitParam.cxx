@@ -18,19 +18,22 @@ QSigExFitParam::~QSigExFitParam()
   fPlusFitError=NULL;
   delete fMinusFitError;
   fMinusFitError=NULL;
+  delete fFreeParamIndex;
+  fFreeParamIndex=NULL;
 }
 
 void QSigExFitParam::Print(const Option_t*) const
 {
   printf("\nParameter '%s'\n",GetName());
-  printf("\tFitted value:       %f\n",(const Double_t&)(*this));
-  printf("\tMinus fit error:    %f\n",GetMinusFitError());
-  printf("\tPlus fit error:     %f\n",GetPlusFitError());
-  printf("\tStart value:        %f\n",GetStartVal());
-  printf("\tMinimum value:      %f\n",GetMinVal());
-  printf("\tMaximum value:      %f\n",GetMaxVal());
-  printf("\tInitial step value: %f\n",GetStepVal());
-  printf("\tFixed parameter:    %s\n",(IsFixed() ? "yes":"no"));
+  printf("\tFitted value:         %f\n",(const Double_t&)(*this));
+  printf("\tMinus fit error:      %f\n",GetMinusFitError());
+  printf("\tPlus fit error:       %f\n",GetPlusFitError());
+  printf("\tStart value:          %f\n",GetStartVal());
+  printf("\tMinimum value:        %f\n",GetMinVal());
+  printf("\tMaximum value:        %f\n",GetMaxVal());
+  printf("\tInitial step value:   %f\n",GetStepVal());
+  printf("\tFree parameter index: %i\n",GetFreeParamIndex());
+  printf("\tFixed parameter:      %s\n",(IsFixed() ? "yes":"no"));
 }
 
 void QSigExFitParam::Browse(TBrowser *b)
@@ -39,5 +42,6 @@ void QSigExFitParam::Browse(TBrowser *b)
   b->Add(fMinVal);
   b->Add(fMaxVal);
   b->Add(fStepVal);
+  b->Add(fFreeParamIndex);
   b->Add(fFixed);
 }

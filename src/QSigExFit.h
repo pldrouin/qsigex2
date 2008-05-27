@@ -16,6 +16,7 @@ class QSigExFit: public TObject
 
     void ExecProc() const{fQProcessor->Exec();}
 
+    Int_t FindFreeParamIndex(const char *paramname) const;
     Int_t FindParamIndex(const char *paramname) const;
 
     virtual Double_t Fit()=0;
@@ -46,6 +47,7 @@ class QSigExFit: public TObject
     Double_t& ParamFitVal(Int_t i){return (Double_t&)fParams[i];}
     Double_t& ParamMinusFitError(Int_t i){return fParams[i].MinusFitError();}
     Double_t& ParamPlusFitError(Int_t i){return fParams[i].PlusFitError();}
+    Int_t& ParamFreeParamIndex(Int_t i){return fParams[i].FreeParamIndex();}
 
     QProcessor *fQProcessor; //!
     const QProcDouble *fQPD; //!
