@@ -1293,10 +1293,10 @@ void QTTreeProcessor::InitProcess()
 
 	//If there are input buffers for this tree (i.e. the tree is not also listed as an output tree)
 	if((*fIBBuffers)[k].Count()) {
-	//Get the buffer address from the input branches buffers list
-	proc->SetIVarPtr(j,(*fIBBuffers)[k][(*fIBNames)[k].FindFirst(proc->GetIVarNameTitle(j).GetName())]);
+	  //Get the buffer address from the input branches buffers list
+	  proc->SetIVarPtr(j,(*fIBBuffers)[k][(*fIBNames)[k].FindFirst(proc->GetIVarNameTitle(j).GetName())]);
 
-	//Else if there are no input buffers
+	  //Else if there are no input buffers
 	} else {
 	  //Find the object in the list of outputs
 	  k=fOTNames->FindFirst(donbuf);

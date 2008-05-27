@@ -40,13 +40,16 @@
 #pragma link C++ class QMask;
 #pragma link C++ class QProcObj;
 #pragma link C++ class QProcDouble;
+#pragma link C++ class QProcArray;
+#pragma link C++ class QProcBranchHandler;
 #pragma link C++ class QProcArgs;
 #pragma link C++ class QProcedure;
 #pragma link C++ class QCompProc;
 #pragma link C++ class QCINTProc;
 #pragma link C++ class QNamedProc;
 #pragma link C++ class QProcTree;
-#pragma link C++ class QProcBranch;
+#pragma link C++ class QProcBranch-;
+#pragma link C++ class QProcTBranchWrapper;
 #pragma link C++ class QDependentProcs;
 #pragma link C++ class QProcessor;
 #pragma link C++ class QStdProcessor;

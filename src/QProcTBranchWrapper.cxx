@@ -1,13 +1,8 @@
-#include "QProcBranch.h"
+#include "QProcTBranchWrapper.h"
 
-ClassImp(QProcBranch)
+ClassImp(QProcTBranchWrapper)
 
-QProcBranch::QProcBranch(TTree* tree, const char* name, void* address, const char* leaflist, Int_t basketsize, Int_t compress): QProcArray(), TBranch(tree,name,address,leaflist,basketsize,compress), fBuffer(NULL), fOwnsBuffer(kFALSE), fCBType(0), fCBuffer(NULL)
-{
-  SetBuffer();
-}
-
-QProcBranch::~QProcBranch()
+QProcTBranchWrapper::~QProcTBranchWrapper()
 {
   if(fCBuffer == NULL) {
 
@@ -27,7 +22,7 @@ QProcBranch::~QProcBranch()
   }
 }
 
-Int_t QProcBranch::Fill()
+Int_t QProcTBranchWrapper::Fill()
 {
   if(fCBuffer) {
 
@@ -57,12 +52,12 @@ Int_t QProcBranch::Fill()
 	*((Bool_t*)fCBuffer)=(Bool_t)*fBuffer;
     }
   }
-  return TBranch::Fill();
+  return fBranch->Fill();
 }
 
-Int_t QProcBranch::GetEntry(Long64_t entry, Int_t dummy)
+Int_t QProcTBranchWrapper::GetEntry(Long64_t entry, Int_t dummy)
 {
-  Int_t ret=TBranch::GetEntry(entry,dummy);
+  Int_t ret=fBranch->GetEntry(entry,dummy);
 
   if(fCBuffer) {
 
@@ -95,14 +90,14 @@ Int_t QProcBranch::GetEntry(Long64_t entry, Int_t dummy)
   return ret;
 }
 
-void QProcBranch::SetBuffer()
+void QProcTBranchWrapper::SetBuffer()
 {
   TLeaf *lbuf;
   const char *cabuf;
 
   //Get a pointer to the leaf named according to the branch name
-  if(!(lbuf=GetLeaf(GetName()))) {
-    fprintf(stderr,"QProcBranch::SetBuffer(): Error: There is no leaf '%s' contained in branch '%s' from tree '%s:%s'\n",GetName(),GetName(),GetTree()->GetDirectory()->GetPath(),GetTree()->GetName());
+  if(!(lbuf=fBranch->GetLeaf(fBranch->GetName()))) {
+    fprintf(stderr,"QProcTBranchWrapper::SetBuffer(): Error: There is no leaf '%s' contained in branch '%s' from tree '%s:%s'\n",fBranch->GetName(),fBranch->GetName(),fBranch->GetTree()->GetDirectory()->GetPath(),fBranch->GetTree()->GetName());
     throw 1;
   }
 
@@ -113,16 +108,16 @@ void QProcBranch::SetBuffer()
   if(!strcmp(cabuf,"Double_t")) {
 
     //If there is no buffer assigned to the branch
-    if(!GetAddress()) {
+    if(!fBranch->GetAddress()) {
     //Create a new buffer
     fBuffer=new Double_t;
-    SetAddress(fBuffer);
+    fBranch->SetAddress(fBuffer);
     fOwnsBuffer=kTRUE;
 
     //Else if there is already a buffer assigned to the branch
     } else {
       //Get the buffer address from the branch
-      fBuffer=(Double_t*)GetAddress();
+      fBuffer=(Double_t*)fBranch->GetAddress();
       fOwnsBuffer=kFALSE;
     }
 
@@ -156,12 +151,12 @@ void QProcBranch::SetBuffer()
       fCBType=kBool_t;
 
     } else {
-      fprintf(stderr,"QProcBranch::SetBuffer(): Error: The data type '%s' contained in branch '%s' from tree '%s:%s' is not supported\n",cabuf,GetName(),GetTree()->GetDirectory()->GetPath(),GetTree()->GetName());
+      fprintf(stderr,"QProcTBranchWrapper::SetBuffer(): Error: The data type '%s' contained in branch '%s' from tree '%s:%s' is not supported\n",cabuf,fBranch->GetName(),fBranch->GetTree()->GetDirectory()->GetPath(),fBranch->GetTree()->GetName());
       throw 1;
     }
 
     //If there is no buffer associated to that branch
-    if(!GetAddress()) {
+    if(!fBranch->GetAddress()) {
 
       //Create a new buffer having the proper size and assign it to the branch
       switch(fCBType) {
@@ -189,36 +184,18 @@ void QProcBranch::SetBuffer()
 	case kBool_t:
 	  fCBuffer=malloc(sizeof(Bool_t));
       }
-      SetAddress(fCBuffer);
+      fBranch->SetAddress(fCBuffer);
       fOwnsBuffer=kTRUE;
 
       //Else if there is already a buffer for this branch
     } else {
-      fCBuffer=GetAddress();
+      fCBuffer=fBranch->GetAddress();
       fOwnsBuffer=kFALSE;
     }
   }
 }
-void QProcBranch::Streamer(TBuffer &R__b)
-{
-  // Stream an object of class QProcBranch.
 
-  UInt_t R__s, R__c;
-  if (R__b.IsReading()) {
-    Version_t R__v = R__b.ReadVersion(&R__s, &R__c); if (R__v) { }
-    TBranch::Streamer(R__b);
-    QProcArray::Streamer(R__b);
-    R__b.CheckByteCount(R__s, R__c, QProcBranch::IsA());
-    SetBuffer();
-  } else {
-    R__c = R__b.WriteVersion(QProcBranch::IsA(), kTRUE);
-    TBranch::Streamer(R__b);
-    QProcArray::Streamer(R__b);
-    R__b.SetByteCount(R__c, kTRUE);
-  }
-}
-
-void QProcBranch::UnloadArray()
+void QProcTBranchWrapper::UnloadArray()
 {
-  QProcBranchHandler::UnloadBranch(this);
+  QProcBranchHandler::UnloadBranch(fBranch);
 }

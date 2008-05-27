@@ -103,6 +103,7 @@ class QTTreeProcessor: public QStdProcessor
     QList<QList<Bool_t> >    *fOwnsIBCBuffers; //! Identifies input branch buffers containing a different data type owned by the class
     QList<QList<Char_t> >    *fIBCBTypes; //! Data type id of input branches containing a different data type
     QList<Double_t>         *fBuffers;   //! Buffers for output buffers
+    //To be deleted
     enum {
       kDouble_t,
       kFloat_t,
