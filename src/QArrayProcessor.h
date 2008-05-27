@@ -14,13 +14,13 @@
 
 #include "debugger.h"
 
-class QTTreeProcessor: public QStdProcessor
+class QArrayProcessor: public QStdProcessor
 {
   public:
-    QTTreeProcessor(): QStdProcessor(), fProcs(new QList<QNamedProc>), fSelProcs(new QList<Bool_t>), fNAEProcs(0), fLastParams(new QList<Double_t>), fLastExec(0,0), fAnalysisDir(), fIANames(new QList<QList<TString> >), fOANames(new QList<QList<TString> >), fBuNames(new QList<TString>), fIAIndices(new QList<QList<Int_t> >), fIOIndices(new QList<QList<Int_t> >), fOAIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fSelDepProcs(new QList<Bool_t>), fIASProc(new QList<Bool_t>), fOASProc(new QList<Bool_t>), fProcsParDepends(new QList<QMask>), fAPDepends(new QList<QMask>), fObjsPDepends(new QList<QMask>), fIArrays(new QList<QProcArray*>), fIObjects(new QList<QProcObj*>), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>), fBuffers(new QList<Double_t>) {}
-    QTTreeProcessor(const char* name, const char* title): QStdProcessor(name,title), fProcs(new QList<QNamedProc>), fSelProcs(new QList<Bool_t>), fNAEProcs(0), fLastParams(new QList<Double_t>), fLastExec(0,0), fAnalysisDir(), fIANames(new QList<QList<TString> >), fOANames(new QList<QList<TString> >), fBuNames(new QList<TString>), fIAIndices(new QList<QList<Int_t> >), fIOIndices(new QList<QList<Int_t> >), fOAIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fSelDepProcs(new QList<Bool_t>), fIASProc(new QList<Bool_t>), fOASProc(new QList<Bool_t>), fProcsParDepends(new QList<QMask>), fAPDepends(new QList<QMask>), fObjsPDepends(new QList<QMask>), fIArrays(new QList<QProcArray*>), fIObjects(new QList<QProcObj*>), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>), fBuffers(new QList<Double_t>) {}
-    QTTreeProcessor(const QTTreeProcessor &rhs): QStdProcessor(rhs), fProcs(new QList<QNamedProc>(*rhs.fProcs)), fSelProcs(new QList<Bool_t>(*rhs.fSelProcs)), fNAEProcs(0), fLastParams(new QList<Double_t>), fLastExec(0,0), fAnalysisDir(rhs.fAnalysisDir), fIANames(new QList<QList<TString> >(*rhs.fIANames)), fOANames(new QList<QList<TString> >(*rhs.fOANames)), fBuNames(new QList<TString>(*rhs.fBuNames)), fIAIndices(new QList<QList<Int_t> >(*rhs.fIAIndices)), fIOIndices(new QList<QList<Int_t> >(*rhs.fIOIndices)), fOAIndices(new QList<QList<Int_t> >(*rhs.fOAIndices)), fOOIndices(new QList<QList<Int_t> >(*rhs.fOOIndices)), fSelDepProcs(new QList<Bool_t>(*rhs.fSelDepProcs)), fIASProc(new QList<Bool_t>(*rhs.fIASProc)), fOASProc(new QList<Bool_t>(*rhs.fOASProc)), fProcsParDepends(new QList<QMask>(*rhs.fProcsParDepends)), fAPDepends(new QList<QMask>(*rhs.fAPDepends)), fObjsPDepends(new QList<QMask>(*rhs.fObjsPDepends)), fIArrays(new QList<QProcArray*>), fIObjects(new QList<QProcObj*>(*rhs.fIObjects)), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>(*rhs.fOObjects)), fBuffers(new QList<Double_t>){}
-    virtual ~QTTreeProcessor();
+    QArrayProcessor(): QStdProcessor(), fProcs(new QList<QNamedProc>), fSelProcs(new QList<Bool_t>), fNAEProcs(0), fLastParams(new QList<Double_t>), fLastExec(0,0), fAnalysisDir(), fIANames(new QList<QList<TString> >), fOANames(new QList<QList<TString> >), fBuNames(new QList<TString>), fIAIndices(new QList<QList<Int_t> >), fIOIndices(new QList<QList<Int_t> >), fOAIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fSelDepProcs(new QList<Bool_t>), fIASProc(new QList<Bool_t>), fOASProc(new QList<Bool_t>), fProcsParDepends(new QList<QMask>), fAPDepends(new QList<QMask>), fObjsPDepends(new QList<QMask>), fIArrays(new QList<QProcArray*>), fIObjects(new QList<QProcObj*>), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>), fBuffers(new QList<Double_t>) {}
+    QArrayProcessor(const char* name, const char* title): QStdProcessor(name,title), fProcs(new QList<QNamedProc>), fSelProcs(new QList<Bool_t>), fNAEProcs(0), fLastParams(new QList<Double_t>), fLastExec(0,0), fAnalysisDir(), fIANames(new QList<QList<TString> >), fOANames(new QList<QList<TString> >), fBuNames(new QList<TString>), fIAIndices(new QList<QList<Int_t> >), fIOIndices(new QList<QList<Int_t> >), fOAIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fSelDepProcs(new QList<Bool_t>), fIASProc(new QList<Bool_t>), fOASProc(new QList<Bool_t>), fProcsParDepends(new QList<QMask>), fAPDepends(new QList<QMask>), fObjsPDepends(new QList<QMask>), fIArrays(new QList<QProcArray*>), fIObjects(new QList<QProcObj*>), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>), fBuffers(new QList<Double_t>) {}
+    QArrayProcessor(const QArrayProcessor &rhs): QStdProcessor(rhs), fProcs(new QList<QNamedProc>(*rhs.fProcs)), fSelProcs(new QList<Bool_t>(*rhs.fSelProcs)), fNAEProcs(0), fLastParams(new QList<Double_t>), fLastExec(0,0), fAnalysisDir(rhs.fAnalysisDir), fIANames(new QList<QList<TString> >(*rhs.fIANames)), fOANames(new QList<QList<TString> >(*rhs.fOANames)), fBuNames(new QList<TString>(*rhs.fBuNames)), fIAIndices(new QList<QList<Int_t> >(*rhs.fIAIndices)), fIOIndices(new QList<QList<Int_t> >(*rhs.fIOIndices)), fOAIndices(new QList<QList<Int_t> >(*rhs.fOAIndices)), fOOIndices(new QList<QList<Int_t> >(*rhs.fOOIndices)), fSelDepProcs(new QList<Bool_t>(*rhs.fSelDepProcs)), fIASProc(new QList<Bool_t>(*rhs.fIASProc)), fOASProc(new QList<Bool_t>(*rhs.fOASProc)), fProcsParDepends(new QList<QMask>(*rhs.fProcsParDepends)), fAPDepends(new QList<QMask>(*rhs.fAPDepends)), fObjsPDepends(new QList<QMask>(*rhs.fObjsPDepends)), fIArrays(new QList<QProcArray*>), fIObjects(new QList<QProcObj*>(*rhs.fIObjects)), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>(*rhs.fOObjects)), fBuffers(new QList<Double_t>){}
+    virtual ~QArrayProcessor();
 
     void AddProc(const char* name, const char* title=NULL, Bool_t selector=kFALSE, Int_t index=-1);
     void AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname=NULL, Bool_t selector=kFALSE, Int_t index=-1);
@@ -48,7 +48,7 @@ class QTTreeProcessor: public QStdProcessor
 
     void InitProcess();
 
-    const QTTreeProcessor& operator=(const QTTreeProcessor &rhs);
+    const QArrayProcessor& operator=(const QArrayProcessor &rhs);
 
     void PrintAnalysisResults() const;
 
@@ -87,7 +87,7 @@ class QTTreeProcessor: public QStdProcessor
     QList<QProcObj*>         *fOObjects; //! Output objects 
     QList<Double_t>           *fBuffers; //! Buffers for output buffers
 
-    ClassDef(QTTreeProcessor,1) //Events and objects processor
+    ClassDef(QArrayProcessor,1) //Arrays and objects processor
 };
 
 #include "debugger.h"

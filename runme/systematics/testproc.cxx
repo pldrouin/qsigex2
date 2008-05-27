@@ -1,5 +1,5 @@
 #include "TRandom2.h"
-#include "QTTreeProcessor.h"
+#include "QArrayProcessor.h"
 #include "QDisTH.h"
 
 TRandom2 rnd;
@@ -17,7 +17,7 @@ Bool_t FillHist(QProcArgs &args);
 
 int main()
 {
-  QTTreeProcessor *ttp=new QTTreeProcessor;
+  QArrayProcessor *ttp=new QArrayProcessor;
 
   QDisTH *radius=new QDisTH("radpdf","radpdf",50,0.,500.);
   ((TH1&)*radius).GetXaxis()->SetTitle("Radius [cm]");

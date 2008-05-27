@@ -54,7 +54,7 @@
 #pragma link C++ class QDependentProcs;
 #pragma link C++ class QProcessor;
 #pragma link C++ class QStdProcessor;
-#pragma link C++ class QTTreeProcessor;
+#pragma link C++ class QArrayProcessor;
 #pragma link C++ class QProcObjProcessor;
 #pragma link C++ class QProcList;
 

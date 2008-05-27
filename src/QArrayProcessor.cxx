@@ -1,15 +1,15 @@
-#include "QTTreeProcessor.h"
+#include "QArrayProcessor.h"
 
 //#define DEBUG
 //#define DEBUG2
 
 #include "debugger.h"
 
-ClassImp(QTTreeProcessor)
+ClassImp(QArrayProcessor)
 
-QTTreeProcessor::~QTTreeProcessor()
+QArrayProcessor::~QArrayProcessor()
 {
-  PRINTF2(this,"\tQTTreeProcessor::~QTTreeProcessor()\n")
+  PRINTF2(this,"\tQArrayProcessor::~QArrayProcessor()\n")
   delete fProcs;
   fProcs=NULL;
   delete fSelProcs;
@@ -54,9 +54,9 @@ QTTreeProcessor::~QTTreeProcessor()
   fBuffers=NULL;
 }
 
-void QTTreeProcessor::AddProc(const char *name, const char *title, Bool_t selector, Int_t index)
+void QArrayProcessor::AddProc(const char *name, const char *title, Bool_t selector, Int_t index)
 {
-  PRINTF10(this,"\tQTTreeProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
+  PRINTF10(this,"\tQArrayProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
 
   index=AEProcIndexToIndex(index);
   fNAEProcs++;
@@ -65,36 +65,36 @@ void QTTreeProcessor::AddProc(const char *name, const char *title, Bool_t select
   (*fProcs)[index].SetNameTitle(name,title);
 }
 
-void QTTreeProcessor::AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname, Bool_t selector, Int_t index)
+void QArrayProcessor::AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname, Bool_t selector, Int_t index)
 {
-  PRINTF14(this,"\tQTTreeProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t (*proc)(QProcArgs&)<",proc,">, const char *procname<'",procname,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
+  PRINTF14(this,"\tQArrayProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t (*proc)(QProcArgs&)<",proc,">, const char *procname<'",procname,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
 
   index=AEProcIndexToIndex(index);
   AddProc(name,title,selector,index);
   (*fProcs)[index].SetProc(proc,procname);
 }
 
-void QTTreeProcessor::AddProc(const char *name, const char *title, const char *procname, Bool_t selector, Int_t index)
+void QArrayProcessor::AddProc(const char *name, const char *title, const char *procname, Bool_t selector, Int_t index)
 {
-  PRINTF12(this,"\tQTTreeProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, const char *procname<'",procname,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
+  PRINTF12(this,"\tQArrayProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, const char *procname<'",procname,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
 
   index=AEProcIndexToIndex(index);
   AddProc(name,title,selector,index);
   (*fProcs)[index].SetProc(procname);
 }
 
-void QTTreeProcessor::AddProc(const char *name, const char *title, void *proc, const char *procname, Bool_t selector, Int_t index)
+void QArrayProcessor::AddProc(const char *name, const char *title, void *proc, const char *procname, Bool_t selector, Int_t index)
 {
-  PRINTF14(this,"\tQTTreeProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, void *proc<",proc,">, const char *procname<'",procname,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
+  PRINTF14(this,"\tQArrayProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, void *proc<",proc,">, const char *procname<'",procname,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
 
   index=AEProcIndexToIndex(index);
   AddProc(name,title,selector,index);
   (*fProcs)[index].SetProc(proc,procname);
 }
 
-void QTTreeProcessor::AddPSProc(const char *name, const char *title, Bool_t selectedonly, Int_t index)
+void QArrayProcessor::AddPSProc(const char *name, const char *title, Bool_t selectedonly, Int_t index)
 {
-  PRINTF10(this,"\tQTTreeProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
+  PRINTF10(this,"\tQArrayProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
 
   index=PSProcIndexToIndex(index);
   fProcs->RedimList(fProcs->Count()+1,index);
@@ -102,34 +102,34 @@ void QTTreeProcessor::AddPSProc(const char *name, const char *title, Bool_t sele
   (*fProcs)[index].SetNameTitle(name,title);
 }
 
-void QTTreeProcessor::AddPSProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname, Bool_t selectedonly, Int_t index)
+void QArrayProcessor::AddPSProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname, Bool_t selectedonly, Int_t index)
 {
-  PRINTF14(this,"\tQTTreeProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t (*proc)(QProcArgs&)<",proc,">, const char *procname<'",procname,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
+  PRINTF14(this,"\tQArrayProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t (*proc)(QProcArgs&)<",proc,">, const char *procname<'",procname,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
 
   index=PSProcIndexToIndex(index);
   AddPSProc(name,title,selectedonly,index);
   (*fProcs)[index].SetProc(proc,procname);
 }
 
-void QTTreeProcessor::AddPSProc(const char *name, const char *title, const char *procname, Bool_t selectedonly, Int_t index)
+void QArrayProcessor::AddPSProc(const char *name, const char *title, const char *procname, Bool_t selectedonly, Int_t index)
 {
-  PRINTF12(this,"\tQTTreeProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, const char *procname<'",procname,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
+  PRINTF12(this,"\tQArrayProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, const char *procname<'",procname,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
 
   index=PSProcIndexToIndex(index);
   AddPSProc(name,title,selectedonly,index);
   (*fProcs)[index].SetProc(procname);
 }
 
-void QTTreeProcessor::AddPSProc(const char *name, const char *title, void *proc, const char *procname, Bool_t selectedonly, Int_t index)
+void QArrayProcessor::AddPSProc(const char *name, const char *title, void *proc, const char *procname, Bool_t selectedonly, Int_t index)
 {
-  PRINTF14(this,"\tQTTreeProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, void *proc<",proc,">, const char *procname<'",procname,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
+  PRINTF14(this,"\tQArrayProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, void *proc<",proc,">, const char *procname<'",procname,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
 
   index=PSProcIndexToIndex(index);
   AddPSProc(name,title,selectedonly,index);
   (*fProcs)[index].SetProc(proc,procname);
 }
 
-void QTTreeProcessor::Analyze()
+void QArrayProcessor::Analyze()
 {
   Int_t i,j,k;
   QNamedProc *proc;
@@ -188,7 +188,7 @@ void QTTreeProcessor::Analyze()
       pidx=fParamsNames->FindFirst(sbuf);
 
       if(pidx == -1) {
-	fprintf(stderr,"QTTreeProcessor::Analyze(): Error with process '%s': Parameter '%s' does not exist\n",proc->GetName(),sbuf.Data());
+	fprintf(stderr,"QArrayProcessor::Analyze(): Error with process '%s': Parameter '%s' does not exist\n",proc->GetName(),sbuf.Data());
 	throw 1;
       }
       //Turn on the bit of the dependency mask for the current parameter
@@ -204,18 +204,17 @@ void QTTreeProcessor::Analyze()
 	qlsbuf.RedimList(2);
 	qlsbuf[1]=sbuf;
       } else qlsbuf.RedimList(1);
-      //printf("Encoded Input: '%s'\t%s\n",sbuf.Data(),proc->GetIVarNameTitle(j).GetName());
 
-      //If the input is from a tree
+      //If the input is from an array
       if(qlsbuf.Count()==2) {
-	//printf("Input from a tree\n");
+	//printf("Input from an array\n");
 
-	//Ensure the required tree is in the list
+	//Ensure the required array is in the list
 	iidx=fIANames->AddUnique(qlsbuf);
 
-	//If the tree is not already listed in the list of existing trees
+	//If the array is not already listed in the list of existing arrays
 	if(iidx == -1) {
-	  //printf("New input tree\n");
+	  //printf("New input array\n");
 	  //Add the current process to the list of processes that depend on the current input array
 	  fAPDepends->RedimList(fIANames->Count());
 	  iidx=fIANames->Count()-1;
@@ -225,7 +224,7 @@ void QTTreeProcessor::Analyze()
 
 	oidx=fOANames->FindFirst(qlsbuf);
 
-	//If the tree has been generated by a previous process
+	//If the array has been generated by a previous process
 	if(oidx != -1) {
 	  //printf("Intermediary input\n");
 
@@ -234,7 +233,7 @@ void QTTreeProcessor::Analyze()
 
 	  //If this is not the first input and the dependency of the current input on selector processes is different than for the previous input
 	  if(k!=0 && (*fSelDepProcs)[oalastproc[oidx]] != (*fSelDepProcs)[i]) {
-	    fprintf(stderr,"QTTreeProcessor::Analyze(): Error with process '%s': Input array '%s\t%s' does not have the same dependency on selector processes than the previous intermediary input for this process\n",proc->GetName(),qlsbuf[0].Data(),qlsbuf[1].Data());
+	    fprintf(stderr,"QArrayProcessor::Analyze(): Error with process '%s': Input array '%s\t%s' does not have the same dependency on selector processes than the previous intermediary input for this process\n",proc->GetName(),qlsbuf[0].Data(),qlsbuf[1].Data());
 	    throw 1;
 	  }
 	  //Add the dependencies on selector processes of the last process that has saved a value in the current branch to the dependencies for the current process
@@ -249,7 +248,7 @@ void QTTreeProcessor::Analyze()
 
 	//If the buffer has not been listed as an output for a previous process
 	if(iidx == -1) {
-	  fprintf(stderr,"QTTreeProcessor: Analyze(): Error with process '%s': Input buffer '%s' was not generated by a previous process\n",proc->GetName(),qlsbuf[0].Data());
+	  fprintf(stderr,"QArrayProcessor: Analyze(): Error with process '%s': Input buffer '%s' was not generated by a previous process\n",proc->GetName(),qlsbuf[0].Data());
 	  throw 1;
 	}
 
@@ -296,20 +295,20 @@ void QTTreeProcessor::Analyze()
 	qlsbuf[1]=sbuf;
       } else qlsbuf.RedimList(1);
 
-      //If the output is in a tree
+      //If the output is in an array
       if(qlsbuf.Count() == 2) {
 
 	if(fIANames->FindFirst(qlsbuf) != -1) {
-	  fprintf(stderr,"QTTreeProcessor: Analyze(): Error with process '%s': Array '%s\t%s' cannot be overwritten\n",proc->GetName(),qlsbuf[0].Data(),qlsbuf[1].Data());
+	  fprintf(stderr,"QArrayProcessor: Analyze(): Error with process '%s': Array '%s\t%s' cannot be overwritten\n",proc->GetName(),qlsbuf[0].Data(),qlsbuf[1].Data());
 	  throw 1;
 	}
 
-	//printf("Output to a tree\n");
+	//printf("Output to an array\n");
 	oidx=fOANames->AddUnique(qlsbuf);
 
-	//If this tree has not been generated by a previous process
+	//If this array has not been generated by a previous process
 	if(oidx == -1) {
-	  //printf("New output tree\n");
+	  //printf("New output array\n");
 	  //Add the name of the output branch
 	  oidx=fOANames->Count()-1;
 	  oalastproc.RedimList(fOANames->Count());
@@ -364,10 +363,10 @@ void QTTreeProcessor::Analyze()
   fIASProc->RedimList(fIANames->Count());
   memset(fIASProc->GetArray(),0,fIANames->Count()*sizeof(Bool_t));
 
-  //Loop over input trees
+  //Loop over input array
   for(i=0; i<fIANames->Count(); i++) {
 
-    //If the current input tree is also an output tree
+    //If the current input array is also an output array
     if((oidx=fOANames->FindFirst((*fIANames)[i])) != -1) {
       (*fIASProc)[i]=(*fOASProc)[oidx];
     }
@@ -461,7 +460,7 @@ void QTTreeProcessor::Analyze()
   delete[] depprocs;
 }
 
-void QTTreeProcessor::DelProc(const char *procname)
+void QArrayProcessor::DelProc(const char *procname)
 {
   Int_t i;
   if((i=FindProcIndex(procname))!=-1) {
@@ -469,10 +468,10 @@ void QTTreeProcessor::DelProc(const char *procname)
   }
 }
 
-void QTTreeProcessor::Exec() const
+void QArrayProcessor::Exec() const
 {
   static QMask pardiffs; //Modified parameters since the last call
-  static QMask depmods;  //Required processes due to modified input branches or input objects
+  static QMask depmods;  //Required processes due to modified input arrays or input objects
   static Bool_t firstrun;
   pardiffs.Clear();
   depmods.Clear();
@@ -632,7 +631,7 @@ void QTTreeProcessor::Exec() const
 
 	    //If the number of entries for the current input array does not match the number of entries for the previous triggered input array
 	    if(neaea != neaealast && neaealast != -1) {
-	      fprintf(stderr,"QTTreeProcessor::Exec(): Error: The number of entries in array '%s\t%s' does not match the number of entries for the previously triggered input tree\n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data());
+	      fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' does not match the number of entries for the previously triggered input array\n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data());
 	    }
 	    neaealast=neaea;
 
@@ -643,7 +642,7 @@ void QTTreeProcessor::Exec() const
 
 	    //If the number of entries for the current input array does not match the number of entries for the previous triggered input array
 	    if(nesea != nesealast && nesealast != -1) {
-	      fprintf(stderr,"QTTreeProcessor::Exec(): Error: The number of entries in array '%s\t%s' does not match the number of entries for the previously triggered input array\n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data());
+	      fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' does not match the number of entries for the previously triggered input array\n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data());
 	    }
 	    nesealast=nesea;
 	  }
@@ -680,7 +679,7 @@ void QTTreeProcessor::Exec() const
 	  else ((QNamedProc*)procs.GetArray()[j])->Exec();
 	}
 
-	//Assertion: Post-selection processes that depend on a selected events tree are called only for selected events
+	//Assertion: Post-selection processes that depend on a selected events array are called only for selected events
 	//Loop over all triggered post-selection processes
 	for(j=naeprocs; j<procs.Count(); j++) {
 	  //If the process does not depend on a selector process or if the entry is selected, execute it
@@ -689,7 +688,7 @@ void QTTreeProcessor::Exec() const
 
 	//Assertion: Output arrays are filled when it does not depend directly or indirectly on a selector process or
 	//when an event is selected or when loading an entry from an existing array containing only selected events.
-	//Save all triggered output branches
+	//Save all triggered output arrays
 	for(j=0; j<oarrays.Count(); j++) {
 	  //printf("\tOutput array %i/%i\n",j,oarrays.Count());
 	  if(!oasproc[j] || (eventselected && (doselection || i < nesealast))) oarrays.GetArray()[j]->Fill();
@@ -723,7 +722,7 @@ void QTTreeProcessor::Exec() const
   }
 }
 
-Int_t QTTreeProcessor::FindProcIndex(const char *procname) const
+Int_t QArrayProcessor::FindProcIndex(const char *procname) const
 {
   for(Int_t i=0; i<fProcs->Count(); i++){
     if(!strcmp((*fProcs)[i].GetName(),procname)) return i;
@@ -731,18 +730,18 @@ Int_t QTTreeProcessor::FindProcIndex(const char *procname) const
   return -1;
 }
 
-QNamedProc& QTTreeProcessor::GetProc(const char *procname) const
+QNamedProc& QArrayProcessor::GetProc(const char *procname) const
 {
   Int_t i;
   if((i=FindProcIndex(procname))!=-1){
     return GetProc(i);
   }
-  fprintf(stderr,"QTTreeProcessor::GetProc: Procedure '%s' does not exist\n",procname);
+  fprintf(stderr,"QArrayProcessor::GetProc: Procedure '%s' does not exist\n",procname);
   throw 1;
   return GetProc(0);
 }
 
-void QTTreeProcessor::InitProcess()
+void QArrayProcessor::InitProcess()
 {
   TerminateProcess();
   TDirectory *curdir=gDirectory;
@@ -759,7 +758,7 @@ void QTTreeProcessor::InitProcess()
   for(i=0; i<fOANames->Count(); i++) {
 
     if(!(dbuf=gDirectory->GetDirectory(fAnalysisDir))) {
-      fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: Directory '%s' does not exist\n",fAnalysisDir.Data());
+      fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Directory '%s' does not exist\n",fAnalysisDir.Data());
       throw 1;
     }
     dbuf->cd();
@@ -767,11 +766,11 @@ void QTTreeProcessor::InitProcess()
     (*fOArrays).Add(QProcBranchHandler::LoadBranch((*fOANames)[i][1],(*fOANames)[i][0], QProcArray::kRW));
   }
 
-  //Loop over the input trees
+  //Loop over the input arrays
   for(i=0; i<fIANames->Count(); i++) {
 
     if(!(dbuf=gDirectory->GetDirectory(fAnalysisDir))) {
-      fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: Directory '%s' does not exist\n",fAnalysisDir.Data());
+      fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Directory '%s' does not exist\n",fAnalysisDir.Data());
       throw 1;
     }
     dbuf->cd();
@@ -848,7 +847,7 @@ void QTTreeProcessor::InitProcess()
   curdir->cd();
 }
 
-const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
+const QArrayProcessor& QArrayProcessor::operator=(const QArrayProcessor &rhs)
 {
   QStdProcessor::operator=(rhs);
   *fProcs=*rhs.fProcs;
@@ -873,12 +872,12 @@ const QTTreeProcessor& QTTreeProcessor::operator=(const QTTreeProcessor &rhs)
   return *this;
 }
 
-void QTTreeProcessor::PrintAnalysisResults() const
+void QArrayProcessor::PrintAnalysisResults() const
 {
   TDirectory *curdir=gDirectory;
 
   if(!gDirectory->cd(fAnalysisDir)) {
-    fprintf(stderr,"QTTreeProcessor::PrintAnalysisResults(): Error: Directory %s does not exist\n",fAnalysisDir.Data());
+    fprintf(stderr,"QArrayProcessor::PrintAnalysisResults(): Error: Directory %s does not exist\n",fAnalysisDir.Data());
     return;
   }
 
@@ -986,7 +985,7 @@ void QTTreeProcessor::PrintAnalysisResults() const
   curdir->cd();
 }
 
-void QTTreeProcessor::TerminateProcess()
+void QArrayProcessor::TerminateProcess()
 {
   Int_t i;
 
@@ -994,29 +993,29 @@ void QTTreeProcessor::TerminateProcess()
   for(i=0; i<fOArrays->Count(); i++) (*fOArrays)[i]->UnloadArray();
 }
 
-void QTTreeProcessor::Browse(TBrowser *b)
+void QArrayProcessor::Browse(TBrowser *b)
 {   
   if(b) { 
     b->Add(fProcs,"Processes");
   } 
 }
 
-Int_t QTTreeProcessor::AEProcIndexToIndex(Int_t index){
+Int_t QArrayProcessor::AEProcIndexToIndex(Int_t index){
   if(index == -1) return fNAEProcs;
 
   if(index > fNAEProcs) {
-    fprintf(stderr,"QTTreeProcessor::AEProcIndexToIndex: Error: Index %i is invalid\n",index);
+    fprintf(stderr,"QArrayProcessor::AEProcIndexToIndex: Error: Index %i is invalid\n",index);
     throw 1;
   }
 
   return index;
 }
 
-Int_t QTTreeProcessor::PSProcIndexToIndex(Int_t index){
+Int_t QArrayProcessor::PSProcIndexToIndex(Int_t index){
   if(index == -1) return fProcs->Count();
 
   if(index < fNAEProcs) {
-    fprintf(stderr,"QTTreeProcessor::PSProcIndexToIndex: Error: Index %i is invalid\n",index);
+    fprintf(stderr,"QArrayProcessor::PSProcIndexToIndex: Error: Index %i is invalid\n",index);
     throw 1;
   }
 

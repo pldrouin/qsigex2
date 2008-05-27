@@ -166,7 +166,7 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 
       //Get a pointer to the branch
       if(!(bbuf=tbuf->GetBranch(bname))) {
-	fprintf(stderr,"QTTreeProcessor::InitProcess(): Error: Branch '%s' does not exist in tree '%s:%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data());
+	fprintf(stderr,"QProcBranchHandler::InitProcess(): Error: Branch '%s' does not exist in tree '%s:%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data());
 	throw 1;
       }
 
