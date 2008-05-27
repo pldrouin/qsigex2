@@ -1,5 +1,5 @@
-#ifndef _QTTREEPROCESSOR_
-#define _QTTREEPROCESSOR_
+#ifndef _QARRAYPROCESSOR_
+#define _QARRAYPROCESSOR_
 
 #include "QStdProcessor.h"
 #include "QDependentProcs.h"
