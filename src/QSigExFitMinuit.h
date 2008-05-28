@@ -18,7 +18,14 @@ class QSigExFitMinuit: public QSigExFit
     Double_t Fit();
 
     const Double_t& GetMinimArg(Int_t index) const{return (*fMinimArgs)[index];}
-    const char* GetMinimName() const{return (TString&)fMinimName;}
+    const char* GetMinimName() const
+    {
+#if (__GNUC__ >= 4)
+      return (TString&)fMinimName;
+#else
+      return (TString&)const_cast<QNamedVar<TString>&>(fMinimName);
+#endif
+    }
 
     void InitFit();
 
