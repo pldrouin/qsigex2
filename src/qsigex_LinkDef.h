@@ -39,6 +39,7 @@
 #pragma link C++ class QNamedVar<Double_t>;
 
 #pragma link C++ class QMask;
+#pragma link C++ class QOversizeArray;
 #pragma link C++ class QProcObj;
 #pragma link C++ class QProcDouble;
 #pragma link C++ class QProcArray;
