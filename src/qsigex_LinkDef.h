@@ -40,6 +40,7 @@
 
 #pragma link C++ class QMask;
 #pragma link C++ class QOversizeArray;
+#pragma link C++ class QOABuffer;
 #pragma link C++ class QProcObj;
 #pragma link C++ class QProcDouble;
 #pragma link C++ class QProcArray;
