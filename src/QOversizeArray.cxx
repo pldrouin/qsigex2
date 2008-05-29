@@ -3,12 +3,12 @@
 ClassImp(QOversizeArray)
 
 UInt_t QOversizeArray::fNInstances=0;
-Long64_t QOversizeArray::fAAMaxSize=-1;
+Long64_t QOversizeArray::fAAMaxMemSize=-1;
 
-QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, UInt_t objectsize, UInt_t nobjectsperbuffer, Long64_t arraymaxsize, Long64_t allarraysmaxsize): fFilename(filename), fArrayName(arrayname), fPtr(NULL), fFirstDataByte(sizeof(UInt_t)+256+sizeof(Long64_t)), fOpenMode(openmode), fObjectsSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fNObjects(0), fArrayMaxSize(arraymaxsize)
+QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer, const Long64_t &arraymaxmemsize, const Long64_t &allarraysmaxmemsize): fFilename(filename), fArrayName(arrayname), fPtr(NULL), fFirstDataByte(sizeof(UInt_t)+256+sizeof(Long64_t)), fOpenMode(openmode), fObjectsSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fNObjects(0), fArrayMaxMemSize(arraymaxmemsize), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fNReadBuffers(0), fFirstParkedBuffer(NULL), fNParkedBuffers(0)
 {
     fNInstances++;
-    if(allarraysmaxsize != -2) fAAMaxSize=allarraysmaxsize;
+    if(allarraysmaxmemsize != -2) fAAMaxMemSize=allarraysmaxmemsize;
     OpenFile();
 }
 
@@ -21,10 +21,7 @@ QOversizeArray::~QOversizeArray()
 void QOversizeArray::CloseFile()
 {
     if(fPtr) {
-
-	if(fOpenMode != kRead) {
-	    Write(&fNObjects, sizeof(fNObjects), 1, fFirstDataByte-sizeof(fNObjects));
-	}
+	if(fOpenMode != kRead)  Save();
 
 	if(fclose(fPtr) == EOF) {
 	    perror("QOversizeArray::~QOversizeArray(): Error: ");
@@ -32,6 +29,48 @@ void QOversizeArray::CloseFile()
 	}
 	fPtr=NULL;
     }
+
+    Terminate();
+}
+
+void QOversizeArray::CheckMemory(Bool_t removefromleft)
+{
+    Long64_t arraysize=(fNReadBuffers+fNParkedBuffers+1)*(fNOPerBuffer*fObjectsSize+sizeof(QOABuffer));
+
+    if(removefromleft) {
+
+	while(((fArrayMaxMemSize > 0 && arraysize > fArrayMaxMemSize) || (fAAMaxMemSize>0 && arraysize*fNInstances > fAAMaxMemSize)) && fNReadBuffers > 0) {
+	}
+
+    } else {
+    }
+}
+
+void QOversizeArray::Init()
+{
+   if(!fWriteBuffer) {
+      fWriteBuffer=new QOABuffer(fNObjects, fObjectsSize*fNOPerBuffer);
+   } 
+}
+
+void QOversizeArray::Fill()
+{
+    //Copy the content of the object buffer in fWriteBuffer
+    memcpy(fWriteBuffer->GetBuffer()+(fNObjects-fWriteBuffer->GetFirstObjIdx())*fObjectsSize,fBuffer,fObjectsSize);
+    fNObjects++;
+
+    //If fWriteBuffer is full
+    if(fNObjects-fWriteBuffer->GetFirstObjIdx() == fNOPerBuffer) {
+	fWriteBuffer->SetModified();
+
+	if(fLastReadBuffer) {
+	    fLastReadBuffer->SetNextOAB(fWriteBuffer);
+	    fWriteBuffer->SetPreviousOAB(fLastReadBuffer);
+	}
+	fLastReadBuffer=fWriteBuffer;
+	fNReadBuffers++;
+    }
+    CheckMemory();
 }
 
 void QOversizeArray::OpenFile()
@@ -73,9 +112,11 @@ void QOversizeArray::OpenFile()
 	    }
 	    WriteHeader();
     }
+
+    Init();
 }
 
-void QOversizeArray::Read(void *buf, size_t size, size_t num, Long64_t pos)
+void QOversizeArray::Read(void *buf, const size_t &size, const size_t &num, const Long64_t &pos) const
 {
     size_t ret;
 
@@ -129,7 +170,25 @@ void QOversizeArray::ReadHeader()
     }
 }
 
-void QOversizeArray::Write(const void *buf, size_t size, size_t num, Long64_t pos) const
+void QOversizeArray::Save()
+{
+    if(!fPtr) {
+	fprintf(stderr,"QOversizeArray::Save: Error: There is no opened file\n");
+	throw 1;
+    }
+
+    WriteHeader();
+}
+
+void QOversizeArray::Terminate()
+{
+    if(fWriteBuffer) {
+	delete fWriteBuffer;
+	fWriteBuffer=NULL;
+    }
+}
+
+void QOversizeArray::Write(const void *buf, const size_t &size, const size_t &num, const Long64_t &pos) const
 {
     size_t ret;
 
