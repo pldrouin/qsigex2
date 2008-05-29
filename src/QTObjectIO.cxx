@@ -30,6 +30,8 @@ void QTObjectIO::Load(const Char_t* filename, const Char_t* objectname)
   //object (ex: "mydir/myobject").
 
   PRINTF6(this,"\tvoid QTObjectIO::Load(const Char_t* filename<",filename,">, const Char_t* objectname<",objectname,">)\n")
+
+  TDirectory *curdir=gDirectory;
   Clear();
   TFile f(filename,"READ");
   fObject=f.Get(objectname);
@@ -58,6 +60,8 @@ void QTObjectIO::Load(const Char_t* filename, const Char_t* objectname)
   if(lastbs>lasts) lasts=lastbs;
   if(lasts>0) fDirectory.Append(objectname,lasts);
   else      fDirectory=(Char_t*)NULL;  
+
+  curdir->cd();
 }
 
 void QTObjectIO::Save() const

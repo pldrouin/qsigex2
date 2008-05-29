@@ -38,13 +38,13 @@ using std::cout;
 class QDis: public TNamed, public QTObjectIO, public QProcObj
 {
  public:
-  QDis():QTObjectIO(), fCutExpr(), fNormFlags(0)
+  QDis():QTObjectIO(), fCutExpr(), fNormFlags(kRegularNorm)
     {
       PRINTF2(this,"\tQDis::QDis()\n")
     }
-  QDis(const Char_t* classname):QTObjectIO(classname), QProcObj(), fCutExpr(), fNormFlags(0){}
-  QDis(const Char_t* classname, const Char_t* filename, const Char_t* objectname):QTObjectIO(classname, filename,objectname), QProcObj(), fCutExpr(), fNormFlags(0){SetNameTitleToObject();}
-  QDis(const Char_t* classname, const TObject& rhs):QTObjectIO(classname, rhs), QProcObj(), fCutExpr(), fNormFlags(0){SetNameTitleToObject();}
+  QDis(const Char_t* classname):QTObjectIO(classname), QProcObj(), fCutExpr(), fNormFlags(kRegularNorm){}
+  QDis(const Char_t* classname, const Char_t* filename, const Char_t* objectname):QTObjectIO(classname, filename,objectname), QProcObj(), fCutExpr(), fNormFlags(kRegularNorm){SetNameTitleToObject();}
+  QDis(const Char_t* classname, const TObject& rhs):QTObjectIO(classname, rhs), QProcObj(), fCutExpr(), fNormFlags(kRegularNorm){SetNameTitleToObject();}
   
   virtual ~QDis();
 
@@ -80,12 +80,26 @@ class QDis: public TNamed, public QTObjectIO, public QProcObj
   Int_t GetNormFlags() const{return fNormFlags;}
 
   void SetCutExpr(Option_t *cutexpr=NULL){fCutExpr=cutexpr;}
-  void SetNormFlags(Int_t normflags=0){fNormFlags=normflags;}
+  enum eNormFlags {kRegularNorm=0, kOneFixedCoord=1, kTwoFixedCoords=2, kThreeFixedCoords=3, kVarBinSizeEventsFilled=4, kNoNorm=8};
+  void SetNormFlags(eNormFlags normflags=kRegularNorm)
+  {
+    //Sets the normalization flags for the QDis object. The available normalization flags are the following:
+    //
+    //kRegularNorm: Regular normalization (area/volume/hypervolume = 1) (default)
+    //kOneFixedCoord: Conditional PDF with 1 fixed coordinate
+    //kTwoFixedCoords: Conditional PDF with 2 fixed coordinates
+    //kThreeFixedCoords: Conditional PDF with 3 fixed coordinates
+    //kVarBinSizeEventsFilled: PDF with variable bin size for which the histogram bin content corresponds to
+    //                         a number of events
+    //kNoNorm: No normalization
+    //Flags can be combined using a bitwise "OR" operator (&).
+    fNormFlags=normflags;
+  }
 
  protected:
   void SetNameTitleToObject();
   TString fCutExpr;
-  Int_t fNormFlags;
+  eNormFlags fNormFlags;
 
  private:
   QDis(const QDis& rhs): TNamed(rhs),QTObjectIO(rhs.GetClassName()), QProcObj(rhs){*this=rhs;}
