@@ -14,8 +14,8 @@ struct pthread_cond_t;
 class QOABuffer
 {
     public:
-	QOABuffer(const Long64_t &firstobjidx, const UInt_t &arraysize, QOABuffer *previousoab=NULL, QOABuffer *nextoab=NULL): fFirstObjIdx(firstobjidx), fBuffer((char*)malloc(arraysize)), fIsModified(kFALSE), fPreviousOAB(previousoab), fNextOAB(nextoab), fBufferMutex(PTHREAD_MUTEX_INITIALIZER) {
-//	    printf("%p\tQOABuffer(const Long64_t &firstobjidx<%lli>, const UInt_t &arraysize<%u>, const QOABuffer *previousoab<%p>, QOABuffer *nextoab<%p>)\n",this,firstobjidx,arraysize,previousoab,nextoab);
+	QOABuffer(const UInt_t &bufferidx, const UInt_t &arraysize, QOABuffer *previousoab=NULL, QOABuffer *nextoab=NULL): fBufferIdx(bufferidx), fBuffer((char*)malloc(arraysize)), fBufferSize(arraysize), fIsModified(kFALSE), fPreviousOAB(previousoab), fNextOAB(nextoab), fBufferMutex(PTHREAD_MUTEX_INITIALIZER) {
+	    //printf("%p\tQOABuffer(const UInt_t &bufferidx<%u>, const UInt_t &arraysize<%u>, const QOABuffer *previousoab<%p>, QOABuffer *nextoab<%p>)\n",this,bufferidx,arraysize,previousoab,nextoab);
 	}
 	virtual ~QOABuffer(){free(fBuffer);}
 
@@ -25,11 +25,12 @@ class QOABuffer
 	QOABuffer(const QOABuffer &rhs);
 	const QOABuffer& operator=(const QOABuffer &rhs);
 
-	Long64_t fFirstObjIdx;
+	UInt_t fBufferIdx;
 	char *fBuffer;           //!
+	UInt_t fBufferSize;      //!
 	Bool_t fIsModified;      //!
-	QOABuffer *fPreviousOAB; //! Previous QOABuffer (list sorted according to fFirstObjIdx)
-	QOABuffer *fNextOAB;     //! Next QOABuffer (list sorted according to fFirstObjIdx)
+	QOABuffer *fPreviousOAB; //! Previous QOABuffer (list sorted according to fBufferIdx)
+	QOABuffer *fNextOAB;     //! Next QOABuffer (list sorted according to fBufferIdx)
 	pthread_mutex_t fBufferMutex; //Lock on the buffer elements, fFrstObjIdx and fIsModified
 	ClassDef(QOABuffer,1)
 };

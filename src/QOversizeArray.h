@@ -47,32 +47,36 @@ class QOversizeArray
   protected:
     void CheckMemory();
     void Init();
-    void Read(void *buf, const size_t &size, const size_t &num, const Long64_t &pos=-1) const;
     void ReadHeader();
+    void ReadBuffer(QOABuffer *buf, const UInt_t &bufferidx);
     void ReadWriteBuffer();
     void Terminate();
-    void Write(const void *buf, const size_t &size, const size_t &num, const Long64_t &pos=-1) const;
     void WriteHeader() const;
+    void WriteBuffer(const QOABuffer *buf) const;
     void WriteWriteBuffer() const;
 
   private:
-    QOversizeArray(): fFirstDataByte(0){}
-    QOversizeArray(const QOversizeArray &): fFirstDataByte(0){}
+    QOversizeArray(): fFirstDataByte(0), fBufferHeaderSize(0) {}
+    QOversizeArray(const QOversizeArray &): fFirstDataByte(0), fBufferHeaderSize(0) {}
     const QOversizeArray& operator=(const QOversizeArray &){return *this;}
 
     TString fFilename;
     TString fArrayName;
     FILE *fPtr;                 //!
-    const Long64_t fFirstDataByte;
+    const UInt_t fFirstDataByte;
+    const UInt_t fBufferHeaderSize;
     omode fOpenMode;
-    UInt_t fObjectsSize;
+    UInt_t fObjectSize;
     void *fBuffer;               //!
     UInt_t fNOPerBuffer;
+    UInt_t fMaxBDataSize;        //Maximum buffer data size
+    UInt_t fMaxBHBDataSize;      //fBufferHeaderSize+fMaxBHBDataSize 
     Long64_t fNObjects;
     QOABuffer *fCurReadBuffer;   //! Current read buffer. A NULL pointer means that the array is in writing mode
     QOABuffer *fFirstReadBuffer; //!
     QOABuffer *fLastReadBuffer;  //!
     QOABuffer *fWriteBuffer;     //!
+    Long64_t   fWBFirstObjIdx;   // Index of the first object contained in the write buffer
     UInt_t fNReadBuffers;        // Number of active buffers that are full and ready for reading
     QOABuffer **fUMBuffers;       //! Array of unmodified buffers
     UInt_t fNUMBuffers;           // Number of unmodified buffers
