@@ -31,7 +31,7 @@ pthread_mutex_t stampmutex=PTHREAD_MUTEX_INITIALIZER;
 
 void printstatus(const char* status){}
 
-QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer): fFilename(filename), fArrayName(arrayname), fPtr(NULL), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fWBFirstObjIdx(0), fNReadBuffers(0), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(3), fArrayIO(0), fAPriority(0), fFileMutex(PTHREAD_MUTEX_INITIALIZER), fBuffersMutex(PTHREAD_MUTEX_INITIALIZER), fMFThread(), fMFMutex(PTHREAD_MUTEX_INITIALIZER), fMFCond(PTHREAD_COND_INITIALIZER), fMFCMutex(PTHREAD_MUTEX_INITIALIZER), fMFPCond(PTHREAD_COND_INITIALIZER), fMFCCond(PTHREAD_COND_INITIALIZER), fMFAction(kFALSE), fMFBuffer(NULL)
+QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer): fFilename(filename), fArrayName(arrayname), fFDesc(0), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fWBFirstObjIdx(0), fNReadBuffers(0), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(3), fArrayIO(0), fAPriority(0), fFileMutex(PTHREAD_MUTEX_INITIALIZER), fBuffersMutex(PTHREAD_MUTEX_INITIALIZER), fMFThread(), fMFMutex(PTHREAD_MUTEX_INITIALIZER), fMFCond(PTHREAD_COND_INITIALIZER), fMFCMutex(PTHREAD_MUTEX_INITIALIZER), fMFPCond(PTHREAD_COND_INITIALIZER), fMFCCond(PTHREAD_COND_INITIALIZER), fMFAction(kFALSE), fMFBuffer(NULL)
 {
     OpenFile();
 }
@@ -45,7 +45,7 @@ QOversizeArray::~QOversizeArray()
 void QOversizeArray::CloseFile()
 {
     printstatus("void QOversizeArray::CloseFile()");
-    if(fPtr) {
+    if(fFDesc) {
 	if(fOpenMode != kRead)  Save();
 
 	pthread_mutex_lock(&fILMutex);
@@ -64,11 +64,11 @@ void QOversizeArray::CloseFile()
 	pthread_join(fMFThread,NULL);
 	printstatus("MF thread has terminated");
 
-	if(fclose(fPtr) == EOF) {
+	if(close(fFDesc)) {
 	    perror("QOversizeArray::~QOversizeArray(): Error: ");
 	    throw 1;
 	}
-	fPtr=NULL;
+	fFDesc=0;
     }
 
     Terminate();
@@ -157,13 +157,13 @@ void QOversizeArray::Fill()
 void QOversizeArray::OpenFile()
 {
     printstatus("void QOversizeArray::OpenFile()");
-    if(fPtr) CloseFile();
+    if(fFDesc) CloseFile();
 
     switch(fOpenMode) {
 	case kRead:
-	    fPtr=fopen(fFilename,"rb");
+	    fFDesc=open(fFilename,O_RDONLY);
 
-	    if(!fPtr) {
+	    if(fFDesc<0) {
 		fprintf(stderr,"QOversizeArray::OpenFile: Error: file '%s' cannot be opened in read-only mode\n",fFilename.Data());
 		throw 1;
 	    }
@@ -171,9 +171,9 @@ void QOversizeArray::OpenFile()
 	    break;
 
 	case kRW:
-	    fPtr=fopen(fFilename,"rb+");
+	    fFDesc=open(fFilename,O_RDWR);
 
-	    if(!fPtr) {
+	    if(fFDesc<0) {
 		fprintf(stderr,"QOversizeArray::OpenFile: Error: file '%s' cannot be opened in read-write mode\n",fFilename.Data());
 		throw 1;
 	    }
@@ -181,9 +181,9 @@ void QOversizeArray::OpenFile()
 	    break;
 
 	case kRecreate:
-	    fPtr=fopen(fFilename,"wb+");
+	    fFDesc=open(fFilename,O_RDWR|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 
-	    if(!fPtr) {
+	    if(fFDesc<0) {
 		fprintf(stderr,"QOversizeArray::OpenFile: Error: file '%s' cannot be recreated\n",fFilename.Data());
 		throw 1;
 	    }
@@ -239,26 +239,18 @@ void QOversizeArray::ReadHeader()
 
     pthread_mutex_lock(&fFileMutex);
 
-    if(fseek(fPtr,0,SEEK_SET)) {
+    if(lseek(fFDesc,0,SEEK_SET)==-1) {
 	perror("QOversizeArray::ReadHeader: Error: ");
 	throw 1;
     }
 
-    if(!fread(&uibuf, sizeof(uibuf), 1, fPtr)) {
-	if(feof(fPtr)) {
-	    fprintf(stderr,"QOversizeArray::ReadHeader: Error: End of file has been reached\n");
-	    throw 1;
-	}
+    if(read(fFDesc, &uibuf, sizeof(uibuf))!=sizeof(uibuf)) {
 	perror("QOversizeArray::ReadHeader: Error: ");
 	throw 1;
     }
     strbuf=(char*)malloc(uibuf+1);
 
-    if(!fread(strbuf, 1, uibuf, fPtr)) {
-	if(feof(fPtr)) {
-	    fprintf(stderr,"QOversizeArray::ReadHeader: Error: End of file has been reached\n");
-	    throw 1;
-	}
+    if((UInt_t)read(fFDesc, strbuf, uibuf)!=uibuf) {
 	perror("QOversizeArray::ReadHeader: Error: ");
 	throw 1;
     }
@@ -270,15 +262,11 @@ void QOversizeArray::ReadHeader()
     }
     free(strbuf);
 
-    if(fseek(fPtr,sizeof(uibuf)+256,SEEK_SET)) {
+    if(lseek(fFDesc,sizeof(uibuf)+256,SEEK_SET)==-1) {
 	perror("QOversizeArray::ReadHeader: Error: ");
 	throw 1;
     }
-    if(!fread(&uibuf, sizeof(uibuf), 1, fPtr)) {
-	if(feof(fPtr)) {
-	    fprintf(stderr,"QOversizeArray::ReadHeader: Error: End of file has been reached\n");
-	    throw 1;
-	}
+    if(read(fFDesc, &uibuf, sizeof(uibuf))!=sizeof(uibuf)) {
 	perror("QOversizeArray::ReadHeader: Error: ");
 	throw 1;
     }
@@ -289,11 +277,7 @@ void QOversizeArray::ReadHeader()
     }
     fObjectSize=uibuf;
 
-    if(!fread(&uibuf, sizeof(uibuf), 1, fPtr)) {
-	if(feof(fPtr)) {
-	    fprintf(stderr,"QOversizeArray::ReadHeader: Error: End of file has been reached\n");
-	    throw 1;
-	}
+    if(read(fFDesc, &uibuf, sizeof(uibuf))!=sizeof(uibuf)) {
 	perror("QOversizeArray::ReadHeader: Error: ");
 	throw 1;
     }
@@ -306,11 +290,7 @@ void QOversizeArray::ReadHeader()
     fMaxBDataSize=fObjectSize*fNOPerBuffer;
     fMaxBHBDataSize=fBufferHeaderSize+fMaxBDataSize;
 
-    if(!fread(&fNObjects, sizeof(fNObjects), 1, fPtr)) {
-	if(feof(fPtr)) {
-	    fprintf(stderr,"QOversizeArray::ReadHeader: Error: End of file has been reached\n");
-	    throw 1;
-	}
+    if(read(fFDesc, &fNObjects, sizeof(fNObjects))!=sizeof(fNObjects)) {
 	perror("QOversizeArray::ReadHeader: Error: ");
 	throw 1;
     }
@@ -322,24 +302,16 @@ void QOversizeArray::ReadBuffer(QOABuffer *buf, const UInt_t &bufferidx)
     //printf("Write buffer %u at %u\n",buf->fBufferIdx,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte);
     buf->fBufferIdx=bufferidx;
     pthread_mutex_lock(&fFileMutex);
-    if(fseek(fPtr,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte,SEEK_SET)){
+    if(lseek(fFDesc,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte,SEEK_SET)==-1){
 	perror("QOversizeArray::ReadBuffer: Error: ");
 	throw 1;
     }
-    if(!fread(&buf->fBufferSize, fBufferHeaderSize, 1, fPtr)) {
-	if(feof(fPtr)) {
-	    fprintf(stderr,"QOversizeArray::ReadBuffer: Error: End of file has been reached\n");
-	    throw 1;
-	}
+    if((UInt_t)read(fFDesc, &buf->fBufferSize, fBufferHeaderSize)!=fBufferHeaderSize) {
 	perror("QOversizeArray::ReadBuffer: Error: ");
 	throw 1;
     }
 
-    if(!fread(buf->fBuffer, buf->fBufferSize, 1, fPtr)) {
-	if(feof(fPtr)) {
-	    fprintf(stderr,"QOversizeArray::ReadBuffer: Error: End of file has been reached\n");
-	    throw 1;
-	}
+    if((UInt_t)read(fFDesc, buf->fBuffer, buf->fBufferSize)!=buf->fBufferSize) {
 	perror("QOversizeArray::ReadBuffer: Error: ");
 	throw 1;
     }
@@ -362,7 +334,7 @@ void QOversizeArray::ReadWriteBuffer()
 void QOversizeArray::Save()
 {
     printstatus("void QOversizeArray::Save()");
-    if(!fPtr) {
+    if(!fFDesc) {
 	fprintf(stderr,"QOversizeArray::Save: Error: There is no opened file\n");
 	throw 1;
     }
@@ -464,19 +436,19 @@ void QOversizeArray::WriteHeader() const
     uibuf=(uibuf>256 ? 256 : uibuf);
 
     pthread_mutex_lock(&fFileMutex);
-    if(fseek(fPtr,0,SEEK_SET)) {
+    if(lseek(fFDesc,0,SEEK_SET)==-1) {
 	perror("QOversizeArray::WriteHeader: Error: ");
 	throw 1;
     }
-    if(!fwrite(&uibuf, sizeof(uibuf), 1, fPtr) || !fwrite(fArrayName.Data(), uibuf, 1, fPtr)) {
+    if((UInt_t)write(fFDesc, &uibuf, sizeof(uibuf))!=sizeof(uibuf) || (UInt_t)write(fFDesc, fArrayName.Data(), uibuf)!=uibuf) {
 	perror("QOversizeArray::WriteHeader: Error: ");
 	throw 1;
     }
-    if(fseek(fPtr,sizeof(uibuf)+256,SEEK_SET)) {
+    if(lseek(fFDesc,sizeof(uibuf)+256,SEEK_SET)==-1) {
 	perror("QOversizeArray::WriteHeader: Error: ");
 	throw 1;
     }
-    if(!fwrite(&fObjectSize, sizeof(fObjectSize), 1, fPtr) || !fwrite(&fNOPerBuffer, sizeof(fNOPerBuffer), 1, fPtr) || !fwrite(&fNObjects, sizeof(fNObjects), 1, fPtr)) {
+    if(write(fFDesc, &fObjectSize, sizeof(fObjectSize))!=sizeof(fObjectSize) || write(fFDesc, &fNOPerBuffer, sizeof(fNOPerBuffer))!=sizeof(fNOPerBuffer) || write(fFDesc, &fNObjects, sizeof(fNObjects))!=sizeof(fNObjects)) {
 	perror("QOversizeArray::WriteHeader: Error: ");
 	throw 1;
     }
@@ -487,11 +459,11 @@ void QOversizeArray::WriteBuffer(const QOABuffer *buf) const
 {
     //printf("Write buffer %u at %u\n",buf->fBufferIdx,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte);
     pthread_mutex_lock(&fFileMutex);
-    if(fseek(fPtr,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte,SEEK_SET)){
+    if(lseek(fFDesc,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte,SEEK_SET)==-1){
 	perror("QOversizeArray::WriteBuffer: Error: ");
 	throw 1;
     }
-    if(!fwrite(&buf->fBufferSize, fBufferHeaderSize, 1, fPtr) || !fwrite(buf->fBuffer, buf->fBufferSize, 1, fPtr)) {
+    if((UInt_t)write(fFDesc, &buf->fBufferSize, fBufferHeaderSize)!=fBufferHeaderSize || (UInt_t)write(fFDesc, buf->fBuffer, buf->fBufferSize)!=buf->fBufferSize) {
 	perror("QOversizeArray::WriteBuffer: Error: ");
 	throw 1;
     }

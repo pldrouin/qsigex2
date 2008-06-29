@@ -7,6 +7,11 @@
 #include <errno.h>
 #ifndef __CINT__
 #include <pthread.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
 #else
 struct pthread_t;
 struct pthread_mutex_t;
@@ -62,7 +67,7 @@ class QOversizeArray
 
     TString fFilename;
     TString fArrayName;
-    FILE *fPtr;                 //!
+    int fFDesc;                  //!
     const UInt_t fFirstDataByte;
     const UInt_t fBufferHeaderSize;
     omode fOpenMode;
