@@ -7,6 +7,7 @@ QList<Float_t> QOversizeArray::fICumulPriority;
 Long64_t QOversizeArray::fLevel1MemSize=0;
 Long64_t QOversizeArray::fLevel2MemSize=0;
 Long64_t QOversizeArray::fCritMemSize=0;
+Long64_t QOversizeArray::fCThreshMemSize=0;
 Long64_t QOversizeArray::fTotalMemSize=0;
 pthread_mutex_t QOversizeArray::fMSizeMutex=PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t QOversizeArray::fCMSCMutex=PTHREAD_MUTEX_INITIALIZER;
@@ -18,21 +19,23 @@ pthread_cond_t QOversizeArray::fMMCond=PTHREAD_COND_INITIALIZER;
 pthread_mutex_t QOversizeArray::fILMutex=PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t QOversizeArray::fPriorityMutex=PTHREAD_MUTEX_INITIALIZER;
 
-Int_t mystamp=0;
-pthread_mutex_t stampmutex=PTHREAD_MUTEX_INITIALIZER;
+//#define FuncDef(a) const char* thefunc=#a; TString indent;
+//#define pthread_mutex_lock(a) {printf("\n%slocking %s in function %s...\n",indent.Data(),#a,thefunc); pthread_mutex_lock(a); printf("%s%s is now locked in function %s\n",indent.Data(),#a,thefunc); indent+="     ";}
+//#define pthread_mutex_unlock(a) {indent=indent(0,indent.Length()-5); printf("\n%sunlocking %s in function %s...\n",indent.Data(),#a,thefunc); pthread_mutex_unlock(a); printf("%s%s is now unlocked in function %s\n",indent.Data(),#a,thefunc);}
+#define FuncDef(a)
 
 /*void printstatus(const char* status)
 {
-    pthread_mutex_lock(&stampmutex);
-    mystamp++;
-    printf("%i\t%s\n",mystamp,status);
-    pthread_mutex_unlock(&stampmutex);
+    printf("%s\n",status);
 }*/
 
-void printstatus(const char* status){}
+void printstatus(const char*){}
 
-QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer): fFilename(filename), fArrayName(arrayname), fFDesc(0), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fWBFirstObjIdx(0), fNReadBuffers(0), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(3), fArrayIO(0), fAPriority(0), fFileMutex(PTHREAD_MUTEX_INITIALIZER), fBuffersMutex(PTHREAD_MUTEX_INITIALIZER), fMFThread(), fMFMutex(PTHREAD_MUTEX_INITIALIZER), fMFCond(PTHREAD_COND_INITIALIZER), fMFCMutex(PTHREAD_MUTEX_INITIALIZER), fMFPCond(PTHREAD_COND_INITIALIZER), fMFCCond(PTHREAD_COND_INITIALIZER), fMFAction(kFALSE), fMFBuffer(NULL)
+QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer): fFilename(filename), fArrayName(arrayname), fFDesc(0), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fWBFirstObjIdx(0), fNReadBuffers(0), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(3), fArrayIO(0), fAPriority(0), fFileMutex(PTHREAD_MUTEX_INITIALIZER), fBuffersMutex(PTHREAD_MUTEX_INITIALIZER), fRBDIMutex(PTHREAD_MUTEX_INITIALIZER), fMWThread(), fMWMutex(PTHREAD_MUTEX_INITIALIZER), fMWCond(PTHREAD_COND_INITIALIZER), fMWCMutex(PTHREAD_MUTEX_INITIALIZER), fMWPCond(PTHREAD_COND_INITIALIZER), fMWCCond(PTHREAD_COND_INITIALIZER), fMWAction(kFALSE), fMWBuffer(NULL), fMWWBuffer(NULL)
 {
+    pthread_mutex_lock(&fMSizeMutex);
+    printf("%p\tTotal memory at array creation: %lli\n",this,fTotalMemSize);
+    pthread_mutex_unlock(&fMSizeMutex);
     OpenFile();
 }
 
@@ -40,10 +43,14 @@ QOversizeArray::~QOversizeArray()
 {
     printstatus("QOversizeArray::~QOversizeArray()");
     CloseFile();
+    pthread_mutex_lock(&fMSizeMutex);
+    printf("%p\tTotal memory at array destruction: %lli\n",this,fTotalMemSize);
+    pthread_mutex_unlock(&fMSizeMutex);
 }
 
 void QOversizeArray::CloseFile()
 {
+    FuncDef(CloseFile);
     printstatus("void QOversizeArray::CloseFile()");
     if(fFDesc) {
 	if(fOpenMode != kRead)  Save();
@@ -53,16 +60,16 @@ void QOversizeArray::CloseFile()
 	fICumulPriority.Del(idx);
 	fInstances.Del(idx);
 	pthread_mutex_unlock(&fILMutex);
-	//Send a signal to fMFThread to terminate and wait for termination
-	pthread_mutex_lock(&fMFMutex);
-	fMFAction=2;
-	pthread_mutex_unlock(&fMFMutex);
-	pthread_mutex_lock(&fMFCMutex);
-	pthread_cond_signal(&fMFCond);
-	pthread_mutex_unlock(&fMFCMutex);
-	printstatus("Waiting for MF thread to terminate...");
-	pthread_join(fMFThread,NULL);
-	printstatus("MF thread has terminated");
+	//Send a signal to fMWThread to terminate and wait for termination
+	pthread_mutex_lock(&fMWMutex);
+	fMWAction=2;
+	pthread_mutex_unlock(&fMWMutex);
+	pthread_mutex_lock(&fMWCMutex);
+	pthread_cond_signal(&fMWCond);
+	pthread_mutex_unlock(&fMWCMutex);
+	printstatus("Waiting for MW thread to terminate...");
+	pthread_join(fMWThread,NULL);
+	printstatus("MW thread has terminated");
 
 	if(close(fFDesc)) {
 	    perror("QOversizeArray::~QOversizeArray(): Error: ");
@@ -76,38 +83,36 @@ void QOversizeArray::CloseFile()
 
 void QOversizeArray::CheckMemory()
 {
-	pthread_mutex_lock(&fMMMutex);
-	pthread_cond_signal(&fMMCond);
-	pthread_mutex_unlock(&fMMMutex);
-	pthread_mutex_lock(&fMSizeMutex);
+    FuncDef(CheckMemory);
+    pthread_mutex_lock(&fMMMutex);
+    pthread_cond_signal(&fMMCond);
+    pthread_mutex_unlock(&fMMMutex);
+    pthread_mutex_lock(&fMSizeMutex);
+    pthread_mutex_lock(&fCMSCMutex);
 
-	if(fCritMemSize && fTotalMemSize > fCritMemSize) {
-	    pthread_mutex_unlock(&fMSizeMutex);
-	    pthread_mutex_lock(&fCMSCMutex);
-	    printstatus("***** Critical memory size has been reached");
-	    fCLReached=kTRUE;
-	    pthread_cond_wait(&fCMSCond, &fCMSCMutex);
-	    pthread_mutex_unlock(&fCMSCMutex);
+    if(fCritMemSize && fTotalMemSize > fCritMemSize) {
+	//Need to use this order for unlocking to avoid deadlock with MMThread due to wait on fC<SCond
+        pthread_mutex_unlock(&fMSizeMutex);
+	printstatus("***** Critical memory size has been reached");
+	fCLReached=kTRUE;
+	pthread_cond_wait(&fCMSCond, &fCMSCMutex);
+	pthread_mutex_unlock(&fCMSCMutex);
 
-	} else {
-	    pthread_mutex_unlock(&fMSizeMutex);
-	}
+    } else {
+        pthread_mutex_unlock(&fMSizeMutex);
+	pthread_mutex_unlock(&fCMSCMutex);
+    }
 }
 
 void QOversizeArray::Init()
 {
-    if(!fWriteBuffer) {
-	fWriteBuffer=new QOABuffer(0, fMaxBDataSize);
-	pthread_mutex_lock(&fMSizeMutex);
-	fTotalMemSize+=fMaxBDataSize+sizeof(QOABuffer);
-	pthread_mutex_unlock(&fMSizeMutex);
-	CheckMemory();
-    } 
+    FuncDef(Init);
     ReadWriteBuffer();
 }
 
 void QOversizeArray::Fill()
 {
+    FuncDef(Fill);
     //Copy the content of the object buffer in fWriteBuffer
     memcpy(fWriteBuffer->fBuffer+(fNObjects-fWBFirstObjIdx)*fObjectSize,fBuffer,fObjectSize);
     fNObjects++;
@@ -141,6 +146,7 @@ void QOversizeArray::Fill()
 	if(fFirstParkedBuffer) {
 	    fWriteBuffer=fFirstParkedBuffer;
 	    fWriteBuffer->fBufferIdx=nextbufidx;
+	    fWriteBuffer->fIsCompressed=0;
 	    fFirstParkedBuffer=fFirstParkedBuffer->fNextOAB;
 
 	} else {
@@ -156,6 +162,7 @@ void QOversizeArray::Fill()
 
 void QOversizeArray::OpenFile()
 {
+    FuncDef(OpenFile);
     printstatus("void QOversizeArray::OpenFile()");
     if(fFDesc) CloseFile();
 
@@ -200,8 +207,8 @@ void QOversizeArray::OpenFile()
 	    WriteHeader();
     }
 
-    //Create memory freeing thread
-    pthread_create(&fMFThread, NULL, QOAMFThread, this);
+    //Create memory writing thread
+    pthread_create(&fMWThread, NULL, QOAMWThread, this);
 
     pthread_mutex_lock(&fILMutex);
     fInstances.Add(this);
@@ -220,6 +227,7 @@ void QOversizeArray::OpenFile()
 
 void QOversizeArray::ResetPriorities()
 {
+    FuncDef(ResetPriorities);
     pthread_mutex_lock(&fPriorityMutex);
     pthread_mutex_lock(&fILMutex);
 
@@ -233,6 +241,7 @@ void QOversizeArray::ResetPriorities()
 
 void QOversizeArray::ReadHeader()
 {
+    FuncDef(ReadHeader);
     printstatus("void QOversizeArray::ReadHeader()");
     UInt_t uibuf;
     char *strbuf;
@@ -297,21 +306,56 @@ void QOversizeArray::ReadHeader()
     pthread_mutex_unlock(&fFileMutex);
 }
 
-void QOversizeArray::ReadBuffer(QOABuffer *buf, const UInt_t &bufferidx)
+void QOversizeArray::ReadBuffer(QOABuffer **buf, const UInt_t &bufferidx)
 {
+    FuncDef(ReadBuffer);
     //printf("Write buffer %u at %u\n",buf->fBufferIdx,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte);
-    buf->fBufferIdx=bufferidx;
+    static Int_t buffersize;
+
     pthread_mutex_lock(&fFileMutex);
-    if(lseek(fFDesc,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte,SEEK_SET)==-1){
+    if(lseek(fFDesc,bufferidx*fMaxBHBDataSize+fFirstDataByte,SEEK_SET)==-1){
 	perror("QOversizeArray::ReadBuffer: Error: ");
 	throw 1;
     }
-    if((UInt_t)read(fFDesc, &buf->fBufferSize, fBufferHeaderSize)!=fBufferHeaderSize) {
+    if(read(fFDesc, &buffersize, fBufferHeaderSize)!=fBufferHeaderSize) {
 	perror("QOversizeArray::ReadBuffer: Error: ");
 	throw 1;
     }
 
-    if((UInt_t)read(fFDesc, buf->fBuffer, buf->fBufferSize)!=buf->fBufferSize) {
+    if(fFirstParkedBuffer) {
+	*buf=fFirstParkedBuffer;
+	fFirstParkedBuffer=fFirstParkedBuffer->fNextOAB;
+
+	if((*buf)->fBufferSize != buffersize) {
+	    (*buf)->fBuffer=(char*)realloc((*buf)->fBuffer,buffersize);
+	    pthread_mutex_lock(&fMSizeMutex);
+	    fTotalMemSize+=buffersize-(*buf)->fBufferSize;
+	    pthread_mutex_unlock(&fMSizeMutex);
+
+	    if((*buf)->fBufferSize < buffersize) {
+		(*buf)->fBufferSize=buffersize;
+		CheckMemory();
+
+	    } else {
+		(*buf)->fBufferSize=buffersize;
+	    }	       
+	}
+
+	if(buffersize < fMaxBDataSize) (*buf)->fIsCompressed=1;
+	else (*buf)->fIsCompressed=0;
+
+    } else {
+	*buf=new QOABuffer(0,buffersize);
+	if(buffersize < fMaxBDataSize) (*buf)->fIsCompressed=1;
+	pthread_mutex_lock(&fMSizeMutex);
+	fTotalMemSize+=buffersize+sizeof(QOABuffer);
+	pthread_mutex_unlock(&fMSizeMutex);
+	CheckMemory();
+    }
+    (*buf)->fBufferIdx=bufferidx;
+    (*buf)->fIsModified=kFALSE;
+
+    if(read(fFDesc, (*buf)->fBuffer, (*buf)->fBufferSize)!=(*buf)->fBufferSize) {
 	perror("QOversizeArray::ReadBuffer: Error: ");
 	throw 1;
     }
@@ -320,19 +364,43 @@ void QOversizeArray::ReadBuffer(QOABuffer *buf, const UInt_t &bufferidx)
 
 void QOversizeArray::ReadWriteBuffer()
 {
+    FuncDef(ReadWriteBuffer);
     size_t numobjs=fNObjects%fNOPerBuffer;
     UInt_t bufferidx=fNObjects/fNOPerBuffer;
+    Int_t buffersize;
 
+    if(!fWriteBuffer) {
+	fWriteBuffer=new QOABuffer(0, fMaxBDataSize);
+	pthread_mutex_lock(&fMSizeMutex);
+	fTotalMemSize+=fMaxBDataSize+sizeof(QOABuffer);
+	pthread_mutex_unlock(&fMSizeMutex);
+	CheckMemory();
+    } 
     fWriteBuffer->fBufferIdx=bufferidx;
 
     if(numobjs) {
-	ReadBuffer(fWriteBuffer,bufferidx);
+	pthread_mutex_lock(&fFileMutex);
+	if(lseek(fFDesc,bufferidx*fMaxBHBDataSize+fFirstDataByte,SEEK_SET)==-1){
+	    perror("QOversizeArray::ReadBuffer: Error: ");
+	    throw 1;
+	}
+	if(read(fFDesc, &buffersize, fBufferHeaderSize)!=fBufferHeaderSize) {
+	    perror("QOversizeArray::ReadBuffer: Error: ");
+	    throw 1;
+	}
+
+	if(read(fFDesc, fWriteBuffer->fBuffer, buffersize)!=buffersize) {
+	    perror("QOversizeArray::ReadBuffer: Error: ");
+	    throw 1;
+	}
+	pthread_mutex_unlock(&fFileMutex);
     }
     fWBFirstObjIdx=fNObjects-numobjs;
 }
 
 void QOversizeArray::Save()
 {
+    FuncDef(Save);
     printstatus("void QOversizeArray::Save()");
     if(!fFDesc) {
 	fprintf(stderr,"QOversizeArray::Save: Error: There is no opened file\n");
@@ -341,19 +409,20 @@ void QOversizeArray::Save()
 
     QOABuffer *buf;
 
-    pthread_mutex_lock(&fMFMutex);
-    //Request a pause from memory freeing thread
-    fMFAction=1;
-    pthread_mutex_unlock(&fMFMutex);
-    pthread_mutex_lock(&fMFCMutex);
-    pthread_cond_signal(&fMFCond);
+    pthread_mutex_lock(&fMWMutex);
+    //Request a pause from memory writing thread
+    fMWAction=1;
+    pthread_mutex_unlock(&fMWMutex);
+    pthread_mutex_lock(&fMWCMutex);
+    pthread_cond_signal(&fMWCond);
     //Wait for pause confirmation
-    pthread_cond_wait(&fMFPCond,&fMFCMutex);
-    pthread_mutex_unlock(&fMFCMutex);
-    printstatus("Memory freeing thread confirmed to be in pausing condition");
+    pthread_cond_wait(&fMWPCond,&fMWCMutex);
+    pthread_mutex_unlock(&fMWCMutex);
+    printstatus("Memory writing thread confirmed to be in pausing condition");
 
     //Lock buffer structure
     pthread_mutex_lock(&fBuffersMutex);
+    pthread_mutex_lock(&fRBDIMutex);
 
     buf=fFirstReadBuffer;
 
@@ -368,26 +437,30 @@ void QOversizeArray::Save()
 
     WriteWriteBuffer();
 
-    //Remove pause condition on memory freeing thread
-    pthread_mutex_lock(&fMFMutex);
-    fMFAction=0;
-    pthread_mutex_unlock(&fMFMutex);
-    pthread_mutex_lock(&fMFCMutex);
-    printstatus("QOversizeArray::Save: Removing pausing condition from memory freeing thread");
-    pthread_cond_signal(&fMFCond);
-    pthread_mutex_unlock(&fMFCMutex);
+    pthread_mutex_unlock(&fRBDIMutex);
+
+    //Remove pause condition on memory writing thread
+    pthread_mutex_lock(&fMWMutex);
+    fMWAction=0;
+    pthread_mutex_unlock(&fMWMutex);
+    pthread_mutex_lock(&fMWCMutex);
+    printstatus("QOversizeArray::Save: Removing pausing condition from memory writing thread");
+    pthread_cond_signal(&fMWCond);
+    pthread_mutex_unlock(&fMWCMutex);
     //Unlock buffer structure
     pthread_mutex_unlock(&fBuffersMutex);
 
     WriteHeader();
 }
 
-void QOversizeArray::SetMemConstraints(const Long64_t &critmemsize,const Long64_t &level1memsize,const Long64_t &level2memsize)
+void QOversizeArray::SetMemConstraints(const Long64_t &critmemsize,const Long64_t &level1memsize,const Long64_t &level2memsize,const Long64_t &cthreshmemsize)
 {
+    FuncDef(SetMemConstraints);
     pthread_mutex_lock(&fMSizeMutex);
     fCritMemSize=critmemsize;
     fLevel1MemSize=level1memsize;
     fLevel2MemSize=level2memsize;
+    fCThreshMemSize=cthreshmemsize>=0?cthreshmemsize:critmemsize;
 
     if(fCritMemSize) {
 	if(!fLevel2MemSize) fLevel2MemSize=(UInt_t)(0.95*fCritMemSize);
@@ -398,22 +471,22 @@ void QOversizeArray::SetMemConstraints(const Long64_t &critmemsize,const Long64_
 
 void QOversizeArray::Terminate()
 {
+    FuncDef(Terminate);
     QOABuffer *buf, *nextbuf;
     printstatus("void QOversizeArray::Terminate()");
-    if(fWriteBuffer) {
-	delete fWriteBuffer;
-	fWriteBuffer=NULL;
-    }
 
     if(fNUMBuffers) free(fUMBuffers);
 
     //Lock buffer structure
     pthread_mutex_lock(&fBuffersMutex);
+    pthread_mutex_lock(&fRBDIMutex);
+    pthread_mutex_lock(&fMSizeMutex);
 
     buf=fFirstReadBuffer;
 
     while(buf) {
 	nextbuf=buf->fNextOAB;
+        fTotalMemSize-=buf->fBufferSize+sizeof(QOABuffer);
 	delete buf;
 	buf=nextbuf;
     }
@@ -423,14 +496,20 @@ void QOversizeArray::Terminate()
     fCurReadBuffer=NULL;
     fNObjects=0;
 
-    pthread_mutex_lock(&fMSizeMutex);
-    fTotalMemSize-=(fNObjects+1)*(fMaxBDataSize+sizeof(QOABuffer));
+    if(fWriteBuffer) {
+	fTotalMemSize-=fWriteBuffer->fBufferSize+sizeof(QOABuffer);
+	delete fWriteBuffer;
+	fWriteBuffer=NULL;
+    }
+
     pthread_mutex_unlock(&fMSizeMutex);
+    pthread_mutex_unlock(&fRBDIMutex);
     pthread_mutex_unlock(&fBuffersMutex);
 }
 
 void QOversizeArray::WriteHeader() const
 {
+    FuncDef(WriteHeader);
     printstatus("QOversizeArray::WriteHeader()");
     UInt_t uibuf=fArrayName.Length();
     uibuf=(uibuf>256 ? 256 : uibuf);
@@ -457,13 +536,14 @@ void QOversizeArray::WriteHeader() const
 
 void QOversizeArray::WriteBuffer(const QOABuffer *buf) const
 {
+    FuncDef(WriteBuffer);
     //printf("Write buffer %u at %u\n",buf->fBufferIdx,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte);
     pthread_mutex_lock(&fFileMutex);
     if(lseek(fFDesc,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte,SEEK_SET)==-1){
 	perror("QOversizeArray::WriteBuffer: Error: ");
 	throw 1;
     }
-    if((UInt_t)write(fFDesc, &buf->fBufferSize, fBufferHeaderSize)!=fBufferHeaderSize || (UInt_t)write(fFDesc, buf->fBuffer, buf->fBufferSize)!=buf->fBufferSize) {
+    if(write(fFDesc, &buf->fBufferSize, fBufferHeaderSize)!=fBufferHeaderSize || write(fFDesc, buf->fBuffer, buf->fBufferSize)!=buf->fBufferSize) {
 	perror("QOversizeArray::WriteBuffer: Error: ");
 	throw 1;
     }
@@ -477,117 +557,141 @@ void QOversizeArray::WriteWriteBuffer() const
     if(numobjs) {
 	fWriteBuffer->fBufferSize=numobjs;
 	WriteBuffer(fWriteBuffer);
+	fWriteBuffer->fBufferSize=fMaxBDataSize;
     }
 }
 
-void* QOversizeArray::QOAMFThread(void *array)
+void* QOversizeArray::QOAMWThread(void *array)
 {
+    FuncDef(QOAMWThread);
     QOversizeArray *qoa=(QOversizeArray*)array;
-    QOABuffer *buf;
+    QOABuffer *buf, *buf2;
     Bool_t safedelete;
-    printstatus("Starting memory freeing thread");
+    UInt_t ibuf;
+    printstatus("Starting memory writing thread");
 
     for(;;) {
-	pthread_mutex_lock(&qoa->fMFMutex);
+	pthread_mutex_lock(&qoa->fMWMutex);
 
-	if(qoa->fMFAction) {
+	if(qoa->fMWAction) {
 
-	    if(qoa->fMFAction == 1) {
+	    if(qoa->fMWAction == 1) {
 		//Pause
-		pthread_mutex_unlock(&qoa->fMFMutex);
-	        pthread_mutex_lock(&qoa->fMFCMutex);
-		pthread_cond_signal(&qoa->fMFPCond);
-	        pthread_mutex_unlock(&qoa->fMFCMutex);
-		printstatus("Memory freeing thread is pausing");
-	        pthread_mutex_lock(&qoa->fMFCMutex);
-		pthread_cond_wait(&qoa->fMFCond, &qoa->fMFCMutex);
-		printstatus("Memory freeing thread got a signal in pausing condition");
-	        pthread_mutex_unlock(&qoa->fMFCMutex);
-	        pthread_mutex_lock(&qoa->fMFMutex);
+		pthread_mutex_unlock(&qoa->fMWMutex);
+	        pthread_mutex_lock(&qoa->fMWCMutex);
+		pthread_cond_signal(&qoa->fMWPCond);
+	        pthread_mutex_unlock(&qoa->fMWCMutex);
+		printstatus("Memory writing thread is pausing");
+	        pthread_mutex_lock(&qoa->fMWCMutex);
+		pthread_cond_wait(&qoa->fMWCond, &qoa->fMWCMutex);
+		printstatus("Memory writing thread got a signal in pausing condition");
+	        pthread_mutex_unlock(&qoa->fMWCMutex);
+	        pthread_mutex_lock(&qoa->fMWMutex);
 
-		if(qoa->fMFAction==1) {
-		    pthread_mutex_unlock(&qoa->fMFMutex);
+		if(qoa->fMWAction==1) {
+		    pthread_mutex_unlock(&qoa->fMWMutex);
 		    continue;
 		} else {
-		    qoa->fMFBuffer=NULL;
-		    pthread_mutex_unlock(&qoa->fMFMutex);
+		    qoa->fMWBuffer=NULL;
+		    pthread_mutex_unlock(&qoa->fMWMutex);
 		}
 	    } else {
 		//Stop
-		printstatus("Memory freeing thread is stoping");
-		qoa->fMFAction=0;
-		qoa->fMFBuffer=NULL;
-		pthread_mutex_unlock(&qoa->fMFMutex);
+		printstatus("Memory writing thread is stoping");
+		qoa->fMWAction=0;
+		qoa->fMWBuffer=NULL;
+		pthread_mutex_unlock(&qoa->fMWMutex);
 		return NULL;
 	    }
 
-	} else if(!qoa->fMFBuffer) {
-	    printstatus("Memory freeing thread is waiting for a new buffer to free");
-	    pthread_mutex_unlock(&qoa->fMFMutex);
-	    pthread_mutex_lock(&qoa->fMFCMutex);
-	    pthread_cond_signal(&qoa->fMFCCond);
-	    pthread_cond_wait(&qoa->fMFCond, &qoa->fMFCMutex);
-	    pthread_mutex_unlock(&qoa->fMFCMutex);
+	} else if(!qoa->fMWBuffer) {
+	    printstatus("Memory writing thread is waiting for a new buffer to write");
+	    pthread_mutex_unlock(&qoa->fMWMutex);
+	    pthread_mutex_lock(&qoa->fMWCMutex);
+	    pthread_cond_signal(&qoa->fMWCCond);
+	    pthread_cond_wait(&qoa->fMWCond, &qoa->fMWCMutex);
+	    pthread_mutex_unlock(&qoa->fMWCMutex);
 	} else {
-	    printstatus("Looping in memory freeing thread");
+	    printstatus("Looping in memory writing thread");
 
-	    //printf("Current buffer to be freed: %p\n",qoa->fMFBuffer);
-	    buf=qoa->fMFBuffer;
-	    qoa->fMFBuffer=NULL;
-	    //printf("Value of resetted buffer address: %p\n",qoa->fMFBuffer);
-	    pthread_mutex_unlock(&qoa->fMFMutex);
-	    safedelete=kFALSE;
+	    //printf("Current buffer to be freed: %p\n",qoa->fMWBuffer);
+	    buf=qoa->fMWBuffer;
+	    qoa->fMWBuffer=NULL;
+	    qoa->fMWWBuffer=buf;
+	    //printf("Value of resetted buffer address: %p\n",qoa->fMWBuffer);
+	    pthread_mutex_unlock(&qoa->fMWMutex);
 
+	    pthread_mutex_lock(&qoa->fMWCMutex);
+	    pthread_cond_signal(&qoa->fMWCCond);
+	    pthread_mutex_unlock(&qoa->fMWCMutex);
+	    printstatus("Memory writing thread just sent a confirmation");
+
+	    //qoa->Write(buf->fBuffer, qoa->fMaxBDataSize, 1, buf->fBufferIdx*qoa->fMaxBDataSize+qoa->fFirstDataByte);
+	    qoa->WriteBuffer(buf);
+
+	    //Remove it from the linked list first
 	    pthread_mutex_lock(&qoa->fBuffersMutex);
-	    if(qoa->fCurReadBuffer != buf) {
-		safedelete=kTRUE;
+	    buf->fIsModified=kFALSE;
+	    //To put this block of code after the call to write buffer ensures that buffers removed from the linked list have been fully written on disk (important for reading thread).
+	    safedelete=kTRUE;
+	    if(qoa->fCurReadBuffer) {
+		buf2=qoa->fCurReadBuffer;
+		if(buf2==buf) safedelete=kFALSE;
+
+		else {
+		    ibuf=0;
+
+		    while(ibuf<qoa->fNPCBuffers && buf2) {
+			buf2=buf2->fNextOAB;
+
+			if(buf2==buf) {
+			    safedelete=kFALSE;
+			    break;
+			}
+			ibuf++;
+		    }
+		}
+	    }
+
+	    if(safedelete) {
 		if(buf->fPreviousOAB) buf->fPreviousOAB->fNextOAB=buf->fNextOAB;
 		if(buf->fNextOAB) buf->fNextOAB->fPreviousOAB=buf->fPreviousOAB;
 		if(qoa->fFirstReadBuffer == buf) qoa->fFirstReadBuffer=buf->fNextOAB;
 		if(qoa->fLastReadBuffer == buf) qoa->fLastReadBuffer=buf->fPreviousOAB;
 		qoa->fNReadBuffers--;
-	    }
-	    pthread_mutex_unlock(&qoa->fBuffersMutex);
 
-	    pthread_mutex_lock(&qoa->fMFCMutex);
-	    pthread_cond_signal(&qoa->fMFCCond);
-	    pthread_mutex_unlock(&qoa->fMFCMutex);
-	    printstatus("Memory freeing thread just sent a confirmation");
-
-	    if(buf->fIsModified) {
-		//qoa->Write(buf->fBuffer, qoa->fMaxBDataSize, 1, buf->fBufferIdx*qoa->fMaxBDataSize+qoa->fFirstDataByte);
-		qoa->WriteBuffer(buf);
-		buf->fIsModified=kFALSE;
-	    }
-
-	    if(safedelete) {
-		printstatus("Memory freeing thread is deleting a buffer");
-		delete buf;
+		printstatus("Memory writing thread is deleting a buffer");
 		pthread_mutex_lock(&QOversizeArray::fMSizeMutex);
-		QOversizeArray::fTotalMemSize-=qoa->fMaxBDataSize+sizeof(QOABuffer);
+		QOversizeArray::fTotalMemSize-=buf->fBufferSize+sizeof(QOABuffer);
 		pthread_mutex_unlock(&QOversizeArray::fMSizeMutex);
+		delete buf;
 	    }
+	    qoa->fMWWBuffer=NULL;
+	    pthread_mutex_unlock(&qoa->fBuffersMutex);
 	}
-	printstatus("Reached the bottom of the loop in memory freeing thread");
+	printstatus("Reached the bottom of the loop in memory writing thread");
     }
-    printstatus("Exiting from memory freeing thread");
+    printstatus("Exiting from memory writing thread");
     return NULL;
 }
 
 void* QOversizeArray::QOAReadThread(void *array)
 {
+    FuncDef(QOAReadThread);
     QOversizeArray *qoa=(QOversizeArray*)array;
     return NULL;
 }
 
 void* QOversizeArray::QOAMMThread(void *)
 {
+    FuncDef(QOAMMThread);
     Int_t i;
     Float_t fbuf;
     TRandom rnd;
     QOversizeArray *abuf;
     QOABuffer *bbuf;
     Int_t ibuf;
+    char* tmpbuf;
     printstatus("Starting memory management thread");
 
     for(;;) {
@@ -609,7 +713,7 @@ void* QOversizeArray::QOAMMThread(void *)
 
 	pthread_mutex_lock(&fMSizeMutex);
 
-	//While total memory size exceeds fLevelsMemSize
+	//While total memory size exceeds fLevel2MemSize
 	while(fLevel2MemSize && fTotalMemSize > fLevel2MemSize) {
 	    pthread_mutex_unlock(&fMSizeMutex);
 	    //printf("Looping in memory management thread...\n");
@@ -675,28 +779,77 @@ void* QOversizeArray::QOAMMThread(void *)
 	    } else {
 	    }
 
-	    if(bbuf) {
-		pthread_mutex_lock(&abuf->fMFMutex);
-		pthread_mutex_unlock(&abuf->fBuffersMutex);
-		printstatus("Memory management thread is asking to delete a buffer");
-		//printf("Buffer address is %p\n",bbuf);
-		abuf->fMFBuffer=bbuf;
-		pthread_mutex_lock(&abuf->fMFCMutex);
-		pthread_cond_signal(&abuf->fMFCond);
-		pthread_mutex_unlock(&abuf->fMFMutex);
-		printstatus("Memory management thread is waiting for a confirmation");
-		pthread_cond_wait(&abuf->fMFCCond, &abuf->fMFCMutex);
-		pthread_mutex_unlock(&abuf->fMFCMutex);
-		printstatus("Memory management thread received a confirmation");
+	    if(bbuf && bbuf != abuf->fMWWBuffer) {
+		//If the buffer has not been modified, delete it
+		if(!bbuf->fIsModified) {
+		    //Remove it from the linked list first
+		    if(bbuf->fPreviousOAB) bbuf->fPreviousOAB->fNextOAB=bbuf->fNextOAB;
+		    if(bbuf->fNextOAB) bbuf->fNextOAB->fPreviousOAB=bbuf->fPreviousOAB;
+		    if(abuf->fFirstReadBuffer == bbuf) abuf->fFirstReadBuffer=bbuf->fNextOAB;
+		    if(abuf->fLastReadBuffer == bbuf) abuf->fLastReadBuffer=bbuf->fPreviousOAB;
+		    abuf->fNReadBuffers--;
+		    pthread_mutex_lock(&QOversizeArray::fMSizeMutex);
+		    QOversizeArray::fTotalMemSize-=bbuf->fBufferSize+sizeof(QOABuffer);
+		    pthread_mutex_unlock(&QOversizeArray::fMSizeMutex);
+		    pthread_mutex_unlock(&abuf->fBuffersMutex);
+		    delete bbuf;
+
+		    //Else if it was modified
+		} else {
+		    pthread_mutex_lock(&QOversizeArray::fMSizeMutex);
+
+		    //If the buffer is not compressed and the total memory size is >= compression memory size threshold, compress the buffer
+		    if(!bbuf->fIsCompressed && QOversizeArray::fTotalMemSize>=QOversizeArray::fCThreshMemSize) {
+			pthread_mutex_unlock(&QOversizeArray::fMSizeMutex);
+			pthread_mutex_lock(&abuf->fRBDIMutex);
+			bbuf->fIsCompressed=2;
+			pthread_mutex_unlock(&abuf->fBuffersMutex);
+			tmpbuf=(char*)malloc(abuf->fMaxBDataSize);
+			R__zip(1,&abuf->fMaxBDataSize,bbuf->fBuffer,&abuf->fMaxBDataSize,tmpbuf,&ibuf);
+
+			//If compressed data is more compact than uncompressed data
+			if(ibuf && ibuf<abuf->fMaxBDataSize) {
+			    //printf("Compression %i/%i\n",ibuf,bbuf->fBufferSize);
+			    free(bbuf->fBuffer);
+			    tmpbuf=(char*)realloc(tmpbuf,ibuf);
+			    bbuf->fBuffer=tmpbuf;
+			    pthread_mutex_lock(&QOversizeArray::fMSizeMutex);
+			    QOversizeArray::fTotalMemSize-=bbuf->fBufferSize-ibuf;
+			    pthread_mutex_unlock(&QOversizeArray::fMSizeMutex);
+			    bbuf->fBufferSize=ibuf;
+			}
+			//Need to unlock TBDIMutex first to avoid deadlock with Save and Terminate functions. Should not cause a problem with reading thread
+			pthread_mutex_unlock(&abuf->fRBDIMutex);
+			pthread_mutex_lock(&abuf->fBuffersMutex);
+			bbuf->fIsCompressed=1;
+			pthread_mutex_unlock(&abuf->fBuffersMutex);
+
+			//Else if the buffer is already compressed or total memory size < compression memory size threshold, write ask the memory writing thread to write it on disk and delete it	
+		    } else {
+			pthread_mutex_unlock(&QOversizeArray::fMSizeMutex);
+			pthread_mutex_lock(&abuf->fMWMutex);
+			pthread_mutex_unlock(&abuf->fBuffersMutex);
+			printstatus("Memory management thread is asking to write a buffer");
+			//printf("Buffer address is %p\n",bbuf);
+			abuf->fMWBuffer=bbuf;
+			pthread_mutex_lock(&abuf->fMWCMutex);
+			pthread_cond_signal(&abuf->fMWCond);
+			pthread_mutex_unlock(&abuf->fMWMutex);
+			printstatus("Memory management thread is waiting for a confirmation");
+			pthread_cond_wait(&abuf->fMWCCond, &abuf->fMWCMutex);
+			pthread_mutex_unlock(&abuf->fMWCMutex);
+			printstatus("Memory management thread received a confirmation");
+		    }
+		}
 
 	    } else {
 		pthread_mutex_unlock(&abuf->fBuffersMutex);
 	    }
 
 	    pthread_mutex_unlock(&fILMutex);
-	    pthread_mutex_lock(&fMSizeMutex);
 
 	    //printf("CritMemSize: %lli\tTotalMemSize: %lli\n",fCritMemSize,fTotalMemSize);
+	    pthread_mutex_lock(&fMSizeMutex);
 	    pthread_mutex_lock(&fCMSCMutex);
 	    if(fCLReached && (!fCritMemSize || fTotalMemSize <= fCritMemSize)) {
 		printstatus("***** Memory size is no longer critical");

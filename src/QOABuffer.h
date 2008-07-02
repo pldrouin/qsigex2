@@ -14,7 +14,7 @@ struct pthread_cond_t;
 class QOABuffer
 {
     public:
-	QOABuffer(const UInt_t &bufferidx, const UInt_t &arraysize, QOABuffer *previousoab=NULL, QOABuffer *nextoab=NULL): fBufferIdx(bufferidx), fBuffer((char*)malloc(arraysize)), fBufferSize(arraysize), fIsModified(kFALSE), fPreviousOAB(previousoab), fNextOAB(nextoab), fBufferMutex(PTHREAD_MUTEX_INITIALIZER) {
+	QOABuffer(const UInt_t &bufferidx, const UInt_t &arraysize, QOABuffer *previousoab=NULL, QOABuffer *nextoab=NULL): fBufferIdx(bufferidx), fBuffer((char*)malloc(arraysize)), fBufferSize(arraysize), fIsCompressed(0), fIsModified(kFALSE), fPreviousOAB(previousoab), fNextOAB(nextoab), fBufferMutex(PTHREAD_MUTEX_INITIALIZER) {
 	    //printf("%p\tQOABuffer(const UInt_t &bufferidx<%u>, const UInt_t &arraysize<%u>, const QOABuffer *previousoab<%p>, QOABuffer *nextoab<%p>)\n",this,bufferidx,arraysize,previousoab,nextoab);
 	}
 	virtual ~QOABuffer(){free(fBuffer);}
@@ -27,7 +27,8 @@ class QOABuffer
 
 	UInt_t fBufferIdx;
 	char *fBuffer;           //!
-	UInt_t fBufferSize;      //!
+	Int_t fBufferSize;       //!
+	Char_t fIsCompressed;    //! 0:Not Compressed 1:Compressed 2:Being compressed
 	Bool_t fIsModified;      //!
 	QOABuffer *fPreviousOAB; //! Previous QOABuffer (list sorted according to fBufferIdx)
 	QOABuffer *fNextOAB;     //! Next QOABuffer (list sorted according to fBufferIdx)
