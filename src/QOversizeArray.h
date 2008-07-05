@@ -30,7 +30,7 @@ class QOversizeArray
 {
   public:
     enum omode{kRead, kRW, kRecreate};
-    QOversizeArray(const char *filename, const char *arrayname, omode openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=131072);
+    QOversizeArray(const char *filename, const char *arrayname, omode openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=131072, const Int_t npcbuffers=3);
     virtual ~QOversizeArray();
 
     void CloseFile();
@@ -40,15 +40,17 @@ class QOversizeArray
     void* GetBuffer() const{return fBuffer;}
     Long64_t GetNObjects() const{return fNObjects;}
 
+    Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0);
+
     void OpenFile();
+
+    void ResetArray();
 
     static void ResetPriorities();
 
     void Save();
 
     void SetBuffer(void *buffer){fBuffer=buffer;}
-
-    void SetBufferCaching(UInt_t npcbuffers=3){pthread_mutex_lock(&fBuffersMutex); fNPCBuffers=npcbuffers; pthread_mutex_unlock(&fBuffersMutex);}
 
     static void SetMemConstraints(const Long64_t &critmemsize=0, const Long64_t &level1memsize=0, const Long64_t &level2memsize=0, const Long64_t &cthreshmemsize=-1);
 
@@ -80,20 +82,21 @@ class QOversizeArray
     Int_t fMaxBDataSize;         //Maximum buffer data size
     Int_t fMaxBHBDataSize;       //fBufferHeaderSize+fMaxBHBDataSize 
     Long64_t fNObjects;
-    QOABuffer *fCurReadBuffer;   //! Current read buffer. A NULL pointer means that the array is in writing mode
+    QOABuffer *fCurReadBuffer;   //! Current read buffer
     QOABuffer *fFirstReadBuffer; //!
     QOABuffer *fLastReadBuffer;  //!
     QOABuffer *fWriteBuffer;     //!
-    Long64_t   fWBFirstObjIdx;   // Index of the first object contained in the write buffer
-    UInt_t fNReadBuffers;        // Number of active buffers that are full and ready for reading
+    Long64_t   fWBFirstObjIdx;   // Index of the first object contained in the write buffer. ****Value should be modified only by the main thread
+    Int_t fCurRBIdx;             // Current read buffer index. A value of -1 indicates the array is in write mode
+    Int_t fNReadBuffers;        // Number of active buffers that are full and ready for reading
     QOABuffer **fUMBuffers;       //! Array of unmodified buffers
-    UInt_t fNUMBuffers;           // Number of unmodified buffers
+    Int_t fNUMBuffers;           // Number of unmodified buffers
     QOABuffer *fFirstParkedBuffer;//!
-    UInt_t fNPCBuffers;           // Number of buffers that are pre-cached (to speed up reading)
+    Int_t fNPCBuffers;           // Number of buffers that are pre-cached (to speed up reading)
     Float_t fArrayIO;
     Float_t fAPriority;
     mutable pthread_mutex_t fFileMutex;
-    pthread_mutex_t fBuffersMutex; // Lock on all buffer linked list structure (all "read" QOABuffer pointers + counters, QOABuffer::fIsModified, QOABuffer::fIsCompressed)
+    pthread_mutex_t fBuffersMutex; // Lock on all buffer linked list structure (all "read" QOABuffer pointers + counters, fWBFirstObjIdx, fCurRBIdx, QOABuffer::fIsModified, QOABuffer::fIsCompressed)
     pthread_mutex_t fRBDIMutex;    // Lock on read buffer data integrity (QOABuffer::fBuffer and QOABuffer::fBufferSize), for buffers IN THE LINKED LIST
     pthread_t fMWThread;           // Memory writing thread
     pthread_mutex_t fMWMutex;      // Memory writing thread mutex
@@ -104,6 +107,16 @@ class QOversizeArray
     Char_t          fMWAction;     // Flag to control the action of the memory writing thread (0: Normal 1: Pause 2: Stop)
     QOABuffer      *fMWBuffer;     // QOABuffer to be freed by fMWThread
     QOABuffer      *fMWWBuffer;    // QOABuffer being written by fMWThread
+    pthread_t fBLThread;           // Buffer loading thread
+    pthread_mutex_t fBLMutex;      // Buffer loading thread mutex
+    pthread_cond_t fBLCond;        // Buffer loading thread condition
+    pthread_mutex_t fBLCMutex;     // Buffer loading thread condition mutex
+    pthread_cond_t fBLPCond;       // Buffer loading thread pausing condition
+    pthread_cond_t fBLCCond;       // Buffer loading thread confirmation condition
+    Char_t          fBLAction;     // Flag to control the action of the buffer loading thread (0: Normal 1: Pause 2: Stop)
+    QOABuffer     **fUZQOAB;       //! Array of QOABuffers that have been unzipped
+    Char_t        **fUZBuffers;    //! Array of unzipped buffers
+    pthread_mutex_t fUZBMutex;     // Lock on unzipped buffer arrays
     static QList<QOversizeArray*> fInstances;
     static QList<Float_t>         fICumulPriority;
     static Long64_t fLevel1MemSize;
@@ -122,7 +135,7 @@ class QOversizeArray
     static pthread_mutex_t fPriorityMutex; //Mutex for instance priorities
 
     static void* QOAMWThread(void *array);
-    static void* QOAReadThread(void *array);
+    static void* QOABLThread(void *array);
     static void* QOAMMThread(void *);
 
     ClassDef(QOversizeArray,1)

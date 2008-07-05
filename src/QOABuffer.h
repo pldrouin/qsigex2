@@ -25,10 +25,10 @@ class QOABuffer
 	QOABuffer(const QOABuffer &rhs);
 	const QOABuffer& operator=(const QOABuffer &rhs);
 
-	UInt_t fBufferIdx;
+	Int_t fBufferIdx;
 	char *fBuffer;           //!
 	Int_t fBufferSize;       //!
-	Char_t fIsCompressed;    //! 0:Not Compressed 1:Compressed 2:Being compressed
+	Char_t fIsCompressed;    //! 0:Not Compressed 1:Compressed 2:Being compressed 3:Being uncompressed 4:Uncompressed. Note: A compressed buffer is not necessarily stored in fBuffer but an uncompressed buffer is
 	Bool_t fIsModified;      //!
 	QOABuffer *fPreviousOAB; //! Previous QOABuffer (list sorted according to fBufferIdx)
 	QOABuffer *fNextOAB;     //! Next QOABuffer (list sorted according to fBufferIdx)
