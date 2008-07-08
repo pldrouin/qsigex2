@@ -88,7 +88,8 @@ class QOversizeArray
     QOABuffer *fWriteBuffer;     //!
     Long64_t   fWBFirstObjIdx;   // Index of the first object contained in the write buffer. ****Value should be modified only by the main thread
     Int_t fCurRBIdx;             // Current read buffer index. A value of -1 indicates the array is in write mode
-    Int_t fNReadBuffers;        // Number of active buffers that are full and ready for reading
+    Int_t fNReadBuffers;         // Number of active buffers that are full and ready for reading
+    Long64_t fPTNRBObjects;      // Total number of objects in read buffers in the previous pass (==fWBFirstObjIdx after the last call of Fill())
     QOABuffer **fUMBuffers;       //! Array of unmodified buffers
     Int_t fNUMBuffers;           // Number of unmodified buffers
     QOABuffer *fFirstParkedBuffer;//!
@@ -96,7 +97,8 @@ class QOversizeArray
     Float_t fArrayIO;
     Float_t fAPriority;
     mutable pthread_mutex_t fFileMutex;
-    pthread_mutex_t fBuffersMutex; // Lock on all buffer linked list structure (all "read" QOABuffer pointers + counters, fWBFirstObjIdx, fCurRBIdx, QOABuffer::fIsModified, QOABuffer::fIsCompressed)
+    pthread_mutex_t fBuffersMutex; // Lock on all buffer linked list structure, excluding parked buffers (all "read" QOABuffer pointers + counters, fWBFirstObjIdx, fCurRBIdx, QOABuffer::fIsModified, QOABuffer::fIsCompressed)
+    pthread_mutex_t fPBuffersMutex; //Lock on all parked buffer linked list structure
     pthread_mutex_t fRBDIMutex;    // Lock on read buffer data integrity (QOABuffer::fBuffer and QOABuffer::fBufferSize), for buffers IN THE LINKED LIST
     pthread_t fMWThread;           // Memory writing thread
     pthread_mutex_t fMWMutex;      // Memory writing thread mutex
@@ -111,8 +113,8 @@ class QOversizeArray
     pthread_mutex_t fBLMutex;      // Buffer loading thread mutex
     pthread_cond_t fBLCond;        // Buffer loading thread condition
     pthread_mutex_t fBLCMutex;     // Buffer loading thread condition mutex
-    pthread_cond_t fBLPCond;       // Buffer loading thread pausing condition
     pthread_cond_t fBLCCond;       // Buffer loading thread confirmation condition
+    pthread_cond_t fBLWCond;       // Buffer loading thread waiting condition. Can use this instead of a pause condition for this thread since only the main thread can be calling for both a waiting condition or a command
     Char_t          fBLAction;     // Flag to control the action of the buffer loading thread (0: Normal 1: Pause 2: Stop)
     QOABuffer     **fUZQOAB;       //! Array of QOABuffers that have been unzipped
     Char_t        **fUZBuffers;    //! Array of unzipped buffers
