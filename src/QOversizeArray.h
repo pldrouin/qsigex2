@@ -55,7 +55,7 @@ class QOversizeArray
     static void SetMemConstraints(const Long64_t &critmemsize=0, const Long64_t &level1memsize=0, const Long64_t &level2memsize=0, const Long64_t &cthreshmemsize=-1);
 
   protected:
-    void CheckMemory();
+    static void CheckMemory();
     void Init();
     void ReadHeader();
     void ReadBuffer(QOABuffer **buf, const UInt_t &bufferidx);
@@ -94,6 +94,7 @@ class QOversizeArray
     Int_t fNUMBuffers;           // Number of unmodified buffers
     QOABuffer *fFirstParkedBuffer;//!
     Int_t fNPCBuffers;           // Number of buffers that are pre-cached (to speed up reading)
+    Long64_t fArrayMemSize;      // Total size used by array buffers (including size used by QOABuffer member variables and by zipped/unzipped buffers).
     Float_t fArrayIO;
     Float_t fAPriority;
     mutable pthread_mutex_t fFileMutex;
