@@ -223,7 +223,8 @@ void QOversizeArray::Fill()
 	    fWriteBuffer->fBufferIdx=nextbufidx;
 	    fWriteBuffer->fIsCompressed=0;
 	    if(fWriteBuffer->fBufferSize<fMaxBDataSize) {
-		fWriteBuffer->fBuffer=(char*)realloc(fWriteBuffer->fBuffer,fMaxBDataSize);
+		free(fWriteBuffer->fBuffer);
+		fWriteBuffer->fBuffer=(char*)malloc(fMaxBDataSize);
 		pthread_mutex_lock(&fMSizeMutex);
 		fTotalMemSize+=fMaxBDataSize-fWriteBuffer->fBufferSize;
 		fArrayMemSize+=fMaxBDataSize-fWriteBuffer->fBufferSize;
@@ -611,7 +612,8 @@ void QOversizeArray::ReadBuffer(QOABuffer **buf, const UInt_t &bufferidx)
         pthread_mutex_unlock(&fPBuffersMutex);
 
 	if((*buf)->fBufferSize != buffersize) {
-	    (*buf)->fBuffer=(char*)realloc((*buf)->fBuffer,buffersize);
+	    free((*buf)->fBuffer);
+	    (*buf)->fBuffer=(char*)malloc(buffersize);
 	    pthread_mutex_lock(&fMSizeMutex);
 	    fTotalMemSize+=buffersize-(*buf)->fBufferSize;
 	    fArrayMemSize+=buffersize-(*buf)->fBufferSize;
