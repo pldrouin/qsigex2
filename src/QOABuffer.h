@@ -14,7 +14,7 @@ struct pthread_cond_t;
 class QOABuffer
 {
     public:
-	QOABuffer(const UInt_t &bufferidx, const UInt_t &arraysize, QOABuffer *previousoab=NULL, QOABuffer *nextoab=NULL): fBufferIdx(bufferidx), fBuffer((char*)malloc(arraysize)), fBufferSize(arraysize), fIsCompressed(0), fIsModified(kFALSE), fPreviousOAB(previousoab), fNextOAB(nextoab), fBufferMutex(PTHREAD_MUTEX_INITIALIZER) {
+	QOABuffer(const UInt_t &bufferidx, Int_t buffersize, QOABuffer *previousoab=NULL, QOABuffer *nextoab=NULL): fBufferIdx(bufferidx), fBuffer((char*)malloc(buffersize)), fBufferSize(buffersize), fIsCompressed(0), fIsModified(kFALSE), fPreviousOAB(previousoab), fNextOAB(nextoab), fBufferMutex(PTHREAD_MUTEX_INITIALIZER) {
 	    //printf("%p\tQOABuffer(const UInt_t &bufferidx<%u>, const UInt_t &arraysize<%u>, const QOABuffer *previousoab<%p>, QOABuffer *nextoab<%p>)\n",this,bufferidx,arraysize,previousoab,nextoab);
 	}
 	virtual ~QOABuffer(){free(fBuffer);}
@@ -27,7 +27,7 @@ class QOABuffer
 
 	Int_t fBufferIdx;
 	char *fBuffer;           //!
-	Int_t fBufferSize;       //!
+	Int_t fBufferSize;      //!
 	Char_t fIsCompressed;    //! 0:Not Compressed 1:Compressed 2:Being compressed 3:Being uncompressed 4:Uncompressed. Note: A compressed buffer is not necessarily stored in fBuffer but an uncompressed buffer is
 	Bool_t fIsModified;      //!
 	QOABuffer *fPreviousOAB; //! Previous QOABuffer (list sorted according to fBufferIdx)

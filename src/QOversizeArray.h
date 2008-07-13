@@ -56,6 +56,7 @@ class QOversizeArray
 
   protected:
     static void CheckMemory();
+    void CleanUZBuffers();
     void Init();
     void ReadHeader();
     void ReadBuffer(QOABuffer **buf, const UInt_t &bufferidx);
@@ -88,6 +89,7 @@ class QOversizeArray
     QOABuffer *fWriteBuffer;     //!
     Long64_t   fWBFirstObjIdx;   // Index of the first object contained in the write buffer. ****Value should be modified only by the main thread
     Int_t fCurRBIdx;             // Current read buffer index. A value of -1 indicates the array is in write mode
+    Int_t fCurBLRBIdx;           // Current read buffer index used by buffer loading thread.
     Int_t fNReadBuffers;         // Number of active buffers that are full and ready for reading
     Long64_t fPTNRBObjects;      // Total number of objects in read buffers in the previous pass (==fWBFirstObjIdx after the last call of Fill())
     QOABuffer **fUMBuffers;       //! Array of unmodified buffers
@@ -116,7 +118,7 @@ class QOversizeArray
     pthread_mutex_t fBLCMutex;     // Buffer loading thread condition mutex
     pthread_cond_t fBLCCond;       // Buffer loading thread confirmation condition
     pthread_cond_t fBLWCond;       // Buffer loading thread waiting condition. Can use this instead of a pause condition for this thread since only the main thread can be calling for both a waiting condition or a command
-    Char_t          fBLAction;     // Flag to control the action of the buffer loading thread (0: Normal 1: Pause 2: Stop)
+    Char_t          fBLAction;     // Flag to control the action of the buffer loading thread (0: Normal 1: Wait 2: Stop)
     QOABuffer     **fUZQOAB;       //! Array of QOABuffers that have been unzipped
     Char_t        **fUZBuffers;    //! Array of unzipped buffers
     pthread_mutex_t fUZBMutex;     // Lock on unzipped buffer arrays
