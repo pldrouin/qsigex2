@@ -19,15 +19,15 @@ pthread_cond_t QOversizeArray::fMMCond=PTHREAD_COND_INITIALIZER;
 pthread_mutex_t QOversizeArray::fILMutex=PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t QOversizeArray::fPriorityMutex=PTHREAD_MUTEX_INITIALIZER;
 
-//#define FuncDef(a,b) const char* thefunc=#a; Bool_t show=b; TString indent;
+#define FuncDef(a,b) const char* thefunc=#a; Bool_t show=b; TString indent;
 //#define pthread_mutex_lock(a) {if(show) printf("\n%slocking %s in function %s...\n",indent.Data(),#a,thefunc); pthread_mutex_lock(a); if(show) printf("%s%s is now locked in function %s\n",indent.Data(),#a,thefunc); indent+="     ";}
 //#define pthread_mutex_unlock(a) {indent=indent(0,indent.Length()-5); if(show) printf("\n%sunlocking %s in function %s...\n",indent.Data(),#a,thefunc); pthread_mutex_unlock(a); if(show) printf("%s%s is now unlocked in function %s\n",indent.Data(),#a,thefunc);}
 //#define pthread_cond_signal(a) {if(show) printf("sending signal %s in function %s...\n",#a,thefunc); pthread_cond_signal(a);}
 //#define pthread_cond_wait(a,b) {if(show) printf("waiting for signal %s with mutex %s in function %s...\n",#a,#b,thefunc); pthread_cond_wait(a,b);}
-//#define ASSERT(a) if(!(a) && show) {fprintf(stderr,"Error in function %s: Assertion failed: %s\n",thefunc,#a); throw 1;}
+#define ASSERT(a) if(!(a) && show) {fprintf(stderr,"Error in function %s: Assertion failed: %s\n",thefunc,#a); throw 1;}
 
-#define FuncDef(a,b)
-#define ASSERT(a)
+//#define FuncDef(a,b)
+//#define ASSERT(a)
 
 
 /*void printstatus(const char* status)
@@ -955,12 +955,23 @@ void* QOversizeArray::QOAMWThread(void *array)
 		else qoa->fLastReadBuffer=buf->fPreviousOAB;
 		qoa->fNReadBuffers--;
 
-		//printf("Memory writing thread is deleting buffer %i\n",buf->fBufferIdx);
-		pthread_mutex_lock(&fMSizeMutex);
-		fTotalMemSize-=buf->fBufferSize+sizeof(QOABuffer);
-		qoa->fArrayMemSize-=buf->fBufferSize+sizeof(QOABuffer);
-		pthread_mutex_unlock(&fMSizeMutex);
-		delete buf;
+		pthread_mutex_lock(&qoa->fPBuffersMutex);
+		if(qoa->fFirstParkedBuffer) {
+		    pthread_mutex_unlock(&qoa->fPBuffersMutex);
+		    //printf("Memory writing thread is deleting buffer %i\n",buf->fBufferIdx);
+		    pthread_mutex_lock(&fMSizeMutex);
+		    fTotalMemSize-=buf->fBufferSize+sizeof(QOABuffer);
+		    qoa->fArrayMemSize-=buf->fBufferSize+sizeof(QOABuffer);
+		    pthread_mutex_unlock(&fMSizeMutex);
+		    delete buf;
+
+		} else {
+		    //printf("Memory writing thread is parking buffer %i\n",buf->fBufferIdx);
+		    qoa->fFirstParkedBuffer=buf;
+		    buf->fPreviousOAB=NULL;
+		    buf->fNextOAB=NULL;
+		    pthread_mutex_unlock(&qoa->fPBuffersMutex);
+		}
 
             //Else if the buffer is required, add it to the list of unmodified buffers	
 	    } else {
@@ -1437,13 +1448,25 @@ void* QOversizeArray::QOAMMThread(void *)
 			if(bbuf->fNextOAB) bbuf->fNextOAB->fPreviousOAB=bbuf->fPreviousOAB;
 			else abuf->fLastReadBuffer=bbuf->fPreviousOAB;
 			abuf->fNReadBuffers--;
-			//printf("Memory management thread is deleting buffer %i\n",bbuf->fBufferIdx);
-			pthread_mutex_lock(&fMSizeMutex);
-			fTotalMemSize-=bbuf->fBufferSize+sizeof(QOABuffer);
-			abuf->fArrayMemSize-=bbuf->fBufferSize+sizeof(QOABuffer);
-			pthread_mutex_unlock(&fMSizeMutex);
+
+			pthread_mutex_lock(&abuf->fPBuffersMutex);
+			if(abuf->fFirstParkedBuffer) {
+			    pthread_mutex_unlock(&abuf->fPBuffersMutex);
+			    //printf("Memory management thread is deleting buffer %i\n",bbuf->fBufferIdx);
+			    pthread_mutex_lock(&fMSizeMutex);
+			    fTotalMemSize-=bbuf->fBufferSize+sizeof(QOABuffer);
+			    abuf->fArrayMemSize-=bbuf->fBufferSize+sizeof(QOABuffer);
+			    pthread_mutex_unlock(&fMSizeMutex);
+			    delete bbuf;
+
+			} else {
+			    //printf("Memory management thread is parking buffer %i\n",bbuf->fBufferIdx);
+			    abuf->fFirstParkedBuffer=bbuf;
+			    bbuf->fPreviousOAB=NULL;
+			    bbuf->fNextOAB=NULL;
+			    pthread_mutex_unlock(&abuf->fPBuffersMutex);
+			}
 			pthread_mutex_unlock(&abuf->fBuffersMutex);
-			delete bbuf;
 
 			//Else if it was modified
 		    } else {
