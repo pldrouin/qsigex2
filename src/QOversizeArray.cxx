@@ -288,54 +288,46 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
 	if(fCurReadBuffer) while(fCurReadBuffer->fNextOAB && fCurReadBuffer->fNextOAB->fBufferIdx<=fCurRBIdx) fCurReadBuffer=fCurReadBuffer->fNextOAB;
 	//printf("Looping on buffers with fCurReadBuffer==%p with buffer index %i\n",fCurReadBuffer,fCurReadBuffer?fCurReadBuffer->fBufferIdx:-1);
 
-	//If the buffer is not loaded or ready for reading
-	if(!fCurReadBuffer || fCurReadBuffer->fBufferIdx != fCurRBIdx || (fCurReadBuffer->fIsCompressed != 0 && fCurReadBuffer->fIsCompressed != 4)) {
-	    //Wait for reading thread condition
+	//If the buffer is not loaded
+	if(!fCurReadBuffer || fCurReadBuffer->fBufferIdx != fCurRBIdx) {
+	    pthread_mutex_unlock(&fBuffersMutex);
+	    pthread_mutex_lock(&fBLMutex);
+	    //printf("GetEntry is waiting for buffer %i to load\n",fCurRBIdx);
+	    //printf("Buffer address is %p\n",bbuf);
+	    pthread_mutex_lock(&fBLCMutex);
+	    pthread_cond_signal(&fBLCond);
+	    pthread_mutex_unlock(&fBLMutex);
+	    printstatus("GetEntry is waiting for a confirmation");
+	    pthread_cond_wait(&fBLCCond, &fBLCMutex);
+	    pthread_mutex_unlock(&fBLCMutex);
+	    printstatus("GetEntry received a confirmation");
 
-	    while(!fCurReadBuffer || fCurReadBuffer->fBufferIdx != fCurRBIdx) {
-		pthread_mutex_unlock(&fBuffersMutex);
-		pthread_mutex_lock(&fBLMutex);
-		//printf("GetEntry is waiting for buffer %i to load\n",fCurRBIdx);
-		//printf("Buffer address is %p\n",bbuf);
-		pthread_mutex_lock(&fBLCMutex);
-		pthread_cond_signal(&fBLCond);
-		pthread_mutex_unlock(&fBLMutex);
-		printstatus("GetEntry is waiting for a confirmation");
-		pthread_cond_wait(&fBLCCond, &fBLCMutex);
-		pthread_mutex_unlock(&fBLCMutex);
-		printstatus("GetEntry received a confirmation");
-
-		pthread_mutex_lock(&fBuffersMutex);
-		if(!fCurReadBuffer || fCurReadBuffer->fBufferIdx>fCurRBIdx) {
-		    fCurReadBuffer=fFirstReadBuffer;
-		}
-		while(fCurReadBuffer->fNextOAB && fCurReadBuffer->fNextOAB->fBufferIdx<=fCurRBIdx) fCurReadBuffer=fCurReadBuffer->fNextOAB;
-	    }
-
-	    while(fCurReadBuffer->fIsCompressed != 0 && fCurReadBuffer->fIsCompressed != 4) {
-		pthread_mutex_unlock(&fBuffersMutex);
-		pthread_mutex_lock(&fBLMutex);
-		//printf("GetEntry is waiting for buffer %i to unzip\n",fCurRBIdx);
-		pthread_mutex_lock(&fBLCMutex);
-		pthread_cond_signal(&fBLCond);
-		pthread_mutex_unlock(&fBLMutex);
-		printstatus("GetEntry is waiting for a confirmation");
-		pthread_cond_wait(&fBLCCond, &fBLCMutex);
-		pthread_mutex_unlock(&fBLCMutex);
-		printstatus("GetEntry received a confirmation");
-
-		pthread_mutex_lock(&fBuffersMutex);
-	    }
+	    pthread_mutex_lock(&fBuffersMutex);
+	    if(!fCurReadBuffer) fCurReadBuffer=fFirstReadBuffer;
+	    while(fCurReadBuffer->fNextOAB && fCurReadBuffer->fNextOAB->fBufferIdx<=fCurRBIdx) fCurReadBuffer=fCurReadBuffer->fNextOAB;
 	    //Assertion: fCurReadBuffer->fBufferIdx==fCurRBIdx
 	    ASSERT(fCurReadBuffer->fBufferIdx==fCurRBIdx);
 	    pthread_mutex_unlock(&fBuffersMutex);
+
+	    //Else if the buffer is being uncompressed
+	} else if(fCurReadBuffer->fIsCompressed != 0 && fCurReadBuffer->fIsCompressed != 4) {
+	    pthread_mutex_unlock(&fBuffersMutex);
+	    pthread_mutex_lock(&fBLMutex);
+	    //printf("GetEntry is waiting for buffer %i to unzip\n",fCurRBIdx);
+	    pthread_mutex_lock(&fBLCMutex);
+	    pthread_cond_signal(&fBLCond);
+	    pthread_mutex_unlock(&fBLMutex);
+	    printstatus("GetEntry is waiting for a confirmation");
+	    pthread_cond_wait(&fBLCCond, &fBLCMutex);
+	    pthread_mutex_unlock(&fBLCMutex);
+	    printstatus("GetEntry received a confirmation");
+
 	} else {
 	    pthread_mutex_unlock(&fBuffersMutex);
+	    pthread_mutex_lock(&fBLCMutex);
+	    pthread_cond_signal(&fBLCond);
+	    pthread_mutex_unlock(&fBLCMutex);
 	}
-
-	pthread_mutex_lock(&fBLCMutex);
-	pthread_cond_signal(&fBLCond);
-	pthread_mutex_unlock(&fBLCMutex);
 
 	//If the buffer has never been compressed
 	if(fCurReadBuffer->fIsCompressed==0) sbuf=fCurReadBuffer->fBuffer;
@@ -1015,19 +1007,19 @@ void* QOversizeArray::QOABLThread(void *array)
 		qoa->fCurBLRBIdx=-2;
 		qoa->CleanUZBuffers();
 	    }
-	    pthread_mutex_unlock(&qoa->fBuffersMutex);
 	    printstatus("Buffer loading thread is waiting for a new buffer to load");
 	    pthread_mutex_unlock(&qoa->fBLMutex);
 	    pthread_mutex_lock(&qoa->fBLCMutex);
+	    pthread_mutex_unlock(&qoa->fBuffersMutex);
 	    pthread_cond_signal(&qoa->fBLWCond);
 	    pthread_cond_wait(&qoa->fBLCond, &qoa->fBLCMutex);
 	    pthread_mutex_unlock(&qoa->fBLCMutex);
 	   
 	} else if(qoa->fCurRBIdx==lastbidx) {
-	    pthread_mutex_unlock(&qoa->fBuffersMutex);
 	    printstatus("Buffer loading thread is waiting for a new buffer to load");
 	    pthread_mutex_unlock(&qoa->fBLMutex);
 	    pthread_mutex_lock(&qoa->fBLCMutex);
+	    pthread_mutex_unlock(&qoa->fBuffersMutex);
 	    pthread_cond_signal(&qoa->fBLWCond);
 	    pthread_cond_wait(&qoa->fBLCond, &qoa->fBLCMutex);
 	    pthread_mutex_unlock(&qoa->fBLCMutex);
@@ -1157,10 +1149,12 @@ void* QOversizeArray::QOABLThread(void *array)
 		    }
 		    qoa->fNReadBuffers++;
 
-		    pthread_mutex_lock(&qoa->fBLCMutex);
-		    pthread_cond_signal(&qoa->fBLCCond);
-		    pthread_mutex_unlock(&qoa->fBLCMutex);
-		    printstatus("Buffer loading thread just sent a confirmation");
+		    if(buf->fBufferIdx==qoa->fCurRBIdx) {
+			pthread_mutex_lock(&qoa->fBLCMutex);
+			pthread_cond_signal(&qoa->fBLCCond);
+			pthread_mutex_unlock(&qoa->fBLCMutex);
+			printstatus("Buffer loading thread just sent a confirmation");
+		    }
 
 		    //Else if the required buffer is loaded, but it is compressed or being compressed
 		} else if(buf->fIsCompressed>0 && buf->fIsCompressed<3) {
@@ -1208,10 +1202,12 @@ void* QOversizeArray::QOABLThread(void *array)
 		    pthread_mutex_lock(&qoa->fBuffersMutex);
 		    buf->fIsCompressed=4;
 
-		    pthread_mutex_lock(&qoa->fBLCMutex);
-		    pthread_cond_signal(&qoa->fBLCCond);
-		    pthread_mutex_unlock(&qoa->fBLCMutex);
-		    printstatus("Buffer loading thread just sent a confirmation");
+		    if(buf->fBufferIdx==qoa->fCurRBIdx) {
+			pthread_mutex_lock(&qoa->fBLCMutex);
+			pthread_cond_signal(&qoa->fBLCCond);
+			pthread_mutex_unlock(&qoa->fBLCMutex);
+			printstatus("Buffer loading thread just sent a confirmation");
+		    }
 		}
 		if(buf->fNextOAB && buf->fNextOAB->fBufferIdx<=ibuf+1) buf=buf->fNextOAB;
 
