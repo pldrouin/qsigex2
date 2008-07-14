@@ -1,10 +1,6 @@
 #ifndef _OVERSIZEARRAY_
 #define _OVERSIZEARRAY_
 
-#include <cstdlib>
-#include <cstdio>
-#include <cmath>
-#include <errno.h>
 #ifndef __CINT__
 #include <pthread.h>
 #include <fcntl.h>
@@ -17,6 +13,11 @@ struct pthread_t;
 struct pthread_mutex_t;
 struct pthread_cond_t;
 #endif
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
+#include <errno.h>
+
 #include "Rtypes.h"
 #include "TString.h"
 #include "TRandom.h"
