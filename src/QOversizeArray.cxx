@@ -1403,7 +1403,7 @@ void* QOversizeArray::QOAMMThread(void *)
 	    libuf=abuf->fPTNRBObjects<abuf->fWBFirstObjIdx?abuf->fWBFirstObjIdx:abuf->fPTNRBObjects;
 	    bbuf2=abuf->fFirstReadBuffer;
 	    pthread_mutex_lock(&fMSizeMutex);
-	    libuf2=(abuf->fNReadBuffers-abuf->fNReadBuffers*((Double_t)fTotalMemSize-fLevel1MemSize)*fbuf/(fbuf2*abuf->fArrayMemSize))*abuf->fNOPerBuffer;
+	    libuf2=(Long64_t)(abuf->fNReadBuffers-abuf->fNReadBuffers*((Double_t)fTotalMemSize-fLevel1MemSize)*fbuf/(fbuf2*abuf->fArrayMemSize))*abuf->fNOPerBuffer);
 	    pthread_mutex_unlock(&fMSizeMutex);
 	    if(libuf2<=0) libuf2=abuf->fNOPerBuffer;
 	    //printf("Targeted number of loaded buffers: %lli\n",libuf2/abuf->fNOPerBuffer);
@@ -1460,7 +1460,7 @@ void* QOversizeArray::QOAMMThread(void *)
 	    libuf=(abuf->fPTNRBObjects<abuf->fWBFirstObjIdx?abuf->fWBFirstObjIdx:abuf->fPTNRBObjects);
 	    bbuf2=abuf->fFirstReadBuffer;
 	    pthread_mutex_lock(&fMSizeMutex);
-	    libuf2=(abuf->fNReadBuffers-abuf->fNReadBuffers*((Double_t)fTotalMemSize-fLevel1MemSize)*fbuf/(fbuf2*abuf->fArrayMemSize))*abuf->fNOPerBuffer;
+	    libuf2=(Long64_t)((abuf->fNReadBuffers-abuf->fNReadBuffers*((Double_t)fTotalMemSize-fLevel1MemSize)*fbuf/(fbuf2*abuf->fArrayMemSize))*abuf->fNOPerBuffer);
 	    pthread_mutex_unlock(&fMSizeMutex);
 	    if(libuf2<=0) libuf2=abuf->fNOPerBuffer;
 	    //printf("Targeted number of loaded buffers: %lli\n",libuf2/abuf->fNOPerBuffer);
