@@ -4,6 +4,7 @@
 #include "QOversizeArray.h"
 #include "QProcArray.h"
 #include "QProcBranchHandler.h"
+#include "QProcQOAHandler.h"
 
 //The order of base classes is important to ensure that the ROOT dictionary be generated correctly
 class QProcQOA: public QProcArray, public QOversizeArray
@@ -20,7 +21,7 @@ class QProcQOA: public QProcArray, public QOversizeArray
     void InitProcObj(){QOversizeArray::ResetArray();}
     void ResetArray(){QOversizeArray::ResetArray();}
     void TerminateProcObj(){UpdateModTime();}
-    void UnloadArray(){QOversizeArray::Save(); QOversizeArray::CloseFile();}
+    void UnloadArray();
     void UpdateModTime(){QOversizeArray::UpdateModTime();}
 
   protected:

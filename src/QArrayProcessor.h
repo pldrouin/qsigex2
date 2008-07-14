@@ -6,6 +6,7 @@
 #include "QProcArray.h"
 #include "QNamedProc.h"
 #include "QProcBranchHandler.h"
+#include "QProcQOAHandler.h"
 #include "QMask.h"
 #include "QProgress.h"
 

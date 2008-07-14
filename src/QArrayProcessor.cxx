@@ -748,6 +748,7 @@ void QArrayProcessor::InitProcess()
   TDirectory *dbuf;
   Int_t i,j;
   QList<TString> dpn;
+  TString proto;
 
   fIArrays->Clear();
   fOArrays->Clear();
@@ -762,8 +763,27 @@ void QArrayProcessor::InitProcess()
       throw 1;
     }
     dbuf->cd();
-    //Create the output array and store the pointer
-    (*fOArrays).Add(QProcBranchHandler::LoadBranch((*fOANames)[i][1],(*fOANames)[i][0], QProcArray::kRW));
+    j=(*fOANames)[i][1].Index("://");
+
+    if(j==-1) {
+      fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Array type is not specified\n");
+      throw 1;
+    }
+    proto=(*fOANames)[i][1](0,j);
+
+    if(!strcmp(proto,"tree")) {
+      //Create the output array and store the pointer
+      (*fOArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fOANames)[i][1](j+3,(*fOANames)[i][1].Length()-j-3),(*fOANames)[i][0], QProcArray::kRW));
+
+    } else if(!strcmp(proto,"qoa")) {
+      //Create the output array and store the pointer
+      (*fOArrays).Add(QProcQOAHandler::LoadQOA((TString)(*fOANames)[i][1](j+3,(*fOANames)[i][1].Length()-j-3),(*fOANames)[i][0], QProcArray::kRW));
+
+    } else {
+      fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Array type '%s' is unknown\n",proto.Data());
+      throw 1;
+    }
+
   }
 
   //Loop over the input arrays
@@ -774,9 +794,27 @@ void QArrayProcessor::InitProcess()
       throw 1;
     }
     dbuf->cd();
-    //Get a pointer to the input array and store it
-    (*fIArrays).Add(QProcBranchHandler::LoadBranch((*fIANames)[i][1],(*fIANames)[i][0], QProcArray::kRead));
-  }
+    j=(*fIANames)[i][1].Index("://");
+
+    if(j==-1) {
+      fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Array type is not specified\n");
+      throw 1;
+    }
+    proto=(*fIANames)[i][1](0,j);
+
+    if(!strcmp(proto,"tree")) {
+      //Create the output array and store the pointer
+      (*fIArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fIANames)[i][1](j+3,(*fIANames)[i][1].Length()-j-3),(*fIANames)[i][0], QProcArray::kRead));
+
+    } else if(!strcmp(proto,"qoa")) {
+      //Create the output array and store the pointer
+      (*fIArrays).Add(QProcQOAHandler::LoadQOA((TString)(*fIANames)[i][1](j+3,(*fIANames)[i][1].Length()-j-3),(*fIANames)[i][0], QProcArray::kRead));
+
+    } else {
+      fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Array type '%s' is unknown\n",proto.Data());
+      throw 1;
+    }
+}
 
   //Create output buffers
   fBuffers->RedimList(fBuNames->Count());

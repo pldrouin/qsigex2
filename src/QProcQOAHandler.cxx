@@ -2,184 +2,57 @@
 
 ClassImp(QProcQOAHandler)
 
-QList<TObject*> QProcQOAHandler::fTBObjs;
+QList<TString> QProcQOAHandler::fFiles;
+QList<TObject*> QProcQOAHandler::fQOAObjs;
+QList<Int_t> QProcQOAHandler::fNObjReqQOA;
 
-QProcArray* QProcQOAHandler::LoadBranch(const char *treelocation, const char *branchname, QProcArray::omode openmode)
+QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arrayname, QProcArray::omode openmode)
 {
 
-  TDirectory *dbuf;
-  QList<TString> donbuf=QFileUtils::DecodeObjName(treelocation);
-  QList<TString> dpn;
-  TString bname=branchname;
+  TString pathname=QFileUtils::SimplifyPathName(gSystem->ExpandPathName(arraylocation));
   Int_t i;
-  TTree *tbuf;
-  TBranch *bbuf;
-
-  if(!donbuf.Count()) {
-    fprintf(stderr,"QProcQOAHandler::LoadBranch: Error: Invalid tree location: '%s'\n",treelocation);
-    throw 1;
-  }
 
   switch (openmode) {
     case QProcArray::kRW:
 
-      //If the tree is located in a file
-      if(donbuf.Count() == 2) {
+      //If the array has been opened previously by QProcQOAHandler
+      if((i=fFiles.FindFirst(pathname)) != -1) {
 
-	//If the file is already opened
-	if((dbuf=gDirectory->GetDirectory(donbuf[1]+":/"))) {
-	  dbuf->cd();
-
-	  if(!gDirectory->IsWritable()) {
-	    fprintf(stderr,"QProcQOAHandler::LoadBranch: Error: File '%s' is not writable\n",donbuf[1].Data());
-	    throw 1;
-	  }
-
-	  //If the file has been opened previously by QProcQOAHandler in rw mode
-	  if((i=fOFiles.FindFirst(dbuf)) != -1) {
-	    //Increment the number of output branches that require that file
-	    fNObjReqOFiles[i]++;
-	  }
-
-	  //Else if the file is not opened
-	} else {
-	  if((gSystem->AccessPathName(gSystem->DirName(donbuf[1]),kWritePermission) || gSystem->AccessPathName(gSystem->DirName(donbuf[1]),kExecutePermission))
-	      && !gSystem->AccessPathName(donbuf[1],kFileExists) && gSystem->AccessPathName(donbuf[1],kWritePermission)) {
-	    fprintf(stderr,"QProcQOAHandler::LoadBranch: Error: File '%s' cannot be opened for writing\n",donbuf[1].Data());
-	    throw 1;
-	  }
-
-	  //Open the file
-	  fOFiles.Add(new TFile(donbuf[1],"update"));
-	  fNObjReqOFiles.Add(1);
+	//If the array is opened in read mode
+	if(dynamic_cast<QOversizeArray*>(fQOAObjs[i])->GetOpenMode()==QOversizeArray::kRead) {
+	  fprintf(stderr,"QProcQOAHandler::LoadQOA: Error: Array '%s' located in file '%s' is not writable\n",arrayname,pathname.Data());
 	}
+
+	//Increment the number of output branches that require that file
+	fNObjReqQOA[i]++;
+	return (QProcArray*)fQOAObjs[i];
+
+	//Else if the array is not opened
+      } else {
+	fFiles.Add(pathname);
+	fNObjReqQOA.Add(1);
+	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRecreate,sizeof(Double_t),131072,3));
+
+	return (QProcQOA*)fQOAObjs.GetLast();
       }
-      //Decode the path to the object
-      dpn=QFileUtils::DecodePathName(donbuf[0]);
-
-      //Access the directory where the tree has to be created and create directories if necessary
-      for(i=0; i<dpn.Count()-1; i++) {
-
-	if(!(dbuf=gDirectory->GetDirectory(dpn[i]))) {
-	  dbuf=gDirectory->mkdir(dpn[i]);
-
-	  if(!dbuf) {
-	    fprintf(stderr,"QProcQOAHandler::LoadBranch: Error: Directory '%s' cannot be created in location '%s'\n",dpn[i].Data(),gDirectory->GetPath());
-	    throw 1;
-	  }
-	}
-	dbuf->cd();
-      }
-
-      //If the tree does not exist
-      if(!(tbuf=dynamic_cast<QProcTree*>(gDirectory->Get(dpn.GetLast())))) {
-	//Create the output tree
-	tbuf=new QProcTree(dpn.GetLast(),dpn.GetLast());
-      }
-      dpn.Clear();
-
-      //If the branch already exists
-      if((bbuf=tbuf->GetBranch(bname))) {
-
-	//If the branch is a QProcBranch
-	if(dynamic_cast<QProcBranch*>(bbuf)) {
-	  return dynamic_cast<QProcBranch*>(bbuf);
-
-	//Else if the branch is a TBranch
-	} else {
-	  //If there is no wrapper that have been created for that branch, create one
-	  if((i=fTBObjs.FindFirst(bbuf)) == -1) {
-	    fTBObjs.Add(bbuf);
-	    fQPTBWObjs.Add((TObject*)new QProcTBranchWrapper(bbuf));
-	    fNObjReqTB.Add(0);
-	    i=fQPTBWObjs.Count()-1;
-	  }
-	  //Return a pointer to the wrapper
-	  fNObjReqTB[i]++;
-	  return (QProcTBranchWrapper*)fQPTBWObjs[i];
-	}
-      }
-
-      //Create the branch
-      return dynamic_cast<QProcBranch*>(tbuf->Branch(bname,NULL,bname+"/D"));
       break;
 
     case QProcArray::kRead:
 
-      //If the tree is located in a file
-      if(donbuf.Count() ==2) {
 
-	//If the file is already opened
-	if((dbuf=gDirectory->GetDirectory(donbuf[1]+":/"))) {
-	  dbuf->cd();
+      //If the array has been opened previously by QProcQOAHandler
+      if((i=fFiles.FindFirst(pathname)) != -1) {
+	fNObjReqQOA[i]++;
+	return (QProcArray*)fQOAObjs[i];
 
-	  //If the file has been opened previously by QProcQOAHandler in rw mode
-	  if((i=fOFiles.FindFirst(dbuf)) != -1) {
-	    //Increment the number of output branches that require that file
-	    fNObjReqOFiles[i]++;
-	  }
+	//Else if the file is not opened
+      } else {
+	fFiles.Add(pathname);
+	fNObjReqQOA.Add(1);
+	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRead,sizeof(Double_t),131072,3));
 
-	  //If the file has been opened previously by QProcQOAHandler in read-only mode
-	  if((i=fIFiles.FindFirst(dbuf)) != -1) {
-	    //Increment the number of input branches that require that file
-	    fNObjReqIFiles[i]++;
-	  }
-
-	  //Else if the file is not opened
-	} else {
-
-	  if(gSystem->AccessPathName(donbuf[1],kReadPermission)) {
-	    fprintf(stderr,"QProcQOAHandler::LoadBranch: Error: File '%s' cannot be read\n",donbuf[1].Data());
-	    throw 1;
-	  }
-
-	  //Open the file
-	  fIFiles.Add(new TFile(donbuf[1],"read"));
-	  fNObjReqIFiles.Add(1);
-	}
+	return (QProcQOA*)fQOAObjs.GetLast();
       }
-      //Decode the path to the object
-      dpn=QFileUtils::DecodePathName(donbuf[0]);
-
-      //Access the directory from where the tree has to be read
-      for(i=0; i<dpn.Count()-1; i++) {
-
-	if(!(dbuf=gDirectory->GetDirectory(dpn[i]))) {
-	  fprintf(stderr,"QProcQOAHandler::LoadBranch: Directory '%s' does not exist in location '%s'\n",dpn[i].Data(),gDirectory->GetPath());
-	  throw 1;
-	}
-	dbuf->cd();
-      }
-
-      //Load the input tree
-      if(!(tbuf=dynamic_cast<TTree*>(gDirectory->Get(dpn.GetLast())))) {
-	fprintf(stderr,"QProcQOAHandler::LoadBranch: Tree '%s:%s' does not exist\n",donbuf[1].Data(),donbuf[0].Data());
-	throw 1;
-      }
-      dpn.Clear();
-
-      //Get a pointer to the branch
-      if(!(bbuf=tbuf->GetBranch(bname))) {
-	fprintf(stderr,"QProcQOAHandler::InitProcess(): Error: Branch '%s' does not exist in tree '%s:%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data());
-	throw 1;
-      }
-
-      //If the branch is not a QProcBranch
-      if(!dynamic_cast<QProcBranch*>(bbuf)) {
-
-	//If there is no wrapper that have been created for that branch, create one
-	if((i=fTBObjs.FindFirst(bbuf)) == -1) {
-	  fTBObjs.Add(bbuf);
-	  fQPTBWObjs.Add((TObject*)new QProcTBranchWrapper(bbuf));
-	  fNObjReqTB.Add(0);
-	  i=fQPTBWObjs.Count()-1;
-	}
-	//Return a pointer to the wrapper
-	fNObjReqTB[i]++;
-	return (QProcTBranchWrapper*)fQPTBWObjs[i];
-      }
-
-      return dynamic_cast<QProcBranch*>(bbuf);
       break;
 
     default:
@@ -187,64 +60,29 @@ QProcArray* QProcQOAHandler::LoadBranch(const char *treelocation, const char *br
   }
 }
 
-void QProcQOAHandler::UnloadBranch(TBranch *branch)
+void QProcQOAHandler::UnloadQOA(QProcQOA *array)
 {
-//  printf("void QProcQOAHandler::UnloadBranch(TBranch *branch<'%s'>)\n",branch->GetName());
-  //Get a pointer to the file were is stored the tree associated to the branch
-  TFile *fbuf=branch->GetTree()->GetCurrentFile();
+  //printf("void QProcQOAHandler::UnloadQOA(QProcQOA *array<%p>)\n",array);
   Int_t i;
 
-  //If the branch is a TBranch with a wrapper object
-  if((i=fTBObjs.FindFirst((TObject*)branch)) != -1){
-//    printf("The branch is a TBranch with a wrapper object\n");
-    fNObjReqTB[i]--;
-
-    if(!fNObjReqTB[i]) {
-//      printf("Deleting the wrapper object...\t");
-      delete (QProcTBranchWrapper*)fQPTBWObjs[i];
-      fTBObjs.Del(i);
-      fQPTBWObjs.Del(i);
-      fNObjReqTB.Del(i);
-//      printf("Done\n");
-    }
-  }
-
   //If the file is an input file loaded by this class
-  if((i=fIFiles.FindFirst((TObject*)fbuf)) != -1) {
-//    printf("Associated file is an input file loaded by this class\n");
-    //Decrement the number of objects requiring this file
-    fNObjReqIFiles[i]--;
+  if((i=fQOAObjs.FindFirst((TObject*)array)) != -1) {
+    //Decrement the number of objects requiring this array
+    fNObjReqQOA[i]--;
 
-    //If no object requires this files anymore
-    if(!fNObjReqIFiles[i]) {
-//      printf("Closing and deleting the input file...\t");
-      fbuf->Close();
-      delete fbuf;
-      fIFiles.Del(i);
-      fNObjReqIFiles.Del(i);
-//      printf("Done\n");
+    //If no object requires this array anymore
+    if(!fNObjReqQOA[i]) {
+
+      if(dynamic_cast<QOversizeArray*>(array)->GetOpenMode()!=QOversizeArray::kRead) dynamic_cast<QOversizeArray*>(array)->Save();
+      dynamic_cast<QOversizeArray*>(array)->CloseFile();
+      delete array;
+      fFiles.Del(i);
+      fQOAObjs.Del(i);
+      fNObjReqQOA.Del(i);
+      //      printf("Done\n");
     }
   }
-
-  //If the file is an output file loaded by this class
-  if((i=fOFiles.FindFirst((TObject*)fbuf)) != -1) {
-//    printf("Associated file is an output file loaded by this class\n");
-    //Decrement the number of objects requiring this file
-    fNObjReqOFiles[i]--;
-
-    //If no object requires this files anymore
-    if(!fNObjReqOFiles[i]) {
-//      printf("Saving, closing and deleting the output file...\t");
-      fbuf->Write();
-      fbuf->Close();
-      delete fbuf;
-      fOFiles.Del(i);
-      fNObjReqOFiles.Del(i);
-//      printf("Done\n");
-    }
-  }
-//  printf("Status of QProcQOAHandler:\n");
-//  printf("Number of input files: %i\n",fIFiles.Count());
-//  printf("Number of output files: %i\n",fOFiles.Count());
-//  printf("Number of TBranch objects: %i\n",fTBObjs.Count());
+  //printf("Status of QProcQOAHandler:\n");
+  //printf("Number of files: %i\n",fFiles.Count());
+  //printf("Number of QOversizeArray objects: %i\n",fQOAObjs.Count());
 }

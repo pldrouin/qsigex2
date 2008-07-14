@@ -43,6 +43,8 @@ class QOversizeArray
 
     Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0);
 
+    const omode& GetOpenMode(){return fOpenMode;}
+
     const TTimeStamp& GetTimeStamp() const{return fTStamp;}
 
     void OpenFile();
@@ -59,7 +61,7 @@ class QOversizeArray
 
     static void SetMemConstraints(const Long64_t &critmemsize=0, const Long64_t &level1memsize=0, const Long64_t &level2memsize=0, const Long64_t &cthreshmemsize=-1);
 
-    void UpdateModTime(){fTStamp.Set(); printf("QOversizeArray::UpdateModTime()\n");}
+    void UpdateModTime(){fTStamp.Set();}
 
   protected:
     QOversizeArray(): fFirstDataByte(0), fBufferHeaderSize(0) {}

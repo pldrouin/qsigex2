@@ -12,7 +12,7 @@ ROOTINCLUDE	?=	$(shell root-config --incdir)
 
 CXXFLAGS    	?=	-g -O2 -Wall   -fPIC -I$(ROOTINCLUDE) -I$(QSIGEXDIR)/src
 
-MOBJ		=	testproc.o
+MOBJ		=	testproc_tree.o testproc_qoa.o
 EXEC		=	$(MOBJ:.o=)
 OBJ		=	$(MOBJ)
 DEP		=	$(OBJ:.o=.d)

@@ -6,16 +6,21 @@
 #include "QProcArray.h"
 #include "QProcQOA.h"
 
+class QProcQOA;
+
 class QProcQOAHandler
 {
   public:
     QProcQOAHandler(){}
     virtual ~QProcQOAHandler(){}
-    static QProcArray* LoadBranch(const char *treelocation, const char *branchname, QProcArray::omode openmode);
+    static QProcArray* LoadQOA(const char *arraylocation, const char *arrayname, QProcArray::omode openmode);
+    friend class QProcQOA;
   protected:
-    static QList<TObject*> fTBObjs;     //TBranch objects required by this class
+    static QList<TString> fFiles;    //Filenames of QOA objects required by this class
+    static QList<TObject*> fQOAObjs;     //QOA objects required by this class
+    static QList<Int_t> fNObjReqQOA;     //Number of objects requiring the QOA objects
   private:
-    static void UnloadBranch(TBranch *branch);
+    static void UnloadQOA(QProcQOA *array);
     const QProcQOAHandler& operator=(const QProcQOAHandler &){return *this;}
     ClassDef(QProcQOAHandler,1)
 };

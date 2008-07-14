@@ -46,6 +46,7 @@
 #pragma link C++ class QProcDouble;
 #pragma link C++ class QProcArray;
 #pragma link C++ class QProcBranchHandler;
+#pragma link C++ class QProcQOAHandler;
 #pragma link C++ class QProcArgs;
 #pragma link C++ class QProcedure;
 #pragma link C++ class QCompProc;
