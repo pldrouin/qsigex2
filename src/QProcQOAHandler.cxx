@@ -75,7 +75,6 @@ void QProcQOAHandler::UnloadQOA(QProcQOA *array)
     if(!fNObjReqQOA[i]) {
 
       if(dynamic_cast<QOversizeArray*>(array)->GetOpenMode()!=QOversizeArray::kRead && fSaveOutputs) dynamic_cast<QOversizeArray*>(array)->Save();
-      dynamic_cast<QOversizeArray*>(array)->CloseFile();
       delete array;
       fFiles.Del(i);
       fQOAObjs.Del(i);

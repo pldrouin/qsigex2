@@ -175,7 +175,7 @@ int main(int nargs, char* args[])
   dataproc.GetProc("LLSum").AddOObj(&llsum);
 
   dataproc.Analyze();
-  dataproc.InitProcess();
+  //dataproc.InitProcess();
   //dataproc.PrintAnalysisResults();
 
   QProcList plist;

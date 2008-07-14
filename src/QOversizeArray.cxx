@@ -66,6 +66,7 @@ QOversizeArray::~QOversizeArray()
 {
   FuncDef(~QOversizeArray,1);
   printstatus("QOversizeArray::~QOversizeArray()");
+
   CloseFile();
   //printf("%p\tArray size at array destruction: %lli\n",this,fArrayMemSize);
   pthread_mutex_lock(&fMSizeMutex);
@@ -79,6 +80,17 @@ void QOversizeArray::CloseFile()
   printstatus("void QOversizeArray::CloseFile()");
   if(fFDesc) {
     pthread_mutex_lock(&fILMutex);
+
+    /*printf("\nPriorities:\n");
+    Int_t i;
+    Float_t fbuf=0;
+    pthread_mutex_lock(&fPriorityMutex);
+    for(i=0; i<fInstances.Count(); i++) fbuf+=fInstances.GetArray()[i]->fAPriority;
+    for(i=0; i<fInstances.Count(); i++) {
+      printf("Array '%s': %7.3f\n",fInstances.GetArray()[i]->fFilename.Data(),fbuf?fInstances.GetArray()[i]->fAPriority*100./fbuf:-1.);
+    }
+    pthread_mutex_unlock(&fPriorityMutex);*/
+
     Int_t idx=fInstances.FindFirst(this);
     fICumulPriority.Del(idx);
     fInstances.Del(idx);
