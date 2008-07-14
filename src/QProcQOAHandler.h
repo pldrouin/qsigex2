@@ -13,7 +13,7 @@ class QProcQOAHandler
   public:
     QProcQOAHandler(){}
     virtual ~QProcQOAHandler(){}
-    static QProcArray* LoadQOA(const char *arraylocation, const char *arrayname, QProcArray::omode openmode);
+    static QProcArray* LoadQOA(const char *arraylocation, const char *arrayname, Bool_t isoutput);
     friend class QProcQOA;
   protected:
     static QList<TString> fFiles;    //Filenames of QOA objects required by this class

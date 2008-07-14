@@ -18,7 +18,7 @@ Bool_t FillHist(QProcArgs &args);
 int main()
 {
   QArrayProcessor *ttp=new QArrayProcessor;
-  QOversizeArray::SetMemConstraints(40*1024*1024,10*1024*1024,20*1024*1024,0);
+  QOversizeArray::SetMemConstraints(200*1024*1024,160*1024*1024,170*1024*1024,0);
 
   QDisTH *radius=new QDisTH("radpdf","radpdf",50,0.,500.);
   ((TH1&)*radius).GetXaxis()->SetTitle("Radius [cm]");

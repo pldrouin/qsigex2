@@ -57,7 +57,7 @@ QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omod
   pthread_mutex_init(&fUZBMutex,NULL);
 
   pthread_mutex_lock(&fMSizeMutex);
-  printf("%p\tTotal memory at array creation: %lli\n",this,fTotalMemSize);
+  //printf("%p\tTotal memory at array creation: %lli\n",this,fTotalMemSize);
   pthread_mutex_unlock(&fMSizeMutex);
   OpenFile();
 }
@@ -67,9 +67,9 @@ QOversizeArray::~QOversizeArray()
   FuncDef(~QOversizeArray,1);
   printstatus("QOversizeArray::~QOversizeArray()");
   CloseFile();
-  printf("%p\tArray size at array destruction: %lli\n",this,fArrayMemSize);
+  //printf("%p\tArray size at array destruction: %lli\n",this,fArrayMemSize);
   pthread_mutex_lock(&fMSizeMutex);
-  printf("%p\tTotal memory at array destruction: %lli\n",this,fTotalMemSize);
+  //printf("%p\tTotal memory at array destruction: %lli\n",this,fTotalMemSize);
   pthread_mutex_unlock(&fMSizeMutex);
 }
 

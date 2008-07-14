@@ -16,7 +16,6 @@ class QProcArray: public QProcObj
     virtual Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0)=0;
     virtual void ResetArray()=0;
     virtual void UnloadArray()=0;
-    enum omode{kRead, kRW};
   protected:
   private:
     ClassDef(QProcArray,1)

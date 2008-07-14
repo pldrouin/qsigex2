@@ -773,11 +773,11 @@ void QArrayProcessor::InitProcess()
 
     if(!strcmp(proto,"tree")) {
       //Create the output array and store the pointer
-      (*fOArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fOANames)[i][1](j+3,(*fOANames)[i][1].Length()-j-3),(*fOANames)[i][0], QProcArray::kRW));
+      (*fOArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fOANames)[i][1](j+3,(*fOANames)[i][1].Length()-j-3),(*fOANames)[i][0], kTRUE));
 
     } else if(!strcmp(proto,"qoa")) {
       //Create the output array and store the pointer
-      (*fOArrays).Add(QProcQOAHandler::LoadQOA((TString)(*fOANames)[i][1](j+3,(*fOANames)[i][1].Length()-j-3),(*fOANames)[i][0], QProcArray::kRW));
+      (*fOArrays).Add(QProcQOAHandler::LoadQOA((TString)(*fOANames)[i][1](j+3,(*fOANames)[i][1].Length()-j-3),(*fOANames)[i][0], kTRUE));
 
     } else {
       fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Array type '%s' is unknown\n",proto.Data());
@@ -804,11 +804,11 @@ void QArrayProcessor::InitProcess()
 
     if(!strcmp(proto,"tree")) {
       //Create the output array and store the pointer
-      (*fIArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fIANames)[i][1](j+3,(*fIANames)[i][1].Length()-j-3),(*fIANames)[i][0], QProcArray::kRead));
+      (*fIArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fIANames)[i][1](j+3,(*fIANames)[i][1].Length()-j-3),(*fIANames)[i][0], kFALSE));
 
     } else if(!strcmp(proto,"qoa")) {
       //Create the output array and store the pointer
-      (*fIArrays).Add(QProcQOAHandler::LoadQOA((TString)(*fIANames)[i][1](j+3,(*fIANames)[i][1].Length()-j-3),(*fIANames)[i][0], QProcArray::kRead));
+      (*fIArrays).Add(QProcQOAHandler::LoadQOA((TString)(*fIANames)[i][1](j+3,(*fIANames)[i][1].Length()-j-3),(*fIANames)[i][0], kFALSE));
 
     } else {
       fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Array type '%s' is unknown\n",proto.Data());

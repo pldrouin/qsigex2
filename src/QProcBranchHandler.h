@@ -14,7 +14,7 @@ class QProcBranchHandler
   public:
     QProcBranchHandler(){}
     virtual ~QProcBranchHandler(){}
-    static QProcArray* LoadBranch(const char *treelocation, const char *branchname, QProcArray::omode openmode);
+    static QProcArray* LoadBranch(const char *treelocation, const char *branchname, Bool_t isoutput);
     friend class QProcBranch;
     friend class QProcTBranchWrapper;
   protected:

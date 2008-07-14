@@ -10,7 +10,7 @@ QList<TObject*> QProcBranchHandler::fTBObjs;
 QList<TObject*> QProcBranchHandler::fQPTBWObjs;
 QList<Int_t> QProcBranchHandler::fNObjReqTB;
 
-QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char *branchname, QProcArray::omode openmode)
+QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char *branchname, Bool_t isoutput)
 {
 
   TDirectory *dbuf;
@@ -26,8 +26,8 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
     throw 1;
   }
 
-  switch (openmode) {
-    case QProcArray::kRW:
+  switch (isoutput) {
+    case kTRUE:
 
       //If the tree is located in a file
       if(donbuf.Count() == 2) {
@@ -110,7 +110,7 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
       return dynamic_cast<QProcBranch*>(tbuf->Branch(bname,NULL,bname+"/D"));
       break;
 
-    case QProcArray::kRead:
+    case kFALSE:
 
       //If the tree is located in a file
       if(donbuf.Count() ==2) {

@@ -6,14 +6,14 @@ QList<TString> QProcQOAHandler::fFiles;
 QList<TObject*> QProcQOAHandler::fQOAObjs;
 QList<Int_t> QProcQOAHandler::fNObjReqQOA;
 
-QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arrayname, QProcArray::omode openmode)
+QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arrayname, Bool_t isoutput)
 {
 
   TString pathname=QFileUtils::SimplifyPathName(gSystem->ExpandPathName(arraylocation));
   Int_t i;
 
-  switch (openmode) {
-    case QProcArray::kRW:
+  switch (isoutput) {
+    case kTRUE:
 
       //If the array has been opened previously by QProcQOAHandler
       if((i=fFiles.FindFirst(pathname)) != -1) {
@@ -37,7 +37,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
       }
       break;
 
-    case QProcArray::kRead:
+    case kFALSE:
 
 
       //If the array has been opened previously by QProcQOAHandler
