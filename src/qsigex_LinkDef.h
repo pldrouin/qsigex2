@@ -53,6 +53,7 @@
 #pragma link C++ class QNamedProc;
 #pragma link C++ class QProcTree;
 #pragma link C++ class QProcBranch-;
+#pragma link C++ class QProcQOA-;
 #pragma link C++ class QProcTBranchWrapper;
 #pragma link C++ class QDependentProcs;
 #pragma link C++ class QProcessor;

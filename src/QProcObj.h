@@ -10,10 +10,10 @@ class QProcObj
     QProcObj(): fLastModified(0,0){}
     QProcObj(const QProcObj& qprocobj): fLastModified(qprocobj.fLastModified){}
     virtual ~QProcObj(){}
-    const TTimeStamp& GetTimeStamp(){return fLastModified;}
+    virtual const TTimeStamp& GetTimeStamp() const{return fLastModified;}
     virtual Bool_t NewerThan(const TTimeStamp &time) const;
     const QProcObj& operator=(const QProcObj& rhs){fLastModified=rhs.fLastModified; return *this;}
-    void UpdateModTime(){fLastModified.Set();}
+    virtual void UpdateModTime(){fLastModified.Set();}
     virtual void InitProcObj(){}
     virtual void TerminateProcObj(){}
 

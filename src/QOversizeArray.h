@@ -20,6 +20,7 @@ struct pthread_cond_t;
 #include "Rtypes.h"
 #include "TString.h"
 #include "TRandom.h"
+#include "TTimeStamp.h"
 #include "QOABuffer.h"
 #include "QList.h"
 
@@ -30,7 +31,7 @@ class QOversizeArray
 {
   public:
     enum omode{kRead, kRW, kRecreate};
-    QOversizeArray(const char *filename, const char *arrayname, omode openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=131072, const Int_t npcbuffers=3);
+    QOversizeArray(const char *filename, const char *arrayname, omode openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=131072, const Int_t &npcbuffers=3);
     virtual ~QOversizeArray();
 
     void CloseFile();
@@ -38,11 +39,15 @@ class QOversizeArray
     void Fill();
 
     void* GetBuffer() const{return fBuffer;}
-    Long64_t GetNObjects() const{return fNObjects;}
+    Long64_t GetEntries() const{return fNObjects;}
 
     Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0);
 
+    const TTimeStamp& GetTimeStamp() const{return fTStamp;}
+
     void OpenFile();
+
+    void PrintInfo() const;
 
     void ResetArray();
 
@@ -54,7 +59,10 @@ class QOversizeArray
 
     static void SetMemConstraints(const Long64_t &critmemsize=0, const Long64_t &level1memsize=0, const Long64_t &level2memsize=0, const Long64_t &cthreshmemsize=-1);
 
+    void UpdateModTime(){fTStamp.Set(); printf("QOversizeArray::UpdateModTime()\n");}
+
   protected:
+    QOversizeArray(): fFirstDataByte(0), fBufferHeaderSize(0) {}
     static void CheckMemory();
     void CleanUZBuffers();
     void Init();
@@ -67,12 +75,12 @@ class QOversizeArray
     void WriteWriteBuffer() const;
 
   private:
-    QOversizeArray(): fFirstDataByte(0), fBufferHeaderSize(0) {}
     QOversizeArray(const QOversizeArray &): fFirstDataByte(0), fBufferHeaderSize(0) {}
     const QOversizeArray& operator=(const QOversizeArray &){return *this;}
 
     TString fFilename;
     TString fArrayName;
+    TTimeStamp fTStamp;
     int fFDesc;                  //!
     const UInt_t fFirstDataByte;
     const Int_t fBufferHeaderSize;

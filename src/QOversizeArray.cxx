@@ -37,7 +37,7 @@ pthread_mutex_t QOversizeArray::fPriorityMutex=PTHREAD_MUTEX_INITIALIZER;
 
 void printstatus(const char*){}
 
-QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer, const Int_t npcbuffers): fFilename(filename), fArrayName(arrayname), fFDesc(0), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fWBFirstObjIdx(0), fCurRBIdx(-1), fCurBLRBIdx(-2), fNReadBuffers(0), fPTNRBObjects(-1), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(npcbuffers), fArrayMemSize(0), fArrayIO(0), fAPriority(0), fFileMutex(PTHREAD_MUTEX_INITIALIZER), fBuffersMutex(PTHREAD_MUTEX_INITIALIZER), fPBuffersMutex(PTHREAD_MUTEX_INITIALIZER), fRBDIMutex(PTHREAD_MUTEX_INITIALIZER), fMWThread(), fMWMutex(PTHREAD_MUTEX_INITIALIZER), fMWCond(PTHREAD_COND_INITIALIZER), fMWCMutex(PTHREAD_MUTEX_INITIALIZER), fMWPCond(PTHREAD_COND_INITIALIZER), fMWCCond(PTHREAD_COND_INITIALIZER), fMWAction(kFALSE), fMWBuffer(NULL), fMWWBuffer(NULL), fBLThread(), fBLMutex(PTHREAD_MUTEX_INITIALIZER), fBLCond(PTHREAD_COND_INITIALIZER), fBLCMutex(PTHREAD_MUTEX_INITIALIZER), fBLCCond(PTHREAD_COND_INITIALIZER), fBLWCond(PTHREAD_COND_INITIALIZER), fBLAction(kFALSE), fUZQOAB(NULL), fUZBuffers(NULL), fUZBMutex(PTHREAD_MUTEX_INITIALIZER)
+QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer, const Int_t &npcbuffers): fFilename(filename), fArrayName(arrayname), fTStamp(), fFDesc(0), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)+sizeof(time_t)+sizeof(Int_t)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fWBFirstObjIdx(0), fCurRBIdx(-1), fCurBLRBIdx(-2), fNReadBuffers(0), fPTNRBObjects(-1), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(npcbuffers), fArrayMemSize(0), fArrayIO(0), fAPriority(0), fFileMutex(PTHREAD_MUTEX_INITIALIZER), fBuffersMutex(PTHREAD_MUTEX_INITIALIZER), fPBuffersMutex(PTHREAD_MUTEX_INITIALIZER), fRBDIMutex(PTHREAD_MUTEX_INITIALIZER), fMWThread(), fMWMutex(PTHREAD_MUTEX_INITIALIZER), fMWCond(PTHREAD_COND_INITIALIZER), fMWCMutex(PTHREAD_MUTEX_INITIALIZER), fMWPCond(PTHREAD_COND_INITIALIZER), fMWCCond(PTHREAD_COND_INITIALIZER), fMWAction(kFALSE), fMWBuffer(NULL), fMWWBuffer(NULL), fBLThread(), fBLMutex(PTHREAD_MUTEX_INITIALIZER), fBLCond(PTHREAD_COND_INITIALIZER), fBLCMutex(PTHREAD_MUTEX_INITIALIZER), fBLCCond(PTHREAD_COND_INITIALIZER), fBLWCond(PTHREAD_COND_INITIALIZER), fBLAction(kFALSE), fUZQOAB(NULL), fUZBuffers(NULL), fUZBMutex(PTHREAD_MUTEX_INITIALIZER)
 {
     FuncDef(QOversizeArray,1);
     pthread_mutex_lock(&fMSizeMutex);
@@ -261,10 +261,12 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
 
     //If the entry is located in the write buffer. Do not need a lock since only the main thread access the write buffer
     if(entry>=fWBFirstObjIdx) {
-	pthread_mutex_lock(&fBuffersMutex);
-	fCurReadBuffer=NULL;
-	fCurRBIdx=-1;
-	pthread_mutex_unlock(&fBuffersMutex);
+	if(fCurRBIdx!=-1) {
+	    pthread_mutex_lock(&fBuffersMutex);
+	    fCurReadBuffer=NULL;
+	    fCurRBIdx=-1;
+	    pthread_mutex_unlock(&fBuffersMutex);
+	}
 
 	memcpy(fBuffer,fWriteBuffer->fBuffer+(entry-fWBFirstObjIdx)*fObjectSize,fObjectSize);
 	return fObjectSize;
@@ -431,6 +433,15 @@ void QOversizeArray::OpenFile()
     Init();
 }
 
+void QOversizeArray::PrintInfo() const
+{
+    printf("Array name: %s\n",fArrayName.Data());
+    printf("Objects size: %i\n",fObjectSize);
+    printf("Number of objects per buffer: %i\n",fNOPerBuffer);
+    printf("Total number of objects: %lli\n",fNObjects);
+    printf("Time stamp: ");fTStamp.Print();
+}
+
 void QOversizeArray::ResetArray()
 {
     printstatus("QOversizeArray::ResetArray has been called");
@@ -520,6 +531,8 @@ void QOversizeArray::ReadHeader()
     printstatus("void QOversizeArray::ReadHeader()");
     UInt_t uibuf;
     char *strbuf;
+    time_t sec;
+    Int_t nsec;
 
     pthread_mutex_lock(&fFileMutex);
 
@@ -578,6 +591,18 @@ void QOversizeArray::ReadHeader()
 	perror("QOversizeArray::ReadHeader: Error: ");
 	throw 1;
     }
+
+    if(read(fFDesc, &sec, sizeof(sec))!=sizeof(sec)) {
+	perror("QOversizeArray::ReadHeader: Error: ");
+	throw 1;
+    }
+    fTStamp.SetSec(sec);
+
+    if(read(fFDesc, &nsec, sizeof(nsec))!=sizeof(nsec)) {
+	perror("QOversizeArray::ReadHeader: Error: ");
+	throw 1;
+    }
+    fTStamp.SetNanoSec(nsec);
     pthread_mutex_unlock(&fFileMutex);
 }
 
@@ -829,6 +854,8 @@ void QOversizeArray::WriteHeader() const
     printstatus("QOversizeArray::WriteHeader()");
     UInt_t uibuf=fArrayName.Length();
     uibuf=(uibuf>256 ? 256 : uibuf);
+    time_t sec=fTStamp.GetSec();
+    Int_t nsec=fTStamp.GetNanoSec();
 
     pthread_mutex_lock(&fFileMutex);
     if(lseek(fFDesc,0,SEEK_SET)==-1) {
@@ -843,7 +870,7 @@ void QOversizeArray::WriteHeader() const
 	perror("QOversizeArray::WriteHeader: Error: ");
 	throw 1;
     }
-    if(write(fFDesc, &fObjectSize, sizeof(fObjectSize))!=sizeof(fObjectSize) || write(fFDesc, &fNOPerBuffer, sizeof(fNOPerBuffer))!=sizeof(fNOPerBuffer) || write(fFDesc, &fNObjects, sizeof(fNObjects))!=sizeof(fNObjects)) {
+    if(write(fFDesc, &fObjectSize, sizeof(fObjectSize))!=sizeof(fObjectSize) || write(fFDesc, &fNOPerBuffer, sizeof(fNOPerBuffer))!=sizeof(fNOPerBuffer) || write(fFDesc, &fNObjects, sizeof(fNObjects))!=sizeof(fNObjects) || write(fFDesc, &sec, sizeof(sec))!=sizeof(sec) || write(fFDesc, &nsec, sizeof(nsec))!=sizeof(nsec)) {
 	perror("QOversizeArray::WriteHeader: Error: ");
 	throw 1;
     }
@@ -871,7 +898,7 @@ void QOversizeArray::WriteWriteBuffer() const
     size_t numobjs=fNObjects%fNOPerBuffer;
 
     if(numobjs) {
-	fWriteBuffer->fBufferSize=numobjs;
+	fWriteBuffer->fBufferSize=numobjs*fObjectSize;
 	WriteBuffer(fWriteBuffer);
 	fWriteBuffer->fBufferSize=fMaxBDataSize;
     }
@@ -1364,6 +1391,7 @@ void* QOversizeArray::QOAMMThread(void *)
 			pthread_mutex_unlock(&fMSizeMutex);
 			if(libuf2<=0) libuf2=abuf->fNOPerBuffer;
 			//printf("Targeted number of loaded buffers: %lli\n",libuf2/abuf->fNOPerBuffer);
+			//printf("Expected number of events: %lli\tTargeted number of loaded events: %lli\n",libuf,libuf2);
 
 			//Loop over all the fNReadBuffers read buffers (except the very first one) and pick the first one for which the buffer index / read buffer index < expected number of entries / targetted number of buffered entries (=(fNReadBuffers-1)*fNOPerBuffer or (fNReadBuffers-2)*fNOPerBuffer depending if there is another buffer being deleted or not)
 			i=0;
@@ -1440,6 +1468,7 @@ void* QOversizeArray::QOAMMThread(void *)
 
 		//If a read buffer has been selected and is different from the one currently taken care of by QOAMWThread
 		if(bbuf) {
+		    //printf("Selected buffer by QOAMMThread is %i\n",bbuf->fBufferIdx);
 		    //If the buffer has not been modified, delete it
 		    if(!bbuf->fIsModified) {
 			//Remove it from the linked list first
