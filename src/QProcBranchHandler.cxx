@@ -9,6 +9,7 @@ QList<Int_t> QProcBranchHandler::fNObjReqOFiles;
 QList<TObject*> QProcBranchHandler::fTBObjs;
 QList<TObject*> QProcBranchHandler::fQPTBWObjs;
 QList<Int_t> QProcBranchHandler::fNObjReqTB;
+Bool_t QProcBranchHandler::fSaveOutputs=kTRUE;
 
 QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char *branchname, Bool_t isoutput)
 {
@@ -241,7 +242,7 @@ void QProcBranchHandler::UnloadBranch(TBranch *branch)
     //If no object requires this files anymore
     if(!fNObjReqOFiles[i]) {
 //      printf("Saving, closing and deleting the output file...\t");
-      fbuf->Write();
+      if(fSaveOutputs) fbuf->Write();
       fbuf->Close();
       delete fbuf;
       fOFiles.Del(i);

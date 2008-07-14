@@ -12,7 +12,7 @@ ROOTINCLUDE	?=	$(shell root-config --incdir)
 
 CXXFLAGS    	?=	-g -O2 -Wall   -fPIC -I$(ROOTINCLUDE) -I$(QSIGEXDIR)/src
 
-MOBJ		=	rund2o.o
+MOBJ		=	rund2o_tree.o rund2o_qoa.o
 EXEC		=	$(MOBJ:.o=)
 OBJ		=	$(MOBJ)
 DEP		=	$(OBJ:.o=.d)

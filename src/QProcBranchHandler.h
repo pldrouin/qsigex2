@@ -15,6 +15,7 @@ class QProcBranchHandler
     QProcBranchHandler(){}
     virtual ~QProcBranchHandler(){}
     static QProcArray* LoadBranch(const char *treelocation, const char *branchname, Bool_t isoutput);
+    static void SaveOutputs(Bool_t saveoutputs=kTRUE){fSaveOutputs=saveoutputs;}
     friend class QProcBranch;
     friend class QProcTBranchWrapper;
   protected:
@@ -25,6 +26,7 @@ class QProcBranchHandler
     static QList<TObject*> fTBObjs;     //TBranch objects required by this class
     static QList<TObject*> fQPTBWObjs;  //QProcTBranchWrapper objects associated with TBranch instances
     static QList<Int_t> fNObjReqTB;     //Number of objects requiring the TBranch objects
+    static Bool_t fSaveOutputs;         //Save files loaded by this class before closing them (for output branches only)
   private:
     static void UnloadBranch(TBranch *branch);
     const QProcBranchHandler& operator=(const QProcBranchHandler &){return *this;}

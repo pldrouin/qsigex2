@@ -18,6 +18,8 @@ Bool_t FillHist(QProcArgs &args);
 int main()
 {
   QArrayProcessor *ttp=new QArrayProcessor;
+  QProcBranchHandler::SaveOutputs(kFALSE);
+  QProcQOAHandler::SaveOutputs(kFALSE);
 
   QDisTH *radius=new QDisTH("radpdf","radpdf",50,0.,500.);
   ((TH1&)*radius).GetXaxis()->SetTitle("Radius [cm]");

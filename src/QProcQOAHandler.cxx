@@ -5,6 +5,7 @@ ClassImp(QProcQOAHandler)
 QList<TString> QProcQOAHandler::fFiles;
 QList<TObject*> QProcQOAHandler::fQOAObjs;
 QList<Int_t> QProcQOAHandler::fNObjReqQOA;
+Bool_t QProcQOAHandler::fSaveOutputs=kTRUE;
 
 QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arrayname, Bool_t isoutput)
 {
@@ -73,7 +74,7 @@ void QProcQOAHandler::UnloadQOA(QProcQOA *array)
     //If no object requires this array anymore
     if(!fNObjReqQOA[i]) {
 
-      if(dynamic_cast<QOversizeArray*>(array)->GetOpenMode()!=QOversizeArray::kRead) dynamic_cast<QOversizeArray*>(array)->Save();
+      if(dynamic_cast<QOversizeArray*>(array)->GetOpenMode()!=QOversizeArray::kRead && fSaveOutputs) dynamic_cast<QOversizeArray*>(array)->Save();
       dynamic_cast<QOversizeArray*>(array)->CloseFile();
       delete array;
       fFiles.Del(i);

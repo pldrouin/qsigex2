@@ -55,107 +55,110 @@ int main(int nargs, char* args[])
   bkc.Normalize();
 
   QArrayProcessor dataproc("Data Processor","Data Processor");
+  QProcBranchHandler::SaveOutputs(kFALSE);
+  QProcQOAHandler::SaveOutputs(kFALSE);
+
   dataproc.AddParam("ncc",2000);
   dataproc.AddParam("nes",200);
   dataproc.AddParam("nnc",500);
   dataproc.AddParam("nbk",124.2);
 
   dataproc.AddProc("Selector","Selector",Selector,NULL,kTRUE);
-  dataproc.GetProc("Selector").AddIVar("energy","d2o_data.root:Tree");
-  dataproc.GetProc("Selector").AddIVar("radius","d2o_data.root:Tree");
-  dataproc.GetProc("Selector").AddIVar("cthsun","d2o_data.root:Tree");
+  dataproc.GetProc("Selector").AddIVar("energy","tree://d2o_data.root:Tree");
+  dataproc.GetProc("Selector").AddIVar("radius","tree://d2o_data.root:Tree");
+  dataproc.GetProc("Selector").AddIVar("cthsun","tree://d2o_data.root:Tree");
 
 
   dataproc.AddPSProc("CCE PDF Eval","CCE PDF Eval",PDFEval,NULL,kTRUE);
-  dataproc.GetProc("CCE PDF Eval").AddIVar("energy","d2o_data.root:Tree");
+  dataproc.GetProc("CCE PDF Eval").AddIVar("energy","tree://d2o_data.root:Tree");
   dataproc.GetProc("CCE PDF Eval").AddIObj(&cce);
-  dataproc.GetProc("CCE PDF Eval").AddOVar("f_e","ccpdf");
+  dataproc.GetProc("CCE PDF Eval").AddOVar("f_e","tree://ccpdf");
 
   dataproc.AddPSProc("CCR PDF Eval","CCR PDF Eval",PDFEval,NULL,kTRUE);
-  dataproc.GetProc("CCR PDF Eval").AddIVar("radius","d2o_data.root:Tree");
+  dataproc.GetProc("CCR PDF Eval").AddIVar("radius","tree://d2o_data.root:Tree");
   dataproc.GetProc("CCR PDF Eval").AddIObj(&ccr);
-  dataproc.GetProc("CCR PDF Eval").AddOVar("f_r","ccpdf");
+  dataproc.GetProc("CCR PDF Eval").AddOVar("f_r","tree://ccpdf");
 
   dataproc.AddPSProc("CCC PDF Eval","CCC PDF Eval",PDFEval,NULL,kTRUE);
-  dataproc.GetProc("CCC PDF Eval").AddIVar("cthsun","d2o_data.root:Tree");
+  dataproc.GetProc("CCC PDF Eval").AddIVar("cthsun","tree://d2o_data.root:Tree");
   dataproc.GetProc("CCC PDF Eval").AddIObj(&ccc);
-  dataproc.GetProc("CCC PDF Eval").AddOVar("f_c","ccpdf");
+  dataproc.GetProc("CCC PDF Eval").AddOVar("f_c","tree://ccpdf");
 
 
   dataproc.AddPSProc("ESE PDF Eval","ESE PDF Eval",PDFEval,NULL,kTRUE);
-  dataproc.GetProc("ESE PDF Eval").AddIVar("energy","d2o_data.root:Tree");
+  dataproc.GetProc("ESE PDF Eval").AddIVar("energy","tree://d2o_data.root:Tree");
   dataproc.GetProc("ESE PDF Eval").AddIObj(&ese);
-  dataproc.GetProc("ESE PDF Eval").AddOVar("f_e","espdf");
+  dataproc.GetProc("ESE PDF Eval").AddOVar("f_e","tree://espdf");
 
   dataproc.AddPSProc("ESR PDF Eval","ESR PDF Eval",PDFEval,NULL,kTRUE);
-  dataproc.GetProc("ESR PDF Eval").AddIVar("radius","d2o_data.root:Tree");
+  dataproc.GetProc("ESR PDF Eval").AddIVar("radius","tree://d2o_data.root:Tree");
   dataproc.GetProc("ESR PDF Eval").AddIObj(&esr);
-  dataproc.GetProc("ESR PDF Eval").AddOVar("f_r","espdf");
+  dataproc.GetProc("ESR PDF Eval").AddOVar("f_r","tree://espdf");
 
   dataproc.AddPSProc("ESC PDF Eval","ESE PDF Eval",PDFEval,NULL,kTRUE);
-  dataproc.GetProc("ESC PDF Eval").AddIVar("cthsun","d2o_data.root:Tree");
+  dataproc.GetProc("ESC PDF Eval").AddIVar("cthsun","tree://d2o_data.root:Tree");
   dataproc.GetProc("ESC PDF Eval").AddIObj(&esc);
-  dataproc.GetProc("ESC PDF Eval").AddOVar("f_c","espdf");
+  dataproc.GetProc("ESC PDF Eval").AddOVar("f_c","tree://espdf");
 
 
   dataproc.AddPSProc("NCE PDF Eval","NCE PDF Eval",PDFEval,NULL,kTRUE);
-  dataproc.GetProc("NCE PDF Eval").AddIVar("energy","d2o_data.root:Tree");
+  dataproc.GetProc("NCE PDF Eval").AddIVar("energy","tree://d2o_data.root:Tree");
   dataproc.GetProc("NCE PDF Eval").AddIObj(&nce);
-  dataproc.GetProc("NCE PDF Eval").AddOVar("f_e","ncpdf");
+  dataproc.GetProc("NCE PDF Eval").AddOVar("f_e","tree://ncpdf");
 
   dataproc.AddPSProc("NCR PDF Eval","NCR PDF Eval",PDFEval,NULL,kTRUE);
-  dataproc.GetProc("NCR PDF Eval").AddIVar("radius","d2o_data.root:Tree");
+  dataproc.GetProc("NCR PDF Eval").AddIVar("radius","tree://d2o_data.root:Tree");
   dataproc.GetProc("NCR PDF Eval").AddIObj(&ncr);
-  dataproc.GetProc("NCR PDF Eval").AddOVar("f_r","ncpdf");
+  dataproc.GetProc("NCR PDF Eval").AddOVar("f_r","tree://ncpdf");
 
   dataproc.AddPSProc("NCC PDF Eval","NCC PDF Eval",PDFEval,NULL,kTRUE);
-  dataproc.GetProc("NCC PDF Eval").AddIVar("cthsun","d2o_data.root:Tree");
+  dataproc.GetProc("NCC PDF Eval").AddIVar("cthsun","tree://d2o_data.root:Tree");
   dataproc.GetProc("NCC PDF Eval").AddIObj(&ncc);
-  dataproc.GetProc("NCC PDF Eval").AddOVar("f_c","ncpdf");
+  dataproc.GetProc("NCC PDF Eval").AddOVar("f_c","tree://ncpdf");
 
 
   dataproc.AddPSProc("BKE PDF Eval","BKE PDF Eval",PDFEval,NULL,kTRUE);
-  dataproc.GetProc("BKE PDF Eval").AddIVar("energy","d2o_data.root:Tree");
+  dataproc.GetProc("BKE PDF Eval").AddIVar("energy","tree://d2o_data.root:Tree");
   dataproc.GetProc("BKE PDF Eval").AddIObj(&bke);
-  dataproc.GetProc("BKE PDF Eval").AddOVar("f_e","bkpdf");
+  dataproc.GetProc("BKE PDF Eval").AddOVar("f_e","tree://bkpdf");
 
   dataproc.AddPSProc("BKR PDF Eval","BKR PDF Eval",PDFEval,NULL,kTRUE);
-  dataproc.GetProc("BKR PDF Eval").AddIVar("radius","d2o_data.root:Tree");
+  dataproc.GetProc("BKR PDF Eval").AddIVar("radius","tree://d2o_data.root:Tree");
   dataproc.GetProc("BKR PDF Eval").AddIObj(&bkr);
-  dataproc.GetProc("BKR PDF Eval").AddOVar("f_r","bkpdf");
+  dataproc.GetProc("BKR PDF Eval").AddOVar("f_r","tree://bkpdf");
 
   dataproc.AddPSProc("BKC PDF Eval","BKC PDF Eval",PDFEval,NULL,kTRUE);
-  dataproc.GetProc("BKC PDF Eval").AddIVar("cthsun","d2o_data.root:Tree");
+  dataproc.GetProc("BKC PDF Eval").AddIVar("cthsun","tree://d2o_data.root:Tree");
   dataproc.GetProc("BKC PDF Eval").AddIObj(&bkc);
-  dataproc.GetProc("BKC PDF Eval").AddOVar("f_c","bkpdf");
+  dataproc.GetProc("BKC PDF Eval").AddOVar("f_c","tree://bkpdf");
 
 
   dataproc.AddPSProc("CC JP","CC JP",Multiply);
-  dataproc.GetProc("CC JP").AddIVar("f_e","ccpdf");
-  dataproc.GetProc("CC JP").AddIVar("f_r","ccpdf");
-  dataproc.GetProc("CC JP").AddIVar("f_c","ccpdf");
-  dataproc.GetProc("CC JP").AddOVar("cc","jointpdf");
+  dataproc.GetProc("CC JP").AddIVar("f_e","tree://ccpdf");
+  dataproc.GetProc("CC JP").AddIVar("f_r","tree://ccpdf");
+  dataproc.GetProc("CC JP").AddIVar("f_c","tree://ccpdf");
+  dataproc.GetProc("CC JP").AddOVar("cc","tree://jointpdf");
 
 
   dataproc.AddPSProc("ES JP","ES JP",Multiply);
-  dataproc.GetProc("ES JP").AddIVar("f_e","espdf");
-  dataproc.GetProc("ES JP").AddIVar("f_r","espdf");
-  dataproc.GetProc("ES JP").AddIVar("f_c","espdf");
-  dataproc.GetProc("ES JP").AddOVar("es","jointpdf");
+  dataproc.GetProc("ES JP").AddIVar("f_e","tree://espdf");
+  dataproc.GetProc("ES JP").AddIVar("f_r","tree://espdf");
+  dataproc.GetProc("ES JP").AddIVar("f_c","tree://espdf");
+  dataproc.GetProc("ES JP").AddOVar("es","tree://jointpdf");
 
 
   dataproc.AddPSProc("NC JP","NC JP",Multiply);
-  dataproc.GetProc("NC JP").AddIVar("f_e","ncpdf");
-  dataproc.GetProc("NC JP").AddIVar("f_r","ncpdf");
-  dataproc.GetProc("NC JP").AddIVar("f_c","ncpdf");
-  dataproc.GetProc("NC JP").AddOVar("nc","jointpdf");
+  dataproc.GetProc("NC JP").AddIVar("f_e","tree://ncpdf");
+  dataproc.GetProc("NC JP").AddIVar("f_r","tree://ncpdf");
+  dataproc.GetProc("NC JP").AddIVar("f_c","tree://ncpdf");
+  dataproc.GetProc("NC JP").AddOVar("nc","tree://jointpdf");
 
 
   dataproc.AddPSProc("BK JP","BK JP",Multiply);
-  dataproc.GetProc("BK JP").AddIVar("f_e","bkpdf");
-  dataproc.GetProc("BK JP").AddIVar("f_r","bkpdf");
-  dataproc.GetProc("BK JP").AddIVar("f_c","bkpdf");
-  dataproc.GetProc("BK JP").AddOVar("bk","jointpdf");
+  dataproc.GetProc("BK JP").AddIVar("f_e","tree://bkpdf");
+  dataproc.GetProc("BK JP").AddIVar("f_r","tree://bkpdf");
+  dataproc.GetProc("BK JP").AddIVar("f_c","tree://bkpdf");
+  dataproc.GetProc("BK JP").AddOVar("bk","tree://jointpdf");
 
 
   QProcDouble llsum;
@@ -164,10 +167,10 @@ int main(int nargs, char* args[])
   dataproc.GetProc("LLSum").AddParam("nes");
   dataproc.GetProc("LLSum").AddParam("nnc");
   dataproc.GetProc("LLSum").AddParam("nbk");
-  dataproc.GetProc("LLSum").AddIVar("cc","jointpdf");
-  dataproc.GetProc("LLSum").AddIVar("es","jointpdf");
-  dataproc.GetProc("LLSum").AddIVar("nc","jointpdf");
-  dataproc.GetProc("LLSum").AddIVar("bk","jointpdf");
+  dataproc.GetProc("LLSum").AddIVar("cc","tree://jointpdf");
+  dataproc.GetProc("LLSum").AddIVar("es","tree://jointpdf");
+  dataproc.GetProc("LLSum").AddIVar("nc","tree://jointpdf");
+  dataproc.GetProc("LLSum").AddIVar("bk","tree://jointpdf");
   dataproc.GetProc("LLSum").AddOObj(&llsum);
 
   dataproc.Analyze();
