@@ -62,7 +62,7 @@ class QOversizeArray
 
     static void SetMemConstraints(const Long64_t &critmemsize=0, const Long64_t &level1memsize=0, const Long64_t &level2memsize=0, const Long64_t &cthreshmemsize=-1);
 
-    void UpdateModTime(){fTStamp.Set();}
+    void UpdateTimeStamp(){fTStamp.Set();}
 
   protected:
     QOversizeArray(): fFirstDataByte(0), fBufferHeaderSize(0) {}

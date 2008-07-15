@@ -22,7 +22,7 @@ class QProcQOA: public QProcArray, public QOversizeArray
     void ResetArray(){QOversizeArray::ResetArray();}
     void TerminateProcObj(){UpdateModTime();}
     void UnloadArray();
-    void UpdateModTime(){QOversizeArray::UpdateModTime();}
+    void UpdateModTime(){QOversizeArray::UpdateTimeStamp();}
 
   protected:
     void SetBuffer();
