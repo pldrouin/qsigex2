@@ -24,7 +24,7 @@ class QProcQOAHandler
   private:
     static void UnloadQOA(QProcQOA *array);
     const QProcQOAHandler& operator=(const QProcQOAHandler &){return *this;}
-    ClassDef(QProcQOAHandler,1)
+    ClassDef(QProcQOAHandler,1) //Class handling loading/unloading of QOversizeArray instances
 };
 
 #endif

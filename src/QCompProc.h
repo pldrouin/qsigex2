@@ -22,7 +22,7 @@ class QCompProc: public QProcedure
   private:
     Bool_t (*fProc)(QProcArgs&);
 
-    ClassDef(QCompProc,1) //Procedure class for compiled procedures having the format Bool_t (*proc)(Double_t** inputs, Double_t **outputs, Double_t **params)
+    ClassDef(QCompProc,1) //Procedure class for compiled procedures having the format Bool_t (*proc)(QProcArgs&)
 };
 
 #include "debugger.h"

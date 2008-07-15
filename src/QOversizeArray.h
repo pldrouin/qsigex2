@@ -83,19 +83,19 @@ class QOversizeArray
 
     TString fFilename;
     TString fArrayName;
-    TTimeStamp fTStamp;
+    TTimeStamp fTStamp;          // Timestamp associated with the array
     int fFDesc;                  //!
-    const UInt_t fFirstDataByte;
-    const Int_t fBufferHeaderSize;
-    omode fOpenMode;
-    UInt_t fObjectSize;
-    void *fBuffer;               //!
-    UInt_t fNOPerBuffer;
+    const UInt_t fFirstDataByte; // Size of file header
+    const Int_t fBufferHeaderSize; // Size of buffer header
+    omode fOpenMode;             // Array opening mode
+    UInt_t fObjectSize;          // Size of a single stored object
+    void *fBuffer;               //! Pointer to the current object
+    UInt_t fNOPerBuffer;         // Number of objects per buffer
     Int_t fMaxBDataSize;         //Maximum buffer data size
     Int_t fMaxBHBDataSize;       //fBufferHeaderSize+fMaxBHBDataSize 
-    Long64_t fNObjects;
+    Long64_t fNObjects;          // Total number of objects
     QOABuffer *fCurReadBuffer;   //! Current read buffer
-    QOABuffer *fFirstReadBuffer; //!
+    QOABuffer *fFirstReadBuffer; //
     QOABuffer *fLastReadBuffer;  //!
     QOABuffer *fWriteBuffer;     //!
     Long64_t   fWBFirstObjIdx;   // Index of the first object contained in the write buffer. ****Value should be modified only by the main thread
@@ -108,9 +108,9 @@ class QOversizeArray
     QOABuffer *fFirstParkedBuffer;//!
     Int_t fNPCBuffers;           // Number of buffers that are pre-cached (to speed up reading)
     Long64_t fArrayMemSize;      // Total size used by array buffers (including size used by QOABuffer member variables and by zipped/unzipped buffers).
-    Float_t fArrayIO;
-    Float_t fAPriority;
-    mutable pthread_mutex_t fFileMutex;
+    Float_t fArrayIO;            // Total IO for this array (reading+writing)
+    Float_t fAPriority;          // Priority for this array (1/fArrayIO)
+    mutable pthread_mutex_t fFileMutex; // Mutex on file reading & writing operations
     pthread_mutex_t fBuffersMutex; // Lock on all buffer linked list structure, excluding parked buffers (all "read" QOABuffer pointers + counters, fWBFirstObjIdx, fCurRBIdx, QOABuffer::fIsModified, QOABuffer::fIsCompressed)
     pthread_mutex_t fPBuffersMutex; //Lock on all parked buffer linked list structure
     pthread_mutex_t fRBDIMutex;    // Lock on read buffer data integrity (QOABuffer::fBuffer and QOABuffer::fBufferSize), for buffers IN THE LINKED LIST
@@ -133,13 +133,13 @@ class QOversizeArray
     QOABuffer     **fUZQOAB;       //! Array of QOABuffers that have been unzipped
     Char_t        **fUZBuffers;    //! Array of unzipped buffers
     pthread_mutex_t fUZBMutex;     // Lock on unzipped buffer arrays
-    static QList<QOversizeArray*> fInstances;
-    static QList<Float_t>         fICumulPriority;
-    static Long64_t fLevel1MemSize;
-    static Long64_t fLevel2MemSize;
-    static Long64_t fCritMemSize;
-    static Long64_t fCThreshMemSize;
-    static Long64_t fTotalMemSize;
+    static QList<QOversizeArray*> fInstances; // List of QOversizeArray instances
+    static QList<Float_t>         fICumulPriority; // Cumulative array priorities
+    static Long64_t fLevel1MemSize; // Memory level at which memory management thread stops attempting to free memory
+    static Long64_t fLevel2MemSize; // Memory level at which memory management thread starts attempting to free memory
+    static Long64_t fCritMemSize;   // Critical memory level at which the main thread pauses until some memory is freed
+    static Long64_t fCThreshMemSize; // Memory level at which memory management thread starts compressing the buffers to save memory
+    static Long64_t fTotalMemSize;  //Total amount of memory used by the buffers of all arrays
     static pthread_mutex_t fMSizeMutex; //Total memory size mutex
     static pthread_mutex_t fCMSCMutex;  //Critical memory size condition mutex
     static pthread_cond_t fCMSCond;     //Critical memory size condition
@@ -154,7 +154,7 @@ class QOversizeArray
     static void* QOABLThread(void *array);
     static void* QOAMMThread(void *);
 
-    ClassDef(QOversizeArray,1)
+    ClassDef(QOversizeArray,1) //Multi-threaded array class optimized for speed when handling large amount of data
 };
 
 #endif

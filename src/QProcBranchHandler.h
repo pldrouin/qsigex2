@@ -30,7 +30,7 @@ class QProcBranchHandler
   private:
     static void UnloadBranch(TBranch *branch);
     const QProcBranchHandler& operator=(const QProcBranchHandler &){return *this;}
-    ClassDef(QProcBranchHandler,1)
+    ClassDef(QProcBranchHandler,1) //Class handling loading/unloading of QProcBranch and TBranch instances
 };
 
 #endif

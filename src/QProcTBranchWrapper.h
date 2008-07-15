@@ -47,7 +47,7 @@ class QProcTBranchWrapper: public QProcArray
     QProcTBranchWrapper() {}
     QProcTBranchWrapper(const QProcTBranchWrapper &): QProcArray(){}
     const QProcTBranchWrapper& operator=(const QProcTBranchWrapper&){return *this;}
-    ClassDef(QProcTBranchWrapper,1)
+    ClassDef(QProcTBranchWrapper,1) //Wrapper around TBranch class to give it QProcArray properties
 };
 
 #endif

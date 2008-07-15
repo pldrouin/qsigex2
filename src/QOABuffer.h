@@ -25,14 +25,14 @@ class QOABuffer
     QOABuffer(const QOABuffer &rhs);
     const QOABuffer& operator=(const QOABuffer &rhs);
 
-    Int_t fBufferIdx;
-    char *fBuffer;           //!
-    Int_t fBufferSize;      //!
+    Int_t fBufferIdx;        // Index of this buffer
+    char *fBuffer;           //! Pointer to buffer data
+    Int_t fBufferSize;       //! Size of buffer data
     Char_t fIsCompressed;    //! 0:Not Compressed 1:Compressed 2:Being compressed 3:Being uncompressed 4:Uncompressed. Note: A compressed buffer is not necessarily stored in fBuffer but an uncompressed buffer is
-    Bool_t fIsModified;      //!
+    Bool_t fIsModified;      //! Indicates if this buffer has been modified since last writing on disk
     QOABuffer *fPreviousOAB; //! Previous QOABuffer (list sorted according to fBufferIdx)
     QOABuffer *fNextOAB;     //! Next QOABuffer (list sorted according to fBufferIdx)
-    ClassDef(QOABuffer,1)
+    ClassDef(QOABuffer,1)    // Buffer class for QOversizeArray
 };
 
 #endif
