@@ -1,9 +1,9 @@
 REQUIREMENTS:
 =============
 
--gMake
--Sed
--ROOT 3.05/06 or newer
+-gmake
+-sed
+-ROOT 5.19/03 or newer
 
 INSTALLATION:
 =============
@@ -16,8 +16,7 @@ INSTALLATION:
 -To compile the examples, go into directory 
 
  d2o
- mcgen
- data2root
+ systematics
 
  and type:
 

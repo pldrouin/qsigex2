@@ -5,8 +5,5 @@ The examples can be run using the programs in runme/name, where name
 is d2o, mcgen, or data2root.
 
 d2o: fit the d2o data
-mcgen: Exsemble test example
-data2root: convert an ASCII file into a root file
-
-To run QSIgEx, the user must provide a configuration filename (one *.dat 
-files) as first argument.
+d2o_legacy: fit of the d2o data, using code that is compatible only with the old qsigex interface
+systematics: shows how MC can be smeared using QSigEx

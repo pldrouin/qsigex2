@@ -5,4 +5,4 @@
 *************************************************
 
 > gmake
-> rund2o_qoa d2o_results.root
+> testptoc_qoa

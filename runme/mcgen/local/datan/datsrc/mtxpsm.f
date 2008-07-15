@@ -1,9 +1,0 @@
-      SUBROUTINE MTXPSM(A,S,M,N,K,L,M1,N1)
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
-      DIMENSION A(M,N), S(K,L)
-      DO 20 I=1,K
-        DO 10 J=1,L
-          A(M1-1+I,N1-1+J)=S(I,J)
-   10   CONTINUE
-   20 CONTINUE
-      END

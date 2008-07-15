@@ -1,7 +1,0 @@
-      SUBROUTINE MTXPCL(A,C,M,N,I)
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
-      DIMENSION A(M,N), C(M)
-      DO 10 J=1,M
-        A(J,I)=C(J)
-   10 CONTINUE
-      END

@@ -1,7 +1,0 @@
-      SUBROUTINE MTXGRW(A,R,M,N,I)
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
-      DIMENSION A(M,N), R(N)
-      DO 10 J=1,N
-        R(J)=A(I,J)
-   10 CONTINUE
-      END

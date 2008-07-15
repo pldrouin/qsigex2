@@ -1,7 +1,0 @@
-      SUBROUTINE MTXZRV(U,N)
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
-      DIMENSION U(N)
-      DO 10 I=1,N
-        U(I)=0.
-   10 CONTINUE
-      END
