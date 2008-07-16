@@ -28,7 +28,7 @@ class QCINTProc: public QProcedure
   protected:
     TMethodCall *fMethodCall;
 
-    ClassDef(QCINTProc,1) //Procedure class for CINT procedures having the format Bool_t (*proc)(QProcArgs&)
+    ClassDef(QCINTProc,1) //Procedure class for CINT procedures having the signature Bool_t (*proc)(QProcArgs&)
 };
 
 #include "debugger.h"
