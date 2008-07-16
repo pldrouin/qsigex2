@@ -8,6 +8,7 @@
   gEnv->SetValue("Root.Html.Root","http://root.cern.ch/root/html");
 
   THtml html;
+  html.SetProductName("QSigEx2");
   html.MakeAll(kFALSE,"Q*");
 
 }
