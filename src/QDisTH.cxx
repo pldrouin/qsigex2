@@ -155,7 +155,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t x
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, Double_t *zbins):QDis()
 {
   if(nbinsz <=0) nbinsz=1;
-  TH1* th=new TH3F(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
+  TH1* th=new TH3D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
   th->GetZaxis()->Set(nbinsz,zbins);
   SetObject("TH3D",th);
   SetNameTitleToObject();
@@ -164,7 +164,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t x
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t *ybins, Int_t nbinsz, Double_t zlow, Double_t zhigh):QDis()
 {
   if(nbinsy <=0) nbinsy=1;
-  TH1* th=new TH3F(name,title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
+  TH1* th=new TH3D(name,title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
   th->GetYaxis()->Set(nbinsy,ybins);
   SetObject("TH3D",th);
   SetNameTitleToObject();
@@ -173,17 +173,17 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t x
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, Double_t zlow, Double_t zhigh):QDis()
 {
   if(nbinsy==0) {
-    SetObject("TH1D",new TH1F(name,title,nbinsx,xbins));
+    SetObject("TH1D",new TH1D(name,title,nbinsx,xbins));
 
   } else if(nbinsz==0) {
     if(nbinsx <=0) nbinsx=1;
-    TH1* th=new TH2F(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh);
+    TH1* th=new TH2D(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh);
     th->GetXaxis()->Set(nbinsx,xbins);
     SetObject("TH2D",th);
 
   } else {
     if(nbinsx <=0) nbinsx=1;
-    TH1* th=new TH3F(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+    TH1* th=new TH3D(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
     th->GetXaxis()->Set(nbinsx,xbins);
     SetObject("TH3D",th);
   }
@@ -194,7 +194,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t x
 {
   if(nbinsy <=0) nbinsy=1;
   if(nbinsz <=0) nbinsz=1;
-  TH1* th=new TH3F(name,title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zbins[0],zbins[nbinsz]);
+  TH1* th=new TH3D(name,title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zbins[0],zbins[nbinsz]);
   th->GetYaxis()->Set(nbinsy,ybins);
   th->GetZaxis()->Set(nbinsz,zbins);
   SetObject("TH3D",th);
@@ -205,7 +205,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *
 {
   if(nbinsx <=0) nbinsx=1;
   if(nbinsz <=0) nbinsz=1;
-  TH1* th=new TH3F(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
+  TH1* th=new TH3D(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
   th->GetXaxis()->Set(nbinsx,xbins);
   th->GetZaxis()->Set(nbinsz,zbins);
   SetObject("TH3D",th);
@@ -217,7 +217,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *
   if(nbinsz==0) {
     if(nbinsx <=0) nbinsx=1;
     if(nbinsy <=0) nbinsy=1;
-    TH1* th=new TH2F(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy]);
+    TH1* th=new TH2D(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy]);
     th->GetXaxis()->Set(nbinsx,xbins);
     th->GetYaxis()->Set(nbinsy,ybins);
     SetObject("TH2D",th);
@@ -226,7 +226,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *
   } else {
     if(nbinsx <=0) nbinsx=1;
     if(nbinsy <=0) nbinsy=1;
-    TH1* th=new TH3F(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
+    TH1* th=new TH3D(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
     th->GetXaxis()->Set(nbinsx,xbins);
     th->GetYaxis()->Set(nbinsy,ybins);
     SetObject("TH2D",th);
