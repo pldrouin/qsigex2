@@ -49,9 +49,22 @@ class QDisTH: public QDis
     }
 
   QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy=0, Float_t ylow=0, Float_t yhigh=0, Int_t nbinsz=0, Float_t zlow=0, Float_t zhigh=0);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *xbins, Int_t nbinsy=0, Float_t *ybins=NULL, Int_t nbinsz=0, Float_t *zbins=NULL);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, Float_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, Float_t *ybins, Int_t nbinsz=0, Float_t zlow=0, Float_t zhigh=0);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *xbins, Int_t nbinsy=0, Float_t ylow=0, Float_t yhigh=0, Int_t nbinsz=0, Float_t zlow=0, Float_t zhigh=0);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, Float_t *ybins, Int_t nbinsz, Float_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *xbins, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, Float_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *xbins, Int_t nbinsy, Float_t *ybins, Int_t nbinsz=0, Float_t zlow=0, Float_t zhigh=0);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *xbins, Int_t nbinsy, Float_t *ybins, Int_t nbinsz, Float_t *zbins);
+
   QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy=0, Double_t ylow=0, Double_t yhigh=0, Int_t nbinsz=0, Double_t zlow=0, Double_t zhigh=0);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy=0, Double_t *ybins=NULL, Int_t nbinsz=0, Double_t *zbins=NULL);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, Double_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t *ybin, Int_t nbinsz=0, Double_t zlow=0, Double_t zhigh=0);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy=0, Double_t ylow=0, Double_t yhigh=0, Int_t nbinsz=0, Double_t zlow=0, Double_t zhigh=0);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t *ybins, Int_t nbinsz, Double_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, Double_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy, Double_t *ybins, Int_t nbinsz=0, Double_t zlow=0, Double_t zhigh=0);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy, Double_t *ybins, Int_t nbinsz, Double_t *zbins);
 
   virtual ~QDisTH(){PRINTF2(this,"\tQDisTH::~QDisTH()\n")}
 
