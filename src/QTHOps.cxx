@@ -40,7 +40,7 @@ Double_t QTHOps::BinIntegral(Int_t xbinlo, Int_t xbinhi, Int_t ybinlo, Int_t ybi
   //if no limits are given, find the number of bins and integrate over all
   if(xbinhi==-1) xbinhi=(thbuf->GetXaxis())->GetNbins();
   if(ybinhi==-1) ybinhi=(thbuf->GetYaxis())->GetNbins();
-  if(zbinhi==-1) zbinhi=(thbuf->GetYaxis())->GetNbins();
+  if(zbinhi==-1) zbinhi=(thbuf->GetZaxis())->GetNbins();
 
   //Integral takes the sum of all of the bin values btwn the limits
   //however, the option "width" then multiplies by the bin widths
