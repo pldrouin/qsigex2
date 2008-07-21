@@ -7,11 +7,12 @@ class QProcTObject: public QProcObj
 {
   public:
     QProcTObject(): QProcObj(), fObject(NULL){}
-    QProcTObject(TObject*& rhs): QProcObj(), fObject(rhs){}
+    QProcTObject(TObject* rhs): QProcObj(), fObject(rhs){}
     QProcTObject(const QProcTObject &rhs): QProcObj(rhs), fObject(rhs.fObject){}
     virtual ~QProcTObject(){}
-    void InitProcObj(){fObject=NULL;}
-    operator TObject*&() {return fObject;}
+    void InitProcObj(){}
+    TObject* GetObject() {return fObject;}
+    operator TObject*() {return fObject;}
     const QProcTObject& operator=(const QProcTObject &rhs){fObject=rhs.fObject; return *this;}
     const QProcTObject& operator=(TObject*& rhs){fObject=rhs; return *this;}
   protected:

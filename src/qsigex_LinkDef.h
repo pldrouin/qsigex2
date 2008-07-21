@@ -71,7 +71,7 @@
 #pragma link C++ class QTObjectIO-;
 #pragma link C++ class QTFOps;
 #pragma link C++ class QTHOps;
-#pragma link C++ class QTHN<Double_t>;
+#pragma link C++ class QTHN<Double_t>-;
 #pragma link C++ class QFileUtils;
 #pragma link C++ class QTTreeUtils;
 

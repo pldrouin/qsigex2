@@ -378,3 +378,5 @@ template <typename U> void QTHN<U>::SetAxis(Int_t axis, Int_t nbins, Double_t *b
   if(fAxes[axis]) delete fAxes[axis];
   fAxes[axis]=new TAxis(nbins,bins);
 }
+
+#include "QTHN_Dict_cxx.h"
