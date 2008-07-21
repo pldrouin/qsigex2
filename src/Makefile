@@ -13,7 +13,7 @@ CXXFLAGS    	?=	-g -I$(shell root-config --incdir) -O2 -pipe -Wall -W -Woverload
 
 QSIGEX_QCXX	=	$(wildcard Q*.cxx)
 QSIGEX_OBJS	=	$(QSIGEX_QCXX:.cxx=.o)
-QSIGEX_CLHD     =       $(QSIGEX_QCXX:.cxx=.h) QList.h QNamedVar.h
+QSIGEX_CLHD     =       $(QSIGEX_QCXX:.cxx=.h) QList.h QNamedVar.h QTHN.h
 
 QSIGEX_DICTOBJ	=	qsigex_Dict.o
 QSIGEX_LINKDEF	=	qsigex_LinkDef.h

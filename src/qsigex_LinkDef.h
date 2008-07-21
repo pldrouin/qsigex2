@@ -44,6 +44,7 @@
 #pragma link C++ class QOABuffer;
 #pragma link C++ class QProcObj;
 #pragma link C++ class QProcDouble;
+#pragma link C++ class QProcTObject;
 #pragma link C++ class QProcArray;
 #pragma link C++ class QProcBranchHandler;
 #pragma link C++ class QProcQOAHandler;
@@ -70,6 +71,7 @@
 #pragma link C++ class QTObjectIO-;
 #pragma link C++ class QTFOps;
 #pragma link C++ class QTHOps;
+#pragma link C++ class QTHN<Double_t>;
 #pragma link C++ class QFileUtils;
 #pragma link C++ class QTTreeUtils;
 
