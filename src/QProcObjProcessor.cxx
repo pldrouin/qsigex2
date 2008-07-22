@@ -286,18 +286,14 @@ void QProcObjProcessor::Exec() const
       if(neededoo[i]) {
 	//Add it to the list of needed output objects
 	oobjects.Add((*fOObjects)[i]);
+	//Initialize the object
+	(*fOObjects)[i]->InitProcObj();
       }
     }
 
-    //Loop over needed output objects
-    for(i=0; i<oobjects.Count(); i++) {
-      //Initialize the object
-      oobjects[i]->InitProcObj();
-    }
-
-    //Loop over all triggered all events processes
+    //Loop over all triggered processes
     for(j=0; j<procs.Count(); j++) {
-      //Exec the process. If it is a selector process, use the output to check if the entry is selected or not
+      //Exec the process.
       ((QNamedProc*)procs.GetArray()[j])->Exec();
     }
 
