@@ -847,7 +847,7 @@ void QArrayProcessor::InitProcess()
       //If the input is not a memory buffer
       if(qlsbuf.Count() == 2) {
 	//Set the address for the QNamedProc input buffer using the buffer address of the array object
-	proc->SetIVarPtr(j,(*fIArrays)[fIANames->FindFirst(qlsbuf)]->GetBuffer());
+	proc->SetIVarPtr(j,(Double_t*)(*fIArrays)[fIANames->FindFirst(qlsbuf)]->GetBuffer());
 
 	//Else if the input is a memory buffer
       } else {
@@ -868,7 +868,7 @@ void QArrayProcessor::InitProcess()
       //If the output is not a memory buffer
       if(qlsbuf.Count() == 2) {
 	//Set the address for the QNamedProc input buffer using the buffer address of the array object
-	proc->SetOVarPtr(j,(*fOArrays)[fOANames->FindFirst(qlsbuf)]->GetBuffer());
+	proc->SetOVarPtr(j,(Double_t*)(*fOArrays)[fOANames->FindFirst(qlsbuf)]->GetBuffer());
 
 	//Else if the output is a memory buffer
       } else {
