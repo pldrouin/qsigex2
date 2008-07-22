@@ -19,23 +19,23 @@ pthread_cond_t QOversizeArray::fMMCond=PTHREAD_COND_INITIALIZER;
 pthread_mutex_t QOversizeArray::fILMutex=PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t QOversizeArray::fPriorityMutex=PTHREAD_MUTEX_INITIALIZER;
 
-//#define FuncDef(a,b) const char* thefunc=#a; Bool_t show=b; TString indent;
-//#define pthread_mutex_lock(a) {if(show) printf("\n%slocking %s in function %s...\n",indent.Data(),#a,thefunc); pthread_mutex_lock(a); if(show) printf("%s%s is now locked in function %s\n",indent.Data(),#a,thefunc); indent+="     ";}
-//#define pthread_mutex_unlock(a) {indent=indent(0,indent.Length()-5); if(show) printf("\n%sunlocking %s in function %s...\n",indent.Data(),#a,thefunc); pthread_mutex_unlock(a); if(show) printf("%s%s is now unlocked in function %s\n",indent.Data(),#a,thefunc);}
-//#define pthread_cond_signal(a) {if(show) printf("sending signal %s in function %s...\n",#a,thefunc); pthread_cond_signal(a);}
-//#define pthread_cond_wait(a,b) {if(show) printf("waiting for signal %s with mutex %s in function %s...\n",#a,#b,thefunc); pthread_cond_wait(a,b);}
-//#define ASSERT(a) if(!(a) && show) {fprintf(stderr,"Error in function %s: Assertion failed: %s\n",thefunc,#a); throw 1;}
+#define FuncDef(a,b) const char* thefunc=#a; Bool_t show=b; TString indent;
+#define pthread_mutex_lock(a) {if(show) printf("\n%slocking %s in function %s...\n",indent.Data(),#a,thefunc); pthread_mutex_lock(a); if(show) printf("%s%s is now locked in function %s\n",indent.Data(),#a,thefunc); indent+="     ";}
+#define pthread_mutex_unlock(a) {indent=indent(0,indent.Length()-5); if(show) printf("\n%sunlocking %s in function %s...\n",indent.Data(),#a,thefunc); pthread_mutex_unlock(a); if(show) printf("%s%s is now unlocked in function %s\n",indent.Data(),#a,thefunc);}
+#define pthread_cond_signal(a) {if(show) printf("sending signal %s in function %s...\n",#a,thefunc); pthread_cond_signal(a);}
+#define pthread_cond_wait(a,b) {if(show) printf("waiting for signal %s with mutex %s in function %s...\n",#a,#b,thefunc); pthread_cond_wait(a,b);}
+#define ASSERT(a) if(!(a) && show) {fprintf(stderr,"Error in function %s: Assertion failed: %s\n",thefunc,#a); throw 1;}
 
-#define FuncDef(a,b)
-#define ASSERT(a)
+//#define FuncDef(a,b)
+//#define ASSERT(a)
 
 
-/*void printstatus(const char* status)
+void printstatus(const char* status)
   {
   printf("%s\n",status);
-  }*/
+  }
 
-void printstatus(const char*){}
+//void printstatus(const char*){}
 
 QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer, const Int_t &npcbuffers): fFilename(filename), fArrayName(arrayname), fTStamp(), fFDesc(0), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)+sizeof(time_t)+sizeof(Int_t)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fWBFirstObjIdx(0), fCurRBIdx(-1), fCurBLRBIdx(-2), fNReadBuffers(0), fPTNRBObjects(-1), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(npcbuffers), fArrayMemSize(0), fArrayIO(0), fAPriority(0), fFileMutex(), fBuffersMutex(), fPBuffersMutex(), fRBDIMutex(), fMWThread(), fMWMutex(), fMWCond(), fMWCMutex(), fMWPCond(), fMWCCond(), fMWAction(kFALSE), fMWBuffer(NULL), fMWWBuffer(NULL), fBLThread(), fBLMutex(), fBLCond(), fBLCMutex(), fBLCCond(), fBLWCond(), fBLAction(kFALSE), fUZQOAB(NULL), fUZBuffers(NULL), fUZBMutex()
 {
@@ -102,9 +102,9 @@ void QOversizeArray::CloseFile()
     pthread_mutex_lock(&fMWCMutex);
     pthread_cond_signal(&fMWCond);
     pthread_mutex_unlock(&fMWCMutex);
-    printstatus("Waiting for MW thread to terminate...");
+    printf("Waiting for MW thread %p to terminate...\n",this);
     pthread_join(fMWThread,NULL);
-    printstatus("MW thread has terminated");
+    printf("MW thread %p has terminated\n",this);
 
     //Send a signal to fBLThread to terminate and wait for termination
     pthread_mutex_lock(&fBLMutex);
@@ -113,9 +113,9 @@ void QOversizeArray::CloseFile()
     pthread_mutex_lock(&fBLCMutex);
     pthread_cond_signal(&fBLCond);
     pthread_mutex_unlock(&fBLCMutex);
-    printstatus("Waiting for BL thread to terminate...");
+    printf("Waiting for BL %p thread to terminate...\n",this);
     pthread_join(fBLThread,NULL);
-    printstatus("BL thread has terminated");
+    printf("BL thread %p has terminated\n",this);
 
     if(close(fFDesc)) {
       perror("QOversizeArray::~QOversizeArray(): Error: ");
@@ -946,13 +946,13 @@ void* QOversizeArray::QOAMWThread(void *array)
 
       if(qoa->fMWAction == 1) {
 	//Pause
-	pthread_mutex_unlock(&qoa->fMWMutex);
 	pthread_mutex_lock(&qoa->fMWCMutex);
 	pthread_cond_signal(&qoa->fMWPCond);
 	pthread_mutex_unlock(&qoa->fMWCMutex);
-	printstatus("Memory writing thread is pausing");
+	printf("Memory writing thread %p is pausing\n",qoa);
 
 	pthread_mutex_lock(&qoa->fMWCMutex);
+	pthread_mutex_unlock(&qoa->fMWMutex);
 	pthread_cond_wait(&qoa->fMWCond, &qoa->fMWCMutex);
 	printstatus("Memory writing thread got a signal in pausing condition");
 	pthread_mutex_unlock(&qoa->fMWCMutex);

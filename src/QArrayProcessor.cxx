@@ -10,6 +10,7 @@ ClassImp(QArrayProcessor)
 QArrayProcessor::~QArrayProcessor()
 {
   PRINTF2(this,"\tQArrayProcessor::~QArrayProcessor()\n")
+  TerminateProcess();
   delete fProcs;
   fProcs=NULL;
   delete fSelProcs;
