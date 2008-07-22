@@ -11,7 +11,7 @@ QList<TObject*> QProcBranchHandler::fQPTBWObjs;
 QList<Int_t> QProcBranchHandler::fNObjReqTB;
 Bool_t QProcBranchHandler::fSaveOutputs=kTRUE;
 
-QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char *branchname, Bool_t isoutput)
+QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char *branchname, Bool_t isoutput, Bool_t incrdeps)
 {
 
   TDirectory *dbuf;
@@ -45,7 +45,7 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 	  //If the file has been opened previously by QProcBranchHandler in rw mode
 	  if((i=fOFiles.FindFirst(dbuf)) != -1) {
 	    //Increment the number of output branches that require that file
-	    fNObjReqOFiles[i]++;
+	    if(incrdeps) fNObjReqOFiles[i]++;
 	  }
 
 	  //Else if the file is not opened
@@ -58,7 +58,8 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 
 	  //Open the file
 	  fOFiles.Add(new TFile(donbuf[1],"update"));
-	  fNObjReqOFiles.Add(1);
+	  if(incrdeps) fNObjReqOFiles.Add(1);
+	  else fNObjReqOFiles.Add(0);
 	}
       }
       //Decode the path to the object
@@ -123,13 +124,13 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 	  //If the file has been opened previously by QProcBranchHandler in rw mode
 	  if((i=fOFiles.FindFirst(dbuf)) != -1) {
 	    //Increment the number of output branches that require that file
-	    fNObjReqOFiles[i]++;
+	    if(incrdeps) fNObjReqOFiles[i]++;
 	  }
 
 	  //If the file has been opened previously by QProcBranchHandler in read-only mode
 	  if((i=fIFiles.FindFirst(dbuf)) != -1) {
 	    //Increment the number of input branches that require that file
-	    fNObjReqIFiles[i]++;
+	    if(incrdeps) fNObjReqIFiles[i]++;
 	  }
 
 	  //Else if the file is not opened
@@ -142,7 +143,8 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 
 	  //Open the file
 	  fIFiles.Add(new TFile(donbuf[1],"read"));
-	  fNObjReqIFiles.Add(1);
+	  if(incrdeps) fNObjReqIFiles.Add(1);
+	  else fNObjReqIFiles.Add(0);
 	}
       }
       //Decode the path to the object

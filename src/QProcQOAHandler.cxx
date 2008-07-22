@@ -7,7 +7,7 @@ QList<TObject*> QProcQOAHandler::fQOAObjs;
 QList<Int_t> QProcQOAHandler::fNObjReqQOA;
 Bool_t QProcQOAHandler::fSaveOutputs=kTRUE;
 
-QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arrayname, Bool_t isoutput)
+QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arrayname, Bool_t isoutput, Bool_t incrdeps)
 {
 
   TString pathname=QFileUtils::SimplifyPathName(gSystem->ExpandPathName(arraylocation));
@@ -25,13 +25,14 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
 	}
 
 	//Increment the number of output branches that require that file
-	fNObjReqQOA[i]++;
+	if(incrdeps) fNObjReqQOA[i]++;
 	return (QProcArray*)fQOAObjs[i];
 
 	//Else if the array is not opened
       } else {
 	fFiles.Add(pathname);
-	fNObjReqQOA.Add(1);
+	if(incrdeps) fNObjReqQOA.Add(1);
+	else fNObjReqQOA.Add(0);
 	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRecreate,sizeof(Double_t),131072,3));
 
 	return (QProcQOA*)fQOAObjs.GetLast();
@@ -43,13 +44,14 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
 
       //If the array has been opened previously by QProcQOAHandler
       if((i=fFiles.FindFirst(pathname)) != -1) {
-	fNObjReqQOA[i]++;
+	if(incrdeps) fNObjReqQOA[i]++;
 	return (QProcArray*)fQOAObjs[i];
 
 	//Else if the file is not opened
       } else {
 	fFiles.Add(pathname);
-	fNObjReqQOA.Add(1);
+	if(incrdeps) fNObjReqQOA.Add(1);
+	else fNObjReqQOA.Add(0);
 	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRead,sizeof(Double_t),131072,3));
 
 	return (QProcQOA*)fQOAObjs.GetLast();
