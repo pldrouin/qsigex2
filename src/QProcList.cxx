@@ -86,7 +86,14 @@ void QProcList::InitProcess()
 
 void QProcList::PrintAnalysisResults() const
 {
-  for(Int_t i=0; i<fQPL->Count(); i++)  {
+  Int_t i;
+
+  printf("\nList of parameters for processor list: %s\n",GetName());
+  for(i=0; i<fParamsNames->Count(); i++) {
+    printf("%3i:\t%s\n",i,(*fParamsNames)[i].Data());
+  }
+
+  for(i=0; i<fQPL->Count(); i++)  {
 
     try {
       printf("====================\nProcessor '%s'\n====================\n\n",((QProcessor*)(*fQPL)[i])->GetName());
