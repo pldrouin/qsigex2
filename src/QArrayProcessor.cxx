@@ -985,8 +985,13 @@ void QArrayProcessor::PrintAnalysisResults() const
     printf("\nDependencies:\n");
     (*fProcsParDepends)[i].Print();
 
-    if((*fSelProcs)[i]) printf("\nIs a selector process\n");
-    else printf("\nIs not a selector process\n");
+    if(i<fNAEProcs) {
+      if((*fSelProcs)[i]) printf("\nIs a selector process\n");
+      else printf("\nIs not a selector process\n");
+    } else {
+      if((*fSelProcs)[i]) printf("\nProcesses only selected events\n");
+      else printf("\nProcesses all events\n");
+    }
 
     if((*fSelDepProcs)[i]) printf("Depends on a selector process\n");
     else printf("Does not depend on a selector process\n");
