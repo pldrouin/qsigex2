@@ -25,6 +25,7 @@ class QSigExFit: public TObject
     const static QSigExFit& GetCurInstance(){return *fCurInstance;}
     const Double_t& GetFCNError() const{return fFCNError;}
     const Double_t& GetFCNMin() const{return fFCNMin;}
+    const Int_t& GetNParams() const{return fParams.Count();}
     const QProcDouble& GetProcOutput() const{return *fQPD;}
 
     void Init();

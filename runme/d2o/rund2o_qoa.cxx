@@ -259,12 +259,12 @@ Bool_t LLSum(QProcArgs &args)
   return kTRUE;
 }
 
-void ELLFunction(Int_t& npar, Double_t*, Double_t &f, Double_t *par, Int_t)
+void ELLFunction(Int_t&, Double_t*, Double_t &f, Double_t *par, Int_t)
 {
   static Int_t i;
   QSigExFit::SetParams(par);
   QSigExFit::GetCurInstance().ExecProc();
   f=0;
-  for(i=0; i<npar; i++) f+=par[i];
+  for(i=0; i<QSigExFit::GetCurInstance().GetNParams(); i++) f+=par[i];
   f=2*(f-QSigExFit::GetCurInstance().GetProcOutput());
 }
