@@ -47,6 +47,7 @@ void QSigExFit::Init()
     for(i=0; i<fQProcessor->GetNParams(); i++) {
 
       fParams[i].SetName(fQProcessor->GetParamName(i));
+      (Double_t&)fParams[i]=0.;
     }
   }
 }
