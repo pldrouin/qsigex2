@@ -88,7 +88,7 @@ void QProcList::PrintAnalysisResults() const
 {
   Int_t i;
 
-  printf("********************\nProcessor List '%s'\n********************\n\n",GetName());
+  printf("\n\n********************\nProcessor List '%s'\n********************\n",GetName());
 
   printf("\nList of parameters for processor list\n");
   for(i=0; i<fParamsNames->Count(); i++) {
@@ -98,7 +98,7 @@ void QProcList::PrintAnalysisResults() const
   for(i=0; i<fQPL->Count(); i++)  {
 
     try {
-      printf("====================\nProcessor '%s'\n====================\n\n",((QProcessor*)(*fQPL)[i])->GetName());
+      printf("\n====================\nProcessor '%s'\n====================\n",((QProcessor*)(*fQPL)[i])->GetName());
       ((QProcessor*)(*fQPL)[i])->PrintAnalysisResults();
 
     } catch (Int_t e) {
