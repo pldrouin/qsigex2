@@ -61,8 +61,8 @@ const char* QProcList::GetParamName(Int_t index) const
   Int_t i=0;
 
   while(i<fQPL->Count() && index >= ((QProcessor*)(*fQPL)[i])->GetNParams()) {
-    i++;
     index-=((QProcessor*)(*fQPL)[i])->GetNParams();
+    i++;
   }
 
   if(i < fQPL->Count()) return ((QProcessor*)(*fQPL)[i])->GetParamName(index);
