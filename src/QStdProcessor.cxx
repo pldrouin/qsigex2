@@ -35,7 +35,10 @@ Int_t QStdProcessor::FindParamIndex(const char *paramname) const
 {
   Int_t ret=(*fParamsNames).FindFirst(paramname);
 
-  if(ret == -1) fprintf(stderr,"QStdProcessor::FindParamIndex: Error: parameter '%s' not found\n",paramname);
+  if(ret == -1) {
+    fprintf(stderr,"QStdProcessor::FindParamIndex: Error: parameter '%s' not found\n",paramname);
+    throw 1;
+  }
   return ret;
 }
 

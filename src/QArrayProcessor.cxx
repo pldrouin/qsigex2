@@ -632,6 +632,7 @@ void QArrayProcessor::Exec() const
 	    //If the number of entries for the current input array does not match the number of entries for the previous triggered input array
 	    if(neaea != neaealast && neaealast != -1) {
 	      fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' does not match the number of entries for the previously triggered input array\n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data());
+	      throw 1;
 	    }
 	    neaealast=neaea;
 
@@ -643,6 +644,7 @@ void QArrayProcessor::Exec() const
 	    //If the number of entries for the current input array does not match the number of entries for the previous triggered input array
 	    if(nesea != nesealast && nesealast != -1) {
 	      fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' does not match the number of entries for the previously triggered input array\n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data());
+	      throw 1;
 	    }
 	    nesealast=nesea;
 	  }
@@ -916,7 +918,7 @@ void QArrayProcessor::PrintAnalysisResults() const
 
   if(!gDirectory->cd(fAnalysisDir)) {
     fprintf(stderr,"QArrayProcessor::PrintAnalysisResults(): Error: Directory %s does not exist\n",fAnalysisDir.Data());
-    return;
+    throw 1;
   }
 
   printf("Analysis Directory: %s\n",fAnalysisDir.Data());
