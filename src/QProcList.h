@@ -23,7 +23,7 @@ class QProcList: public QProcessor
     Int_t GetNParams() const{return fParamsNames->Count();}
     Int_t GetNQProcs() const{return fQPL->Count();}
 
-    const char* GetParamName(Int_t index) const;
+    const char* GetParamName(Int_t index) const{return (*fParamsNames)[index];}
 
     void InitProcess();
 

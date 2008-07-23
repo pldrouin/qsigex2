@@ -56,19 +56,6 @@ void QProcList::Exec() const
   for(Int_t i=0; i<fQPL->Count(); i++) ((QProcessor*)(*fQPL)[i])->Exec();
 }
 
-const char* QProcList::GetParamName(Int_t index) const
-{
-  Int_t i=0;
-
-  while(i<fQPL->Count() && index >= ((QProcessor*)(*fQPL)[i])->GetNParams()) {
-    index-=((QProcessor*)(*fQPL)[i])->GetNParams();
-    i++;
-  }
-
-  if(i < fQPL->Count()) return ((QProcessor*)(*fQPL)[i])->GetParamName(index);
-  return NULL;
-}
-
 void QProcList::InitProcess()
 {
 
