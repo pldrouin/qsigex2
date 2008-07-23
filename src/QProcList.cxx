@@ -88,7 +88,9 @@ void QProcList::PrintAnalysisResults() const
 {
   Int_t i;
 
-  printf("\nList of parameters for processor list: %s\n",GetName());
+  printf("********************\nProcessor List '%s'\n********************\n\n",GetName());
+
+  printf("\nList of parameters for processor list\n");
   for(i=0; i<fParamsNames->Count(); i++) {
     printf("%3i:\t%s\n",i,(*fParamsNames)[i].Data());
   }
