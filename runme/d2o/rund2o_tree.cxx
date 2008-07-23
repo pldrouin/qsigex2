@@ -258,7 +258,7 @@ Bool_t LLSum(QProcArgs &args)
   return kTRUE;
 }
 
-void ELLFunction(Int_t&, Double_t*, Double_t &f, Double_t *par, Int_t npar)
+void ELLFunction(Int_t& npar, Double_t*, Double_t &f, Double_t *par, Int_t)
 {
   static Int_t i;
   QSigExFit::SetParams(par);
