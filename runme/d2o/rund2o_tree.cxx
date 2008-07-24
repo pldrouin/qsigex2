@@ -184,7 +184,7 @@ int main(int nargs, char* args[])
 
   QSigExFitMinuit fitter;
   fitter.SetProcessor(&plist);
-  fitter.SetProcOutput(&llsum);
+  fitter.AddProcOutput(&llsum);
 
   fitter.Param("ncc").Setup(2000,0.01,0,10000);
   fitter.Param("nes").Setup(200,0.01,0,1000);
@@ -265,5 +265,5 @@ void ELLFunction(Int_t&, Double_t*, Double_t &f, Double_t *par, Int_t)
   QSigExFit::GetCurInstance().ExecProc();
   f=0;
   for(i=0; i<QSigExFit::GetCurInstance().GetNParams(); i++) f+=par[i];
-  f=2*(f-QSigExFit::GetCurInstance().GetProcOutput());
+  f=2*(f-(QProcDouble&)QSigExFit::GetCurInstance().GetProcOutput());
 }

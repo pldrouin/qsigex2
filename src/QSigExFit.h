@@ -10,9 +10,12 @@
 class QSigExFit: public TObject
 {
   public:
-    QSigExFit(): TObject(), fQProcessor(NULL), fQPD(NULL), fParams(), fFCNError("Min Function Error",1.0), fFCNMin("Minimization Function Minimum",1.7e308), fCovMatrix(NULL), fVerbose(0) {}
-    QSigExFit(const QSigExFit &rhs): TObject(rhs), fQProcessor(rhs.fQProcessor), fQPD(rhs.fQPD), fParams(rhs.fParams), fFCNError(rhs.fFCNError), fFCNMin(rhs.fFCNMin), fCovMatrix(new TMatrixDSym(*rhs.fCovMatrix)), fVerbose(0) {};
+    QSigExFit(): TObject(), fQProcessor(NULL), fQPOutputs(), fParams(), fFCNError("Min Function Error",1.0), fFCNMin("Minimization Function Minimum",1.7e308), fCovMatrix(NULL), fVerbose(0) {}
+    QSigExFit(const QSigExFit &rhs): TObject(rhs), fQProcessor(rhs.fQProcessor), fQPOutputs(rhs.fQPOutputs), fParams(rhs.fParams), fFCNError(rhs.fFCNError), fFCNMin(rhs.fFCNMin), fCovMatrix(new TMatrixDSym(*rhs.fCovMatrix)), fVerbose(0) {};
     virtual ~QSigExFit();
+
+    void AddProcOutput(const QProcObj* procobj, Int_t index=-1){fQPOutputs.Add(const_cast<QProcObj*>(procobj),index);}
+    void DelProcOutput(Int_t index=-1){fQPOutputs.Del(index);}
 
     void ExecProc() const{fQProcessor->Exec();}
 
@@ -26,7 +29,7 @@ class QSigExFit: public TObject
     const Double_t& GetFCNError() const{return fFCNError;}
     const Double_t& GetFCNMin() const{return fFCNMin;}
     const Int_t& GetNParams() const{return fParams.Count();}
-    const QProcDouble& GetProcOutput() const{return *fQPD;}
+    const QProcObj& GetProcOutput(Int_t index=-1) const{return *fQPOutputs[index];}
 
     void Init();
     virtual void InitFit()=0;
@@ -39,7 +42,6 @@ class QSigExFit: public TObject
     void SetFCNError(Double_t fcnerror){fFCNError=fcnerror;}
     static void SetParams(Double_t *params); //SHOULD ONLY BE CALLED DURING THE FIT
     void SetProcessor(QProcessor* processor){fQProcessor=processor; Init();}
-    void SetProcOutput(const QProcDouble* procobj){fQPD=procobj;}
     void SetVerbose(Int_t verbose=0){fVerbose=verbose;}
 
     const QSigExFit& operator=(const QSigExFit &rhs){TObject::operator=(rhs); return *this;}
@@ -51,7 +53,7 @@ class QSigExFit: public TObject
     Int_t& ParamFreeParamIndex(Int_t i){return fParams[i].FreeParamIndex();}
 
     QProcessor *fQProcessor; //!
-    const QProcDouble *fQPD; //!
+    QList<QProcObj*> fQPOutputs; //!
     QList<QSigExFitParam> fParams;
     QNamedVar<Double_t> fFCNError; //Minimization function error used to compute asymmetric errors
     QNamedVar<Double_t> fFCNMin;   //Minimum value reached for the minimization function
