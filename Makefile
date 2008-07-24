@@ -2,7 +2,7 @@
 
 libqsigex.so:
 	cd ./src; $(MAKE)
-	cp ./src/libqsigex.so ./lib/
+	cp ./src/libqsigex2.so ./lib/
 
 htmldoc: force
 	root -b -n -q -l src/htmlgen.C

@@ -25,7 +25,7 @@ QSIGEX_OBJSDEP	=	$(QSIGEX_OBJS:.o=.d)
 QSIGEX_OOBJSDEP	=	$(QSIGEX_OOBJS:.o=.d)
 QSIGEX_DICTOBJDEP	=	$(QSIGEX_DICTOBJ:.o=.d)
 
-libqsigex.so: $(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ)
+libqsigex2.so: $(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ)
 	$(CXX) $(CXXFLAGS) -shared -L$(shell root-config --libdir) -lMinuit -o $@ $^
 
 clean:
@@ -34,7 +34,7 @@ clean:
 	rm -f *Dict.o
 	rm -f *Dict.h
 	rm -f *Dict.cxx
-	rm -f libqsigex.so
+	rm -f libqsigex2.so
 
 $(QSIGEX_OBJSDEP) $(QSIGEX_OOBJSDEP) $(QSIGEX_DICTOBJDEP): %.d: %.cxx %.h
 	@echo "Generating dependency file $@"
