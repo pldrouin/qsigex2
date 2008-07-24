@@ -2,7 +2,6 @@
 
 // Check:
 // http://www.physics.carleton.ca/research/sno/anal/software/qsigex_run.html
-//
 
 #include "rund2o.h"
 
