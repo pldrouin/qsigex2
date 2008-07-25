@@ -4,7 +4,7 @@
   gSystem->Load("libHist.so");
   gSystem->Load("libRIO.so");
   gSystem->Load("libMatrix.so");
-  gSystem->Load("libqsigex.so");
+  gSystem->Load("libqsigex2.so");
   gEnv->SetValue("Root.Html.Root","http://root.cern.ch/root/html");
 
   THtml html;
