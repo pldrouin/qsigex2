@@ -38,6 +38,8 @@ void QSigExFitParam::Print(const Option_t*) const
 
 void QSigExFitParam::Browse(TBrowser *b)
 {
+  b->Add(fMinusFitError);
+  b->Add(fPlusFitError);
   b->Add(fStartVal);
   b->Add(fMinVal);
   b->Add(fMaxVal);

@@ -61,7 +61,7 @@ class QSigExFit: public TObject
     Int_t fVerbose;
     static const QSigExFit   *fCurInstance; //!
   private:
-    ClassDef(QSigExFit,1) //Base fitter class that using QProcessor objects
+    ClassDef(QSigExFit,1) //Base fitter class that uses QProcessor objects
 };
 
 #endif
