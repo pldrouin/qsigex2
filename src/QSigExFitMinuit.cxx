@@ -203,8 +203,9 @@ void QSigExFitMinuit::SetFCN(void* fcn)
 
 void QSigExFitMinuit::Browse(TBrowser *b)
 {
-  b->Add(&fParams,"Fit Parameters");
+  QSigExFit::Browse(b);
   b->Add(&fFCNError);
   b->Add(&fMinimName);
   b->Add(fMinimArgs,"Minimizer Arguments");
+  b->Add(&fMinuitStatus);
 }

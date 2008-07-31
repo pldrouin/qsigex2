@@ -26,6 +26,7 @@ class QSigExFitMinuit: public QSigExFit
       return (TString&)const_cast<QNamedVar<TString>&>(fMinimName);
 #endif
     }
+    const char* GetMinuitStatus() const{return (const TString&)fMinuitStatus;}
 
     void InitFit();
 
@@ -40,7 +41,6 @@ class QSigExFitMinuit: public QSigExFit
     const QSigExFitMinuit& operator=(const QSigExFitMinuit &rhs){QSigExFit::operator=(rhs); return *this;}
 
     void Browse(TBrowser *b);
-    Bool_t IsFolder() const {return kTRUE;}
 
   protected:
     TMinuit *fMinuit;              //!

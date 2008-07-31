@@ -52,7 +52,6 @@ class QProcObjProcessor: public QStdProcessor
     void TerminateProcess();
 
     void Browse(TBrowser *b);
-    Bool_t IsFolder() const {return kTRUE;}
 
   protected:
 

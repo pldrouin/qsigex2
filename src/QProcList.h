@@ -39,7 +39,6 @@ class QProcList: public QProcessor
     void TerminateProcess();
 
     void Browse(TBrowser *b);
-    Bool_t IsFolder() const {return kTRUE;}
   protected:
     QList<TObject*> *fQPL;         //-> List of QProcessor objects
     QList<TString>  *fParamsNames; //-> List of Parameter Names

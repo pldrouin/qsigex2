@@ -34,6 +34,9 @@ class QProcessor: public TNamed
 
     virtual void TerminateProcess()=0;
 
+    virtual void Browse(TBrowser *b)=0;
+    Bool_t IsFolder() const {return kTRUE;}
+
   protected:
   private:
 

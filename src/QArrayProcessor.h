@@ -56,7 +56,6 @@ class QArrayProcessor: public QStdProcessor
     void TerminateProcess();
 
     void Browse(TBrowser *b);
-    Bool_t IsFolder() const {return kTRUE;}
 
   protected:
     Int_t AEProcIndexToIndex(Int_t index);

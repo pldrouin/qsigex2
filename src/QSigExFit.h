@@ -46,6 +46,9 @@ class QSigExFit: public TObject
 
     const QSigExFit& operator=(const QSigExFit &rhs){TObject::operator=(rhs); return *this;}
 
+    virtual void Browse(TBrowser *b);
+    Bool_t IsFolder() const {return kTRUE;}
+
   protected:
     Double_t& ParamFitVal(Int_t i){return (Double_t&)fParams[i];}
     Double_t& ParamMinusFitError(Int_t i){return fParams[i].MinusFitError();}

@@ -74,3 +74,9 @@ void QSigExFit::SetParams(Double_t *params)
 
   fCurInstance->fQProcessor->SetParams(params);
 }
+
+void QSigExFit::Browse(TBrowser *b)
+{
+  b->Add(&fParams,"Fit Parameters");
+  if(fCovMatrix) b->Add(fCovMatrix,"Covariance Matrix");
+}
