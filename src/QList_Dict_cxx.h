@@ -1,3 +1,13 @@
+#ifndef GCC_VERSION
+#define GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)
+#endif
+
+#if GCC_VERSION >= 403
+# define EXTERN
+#else
+# define EXTERN extern
+#endif
+
 template <typename U> void QList<U>::Streamer(TBuffer &R__b)
 {
   // Stream an object of class QList<U>.
@@ -21,17 +31,17 @@ template <typename U> void QList<U>::Streamer(TBuffer &R__b)
 }
 
 #ifndef _QLIST_SPECIALS_
-template <> extern void QList<char>::Streamer(TBuffer &R__b);
-template <> extern void QList<Bool_t>::Streamer(TBuffer &R__b);
-template <> extern void QList<Int_t>::Streamer(TBuffer &R__b);
-template <> extern void QList<Float_t>::Streamer(TBuffer &R__b);
-template <> extern void QList<Double_t>::Streamer(TBuffer &R__b);
-template <> extern void QList<void*>::Streamer(TBuffer &R__b);
-template <> extern void QList<Double_t*>::Streamer(TBuffer &R__b);
-template <> extern void QList<TObject*>::Streamer(TBuffer &R__b);
-template <> extern void QList<QProcObj*>::Streamer(TBuffer &R__b);
-template <> extern void QList<QProcArray*>::Streamer(TBuffer &R__b);
-template <> extern void QList<QOversizeArray*>::Streamer(TBuffer &R__b);
+template <> EXTERN void QList<char>::Streamer(TBuffer &R__b);
+template <> EXTERN void QList<Bool_t>::Streamer(TBuffer &R__b);
+template <> EXTERN void QList<Int_t>::Streamer(TBuffer &R__b);
+template <> EXTERN void QList<Float_t>::Streamer(TBuffer &R__b);
+template <> EXTERN void QList<Double_t>::Streamer(TBuffer &R__b);
+template <> EXTERN void QList<void*>::Streamer(TBuffer &R__b);
+template <> EXTERN void QList<Double_t*>::Streamer(TBuffer &R__b);
+template <> EXTERN void QList<TObject*>::Streamer(TBuffer &R__b);
+template <> EXTERN void QList<QProcObj*>::Streamer(TBuffer &R__b);
+template <> EXTERN void QList<QProcArray*>::Streamer(TBuffer &R__b);
+template <> EXTERN void QList<QOversizeArray*>::Streamer(TBuffer &R__b);
 #else
 template <> void QList<char>::Streamer(TBuffer &R__b)
 {
