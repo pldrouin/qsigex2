@@ -206,7 +206,7 @@ QMask QMask::operator>>(UInt_t n) const
       Int_t bshift=n%8;
 
       for(Int_t i=0; i<Count()-nbytes-1; i++) {
-	ret[i]=(GetArray()[i+nbytes]>>bshift)|(GetArray()[i+nbytes+1]<<8-bshift);
+	ret[i]=(GetArray()[i+nbytes]>>bshift)|(GetArray()[i+nbytes+1]<<(8-bshift));
       }
       ret[Count()-nbytes-1]=(GetLast()>>bshift);
     }
@@ -229,7 +229,7 @@ QMask QMask::operator<<(UInt_t n) const
       Int_t bshift=n%8;
 
       for(Int_t i=Count()-1; i>nbytes; i--) {
-	ret[i]=(GetArray()[i-nbytes]<<bshift)|(GetArray()[i-nbytes-1]>>8-bshift);
+	ret[i]=(GetArray()[i-nbytes]<<bshift)|(GetArray()[i-nbytes-1]>>(8-bshift));
       }
       ret[nbytes]=(GetArray()[0]<<bshift);
     }
