@@ -286,6 +286,80 @@ Double_t QDisTH::ProbDensity(const Double_t &x,const Double_t &y,const Double_t 
   }    
 }
 
+TH1D* QDisTH::Projection1D(const char *name, Int_t xaxis) const
+{
+  TH1* histo;                 //Histogram pointer
+
+  histo=dynamic_cast<TH1*>(GetObject());
+
+  Int_t dim=histo->GetDimension(); //PDF dimension
+
+  if(xaxis<0 || xaxis>=dim) {
+    fprintf(stderr,"QTHN::Projection1D: Error: Invalid axis index\n");
+    throw 1;
+  }
+  TAxis **axes=new TAxis*[dim];
+  TH1D *th;
+
+  axes[0]=histo->GetXaxis();
+  if(dim>1) axes[1]=histo->GetYaxis();
+  if(dim>2) axes[2]=histo->GetZaxis();
+
+  if(!axes[xaxis]->GetXbins()->fN) {
+    th=new TH1D(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXmin(),axes[xaxis]->GetXmax());
+
+  } else {
+    th=new TH1D(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXbins()->GetArray());
+  }
+
+  Int_t *indices=new Int_t[dim-1];
+  Int_t *is=new Int_t[dim-1];
+  Int_t *coords=new Int_t[3];
+  Int_t i,l,m;
+  Double_t dbuf;
+  l=0;
+
+  for(i=0; i<3; i++) coords[i]=1;
+
+  for(i=0; i<dim; i++) {
+
+    if(i!=xaxis) {
+      indices[l]=i;
+      l++;
+    }
+  }
+
+  for(i=1; i<=axes[xaxis]->GetNbins(); i++) {
+    dbuf=0.;
+
+    for(l=0; l<dim-1; l++) is[l]=1;
+    l=dim-2;
+
+    while(is[0]<=axes[indices[0]]->GetNbins()) {
+
+      for(m=0; m<dim-1; m++) coords[indices[m]]=is[m];
+      coords[xaxis]=i;
+      dbuf+=histo->GetBinContent(histo->GetBin(coords[0],coords[1],coords[2]));
+      is[l]++;
+
+      while(l>0 && is[l]>axes[indices[l]]->GetNbins()) {
+	is[l-1]++;
+	is[l]=1;
+	l--;
+      }
+      l=dim-2;
+    }
+    th->SetBinContent(i,dbuf);
+  }
+
+  delete[] indices;
+  delete[] is;
+  delete[] coords;
+  delete[] axes;
+
+  return th;
+}
+
 void QDisTH::Normalize(Double_t* fullintegral, Double_t* cutintegral, Double_t* error)
 {
  //This function normalizes the PDF according to the normalization

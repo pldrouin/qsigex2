@@ -97,6 +97,8 @@ class QDisTH: public QDis
 
   Double_t ProbDensity(const Double_t &x,const Double_t &y=0,const Double_t &z=0) const;
 
+  TH1D* Projection1D(const char *name, Int_t xaxis) const;
+
   void TerminateProcObj(){Normalize(); UpdateModTime();}
 
  private:
