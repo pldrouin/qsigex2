@@ -85,7 +85,7 @@ template <typename U> TAxis* QTHN<U>::GetAxis(Int_t axis) const
   return fAxes[axis];
 }
 
-template <typename U> const Long64_t QTHN<U>::GetBin(const Int_t *coords) const
+template <typename U> Long64_t QTHN<U>::GetBin(const Int_t *coords) const
 {
   Int_t i;
   Long64_t bin=coords[fNDims-1];

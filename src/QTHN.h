@@ -16,7 +16,7 @@ template <typename U> class QTHN: public TNamed
     Int_t Fill(const Double_t *x, const U &w=1);
     Long64_t FindBin(const Double_t *x) const;
     TAxis* GetAxis(Int_t axis) const;
-    const Long64_t GetBin(const Int_t *coords) const;
+    Long64_t GetBin(const Int_t *coords) const;
     Int_t GetNDims() const {return fNDims;}
     const Long64_t& GetNFbins() const {return fNBins;}
     const U& GetBinContent(const Long64_t &bin) const;
