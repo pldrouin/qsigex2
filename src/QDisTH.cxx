@@ -295,7 +295,7 @@ TH1D* QDisTH::Projection1D(const char *name, Int_t xaxis) const
   Int_t dim=histo->GetDimension(); //PDF dimension
 
   if(xaxis<0 || xaxis>=dim) {
-    fprintf(stderr,"QTHN::Projection1D: Error: Invalid axis index\n");
+    fprintf(stderr,"QDisTH::Projection1D: Error: Invalid axis index\n");
     throw 1;
   }
   TAxis **axes=new TAxis*[dim];
