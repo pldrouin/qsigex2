@@ -65,7 +65,6 @@ class QDisTF: public QDis
     }
 
   Double_t ProbDensity(const Double_t &x,const Double_t &y=0,const Double_t &z=0) const;
-  Double_t Derivative(const Double_t &x) const;
 
   Double_t Integral(Double_t xlo,Double_t xhi,Double_t ylo=0,Double_t yhi=0, Double_t zlo=0, Double_t zhi=0) const; 
   Double_t Integral(Option_t* domain) const;
