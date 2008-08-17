@@ -394,7 +394,7 @@ QDisTH* QDisTH::MarginalPDF(const char *name, Int_t xaxis, Int_t yaxis) const
 
   Int_t dim=histo->GetDimension(); //PDF dimension
 
-  if(dim==1 || yaxis==-1 && dim<3) return NULL;
+  if(dim==1 || (yaxis==-1 && dim<3)) return NULL;
 
   if(xaxis<0 || xaxis>=dim) {
     fprintf(stderr,"QDisTH::Projection1D: Error: Invalid axis index\n");
