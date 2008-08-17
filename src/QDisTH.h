@@ -6,7 +6,6 @@
 
 #include "Rtypes.h"
 #include "TH3.h"
-#include "QTHOps.h"
 #include "QDis.h"
 #include <iostream>
 
@@ -49,22 +48,22 @@ class QDisTH: public QDis
     }
 
   QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy=0, Float_t ylow=0, Float_t yhigh=0, Int_t nbinsz=0, Float_t zlow=0, Float_t zhigh=0);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, Float_t *zbins);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, Float_t *ybins, Int_t nbinsz=0, Float_t zlow=0, Float_t zhigh=0);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *xbins, Int_t nbinsy=0, Float_t ylow=0, Float_t yhigh=0, Int_t nbinsz=0, Float_t zlow=0, Float_t zhigh=0);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, Float_t *ybins, Int_t nbinsz, Float_t *zbins);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *xbins, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, Float_t *zbins);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *xbins, Int_t nbinsy, Float_t *ybins, Int_t nbinsz=0, Float_t zlow=0, Float_t zhigh=0);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t *xbins, Int_t nbinsy, Float_t *ybins, Int_t nbinsz, Float_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, const Float_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, const Float_t *ybins, Int_t nbinsz=0, Float_t zlow=0, Float_t zhigh=0);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Float_t *xbins, Int_t nbinsy=0, Float_t ylow=0, Float_t yhigh=0, Int_t nbinsz=0, Float_t zlow=0, Float_t zhigh=0);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, const Float_t *ybins, Int_t nbinsz, const Float_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Float_t *xbins, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, const Float_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Float_t *xbins, Int_t nbinsy, const Float_t *ybins, Int_t nbinsz=0, Float_t zlow=0, Float_t zhigh=0);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Float_t *xbins, Int_t nbinsy, const Float_t *ybins, Int_t nbinsz, const Float_t *zbins);
 
   QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy=0, Double_t ylow=0, Double_t yhigh=0, Int_t nbinsz=0, Double_t zlow=0, Double_t zhigh=0);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, Double_t *zbins);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t *ybin, Int_t nbinsz=0, Double_t zlow=0, Double_t zhigh=0);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy=0, Double_t ylow=0, Double_t yhigh=0, Int_t nbinsz=0, Double_t zlow=0, Double_t zhigh=0);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t *ybins, Int_t nbinsz, Double_t *zbins);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, Double_t *zbins);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy, Double_t *ybins, Int_t nbinsz=0, Double_t zlow=0, Double_t zhigh=0);
-  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t *xbins, Int_t nbinsy, Double_t *ybins, Int_t nbinsz, Double_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, const Double_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, const Double_t *ybin, Int_t nbinsz=0, Double_t zlow=0, Double_t zhigh=0);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t const *xbins, Int_t nbinsy=0, Double_t ylow=0, Double_t yhigh=0, Int_t nbinsz=0, Double_t zlow=0, Double_t zhigh=0);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, const Double_t *ybins, Int_t nbinsz, const Double_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Double_t *xbins, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, const Double_t *zbins);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Double_t *xbins, Int_t nbinsy, const Double_t *ybins, Int_t nbinsz=0, Double_t zlow=0, Double_t zhigh=0);
+  QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Double_t *xbins, Int_t nbinsy, const Double_t *ybins, Int_t nbinsz, const Double_t *zbins);
 
   virtual ~QDisTH(){PRINTF2(this,"\tQDisTH::~QDisTH()\n")}
 
@@ -93,17 +92,18 @@ class QDisTH: public QDis
 
   void InitProcObj(){((TH1*)GetObject())->Reset();}
 
-  void Normalize(Double_t* fullintegral=NULL, Double_t* cutintegral=NULL, Double_t* error=NULL);
+  Double_t Integral(Int_t** binranges=NULL, Bool_t *widths=NULL) const;
+
+  void Normalize(Double_t* integral=NULL);
 
   Double_t ProbDensity(const Double_t &x,const Double_t &y=0,const Double_t &z=0) const;
 
-  TH1D* Projection1D(const char *name, Int_t xaxis) const;
+  QDisTH* MarginalPDF(const char *name="_m1d", Int_t xaxis=0, Int_t yaxis=-1) const;
+  //QDisTH* MarginalPDF2D(const char *name="_m1d", Int_t xaxis=0, Int_t yaxis=1) const;
 
   void TerminateProcObj(){Normalize(); UpdateModTime();}
 
  private:
-  static QTHOps fQTHOps; //!
-
   ClassDef(QDisTH,1) //Derived class from QDis that allows to get probabilities from a TH
 };
 

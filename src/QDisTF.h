@@ -68,7 +68,7 @@ class QDisTF: public QDis
   Double_t ProbDensity(const Double_t &x,const Double_t &y=0,const Double_t &z=0) const;
   Double_t Derivative(const Double_t &x) const;
 
-  void Normalize(Double_t* fullintegral=NULL, Double_t* cutintegral=NULL, Double_t* error=NULL);
+  void Normalize(Double_t* integral=NULL);
 
   Int_t GetDimension(){return dynamic_cast<TF1*>(GetObject())->GetNdim();}
 

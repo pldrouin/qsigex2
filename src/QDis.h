@@ -54,9 +54,7 @@ class QDis: public TNamed, public QTObjectIO, public QProcObj
 
   virtual QDis* CloneQDis() const=0;
 
-  virtual void Normalize(Double_t* fullintegral=NULL,
-			 Double_t* cutintegral=NULL,
-			 Double_t* error=NULL)=0;
+  virtual void Normalize(Double_t* integral=NULL)=0;
 
   const QDis& operator=(const QDis &rhs){
     TNamed::operator=(rhs);
@@ -80,7 +78,7 @@ class QDis: public TNamed, public QTObjectIO, public QProcObj
   Int_t GetNormFlags() const{return fNormFlags;}
 
   void SetCutExpr(Option_t *cutexpr=NULL){fCutExpr=cutexpr;}
-  enum eNormFlags {kRegularNorm=0, kOneFixedCoord=1, kTwoFixedCoords=2, kThreeFixedCoords=3, kVarBinSizeEventsFilled=4, kNoNorm=8};
+  enum eNormFlags {kRegularNorm=0, kOneFixedCoord=1, kTwoFixedCoords=2, kThreeFixedCoords=3, kVarBinSizeEventsFilled=4, kNoBinWidthNorm=56, kNoXBinWidthNorm=8, kNoYBinWidthNorm=16, kNoZBinWidthNorm=32, kNoNorm=64};
   void SetNormFlags(eNormFlags normflags=kRegularNorm)
   {
     //Sets the normalization flags for the QDis object. The available normalization flags are the following:
@@ -91,6 +89,10 @@ class QDis: public TNamed, public QTObjectIO, public QProcObj
     //kThreeFixedCoords: Conditional PDF with 3 fixed coordinates
     //kVarBinSizeEventsFilled: PDF with variable bin size for which the histogram bin content corresponds to
     //                         a number of events
+    //kNoBinWidthNorm: Do not use bin widths at all for PDF normalization
+    //kNoXBinWidthNorm: Do not use bin widths in x direction for PDF normalization
+    //kNoYBinWidthNorm: Do not use bin widths in y direction for PDF normalization
+    //kNoZBinWidthNorm: Do not use bin widths in z direction for PDF normalization
     //kNoNorm: No normalization
     //Flags can be combined using a bitwise "OR" operator (&).
     fNormFlags=normflags;
