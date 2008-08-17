@@ -22,8 +22,6 @@
 
 ClassImp(QDisTF)
 
-QTFOps QDisTF::fQTFOps; //fQTFOps will perform operations on the pdf
-
 Double_t QDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const
 {
   //This function returns the probability density associated with a point which
@@ -34,9 +32,8 @@ Double_t QDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t 
   PRINTF2(this,"\tDouble_t QDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const\n")
 
   try{
-    fQTFOps.SetTF(dynamic_cast<TF1*>(GetObject())); //Set the pdf.  GetObject() is a QTObjectIO method.
 
-    return fQTFOps.Freq(x,y,z);
+    return (Double_t)const_cast<TF1*>(dynamic_cast<TF1*>(GetObject()))->Eval(x,y,z);
 
   } catch (Int_t i){
     cout << "Exception handled by QDisTF::ProbDensity\n";
@@ -45,20 +42,56 @@ Double_t QDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t 
 }
 
 
-Double_t QDisTF::Derivative(const Double_t &x) const
+Double_t QDisTF::Integral(Double_t xlo, Double_t xhi, Double_t ylo, Double_t yhi, Double_t zlo, Double_t zhi) const
 {
-  // This function returns the derivative of the pdf at x
-  // this function only works for one dimensional pdfs
+  TF1* obj=dynamic_cast<TF1*>(GetObject());
 
-   try{
-    fQTFOps.SetTF(dynamic_cast<TF1*>(GetObject())); //Set the pdf.  GetObject() is a QTObjectIO method.
+  switch(obj->GetNdim()){
+    case 1:
+      return obj->Integral(xlo,xhi);
+      break;
+    case 2:
+      return obj->Integral(xlo,xhi,ylo, yhi);
+      break;
+    case 3:
+      return obj->Integral(xlo,xhi,ylo, yhi, zlo, zhi);
+      break;
+    default:
+      return 0;
+  }
+}
 
-    return fQTFOps.Derivative(x);
+Double_t QDisTF::Integral(Option_t* domain) const
+{
+  PRINTF4(this,"\tDouble_t QDisTF::Integral(Option_t* domain<",domain,">) const\n")
 
-  } catch (Int_t i){
-    cout << "Exception handled by QDisTF::Derivative\n";
-    throw i;
-  } 
+  Double_t xmin,xmax,ymin,ymax,zmin,zmax;
+  const TF1* obj=dynamic_cast<TF1*>(GetObject());
+  obj->GetRange(xmin,ymin,zmin,xmax,ymax,zmax);
+
+  if(!domain || !strlen(domain)) return Integral(xmin,xmax,ymin,ymax,zmin,zmax);
+
+  TString objformula=obj->GetExpFormula();
+  TString newformula="(";
+  newformula+=objformula;
+  newformula+=")*(";
+  newformula+=domain;
+  newformula+=")";
+  
+  TF1 *tfcut=dynamic_cast<TF1*>(obj->Clone());
+  tfcut->SetTitle(newformula);
+  tfcut->Compile();
+
+  for(Int_t i=0;i<obj->GetNpar();i++){
+    tfcut->SetParameter(i,obj->GetParameter(i));
+  }
+
+  const TF1* oldtf=obj;
+  obj=tfcut;
+  Double_t integral=Integral(xmin,xmax,ymin,ymax,zmin,zmax);
+  obj=oldtf;
+  delete tfcut;
+  return integral;
 }
 
 void QDisTF::Normalize(Double_t* integral)
@@ -80,9 +113,7 @@ void QDisTF::Normalize(Double_t* integral)
 
     TString objformula=obj->GetExpFormula();
 
-    fQTFOps.SetTF(dynamic_cast<TF1*>(GetObject()));  //set the pdf.  GetObject is a QTObjectIO method.
-
-    Double_t cutintbuf=fQTFOps.LimIntegral(fCutExpr);
+    Double_t cutintbuf=Integral(fCutExpr);
 
     if(integral) *integral=cutintbuf;
 
