@@ -79,4 +79,5 @@ void QSigExFit::Browse(TBrowser *b)
 {
   b->Add(&fParams,"Fit Parameters");
   if(fCovMatrix) b->Add(fCovMatrix,"Covariance Matrix");
+  b->Add(&fFCNMin);
 }

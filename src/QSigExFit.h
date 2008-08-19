@@ -10,7 +10,7 @@
 class QSigExFit: public TObject
 {
   public:
-    QSigExFit(): TObject(), fQProcessor(NULL), fQPOutputs(), fParams(), fFCNError("Min Function Error",1.0), fFCNMin("Minimization Function Minimum",1.7e308), fCovMatrix(NULL), fVerbose(0) {}
+    QSigExFit(): TObject(), fQProcessor(NULL), fQPOutputs(), fParams(), fFCNError("Min Function Error",1.0), fFCNMin("Minimization Function Minimum",1e99), fCovMatrix(NULL), fVerbose(0) {}
     QSigExFit(const QSigExFit &rhs): TObject(rhs), fQProcessor(rhs.fQProcessor), fQPOutputs(rhs.fQPOutputs), fParams(rhs.fParams), fFCNError(rhs.fFCNError), fFCNMin(rhs.fFCNMin), fCovMatrix(new TMatrixDSym(*rhs.fCovMatrix)), fVerbose(0) {};
     virtual ~QSigExFit();
 
