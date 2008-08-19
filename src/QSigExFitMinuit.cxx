@@ -112,8 +112,6 @@ Double_t QSigExFitMinuit::Fit()
   //Delete the covariance matrix array
   delete[] covmat;
 
-  fFCNMin=fMinuit->fAmin;
-
   return fFCNMin;
 } 
 
