@@ -397,12 +397,12 @@ QDisTH* QDisTH::MarginalPDF(const char *name, Int_t xaxis, Int_t yaxis) const
   if(dim==1 || (yaxis==-1 && dim<3)) return NULL;
 
   if(xaxis<0 || xaxis>=dim) {
-    fprintf(stderr,"QDisTH::Projection1D: Error: Invalid axis index\n");
+    fprintf(stderr,"QDisTH::MarginalPDF: Error: Invalid axis index\n");
     throw 1;
   }
 
   if(yaxis<-1 || yaxis>=dim) {
-    fprintf(stderr,"QDisTH::Projection1D: Error: Invalid axis index\n");
+    fprintf(stderr,"QDisTH::MarginalPDF: Error: Invalid axis index\n");
     throw 1;
   }
   TAxis **axes=new TAxis*[dim];
@@ -447,17 +447,15 @@ QDisTH* QDisTH::MarginalPDF(const char *name, Int_t xaxis, Int_t yaxis) const
   Bool_t widths[3];
   Int_t* binranges[3];
 
-  //Initialized the binranges pointers to NULL
+  //Initialize binranges pointers to NULL
   memset(binranges,0,3*sizeof(Int_t*));
 
   binranges[xaxis]=new Int_t[2];
   if(yaxis!=-1) binranges[yaxis]=new Int_t[2];
 
-  if(fNormFlags&kNoBinWidthNorm) {
-    widths[0]=!(fNormFlags&kNoXBinWidthNorm);
-    widths[1]=!(fNormFlags&kNoYBinWidthNorm);
-    widths[2]=!(fNormFlags&kNoZBinWidthNorm);
-  }
+  widths[0]=!(fNormFlags&kNoXBinWidthNorm);
+  widths[1]=!(fNormFlags&kNoYBinWidthNorm);
+  widths[2]=!(fNormFlags&kNoZBinWidthNorm);
   widths[xaxis]=kFALSE;
   if(yaxis!=-1) widths[yaxis]=kFALSE;
 
