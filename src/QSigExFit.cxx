@@ -52,6 +52,14 @@ void QSigExFit::Init()
   }
 }
 
+Int_t QSigExFit::GetNVarParams() const
+{
+  Int_t i,n=0;
+
+  for(i=0; i<fParams.Count(); i++) if(!fParams.GetArray()[i].IsFixed()) n++;
+  return n;
+}
+
 QSigExFitParam& QSigExFit::Param(const char* paramname) const
 {
   Int_t i;

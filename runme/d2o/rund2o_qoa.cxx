@@ -198,6 +198,8 @@ int main(int nargs, char* args[])
 
   plist.TerminateProcess();
 
+  f1.Add(&fitter);
+
   f1.Write();
   f1.Close();
 }

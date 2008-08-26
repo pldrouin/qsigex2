@@ -10,6 +10,7 @@ template <typename U> void QTHN<U>::Streamer(TBuffer &R__b)
     Version_t R__v = R__b.ReadVersion(&R__s, &R__c); if (R__v) { }
     TNamed::Streamer(R__b);
     R__b >> fNDims;
+    R__b >> fEntries;
 
     if(fAxes) delete[] fAxes;
     fAxes=new TAxis*[fNDims];
@@ -36,6 +37,7 @@ template <typename U> void QTHN<U>::Streamer(TBuffer &R__b)
     R__c = R__b.WriteVersion(QTHN<U>::IsA(), kTRUE);
     TNamed::Streamer(R__b);
     R__b << fNDims;
+    R__b << fEntries;
 
     for(i=0; i<fNDims; i++) {
 

@@ -13,6 +13,8 @@ class QSigExFitMinuit: public QSigExFit
     QSigExFitMinuit(const QSigExFitMinuit &rhs): QSigExFit(rhs), fMinuit(NULL), fCompiledFunc(rhs.fCompiledFunc), fInterpretedFunc(rhs.fInterpretedFunc), fMinimName(rhs.fMinimName), fMinimArgs(new QList<QNamedVar<Double_t> >(*rhs.fMinimArgs)), fMinosMaxCalls(rhs.fMinosMaxCalls), fMinuitStatus(rhs.fMinuitStatus) {};
     virtual ~QSigExFitMinuit();
 
+    Double_t EvalFCN(const Double_t *pars=NULL, Int_t flag=0) const;
+
     Int_t FindMinimArg(const char* name) const;
 
     Double_t Fit();

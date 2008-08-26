@@ -56,6 +56,7 @@ template <typename U> void QTHN<U>::AddBinContent(const Long64_t &bin, const U &
   } else {
     fBinContent[bidx]+=w;
   }
+  fEntries++;
 }
 
 template <typename U> Int_t QTHN<U>::Fill(const Double_t *x, const U &w)
@@ -154,6 +155,7 @@ template <typename U> void QTHN<U>::Reset()
     free(fBinContent); fBinContent=NULL;
     fNBins=0;
   }
+  fEntries=0;
 }
 
 template <typename U> TH1D* QTHN<U>::Projection1D(const char *name, Int_t xaxis) const

@@ -9,7 +9,7 @@
 template <typename U> class QTHN: public TNamed
 {
   public:
-    QTHN(): TNamed(),fNDims(0), fAxes(NULL), fNBins(0), fBins(NULL), fBinContent(NULL), fZero(0){};
+    QTHN(): TNamed(),fNDims(0), fAxes(NULL), fNBins(0), fBins(NULL), fEntries(0), fBinContent(NULL), fZero(0){};
     QTHN(const Char_t *name, const Char_t *title, Int_t ndims);
     virtual ~QTHN();
     void AddBinContent(const Long64_t &bin, const U &w=1);
@@ -20,6 +20,7 @@ template <typename U> class QTHN: public TNamed
     Int_t GetNDims() const {return fNDims;}
     const Long64_t& GetNFbins() const {return fNBins;}
     const U& GetBinContent(const Long64_t &bin) const;
+    const Double_t& GetEntries() const{return fEntries;}
     const U& GetFBinContent(const Long64_t &fbin) const;
     void GetBinCoords(Long64_t bin, Int_t *coords) const;
     const Long64_t& GetFBinCoord(const Long64_t &fbin) const;
@@ -36,6 +37,7 @@ template <typename U> class QTHN: public TNamed
     TAxis **fAxes; //!
     Long64_t fNBins;
     Long64_t *fBins; //!
+    Double_t fEntries;
     U *fBinContent; //!
     const U fZero;
 

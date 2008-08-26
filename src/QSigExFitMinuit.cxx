@@ -15,6 +15,33 @@ QSigExFitMinuit::~QSigExFitMinuit()
   }
 }
 
+Double_t QSigExFitMinuit::EvalFCN(const Double_t *pars, Int_t flag) const
+{
+  if(!fMinuit) {
+    fprintf(stderr,"QSigExFitMinuit::Fit: Error: InitFit has not been called\n");
+    throw 1;
+  }
+  Double_t fval, *par;
+  Int_t i;
+  par=new Double_t[GetNParams()];
+
+  if(pars) {
+    memcpy(par,pars,GetNParams()*sizeof(Double_t));
+
+  } else {
+
+    for(i=0; i<GetNParams(); i++) {
+      par[i]=Param(i).GetStartVal();
+    }
+  }
+
+  fCurInstance=this;
+  fMinuit->Eval(GetNVarParams(),NULL,fval,par,flag);
+
+  delete[] par;
+  return fval;
+}
+
 Int_t QSigExFitMinuit::FindMinimArg(const char* name) const
 {
   for(Int_t i=0; i<fMinimArgs->Count(); i++){
@@ -34,6 +61,11 @@ Double_t QSigExFitMinuit::Fit()
   TString strbuf;
 
   fCurInstance=this;
+
+  if(!fMinuit) {
+    fprintf(stderr,"QSigExFirMinuit::Fit: Error: InitFit has not been called\n");
+    throw 1;
+  }
 
   for(i=0; i<fMinimArgs->Count(); i++) minimargs[i]=(*fMinimArgs)[i];
 
