@@ -5,7 +5,13 @@
 #define _QDISTH_
 
 #include "Rtypes.h"
-#include "TH3.h"
+#include "TFile.h"
+#include "TH3D.h"
+#include "TH3F.h"
+#include "TH2D.h"
+#include "TH2F.h"
+#include "TH1D.h"
+#include "TH1F.h"
 #include "QDis.h"
 #include <iostream>
 
@@ -31,21 +37,33 @@ using std::cout;
 class QDisTH: public QDis
 {
  public:
-  QDisTH():QDis(){}
+  QDisTH(): QDis(), fOwned(kTRUE), fTH(NULL){}
 
-  QDisTH(const Char_t* classname):QDis(classname){}
+  QDisTH(const QDisTH& newqdis): QDis(newqdis), fOwned(kTRUE)
+  {
+    PRINTF2(this,"\tQDisTH::QDisTH(const QDisTH& newqdth)\n")
+    if(newqdis.fTH) {
+	fTH=(TH1*)newqdis.fTH->Clone();
+	fTH->SetDirectory(NULL);
+    } else fTH=NULL;
+  }
 
-  QDisTH(const QDisTH& newqdth):QDis(newqdth.GetClassName()){PRINTF2(this,"\tQDisTH::QDisTH(const QDisTH& newqdth)\n") *this=newqdth; }
+  QDisTH(const Char_t* filename, const Char_t* objectname);
 
-  QDisTH(const Char_t* classname, const Char_t* filename, const Char_t* objectname):QDis(classname,filename, objectname)
-    {
-      PRINTF8(this,"\tQDisTH::QDisTH(const Char_t* classname<",classname,">, const Char_t* filename<",filename,">, const Char_t* objectname<",objectname,">)\n")
-    }
+  QDisTH(const TH1& newobject): QDis(), fOwned(kTRUE)
+  {
+    PRINTF2(this,"\tQDisTH::QDisTH(const TH& newobject)\n")
+    fTH=(TH1*)newobject.Clone();
+    fTH->SetDirectory(NULL);
+    SetNameTitleToObject();
+  }
 
-  QDisTH(const Char_t* classname, const TH1& newobject):QDis(classname,newobject)
-    {
-      PRINTF4(this,"\tQDisTH::QDisTH(const Char_t* classname<",classname,">, const TH& newobject)\n")
-    }
+  QDisTH(TH1 *object): QDis(), fOwned(kFALSE)
+  {
+    PRINTF2(this,"\tQDisTH::QDisTH(TH *object)\n")
+    fTH=object;
+    SetNameTitleToObject();
+  }
 
   QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy=0, Float_t ylow=0, Float_t yhigh=0, Int_t nbinsz=0, Float_t zlow=0, Float_t zhigh=0);
   QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, const Float_t *zbins);
@@ -65,17 +83,26 @@ class QDisTH: public QDis
   QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Double_t *xbins, Int_t nbinsy, const Double_t *ybins, Int_t nbinsz=0, Double_t zlow=0, Double_t zhigh=0);
   QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Double_t *xbins, Int_t nbinsy, const Double_t *ybins, Int_t nbinsz, const Double_t *zbins);
 
-  virtual ~QDisTH(){PRINTF2(this,"\tQDisTH::~QDisTH()\n")}
+  virtual ~QDisTH(){PRINTF2(this,"\tQDisTH::~QDisTH()\n") if(fTH && fOwned) delete fTH;}
 
   const QDisTH& operator=(const QDisTH& newqdis)
   {
     PRINTF2(this,"\tconst QDisTH& QDisTH::operator=(const QDisTH& newqdis)\n")
 
     QDis::operator=(newqdis);
+    if(fTH && fOwned) delete fTH;
+    if(newqdis.fTH) {
+      fTH=(TH1*)newqdis.fTH->Clone();
+      fOwned=kTRUE;
+      fTH->SetDirectory(NULL);
+    } else {
+      fTH=NULL;
+      fOwned=kTRUE;
+    }
     return *this;
   }
 
-  operator TH1&(){return *(dynamic_cast<TH1*>(GetObject()));}
+  operator TH1&(){return *fTH;}
 
   QDis* CloneQDis() const
     {
@@ -84,13 +111,17 @@ class QDisTH: public QDis
       return new QDisTH(*this);
     }
 
+  void Draw(Option_t *option=""){fTH->Draw(option);}
+
   Int_t Fill(const Double_t &x);
   Int_t Fill(const Double_t &x, const Double_t &y);
   Int_t Fill(const Double_t &x, const Double_t &y, const Double_t &z);
   
-  Int_t GetDimension(){return dynamic_cast<TH1*>(GetObject())->GetDimension();}
+  Int_t GetDimension(){return fTH->GetDimension();}
 
-  void InitProcObj(){((TH1*)GetObject())->Reset();}
+  TH1* GetTH() const{return fTH;} 
+
+  void InitProcObj(){fTH->Reset();}
 
   Double_t Integral(Int_t** binranges=NULL, Bool_t *widths=NULL) const;
 
@@ -104,6 +135,10 @@ class QDisTH: public QDis
   void TerminateProcObj(){Normalize(); UpdateModTime();}
 
  private:
+  void SetNameTitleToObject(){SetNameTitle(fTH->GetName(),fTH->GetTitle());}
+  Bool_t fOwned;
+  TH1 *fTH;
+
   ClassDef(QDisTH,1) //Derived class from QDis that allows to get probabilities from a TH
 };
 

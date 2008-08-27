@@ -68,7 +68,6 @@
 #pragma link C++ class QDis;
 #pragma link C++ class QDisTF;
 #pragma link C++ class QDisTH;
-#pragma link C++ class QTObjectIO-;
 #pragma link C++ class QTHN<Double_t>-;
 #pragma link C++ class QTHN<Int_t>-;
 #pragma link C++ class QFileUtils;

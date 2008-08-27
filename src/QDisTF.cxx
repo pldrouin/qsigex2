@@ -22,6 +22,23 @@
 
 ClassImp(QDisTF)
 
+QDisTF::QDisTF(const Char_t* filename, const Char_t* objectname)
+{
+  PRINTF6(this,"\tQDisTF::QDisTF(const Char_t* filename<",filename,">, const Char_t* objectname<",objectname,">)\n")
+
+  TDirectory *curdir=gDirectory;
+  TFile f(filename,"READ");
+  fTF=dynamic_cast<TF1*>(f.Get(objectname));
+
+  if(!fTF){
+    cout << "QDisTF::QDisTF: Object '" << objectname << "' in file '" << filename << "' doesn't exist\n"; 
+    throw 1;
+  }
+
+  f.Close();
+  curdir->cd();
+}
+
 Double_t QDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const
 {
   //This function returns the probability density associated with a point which
@@ -33,7 +50,7 @@ Double_t QDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t 
 
   try{
 
-    return (Double_t)const_cast<TF1*>(dynamic_cast<TF1*>(GetObject()))->Eval(x,y,z);
+    return (Double_t)const_cast<TF1*>(fTF)->Eval(x,y,z);
 
   } catch (Int_t i){
     cout << "Exception handled by QDisTF::ProbDensity\n";
@@ -44,17 +61,15 @@ Double_t QDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t 
 
 Double_t QDisTF::Integral(Double_t xlo, Double_t xhi, Double_t ylo, Double_t yhi, Double_t zlo, Double_t zhi) const
 {
-  TF1* obj=dynamic_cast<TF1*>(GetObject());
-
-  switch(obj->GetNdim()){
+  switch(fTF->GetNdim()){
     case 1:
-      return obj->Integral(xlo,xhi);
+      return fTF->Integral(xlo,xhi);
       break;
     case 2:
-      return obj->Integral(xlo,xhi,ylo, yhi);
+      return fTF->Integral(xlo,xhi,ylo, yhi);
       break;
     case 3:
-      return obj->Integral(xlo,xhi,ylo, yhi, zlo, zhi);
+      return fTF->Integral(xlo,xhi,ylo, yhi, zlo, zhi);
       break;
     default:
       return 0;
@@ -66,30 +81,29 @@ Double_t QDisTF::Integral(Option_t* domain) const
   PRINTF4(this,"\tDouble_t QDisTF::Integral(Option_t* domain<",domain,">) const\n")
 
   Double_t xmin,xmax,ymin,ymax,zmin,zmax;
-  const TF1* obj=dynamic_cast<TF1*>(GetObject());
-  obj->GetRange(xmin,ymin,zmin,xmax,ymax,zmax);
+  fTF->GetRange(xmin,ymin,zmin,xmax,ymax,zmax);
 
   if(!domain || !strlen(domain)) return Integral(xmin,xmax,ymin,ymax,zmin,zmax);
 
-  TString objformula=obj->GetExpFormula();
+  TString objformula=fTF->GetExpFormula();
   TString newformula="(";
   newformula+=objformula;
   newformula+=")*(";
   newformula+=domain;
   newformula+=")";
   
-  TF1 *tfcut=dynamic_cast<TF1*>(obj->Clone());
+  TF1 *tfcut=dynamic_cast<TF1*>(fTF->Clone());
   tfcut->SetTitle(newformula);
   tfcut->Compile();
 
-  for(Int_t i=0;i<obj->GetNpar();i++){
-    tfcut->SetParameter(i,obj->GetParameter(i));
+  for(Int_t i=0;i<fTF->GetNpar();i++){
+    tfcut->SetParameter(i,fTF->GetParameter(i));
   }
 
-  const TF1* oldtf=obj;
-  obj=tfcut;
+  TF1* oldtf=fTF;
+  fTF=tfcut;
   Double_t integral=Integral(xmin,xmax,ymin,ymax,zmin,zmax);
-  obj=oldtf;
+  fTF=oldtf;
   delete tfcut;
   return integral;
 }
@@ -109,9 +123,7 @@ void QDisTF::Normalize(Double_t* integral)
       throw 1;
     }
 
-    TF1* obj=dynamic_cast<TF1*>(GetObject());
-
-    TString objformula=obj->GetExpFormula();
+    TString objformula=fTF->GetExpFormula();
 
     Double_t cutintbuf=Integral(fCutExpr);
 
@@ -123,8 +135,8 @@ void QDisTF::Normalize(Double_t* integral)
       newformula+=objformula;
       newformula+=")/";
       newformula+=cutintbuf;
-      obj->SetTitle(newformula);
-      obj->Compile();
+      fTF->SetTitle(newformula);
+      fTF->Compile();
     }
   } catch (Int_t e){
     cout << "Exception handled by QDisTF::Normalize\n";
