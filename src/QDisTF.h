@@ -87,7 +87,7 @@ class QDisTF: public QDis
  private:
   void SetNameTitleToObject(){SetNameTitle(fTF->GetName(),fTF->GetTitle());}
   mutable TF1 *fTF;
-  ClassDef(QDisTF,1) //Derived class from QDis that allows to get probabilities from a TF
+  ClassDef(QDisTF,2) //Derived class from QDis that allows to get probabilities from a TF
 };
 #include "debugger.h"
 

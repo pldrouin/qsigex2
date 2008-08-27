@@ -139,7 +139,7 @@ class QDisTH: public QDis
   Bool_t fOwned;
   TH1 *fTH;
 
-  ClassDef(QDisTH,1) //Derived class from QDis that allows to get probabilities from a TH
+  ClassDef(QDisTH,2) //Derived class from QDis that allows to get probabilities from a TH
 };
 
 #include "debugger.h"

@@ -106,7 +106,7 @@ class QDis: public TNamed, public QProcObj
   eNormFlags fNormFlags;
 
  private:
-  ClassDef(QDis,1) //Abstract class of QDis* classes
+  ClassDef(QDis,2) //Abstract class of QDis* classes
 };
 
 #include "debugger.h"
