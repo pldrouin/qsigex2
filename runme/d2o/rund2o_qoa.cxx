@@ -18,21 +18,21 @@ int main(int nargs, char* args[])
 
   TFile f1(outfile,"RECREATE");
 
-  QDisTH cce("TH1F","signal_pdf.root","h1001");
-  QDisTH ccr("TH1F","signal_pdf.root","h1002");
-  QDisTH ccc("TH1F","signal_pdf.root","h1003");
+  QDisTH cce("signal_pdf.root","h1001");
+  QDisTH ccr("signal_pdf.root","h1002");
+  QDisTH ccc("signal_pdf.root","h1003");
 
-  QDisTH ese("TH1F","signal_pdf.root","h2001");
-  QDisTH esr("TH1F","signal_pdf.root","h2002");
-  QDisTH esc("TH1F","signal_pdf.root","h2003");
+  QDisTH ese("signal_pdf.root","h2001");
+  QDisTH esr("signal_pdf.root","h2002");
+  QDisTH esc("signal_pdf.root","h2003");
 
-  QDisTH nce("TH1F","signal_pdf.root","h3001");
-  QDisTH ncr("TH1F","signal_pdf.root","h3002");
-  QDisTH ncc("TH1F","signal_pdf.root","h3003");
+  QDisTH nce("signal_pdf.root","h3001");
+  QDisTH ncr("signal_pdf.root","h3002");
+  QDisTH ncc("signal_pdf.root","h3003");
 
-  QDisTH bke("TH1F","bck_pdf.root","h4001");
-  QDisTH bkr("TH1F","bck_pdf.root","h4002");
-  QDisTH bkc("TH1F","bck_pdf.root","h4003");
+  QDisTH bke("bck_pdf.root","h4001");
+  QDisTH bkr("bck_pdf.root","h4002");
+  QDisTH bkc("bck_pdf.root","h4003");
 
   cce.Normalize();
   ccr.Normalize();
