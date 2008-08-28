@@ -37,7 +37,7 @@ using std::cout;
 class QDis: public TNamed, public QProcObj
 {
  public:
-  QDis(): fCutExpr(), fNormFlags(kRegularNorm)
+  QDis(): fCutExpr(), fNormFlags(kRegularNorm), fNFixedCoords(0)
     {
       PRINTF2(this,"\tQDis::QDis()\n")
     }
@@ -58,7 +58,9 @@ class QDis: public TNamed, public QProcObj
     TNamed::operator=(rhs);
     fCutExpr=rhs.fCutExpr;
     fNormFlags=rhs.fNormFlags;
-    return *this;}
+    fNFixedCoords=rhs.fNFixedCoords;
+    return *this;
+  }
 
   virtual void Draw(Option_t *option="")=0;
 
@@ -69,21 +71,18 @@ class QDis: public TNamed, public QProcObj
       gPad->Update();
     }
 
-  virtual Int_t GetDimension()=0;
+  virtual Int_t GetDimension() const=0;
 
   const Option_t* GetCutExpr() const{return fCutExpr;}
   Int_t GetNormFlags() const{return fNormFlags;}
 
   void SetCutExpr(Option_t *cutexpr=NULL){fCutExpr=cutexpr;}
-  enum eNormFlags {kRegularNorm=0, kOneFixedCoord=1, kTwoFixedCoords=2, kThreeFixedCoords=3, kEventsFilled=4, kVarBinSizeEventsFilled=8, kNoBinWidthNorm=112, kNoXBinWidthNorm=16, kNoYBinWidthNorm=32, kNoZBinWidthNorm=64, kNoNorm=128};
-  void SetNormFlags(eNormFlags normflags=kRegularNorm)
+  enum eNormFlags {kRegularNorm=0, kEventsFilled=1, kVarBinSizeEventsFilled=2, kNoBinWidthNorm=4, kNoNorm=8};
+  void SetNormFlags(eNormFlags normflags=kRegularNorm, UInt_t nfixedcoords=0)
   {
     //Sets the normalization flags for the QDis object. The available normalization flags are the following:
     //
     //kRegularNorm: Regular normalization (area/volume/hypervolume = 1) (default)
-    //kOneFixedCoord: Conditional PDF with 1 fixed coordinate
-    //kTwoFixedCoords: Conditional PDF with 2 fixed coordinates
-    //kThreeFixedCoords: Conditional PDF with 3 fixed coordinates
     //kEventsFilled: Faster normalization algorithm for histograms which bin content corresponds to a number of
     //               of events. Underflow and overflow bins must be empty. Should not normalize more than once
     //               using this option. kVarBinSizeEventsFilled is automatically added for histograms having a
@@ -91,19 +90,20 @@ class QDis: public TNamed, public QProcObj
     //kVarBinSizeEventsFilled: PDF with variable bin size for which the histogram bin content corresponds to
     //                         a number of events (should not normalize more than once using this option).
     //                         Has no effect for histograms having constant bin width in all directions.
-    //kNoBinWidthNorm: Do not use bin widths at all for PDF normalization
-    //kNoXBinWidthNorm: Do not use bin widths in x direction for PDF normalization
-    //kNoYBinWidthNorm: Do not use bin widths in y direction for PDF normalization
-    //kNoZBinWidthNorm: Do not use bin widths in z direction for PDF normalization
+    //kNoBinWidthNorm: Do not use bin widths for PDF normalization
     //kNoNorm: No normalization
     //Flags can be combined using a bitwise "OR" operator (|).
+    //The second argument specifies the number of fixed coordinates (i.e. number of conditional variables for a
+    //conditional PDF). Fixed coordinates must have the highest axis indices.
     fNormFlags=normflags;
+    fNFixedCoords=nfixedcoords;
   }
 
  protected:
   virtual void SetNameTitleToObject()=0;
   TString fCutExpr;
   eNormFlags fNormFlags;
+  UInt_t fNFixedCoords;
 
  private:
   ClassDef(QDis,2) //Abstract class of QDis* classes

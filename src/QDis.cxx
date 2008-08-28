@@ -27,7 +27,6 @@ ClassImp(QDis)
 QDis::~QDis()
 {
   PRINTF2(this,"\tvirtual QDis::~QDis()\n")
-
 }
 
 #include "debugger.h"

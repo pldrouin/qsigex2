@@ -117,7 +117,7 @@ class QDisTH: public QDis
   Int_t Fill(const Double_t &x, const Double_t &y);
   Int_t Fill(const Double_t &x, const Double_t &y, const Double_t &z);
   
-  Int_t GetDimension(){return fTH->GetDimension();}
+  Int_t GetDimension() const{return fTH->GetDimension();}
 
   TH1* GetTH() const{return fTH;} 
 

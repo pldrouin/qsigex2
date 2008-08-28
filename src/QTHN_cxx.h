@@ -1,6 +1,18 @@
 #include "QTHN.h"
 
-template <typename U> QTHN<U>::QTHN(const Char_t *name, const Char_t *title, Int_t ndims): TNamed(name,title), fNDims(ndims), fAxes(new TAxis*[ndims]), fNBins(0), fBins(NULL), fBinContent(NULL), fZero(0)
+template <typename U> QTHN<U>::QTHN(const QTHN &qthn): TNamed(qthn), fNDims(qthn.fNDims), fAxes(NULL), fNBins(qthn.fNBins), fBins(NULL), fEntries(qthn.fEntries), fBinContent(NULL), fZero(qthn.fZero), fMaxNBins(qthn.fMaxNBins)
+{
+  Int_t i;
+  fAxes=new TAxis*[fNDims];
+
+  for(i=0; i<fNDims; i++) fAxes[i]=(TAxis*)qthn.fAxes[i]->Clone();
+  fBins=(Long64_t*)malloc(fNBins*sizeof(Long64_t));
+  memcpy(fBins,qthn.fBins,fNBins*sizeof(Long64_t));
+  fBinContent=(U*)malloc(fNBins*sizeof(U));
+  memcpy(fBinContent,qthn.fBinContent,fNBins*sizeof(U));
+}
+
+template <typename U> QTHN<U>::QTHN(const Char_t *name, const Char_t *title, Int_t ndims): TNamed(name,title), fNDims(ndims), fAxes(new TAxis*[ndims]), fNBins(0), fBins(NULL), fBinContent(NULL), fZero(0), fMaxNBins(0)
 {
   if(fNDims<=0) {
     fprintf(stderr,"QTHN::QTHN: Error: Number of dimensions is invalid\n");
@@ -9,10 +21,64 @@ template <typename U> QTHN<U>::QTHN(const Char_t *name, const Char_t *title, Int
   memset(fAxes,0,fNDims*sizeof(TAxis*));
 }
 
-template <typename U> QTHN<U>::~QTHN()
+template <typename U> void QTHN<U>::AddBinContent(const Long64_t &bin, const U &w)
 {
+  Long64_t li;
+  Long64_t bidx;
+
+  if(bin<0 || bin>=fMaxNBins) {
+    fprintf(stderr,"QTHN::AddBinContent: Error: Invalid bin index\n");
+    throw 1;
+  }
+
+  bidx=std::lower_bound(fBins,fBins+fNBins, bin)-fBins;
+
+  if(bidx==fNBins || fBins[bidx]!=bin) {
+
+    if(w) {
+      fNBins++;
+      fBins=(Long64_t*)realloc(fBins,fNBins*sizeof(Long64_t));
+      fBinContent=(U*)realloc(fBinContent,fNBins*sizeof(U));
+
+      if(!fBins || !fBinContent) {
+	fprintf(stderr,"QTHN::AddBinContent: Error: Could not allocate memory\n");
+	throw 1;
+      }
+
+      for(li=fNBins-1; li>bidx; li--) {
+	fBins[li]=fBins[li-1];
+	fBinContent[li]=fBinContent[li-1];
+      }
+      fBins[bidx]=bin;
+      fBinContent[bidx]=w;
+    }
+
+  } else {
+    fBinContent[bidx]+=w;
+  }
+  fEntries++;
+}
+
+template <typename U> void QTHN<U>::AddBinContent(const Int_t *coords, const U &w)
+{
+  AddBinContent(GetBin(coords),w);
+}
+
+template <typename U> void QTHN<U>::AddFBinContent(const Long64_t &fbin, const U &w)
+{
+  if(fbin<0 || fbin>=fNBins) {
+    fprintf(stderr,"QTHN::AddFBinContent: Error: Invalid bin index\n");
+    throw 1;
+  }
+  fBinContent[fbin]+=w;
+  fEntries++;
+}
+
+template <typename U> void QTHN<U>::Clear(Option_t* option)
+{
+  TNamed::Clear(option);
   Int_t i;
-  
+
   for(i=0; i<fNDims; i++) {
     if(fAxes[i]) delete fAxes[i];
   }
@@ -22,41 +88,20 @@ template <typename U> QTHN<U>::~QTHN()
     free(fBins);
     free(fBinContent);
   }
+  fNDims=0;
+  fAxes=NULL;
+  fNBins=0;
+  fBins=NULL;
+  fEntries=0;
+  fBinContent=0;
+  fMaxNBins=0;
 }
 
-template <typename U> void QTHN<U>::AddBinContent(const Long64_t &bin, const U &w)
+template <typename U> void QTHN<U>::ComputeMaxNBins()
 {
-  Long64_t li;
-  Long64_t bidx=fNBins;
-
-  for(li=0; li<fNBins; li++) {
-    if(fBins[li]>=bin) {
-      bidx=li;
-      break;
-    }
-  }
-
-  if(bidx==fNBins || fBins[bidx]!=bin) {
-    fNBins++;
-    fBins=(Long64_t*)realloc(fBins,fNBins*sizeof(Long64_t));
-    fBinContent=(U*)realloc(fBinContent,fNBins*sizeof(U));
-
-    if(!fBins || !fBinContent) {
-      fprintf(stderr,"QTHN::AddBinContent: Error: Could not allocate memory\n");
-      throw 1;
-    }
-
-    for(li=fNBins-1; li>bidx; li--) {
-      fBins[li]=fBins[li-1];
-      fBinContent[li]=fBinContent[li-1];
-    }
-    fBins[bidx]=bin;
-    fBinContent[bidx]=w;
-
-  } else {
-    fBinContent[bidx]+=w;
-  }
-  fEntries++;
+  Int_t i=0;
+  fMaxNBins=fAxes[0]->GetNbins()+2;
+  for(i=1; i<fNDims; i++) fMaxNBins*=fAxes[i]->GetNbins()+2;
 }
 
 template <typename U> Int_t QTHN<U>::Fill(const Double_t *x, const U &w)
@@ -97,12 +142,29 @@ template <typename U> Long64_t QTHN<U>::GetBin(const Int_t *coords) const
   return bin;
 }
 
+template <typename U> Long64_t QTHN<U>::GetFBin(const Int_t *coords) const
+{
+  Long64_t bin=GetBin(coords);
+  Long64_t bidx;
+
+  bidx=std::lower_bound(fBins,fBins+fNBins, bin)-fBins;
+
+  if(bidx==fNBins || fBins[bidx]!=bin) return -1;
+  return bidx;
+}
+
+template <typename U> Long64_t QTHN<U>::GetFBin(const Long64_t &bin) const
+{
+  Long64_t bidx=std::lower_bound(fBins,fBins+fNBins, bin)-fBins;
+
+  if(bidx==fNBins || fBins[bidx]!=bin) return -1;
+  return bidx;
+}
+
 template <typename U> const U& QTHN<U>::GetBinContent(const Long64_t &bin) const
 {
-  Long64_t li;
-
-  for(li=0; li<fNBins && fBins[li]<bin; li++) {}
-  if(li!=fNBins && fBins[li]==bin) return fBinContent[li];
+  Long64_t li=TMath::BinarySearch(fNBins, fBins, bin);
+  if(fBins[li]==bin) return fBinContent[li];
   return fZero;
 }
 
@@ -116,7 +178,7 @@ template <typename U> const U& QTHN<U>::GetFBinContent(const Long64_t &fbin) con
   return fBinContent[fbin];
 }
 
-template <typename U> void QTHN<U>::GetBinCoords(Long64_t bin, Int_t *coords) const
+template <typename U> void QTHN<U>::GetBinCoords(Long64_t &bin, Int_t *coords) const
 {
   Int_t i;
   coords[0]=bin%(fAxes[0]->GetNbins()+2);
@@ -146,6 +208,38 @@ template <typename U> void QTHN<U>::GetFBinCoords(const Long64_t &fbin, Int_t *c
     bin=(bin-coords[i-1])/(fAxes[i-1]->GetNbins()+2);
     coords[i]=bin%(fAxes[i]->GetNbins()+2);
   }
+}
+
+template <typename U> Bool_t QTHN<U>::IsBinIncluded(Long64_t &bin, const Int_t *mins, const Int_t *maxs) const
+{
+  Int_t i;
+  Int_t coord=bin%(fAxes[0]->GetNbins()+2);
+  if(coord<mins[0] || coord>maxs[0]) return kFALSE;
+
+  for(i=1; i<fNDims; i++) {
+    bin=(bin-coord)/(fAxes[i-1]->GetNbins()+2);
+    coord=bin%(fAxes[i]->GetNbins()+2);
+    if(coord<mins[i] || coord>maxs[i]) return kFALSE;
+  }
+  return kTRUE;
+}
+
+template <typename U> const QTHN<U>& QTHN<U>::operator=(const QTHN<U> &qthn)
+{
+  Clear();
+  TNamed::operator=(qthn);
+  fNDims=qthn.fNDims;
+  fNBins=qthn.fNBins;
+  fEntries=qthn.fEntries;
+  Int_t i;
+  fAxes=new TAxis*[fNDims];
+
+  for(i=0; i<fNDims; i++) fAxes[i]=(TAxis*)qthn.fAxes[i]->Clone();
+  fBins=(Long64_t*)malloc(fNBins*sizeof(Long64_t));
+  memcpy(fBins,qthn.fBins,fNBins*sizeof(Long64_t));
+  fBinContent=(U*)malloc(fNBins*sizeof(U));
+  memcpy(fBinContent,qthn.fBinContent,fNBins*sizeof(U));
+  return *this;
 }
 
 template <typename U> void QTHN<U>::Reset()
@@ -361,6 +455,35 @@ template <typename U> TH3D* QTHN<U>::Projection3D(const char *name, Int_t xaxis,
   return th;
 }
 
+template <typename U> void QTHN<U>::Scale(const Double_t &scale)
+{
+  Long64_t li;
+
+  for(li=0; li<fNBins; li++) fBinContent[li]*=scale;
+}
+
+template <typename U> void QTHN<U>::ScaleBinContent(const Long64_t &bin, const Double_t &scale)
+{
+  Long64_t fbin=GetFBin(bin);
+  if(fbin!=-1) fBinContent[fbin]*=scale;
+}
+
+template <typename U> void QTHN<U>::ScaleBinContent(const Int_t *coords, const Double_t &scale)
+{
+  Long64_t fbin=GetFBin(coords);
+  if(fbin!=-1) fBinContent[fbin]*=scale;
+}
+
+template <typename U> void QTHN<U>::ScaleFBinContent(const Long64_t &fbin, const Double_t &scale)
+{
+  if(fbin<0 || fbin>=fNBins) {
+    fprintf(stderr,"QTHN::SetFBinContent: Error: Invalid bin index\n");
+    throw 1;
+  }
+  fBinContent[fbin]*=scale;
+}
+
+
 template <typename U> void QTHN<U>::SetAxis(Int_t axis, Int_t nbins, Double_t min, Double_t max)
 {
   if(axis<0 || axis>=fNDims) {
@@ -369,6 +492,7 @@ template <typename U> void QTHN<U>::SetAxis(Int_t axis, Int_t nbins, Double_t mi
   }
   if(fAxes[axis]) delete fAxes[axis];
   fAxes[axis]=new TAxis(nbins,min,max);
+  ComputeMaxNBins();
 }
 
 template <typename U> void QTHN<U>::SetAxis(Int_t axis, Int_t nbins, Double_t *bins)
@@ -379,6 +503,71 @@ template <typename U> void QTHN<U>::SetAxis(Int_t axis, Int_t nbins, Double_t *b
   }
   if(fAxes[axis]) delete fAxes[axis];
   fAxes[axis]=new TAxis(nbins,bins);
+  ComputeMaxNBins();
+}
+
+template <typename U> void QTHN<U>::SetBinContent(const Long64_t &bin, const Double_t &content)
+{
+  Long64_t li;
+  Long64_t bidx;
+
+  if(bin<0 || bin>=fMaxNBins) {
+    fprintf(stderr,"QTHN::SetBinContent: Error: Invalid bin index\n");
+    throw 1;
+  }
+
+  bidx=std::lower_bound(fBins,fBins+fNBins, bin)-fBins;
+
+  if(bidx==fNBins || fBins[bidx]!=bin) {
+
+    if(content) {
+      fNBins++;
+      fBins=(Long64_t*)realloc(fBins,fNBins*sizeof(Long64_t));
+      fBinContent=(U*)realloc(fBinContent,fNBins*sizeof(U));
+
+      if(!fBins || !fBinContent) {
+	fprintf(stderr,"QTHN::AddBinContent: Error: Could not allocate memory\n");
+	throw 1;
+      }
+
+      for(li=fNBins-1; li>bidx; li--) {
+	fBins[li]=fBins[li-1];
+	fBinContent[li]=fBinContent[li-1];
+      }
+      fBins[bidx]=bin;
+      fBinContent[bidx]=content;
+    }
+
+  } else {
+    fBinContent[bidx]=content;
+  }
+}
+
+template <typename U> void QTHN<U>::SetBinContent(const Int_t *coords, const Double_t &content)
+{
+  SetBinContent(GetBin(coords),content);
+}
+
+template <typename U> void QTHN<U>::SetFBinContent(const Long64_t &fbin, const Double_t &content)
+{
+  if(fbin<0 || fbin>=fNBins) {
+    fprintf(stderr,"QTHN::SetFBinContent: Error: Invalid bin index\n");
+    throw 1;
+  }
+
+  if(content) {
+    fBinContent[fbin]=content;
+
+  } else {
+    fNBins--;
+
+    for(Long64_t li=fbin; li<fNBins; li++) {
+      fBins[li]=fBins[li+1];
+      fBinContent[li]=fBinContent[li+1];
+    }
+    fBins=(Long64_t*)realloc(fBins,fNBins*sizeof(Long64_t));
+    fBinContent=(U*)realloc(fBinContent,fNBins*sizeof(U));
+  }
 }
 
 #include "QTHN_Dict_cxx.h"

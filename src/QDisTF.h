@@ -82,7 +82,7 @@ class QDisTF: public QDis
 
   void Normalize(Double_t* integral=NULL);
 
-  Int_t GetDimension(){return fTF->GetNdim();}
+  Int_t GetDimension() const{return fTF->GetNdim();}
 
  private:
   void SetNameTitleToObject(){SetNameTitle(fTF->GetName(),fTF->GetTitle());}
