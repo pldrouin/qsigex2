@@ -122,6 +122,57 @@ template <typename U> Long64_t QTHN<U>::FindBin(const Double_t *x) const
   return bin;
 }
 
+template <typename U> TH1* QTHN<U>::GenTH(const char *name) const
+{
+  if(fNDims>3) {
+    fprintf(stderr,"QTHN::GenTH: Error: Cannot generate a ROOT histogram because QTHN dimension is too high\n");
+    throw 1;
+  }
+
+  TH1* th;
+  Long64_t li;
+  Int_t coords[3];
+
+  switch(fNDims) {
+    case 1:
+      if(!fAxes[0]->GetXbins()->fN) th=new TH1D(name,name,fAxes[0]->GetNbins(),fAxes[0]->GetXmin(),fAxes[0]->GetXmax());
+      else th=new TH1D(name,name,fAxes[0]->GetNbins(),fAxes[0]->GetXbins()->GetArray());
+
+      for(li=0; li<=fNBins; li++) {
+	GetFBinCoords(li,coords);
+	th->SetBinContent(coords[0],fBinContent[li]);
+      }
+      break;
+
+    case 2:
+      th=new TH2D(name,name,fAxes[0]->GetNbins(),fAxes[0]->GetXmin(),fAxes[0]->GetXmax(),fAxes[1]->GetNbins(),fAxes[1]->GetXmin(),fAxes[1]->GetXmax());
+      if(fAxes[0]->GetXbins()->fN) th->GetXaxis()->Set(fAxes[0]->GetNbins(),fAxes[0]->GetXbins()->GetArray());
+      if(fAxes[1]->GetXbins()->fN) th->GetYaxis()->Set(fAxes[1]->GetNbins(),fAxes[1]->GetXbins()->GetArray());
+
+      for(li=0; li<=fNBins; li++) {
+	GetFBinCoords(li,coords);
+	th->SetBinContent(coords[0],coords[1],fBinContent[li]);
+      }
+      break;
+
+    case 3:
+      th=new TH3D(name,name,fAxes[0]->GetNbins(),fAxes[0]->GetXmin(),fAxes[0]->GetXmax(),fAxes[1]->GetNbins(),fAxes[1]->GetXmin(),fAxes[1]->GetXmax(),fAxes[2]->GetNbins(),fAxes[2]->GetXmin(),fAxes[2]->GetXmax());
+      if(fAxes[0]->GetXbins()->fN) th->GetXaxis()->Set(fAxes[0]->GetNbins(),fAxes[0]->GetXbins()->GetArray());
+      if(fAxes[1]->GetXbins()->fN) th->GetYaxis()->Set(fAxes[1]->GetNbins(),fAxes[1]->GetXbins()->GetArray());
+      if(fAxes[2]->GetXbins()->fN) th->GetZaxis()->Set(fAxes[2]->GetNbins(),fAxes[2]->GetXbins()->GetArray());
+
+      for(li=0; li<=fNBins; li++) {
+	GetFBinCoords(li,coords);
+	th->SetBinContent(coords[0],coords[1],coords[2],fBinContent[li]);
+      }
+    default:
+      return NULL;
+  }
+
+  th->SetEntries(fEntries);
+  return th;
+}
+
 template <typename U> TAxis* QTHN<U>::GetAxis(Int_t axis) const
 {
   if(axis<0 || axis>=fNDims) {
@@ -210,6 +261,94 @@ template <typename U> void QTHN<U>::GetFBinCoords(const Long64_t &fbin, Int_t *c
   }
 }
 
+template <typename U> Double_t QTHN<U>::Integral(Int_t** binranges, Bool_t *widths) const
+{
+  Int_t mins[fNDims], maxs[fNDims];
+  Int_t i, j[fNDims];
+  Long64_t li;
+  Bool_t cbw=kTRUE; //Constant bin width in all directions
+  Bool_t bwi=kFALSE;//Integration using bin width for at least some direction
+
+  for(i=0;i<fNDims;i++){
+
+    if(binranges && binranges[i]){
+      mins[i]=(*(binranges[i])>1)?*(binranges[i]):1;
+      maxs[i]=(*(binranges[i]+1)<fAxes[i]->GetNbins())?*(binranges[i]+1):fAxes[i]->GetNbins(); 
+    } else {
+      mins[i]=1;
+      maxs[i]=fAxes[i]->GetNbins();
+    }
+    if(fAxes[i]->GetXbins()->fN) cbw=kFALSE;
+    if(!widths || widths[i]) bwi=kTRUE;
+    //cout << mins[i] << "\t" << maxs[i] << "\n";
+  }
+
+  Double_t integral=0;
+  Double_t binvol;
+
+  //If bin width is constant in all directions
+  if(cbw) {
+
+    //If integrating using bin width for all axes
+    if(!widths) {
+      binvol=fAxes[0]->GetBinWidth(1);
+      for(i=1; i<fNDims; i++) binvol*=fAxes[i]->GetBinWidth(1);
+
+      //Else if using bin width for only some axes
+    } else {
+      binvol=1;
+      for(i=0; i<fNDims; i++) if(widths[i]) binvol*=fAxes[i]->GetBinWidth(1);
+    }
+
+    for(li=0; li<fNBins; li++) {
+      if(IsBinIncluded(li,mins,maxs)) integral+=fBinContent[li];
+    }
+    integral*=binvol;
+
+  //Else if bin width is not constant for some direction
+  } else {
+
+    //If integrating using bin width for all axes
+    if(!widths) {
+
+      for(li=0; li<fNBins; li++) {
+	GetBinCoords(li,j);
+
+	for(i=0; i<fNDims; i++) if(j[i]<mins[i] || j[i]>maxs[i]) break; 
+
+	if(i==fNDims) {
+	  binvol=fAxes[0]->GetBinWidth(j[0]);
+	  for(i=1; i<fNDims; i++) binvol*=fAxes[i]->GetBinWidth(j[i]);
+	  integral+=fBinContent[li]*binvol;
+	}
+      }
+
+      //Else if integrating without using bin width at all
+    } else if(!bwi) {
+
+      for(li=0; li<fNBins; li++) {
+	if(IsBinIncluded(li,mins,maxs)) integral+=fBinContent[li];
+      }
+
+      //Else if integrating using bin width for some of the directions only
+    } else {
+
+      for(li=0; li<fNBins; li++) {
+	GetBinCoords(li,j);
+
+	for(i=0; i<fNDims; i++) if(j[i]<mins[i] || j[i]>maxs[i]) break; 
+
+	if(i==fNDims) {
+	  binvol=(widths[0]?fAxes[0]->GetBinWidth(j[0]):1);
+	  for(i=1; i<fNDims; i++) binvol*=(widths[i]?fAxes[i]->GetBinWidth(j[i]):1);
+	  integral+=fBinContent[li]*binvol;
+	}
+      }
+    }
+  }
+  return integral;
+}
+
 template <typename U> Bool_t QTHN<U>::IsBinIncluded(Long64_t &bin, const Int_t *mins, const Int_t *maxs) const
 {
   Int_t i;
@@ -252,205 +391,85 @@ template <typename U> void QTHN<U>::Reset()
   fEntries=0;
 }
 
-template <typename U> TH1D* QTHN<U>::Projection1D(const char *name, Int_t xaxis) const
+template <typename U> QTHN<U>* QTHN<U>::Projection(const char *name, const Int_t *axes, Int_t naxes) const
 {
-  if(xaxis<0 || xaxis>=fNDims) {
-    fprintf(stderr,"QTHN::Projection1D: Error: Invalid axis index\n");
-    throw 1;
-  }
-  TH1D *th;
+  const Int_t nsdims=fNDims-naxes;
 
-  if(!fAxes[xaxis]->GetXbins()->fN) {
-    th=new TH1D(name,name,fAxes[xaxis]->GetNbins(),fAxes[xaxis]->GetXmin(),fAxes[xaxis]->GetXmax());
+  if(naxes<=0 || !axes || naxes>=fNDims) return NULL;
 
-  } else {
-    th=new TH1D(name,name,fAxes[xaxis]->GetNbins(),fAxes[xaxis]->GetXbins()->GetArray());
-  }
-
-  Int_t *indices=new Int_t[fNDims-1];
-  Int_t *is=new Int_t[fNDims-1];
-  Int_t *coords=new Int_t[fNDims];
-  Int_t i,l,m;
-  Double_t dbuf;
-  l=0;
-
-  for(i=0; i<fNDims; i++) {
-
-    if(i!=xaxis) {
-      indices[l]=i;
-      l++;
-    }
-  }
-
-  for(i=1; i<=fAxes[xaxis]->GetNbins(); i++) {
-    dbuf=0.;
-
-    for(l=0; l<fNDims-1; l++) is[l]=1;
-    l=fNDims-2;
-
-    while(is[0]<=fAxes[indices[0]]->GetNbins()) {
-
-      for(m=0; m<fNDims-1; m++) coords[indices[m]]=is[m];
-      coords[xaxis]=i;
-      dbuf+=GetBinContent(GetBin(coords));
-      is[l]++;
-
-      while(l>0 && is[l]>fAxes[indices[l]]->GetNbins()) {
-	is[l-1]++;
-	is[l]=1;
-	l--;
-      }
-      l=fNDims-2;
-    }
-    th->SetBinContent(i,dbuf);
-  }
-
-  delete[] indices;
-  delete[] is;
-  delete[] coords;
-
-  return th;
-}
-
-template <typename U> TH2D* QTHN<U>::Projection2D(const char *name, Int_t xaxis, Int_t yaxis) const
-{
-  if(xaxis<0 || xaxis>=fNDims) {
-    fprintf(stderr,"QTHN::Projection1D: Error: Invalid xaxis index\n");
-    throw 1;
-  }
-  if(yaxis<0 || yaxis>=fNDims) {
-    fprintf(stderr,"QTHN::Projection1D: Error: Invalid yaxis index\n");
-    throw 1;
-  }
-  TH2D *th=new TH2D(name,name,fAxes[xaxis]->GetNbins(),fAxes[xaxis]->GetXmin(),fAxes[xaxis]->GetXmax(),fAxes[yaxis]->GetNbins(),fAxes[yaxis]->GetXmin(),fAxes[yaxis]->GetXmax());
-  if(fAxes[xaxis]->GetXbins()->fN) th->GetXaxis()->Set(fAxes[xaxis]->GetNbins(),fAxes[xaxis]->GetXbins()->GetArray());
-  if(fAxes[yaxis]->GetXbins()->fN) th->GetYaxis()->Set(fAxes[yaxis]->GetNbins(),fAxes[yaxis]->GetXbins()->GetArray());
-
-  Int_t *indices=new Int_t[fNDims];
-  Int_t *is=new Int_t[fNDims];
-  Int_t *coords=new Int_t[fNDims];
   Int_t i,j,l,m;
-  Int_t ndiff=0;
+
+  for(i=0; i<naxes; i++) {
+    if(axes[i]<0 || axes[i]>=fNDims) {
+      fprintf(stderr,"QTHN<U>::Projection: Error: Invalid axis index: %i\n",axes[i]);
+      throw 1;
+    }
+  }
+
+  QTHN<U> *th;
+  th=new QTHN<U>(name,name,naxes);
+
+  for(i=0; i<naxes; i++) {
+    th->SetAxis(i,fAxes[axes[i]]);
+  }
+
+  Int_t *indices=new Int_t[nsdims]; //Axes indices for axes that are not projected
+  Int_t *biniter=new Int_t[fNDims]; //Integers used as indices for iteration over bins of original histogram
+  Int_t *pbiniter=new Int_t[naxes]; //Integers used as indices for iteration over bins of projected histogram
   Double_t dbuf;
   l=0;
 
   for(i=0; i<fNDims; i++) {
 
-    if(i!=xaxis && i!=yaxis) {
+    m=0;
+    for(j=0; j<naxes; j++) if(axes[j]==i) m++;
+    if(!m) {
       indices[l]=i;
       l++;
     }
   }
-  ndiff=fNDims-l;
 
-  if(fNDims-ndiff==0) return th;
+  for(i=0; i<naxes; i++) biniter[i]=1;
 
-  for(i=1; i<=fAxes[xaxis]->GetNbins(); i++) {
+  //Loop over bin indices of projection axes
+  do{
+    dbuf=0;
 
-    for(j=1; j<=fAxes[yaxis]->GetNbins(); j++) {
-      dbuf=0.;
+    for(i=0; i<nsdims; i++) biniter[indices[i]]=1;
 
-      for(l=0; l<fNDims-ndiff; l++) is[l]=1;
-      l=fNDims-ndiff-1;
+    do{
+      dbuf+=GetBinContent(GetBin(biniter));
+      biniter[indices[0]]++;
+      
+      i=0;
+      while(biniter[indices[i]]>fAxes[indices[i]]->GetNbins()){
+	biniter[indices[i]]=1;
+	i++;
 
-      while(is[0]<=fAxes[indices[0]]->GetNbins()) {
-
-	for(m=0; m<fNDims-ndiff; m++) coords[indices[m]]=is[m];
-	coords[xaxis]=i;
-	coords[yaxis]=j;
-	dbuf+=GetBinContent(GetBin(coords));
-	is[l]++;
-
-	while(l>0 && is[l]>fAxes[indices[l]]->GetNbins()) {
-	  is[l-1]++;
-	  is[l]=1;
-	  l--;
-	}
-	l=fNDims-ndiff-1;
+	if(i>=nsdims) break;
+	biniter[indices[i]]++;
       }
-      th->SetBinContent(i,j,dbuf);
+
+    } while(i<nsdims);
+
+    for(i=0; i<naxes; i++) pbiniter[i]=biniter[axes[i]];
+    th->SetBinContent(pbiniter,dbuf);
+
+    biniter[axes[0]]++;
+
+    i=0;
+    while(biniter[axes[i]]>fAxes[axes[i]]->GetNbins()){
+      biniter[axes[i]]=1;
+      i++;
+
+      if(i>=naxes) break;
+      biniter[axes[i]]++;
     }
-  }
+
+  } while(i<naxes);
 
   delete[] indices;
-  delete[] is;
-  delete[] coords;
-
-  return th;
-}
-
-template <typename U> TH3D* QTHN<U>::Projection3D(const char *name, Int_t xaxis, Int_t yaxis, Int_t zaxis) const
-{
-  if(xaxis<0 || xaxis>=fNDims) {
-    fprintf(stderr,"QTHN::Projection1D: Error: Invalid xaxis index\n");
-    throw 1;
-  }
-  if(yaxis<0 || yaxis>=fNDims) {
-    fprintf(stderr,"QTHN::Projection1D: Error: Invalid yaxis index\n");
-    throw 1;
-  }
-  if(zaxis<0 || zaxis>=fNDims) {
-    fprintf(stderr,"QTHN::Projection1D: Error: Invalid zaxis index\n");
-    throw 1;
-  }
-  TH3D *th=new TH3D(name,name,fAxes[xaxis]->GetNbins(),fAxes[xaxis]->GetXmin(),fAxes[xaxis]->GetXmax(),fAxes[yaxis]->GetNbins(),fAxes[yaxis]->GetXmin(),fAxes[yaxis]->GetXmax(),fAxes[zaxis]->GetNbins(),fAxes[zaxis]->GetXmin(),fAxes[zaxis]->GetXmax());
-  if(fAxes[xaxis]->GetXbins()->fN) th->GetXaxis()->Set(fAxes[xaxis]->GetNbins(),fAxes[xaxis]->GetXbins()->GetArray());
-  if(fAxes[yaxis]->GetXbins()->fN) th->GetYaxis()->Set(fAxes[yaxis]->GetNbins(),fAxes[yaxis]->GetXbins()->GetArray());
-  if(fAxes[zaxis]->GetXbins()->fN) th->GetZaxis()->Set(fAxes[zaxis]->GetNbins(),fAxes[zaxis]->GetXbins()->GetArray());
-
-  Int_t *indices=new Int_t[fNDims];
-  Int_t *is=new Int_t[fNDims];
-  Int_t *coords=new Int_t[fNDims];
-  Int_t i,j,k,l,m;
-  Int_t ndiff=0;
-  Double_t dbuf;
-  l=0;
-
-  for(i=0; i<fNDims; i++) {
-
-    if(i!=xaxis && i!=yaxis && i!=zaxis) {
-      indices[l]=i;
-      l++;
-    }
-  }
-  ndiff=fNDims-l;
-
-  if(fNDims-ndiff==0) return th;
-
-  for(i=1; i<=fAxes[xaxis]->GetNbins(); i++) {
-
-    for(j=1; j<=fAxes[yaxis]->GetNbins(); j++) {
-
-      for(k=1; k<=fAxes[zaxis]->GetNbins(); k++) {
-	dbuf=0.;
-
-	for(l=0; l<fNDims-ndiff; l++) is[l]=1;
-	l=fNDims-ndiff-1;
-
-	while(is[0]<=fAxes[indices[0]]->GetNbins()) {
-
-	  for(m=0; m<fNDims-ndiff; m++) coords[indices[m]]=is[m];
-	  coords[xaxis]=i;
-	  coords[yaxis]=j;
-	  coords[zaxis]=k;
-	  dbuf+=GetBinContent(GetBin(coords));
-	  is[l]++;
-
-	  while(l>0 && is[l]>fAxes[indices[l]]->GetNbins()) {
-	    is[l-1]++;
-	    is[l]=1;
-	    l--;
-	  }
-	  l=fNDims-ndiff-1;
-	}
-	th->SetBinContent(i,j,k,dbuf);
-      }
-    }
-  }
-
-  delete[] indices;
-  delete[] is;
-  delete[] coords;
+  delete[] biniter;
 
   return th;
 }
@@ -503,6 +522,17 @@ template <typename U> void QTHN<U>::SetAxis(Int_t axis, Int_t nbins, Double_t *b
   }
   if(fAxes[axis]) delete fAxes[axis];
   fAxes[axis]=new TAxis(nbins,bins);
+  ComputeMaxNBins();
+}
+
+template <typename U> void QTHN<U>::SetAxis(Int_t axis, const TAxis *anaxis)
+{
+  if(axis<0 || axis>=fNDims) {
+    fprintf(stderr,"QTHN::SetAxis: Error: axis number is invalid\n");
+    throw 1;
+  }
+  if(fAxes[axis]) delete fAxes[axis];
+  fAxes[axis]=(TAxis*)anaxis->Clone();
   ComputeMaxNBins();
 }
 

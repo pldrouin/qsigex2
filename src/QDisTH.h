@@ -129,7 +129,7 @@ class QDisTH: public QDis
 
   Double_t ProbDensity(const Double_t &x,const Double_t &y=0,const Double_t &z=0) const;
 
-  QDisTH* MarginalPDF(const char *name="_m1d", Int_t xaxis=0, Int_t yaxis=-1) const;
+  QDisTH* MarginalPDF(const char *name="_md", Int_t xaxis=0, Int_t yaxis=-1) const;
   //QDisTH* MarginalPDF2D(const char *name="_m1d", Int_t xaxis=0, Int_t yaxis=1) const;
 
   void TerminateProcObj(){Normalize(); UpdateModTime();}

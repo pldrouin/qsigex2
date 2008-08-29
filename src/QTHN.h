@@ -21,6 +21,7 @@ template <typename U> class QTHN: public TNamed
     TObject* Clone(const char* newname = NULL) const{QTHN<U>* ret=new QTHN(*this); if(newname) ret->SetName(newname); return ret;}
     Int_t Fill(const Double_t *x, const U &w=1);
     Long64_t FindBin(const Double_t *x) const;
+    TH1* GenTH(const char *name="_qth2th") const;
     TAxis* GetAxis(Int_t axis) const;
     Long64_t GetBin(const Int_t *coords) const;
     Long64_t GetFBin(const Int_t *coords) const;
@@ -33,11 +34,10 @@ template <typename U> class QTHN: public TNamed
     void GetBinCoords(Long64_t &bin, Int_t *coords) const;
     const Long64_t& GetFBinCoord(const Long64_t &fbin) const;
     void GetFBinCoords(const Long64_t &fbin, Int_t *coords) const;
+    Double_t Integral(Int_t** binranges=NULL, Bool_t *widths=NULL) const;
     Bool_t IsBinIncluded(Long64_t &bin, const Int_t *mins, const Int_t *maxs) const;
     const QTHN<U>& operator=(const QTHN<U> &qthn);
-    TH1D* Projection1D(const char *name="_p1d", Int_t xaxis=0) const;
-    TH2D* Projection2D(const char *name="_p2d", Int_t xaxis=0, Int_t yaxis=1) const;
-    TH3D* Projection3D(const char *name="_p3d", Int_t xaxis=0, Int_t yaxis=1, Int_t zaxis=2) const;
+    QTHN* Projection(const char *name="_pd", const Int_t *axes=NULL, Int_t naxes=0) const;
     void Reset();
     void Scale(const Double_t &scale);
     void ScaleBinContent(const Long64_t &bin, const Double_t &scale);
@@ -45,6 +45,7 @@ template <typename U> class QTHN: public TNamed
     void ScaleFBinContent(const Long64_t &fbin, const Double_t &scale);
     void SetAxis(Int_t axis, Int_t nbins, Double_t min, Double_t max);
     void SetAxis(Int_t axis, Int_t nbins, Double_t *bins);
+    void SetAxis(Int_t axis, const TAxis* anaxis);
     void SetBinContent(const Long64_t &bin, const Double_t &content);
     void SetBinContent(const Int_t *coords, const Double_t &content);
     void SetFBinContent(const Long64_t &fbin, const Double_t &content);

@@ -49,97 +49,6 @@ template <typename U> Int_t QDisTHN<U>::Fill(const Double_t *x)
   return fQTHN->Fill(x);
 }
 
-template <typename U> Double_t QDisTHN<U>::Integral(Int_t** binranges, Bool_t *widths) const
-{
-  const Int_t dim=fQTHN->GetNDims();
-  Int_t mins[dim], maxs[dim];
-  Int_t i, j[dim];
-  Long64_t li;
-  TAxis *axes[dim];
-  Bool_t cbw=kTRUE; //Constant bin width in all directions
-  Bool_t bwi=kFALSE;//Integration using bin width for at least some direction
-
-  for(i=0;i<dim;i++){
-    axes[i]=fQTHN->GetAxis(i);
-
-    if(binranges && binranges[i]){
-      mins[i]=(*(binranges[i])>1)?*(binranges[i]):1;
-      maxs[i]=(*(binranges[i]+1)<axes[i]->GetNbins())?*(binranges[i]+1):axes[i]->GetNbins(); 
-    } else {
-      mins[i]=1;
-      maxs[i]=axes[i]->GetNbins();
-    }
-    if(axes[i]->GetXbins()->fN) cbw=kFALSE;
-    if(!widths || widths[i]) bwi=kTRUE;
-    //cout << mins[i] << "\t" << maxs[i] << "\n";
-  }
-
-  Double_t integral=0;
-  Double_t binvol;
-
-  //If bin width is constant in all directions
-  if(cbw) {
-
-    //If integrating using bin width for all axes
-    if(!widths) {
-      binvol=axes[0]->GetBinWidth(1);
-      for(i=1; i<dim; i++) binvol*=axes[i]->GetBinWidth(1);
-
-      //Else if using bin width for only some axes
-    } else {
-      binvol=1;
-      for(i=0; i<dim; i++) if(widths[i]) binvol*=axes[i]->GetBinWidth(1);
-    }
-
-    for(li=0; li<fQTHN->GetNFbins(); li++) {
-      if(fQTHN->IsBinIncluded(li,mins,maxs)) integral+=fQTHN->GetFBinContent(li);
-    }
-    integral*=binvol;
-
-  //Else if bin width is not constant for some direction
-  } else {
-
-    //If integrating using bin width for all axes
-    if(!widths) {
-
-      for(li=0; li<fQTHN->GetNFbins(); li++) {
-	fQTHN->GetBinCoords(li,j);
-
-	for(i=0; i<dim; i++) if(j[i]<mins[i] || j[i]>maxs[i]) break; 
-
-	if(i==dim) {
-	  binvol=axes[0]->GetBinWidth(j[0]);
-	  for(i=1; i<dim; i++) binvol*=axes[i]->GetBinWidth(j[i]);
-	  integral+=fQTHN->GetFBinContent(li)*binvol;
-	}
-      }
-
-      //Else if integrating without using bin width at all
-    } else if(!bwi) {
-
-      for(li=0; li<fQTHN->GetNFbins(); li++) {
-	if(fQTHN->IsBinIncluded(li,mins,maxs)) integral+=fQTHN->GetFBinContent(li);
-      }
-
-      //Else if integrating using bin width for some of the directions only
-    } else {
-
-      for(li=0; li<fQTHN->GetNFbins(); li++) {
-	fQTHN->GetBinCoords(li,j);
-
-	for(i=0; i<dim; i++) if(j[i]<mins[i] || j[i]>maxs[i]) break; 
-
-	if(i==dim) {
-	  binvol=(widths[0]?axes[0]->GetBinWidth(j[0]):1);
-	  for(i=1; i<dim; i++) binvol*=(widths[i]?axes[i]->GetBinWidth(j[i]):1);
-	  integral+=fQTHN->GetFBinContent(li)*binvol;
-	}
-      }
-    }
-  }
-  return integral;
-}
-
 template <typename U> Double_t QDisTHN<U>::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const
 {
  //This function returns the probability density associated with a point which
@@ -169,99 +78,71 @@ template <typename U> Double_t QDisTHN<U>::ProbDensity(const Double_t &x,const D
  return 0;
 }
 
-template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, Int_t xaxis, Int_t yaxis) const
+template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, const Int_t *axes, Int_t naxes) const
 {
-/*  Int_t dim=fQTHN->GetDimension(); //PDF dimension
+  //CONDITIONAL PDFS ARE NOT SUPPORTED YET
+  Int_t dim=fQTHN->GetNDims(); //PDF dimension
 
-  if(dim==1 || (yaxis==-1 && dim<3)) return NULL;
+  if(naxes<=0 || !axes || naxes>=dim) return NULL;
 
-  if(xaxis<0 || xaxis>=dim) {
-    fprintf(stderr,"QDisTHN<U>::MarginalPDF: Error: Invalid axis index\n");
-    throw 1;
-  }
+  Int_t i;
 
-  if(yaxis<-1 || yaxis>=dim) {
-    fprintf(stderr,"QDisTHN<U>::MarginalPDF: Error: Invalid axis index\n");
-    throw 1;
-  }
-  TAxis **axes=new TAxis*[dim];
-  QDisTHN *th;
-
-  axes[0]=fQTHN->GetXaxis();
-  if(dim>1) axes[1]=fQTHN->GetYaxis();
-  if(dim>2) axes[2]=fQTHN->GetZaxis();
-
-  if(yaxis==-1) {
-
-    if(!axes[xaxis]->GetXbins()->fN) {
-      th=new QDisTHN(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXmin(),axes[xaxis]->GetXmax());
-
-    } else {
-      th=new QDisTHN(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXbins()->GetArray());
-    }
-
-  } else {
-
-    if(!axes[xaxis]->GetXbins()->fN) {
-
-      if(!axes[yaxis]->GetXbins()->fN) {
-      th=new QDisTHN(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXmin(),axes[xaxis]->GetXmax(),axes[yaxis]->GetNbins(),axes[yaxis]->GetXmin(),axes[yaxis]->GetXmax());
-
-      } else {
-	th=new QDisTHN(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXmin(),axes[xaxis]->GetXmax(),axes[yaxis]->GetNbins(),axes[yaxis]->GetXbins()->GetArray());
-      }
-
-    } else {
-
-      if(!axes[yaxis]->GetXbins()->fN) {
-	th=new QDisTHN(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXbins()->GetArray(),axes[yaxis]->GetNbins(),axes[yaxis]->GetXmin(),axes[yaxis]->GetXmax());
-
-      } else {
-	th=new QDisTHN(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXbins()->GetArray(),axes[yaxis]->GetNbins(),axes[yaxis]->GetXbins()->GetArray());
-      }
+  for(i=0; i<naxes; i++) {
+    if(axes[i]<0 || axes[i]>=dim) {
+      fprintf(stderr,"QDisTHN<U>::MarginalPDF: Error: Invalid axis index: %i\n",axes[i]);
+      throw 1;
     }
   }
 
-  Int_t i,j;
-  Bool_t widths[3];
-  Int_t* binranges[3];
+  TAxis **taxes=new TAxis*[dim];
+  QDisTHN<U> *th;
+
+  for(i=0; i<dim; i++) taxes[i]=fQTHN->GetAxis(i);
+
+  th=new QDisTHN<U>(name,name,naxes);
+
+  Bool_t *widths=new Bool_t[dim];
+  Int_t **binranges=new Int_t*[dim];
+  Int_t *biniter=new Int_t[naxes];    //Integers used as indices for iteration
 
   //Initialize binranges pointers to NULL
-  memset(binranges,0,3*sizeof(Int_t*));
+  memset(binranges,0,dim*sizeof(Int_t*));
 
-  binranges[xaxis]=new Int_t[2];
-  if(yaxis!=-1) binranges[yaxis]=new Int_t[2];
+  for(i=0; i<dim; i++) widths[i]=kTRUE;
 
-  widths[0]=!(fNormFlags&kNoXBinWidthNorm);
-  widths[1]=!(fNormFlags&kNoYBinWidthNorm);
-  widths[2]=!(fNormFlags&kNoZBinWidthNorm);
-  widths[xaxis]=kFALSE;
-  if(yaxis!=-1) widths[yaxis]=kFALSE;
-
-  if(yaxis==-1) {
-
-    for(i=1; i<=axes[xaxis]->GetNbins(); i++) { 
-      binranges[xaxis][0]=binranges[xaxis][1]=i;
-      ((TH1&)*th).SetBinContent(i,Integral(binranges,widths));
-    }
-
-  } else {
-
-    for(i=1; i<=axes[xaxis]->GetNbins(); i++) { 
-      binranges[xaxis][0]=binranges[xaxis][1]=i;
-
-      for(j=1; j<=axes[yaxis]->GetNbins(); j++) { 
-	binranges[yaxis][0]=binranges[yaxis][1]=j;
-	((TH1&)*th).SetBinContent(i,j,Integral(binranges,widths));
-      }
-    }
+  for(i=0; i<naxes; i++) {
+    th->SetAxis(i,taxes[axes[i]]);
+    binranges[axes[i]]=new Int_t[2];
+    widths[axes[i]]=kFALSE;
+    biniter[i]=1;
   }
 
-  delete[] binranges[xaxis];
-  delete[] axes;
+  //Loop over bin indices of projection axes
+  do{
+
+    for(i=0; i<naxes; i++) binranges[axes[i]][0]=binranges[axes[i]][1]=biniter[i];
+    //Scale the bin value
+    th->fQTHN->SetBinContent(biniter,Integral(binranges,widths));
+    biniter[0]++;
+
+    i=0;
+    while(biniter[i]>taxes[i]->GetNbins()){
+      biniter[i]=1;
+      i++;
+
+      if(i>=naxes) break;
+      biniter[i]++;
+    }
+  } while(i<naxes);
+
+  delete[] widths;
+
+  for(i=0; i<naxes; i++) delete[] binranges[axes[i]];
+  delete[] binranges;
+  delete[] biniter;
+  delete[] taxes;
 
   return th;
-  */
 }
 
 template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
@@ -277,7 +158,7 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
     Bool_t *widths=NULL;
     Int_t dim=GetDimension();   //PDF dimension
 
-    //If not using bin width for normalization for at least one direction
+    //If not using bin width for normalization for all directions
     if(fNormFlags&kNoBinWidthNorm) {
       widths=new Bool_t[dim];
       memset(widths,0,dim*sizeof(Bool_t));
@@ -354,8 +235,6 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
 
       //Loop over the bin indices of fixed dimensions
       do{
-	//Set fcoord to the index of the first fixed dimension
-	fcoord=dim-nfix;
 	//Compute the integral of the conditional PDF for a given fixed bin
 	scutintbuf=Integral(binranges,widths);
 	//Add the integral value to the total
@@ -363,10 +242,10 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
 
 	//If the integral value is not 0
 	if(scutintbuf){
-	  //Set all the biniter elements to 0
-	  memset(biniter,0,dim*sizeof(Int_t));
+	  //Loop over the indices of non-fixed dimensions
+	  for(coord=0; coord<dim-nfix; coord++) biniter[coord]=1;
 
-	  //Loop over the indices of the fixed variable
+	  //Loop over the indices of fixed dimensions
 	  for(coord=dim-nfix;coord<dim;coord++){
 	    //Set the biniter elements that are associated to fixed variables
 	    //to the current bin
@@ -375,13 +254,13 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
 
 	  //Loop over bin indices of non-fixed dimensions
 	  do{
-	    coord=0;
 	    //Scale the bin value
 	    fQTHN->ScaleBinContent(biniter, 1./scutintbuf);
-	    biniter[coord]++;
+	    biniter[0]++;
 
-	    while(biniter[coord]>nbins[coord]+1){
-	      biniter[coord]=0;
+	    coord=0;
+	    while(biniter[coord]>nbins[coord]){
+	      biniter[coord]=1;
 	      coord++;
 
 	      if(coord>=dim-nfix) break;
@@ -391,6 +270,8 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
 	}
 	*(binranges[fcoord]+1)=++*(binranges[fcoord]);
 
+	//Set fcoord to the index of the first fixed dimension
+	fcoord=dim-nfix;
 	while(*(binranges[fcoord])>nbins[fcoord]){
 	  *(binranges[fcoord]+1)=*(binranges[fcoord])=1;
 	  fcoord++;

@@ -67,9 +67,9 @@
 #pragma link C++ class QProgress;
 #pragma link C++ class QDis;
 #pragma link C++ class QDisTF;
-#pragma link C++ class QDisTH;
+#pragma link C++ class QDisTH-;
 #pragma link C++ class QDisTHN<Double_t>;
-//#pragma link C++ class QDisTHN<Float_t>;
+#pragma link C++ class QDisTHN<Float_t>;
 #pragma link C++ class QTHN<Double_t>-;
 #pragma link C++ class QTHN<Int_t>-;
 #pragma link C++ class QFileUtils;

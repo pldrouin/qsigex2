@@ -391,6 +391,7 @@ Double_t QDisTH::ProbDensity(const Double_t &x,const Double_t &y,const Double_t 
 
 QDisTH* QDisTH::MarginalPDF(const char *name, Int_t xaxis, Int_t yaxis) const
 {
+  //CONDITIONAL PDFS ARE NOT SUPPORTED YET
   Int_t dim=fTH->GetDimension(); //PDF dimension
 
   if(dim==1 || (yaxis==-1 && dim<3)) return NULL;
@@ -476,6 +477,7 @@ QDisTH* QDisTH::MarginalPDF(const char *name, Int_t xaxis, Int_t yaxis) const
   }
 
   delete[] binranges[xaxis];
+  if(yaxis!=-1) delete[] binranges[yaxis];
 
   return th;
 }
@@ -504,6 +506,7 @@ void QDisTH::Normalize(Double_t* integral)
     Int_t nbins[3];                  //Number of bins for each dimension
     Int_t biniter[3];                //Integers used as indices for iteration
     Int_t bin;                       //bin index buffer
+    Int_t i;
     Double_t scale=fTH->GetEntries(); //scaling factor used for normalization of histograms filled with number of events
 
     //Get the number of bins for each dimension
@@ -589,8 +592,7 @@ void QDisTH::Normalize(Double_t* integral)
 
 	//If the integral value is not 0
 	if(scutintbuf){
-	  //Set all the biniter elements to 0
-	  memset(biniter,0,3*sizeof(Int_t));
+	  for(i=0; i<3; i++) biniter[i]=1;
 
 	  //Loop over the indices of the fixed variable
 	  for(coord=dim-nfix;coord<3;coord++){
@@ -601,15 +603,15 @@ void QDisTH::Normalize(Double_t* integral)
 
 	  //Loop over bin indices of non-fixed dimensions
 	  do{
-	    coord=0;
 	    //Get the bin index
 	    bin=fTH->GetBin(biniter[0],biniter[1],biniter[2]);
 	    //Scale the bin value
 	    fTH->SetBinContent(bin,fTH->GetBinContent(bin)/scutintbuf);
-	    biniter[coord]++;
+	    biniter[0]++;
 
-	    while(biniter[coord]>nbins[coord]+1){
-	      biniter[coord]=0;
+	    coord=0;
+	    while(biniter[coord]>nbins[coord]){
+	      biniter[coord]=1;
 	      coord++;
 
 	      if(coord>=dim-nfix) break;
@@ -653,5 +655,27 @@ void QDisTH::Normalize(Double_t* integral)
     if(widths) delete[] widths;
   }
 }
+
+void QDisTH::Streamer(TBuffer &R__b)
+{
+   // Stream an object of class QDisTH.
+
+   UInt_t R__s, R__c;
+   if (R__b.IsReading()) {
+      Version_t R__v = R__b.ReadVersion(&R__s, &R__c); if (R__v) { }
+      QDis::Streamer(R__b);
+      R__b >> fOwned;
+      R__b >> fTH;
+      fTH->SetDirectory(NULL);
+      R__b.CheckByteCount(R__s, R__c, QDisTH::IsA());
+   } else {
+      R__c = R__b.WriteVersion(QDisTH::IsA(), kTRUE);
+      QDis::Streamer(R__b);
+      R__b << fOwned;
+      R__b << fTH;
+      R__b.SetByteCount(R__c, kTRUE);
+   }
+}
+
 
 #include "debugger.h"

@@ -29,6 +29,8 @@ template <typename U> class QDisTHN: public QDis
  public:
   QDisTHN(): QDis(), fOwned(kTRUE), fQTHN(NULL){}
 
+  QDisTHN(const Char_t *name, const Char_t *title, Int_t ndims): QDis(), fOwned(kTRUE), fQTHN(new QTHN<U>(name,title,ndims)){}
+
   QDisTHN(const QDisTHN<U>& newqdis): QDis(newqdis), fOwned(kTRUE)
   {
     if(newqdis.fQTHN) {
@@ -79,20 +81,26 @@ template <typename U> class QDisTHN: public QDis
   Int_t Fill(const Double_t &x, const Double_t &y, const Double_t &z);
   Int_t Fill(const Double_t *x);
   
+  TH1* GenTH(const char *name="_qth2th") const{return fQTHN->GenTH(name);}
+
   Int_t GetDimension() const{return fQTHN->GetNDims();}
 
   QTHN<U>* GetTHN() const{return fQTHN;} 
 
   void InitProcObj(){fQTHN->Reset();}
 
-  Double_t Integral(Int_t** binranges=NULL, Bool_t *widths=NULL) const;
+  Double_t Integral(Int_t** binranges=NULL, Bool_t *widths=NULL) const{return fQTHN->Integral(binranges,widths);}
 
   void Normalize(Double_t* integral=NULL);
 
   Double_t ProbDensity(const Double_t &x,const Double_t &y=0,const Double_t &z=0) const;
   Double_t ProbDensity(const Double_t *x) const{return fQTHN->GetBinContent(fQTHN->FindBin(x));}
 
-  QDisTHN<U>* MarginalPDF(const char *name="_m1d", Int_t xaxis=0, Int_t yaxis=-1) const;
+  QDisTHN<U>* MarginalPDF(const char *name="_md", const Int_t *axes=NULL, Int_t naxes=0) const;
+
+  void SetAxis(Int_t axis, Int_t nbins, Double_t min, Double_t max){fQTHN->SetAxis(axis,nbins,min,max);}
+  void SetAxis(Int_t axis, Int_t nbins, Double_t *bins){fQTHN->SetAxis(axis,nbins,bins);}
+  void SetAxis(Int_t axis, const TAxis* anaxis){fQTHN->SetAxis(axis,anaxis);}
 
   void TerminateProcObj(){Normalize(); UpdateModTime();}
 
