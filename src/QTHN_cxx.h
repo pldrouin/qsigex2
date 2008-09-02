@@ -100,8 +100,8 @@ template <typename U> void QTHN<U>::Clear(Option_t* option)
 template <typename U> void QTHN<U>::ComputeMaxNBins()
 {
   Int_t i=0;
-  fMaxNBins=fAxes[0]->GetNbins()+2;
-  for(i=1; i<fNDims; i++) fMaxNBins*=fAxes[i]->GetNbins()+2;
+  fMaxNBins=1;
+  for(i=0; i<fNDims; i++) if(fAxes[i]) fMaxNBins*=fAxes[i]->GetNbins()+2;
 }
 
 template <typename U> Int_t QTHN<U>::Fill(const Double_t *x, const U &w)
