@@ -416,7 +416,7 @@ template <typename U> QTHN<U>* QTHN<U>::Projection(const char *name, const Int_t
   Int_t *indices=new Int_t[nsdims]; //Axes indices for axes that are not projected
   Int_t *biniter=new Int_t[fNDims]; //Integers used as indices for iteration over bins of original histogram
   Int_t *pbiniter=new Int_t[naxes]; //Integers used as indices for iteration over bins of projected histogram
-  Double_t dbuf;
+  U dbuf;
   l=0;
 
   for(i=0; i<fNDims; i++) {
