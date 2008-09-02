@@ -71,6 +71,7 @@
 #pragma link C++ class QDisTHN<Double_t>;
 #pragma link C++ class QDisTHN<Float_t>;
 #pragma link C++ class QTHN<Double_t>-;
+#pragma link C++ class QTHN<Float_t>-;
 #pragma link C++ class QTHN<Int_t>-;
 #pragma link C++ class QFileUtils;
 #pragma link C++ class QTTreeUtils;
