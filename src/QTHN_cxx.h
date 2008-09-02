@@ -230,7 +230,7 @@ template <typename U> const U& QTHN<U>::GetFBinContent(const Long64_t &fbin) con
   return fBinContent[fbin];
 }
 
-template <typename U> void QTHN<U>::GetBinCoords(Long64_t &bin, Int_t *coords) const
+template <typename U> void QTHN<U>::GetBinCoords(Long64_t bin, Int_t *coords) const
 {
   Int_t i;
   coords[0]=bin%(fAxes[0]->GetNbins()+2);

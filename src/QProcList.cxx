@@ -1,5 +1,7 @@
 #include "QProcList.h"
 
+//#define DEBUG
+
 ClassImp(QProcList)
 
 const QProcList *gQProcList;
@@ -53,7 +55,13 @@ void QProcList::Analyze()
 
 void QProcList::Exec() const
 {
+#ifdef DEBUG
+  printf("QProcList::Exec() (processor '%s')...\t",GetName());
+#endif
   for(Int_t i=0; i<fQPL->Count(); i++) ((QProcessor*)(*fQPL)[i])->Exec();
+#ifdef DEBUG
+    printf("done\n");
+#endif
 }
 
 void QProcList::InitProcess()

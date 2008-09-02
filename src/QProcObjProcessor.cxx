@@ -216,6 +216,10 @@ void QProcObjProcessor::DelProc(const char *procname)
 
 void QProcObjProcessor::Exec() const
 {
+#ifdef DEBUG
+  printf("QProcObjProcessor::Exec() (processor '%s')...\t",GetName());
+#endif
+
   static QMask pardiffs; //Modified parameters since the last call
   static QMask depmods;  //Required processes due to modified input objects
   static Bool_t firstrun;
@@ -309,6 +313,9 @@ void QProcObjProcessor::Exec() const
     (*fLastParams)=(*fParams);
     fLastExec.Set();
   }
+#ifdef DEBUG
+    printf("done\n");
+#endif
 }
 
 Int_t QProcObjProcessor::FindProcIndex(const char *procname) const

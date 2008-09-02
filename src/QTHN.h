@@ -31,7 +31,7 @@ template <typename U> class QTHN: public TNamed
     const U& GetBinContent(const Long64_t &bin) const;
     const Double_t& GetEntries() const{return fEntries;}
     const U& GetFBinContent(const Long64_t &fbin) const;
-    void GetBinCoords(Long64_t &bin, Int_t *coords) const;
+    void GetBinCoords(Long64_t bin, Int_t *coords) const;
     const Long64_t& GetFBinCoord(const Long64_t &fbin) const;
     void GetFBinCoords(const Long64_t &fbin, Int_t *coords) const;
     Double_t Integral(Int_t** binranges=NULL, Bool_t *widths=NULL) const;

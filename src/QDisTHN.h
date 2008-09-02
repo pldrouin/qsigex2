@@ -29,13 +29,14 @@ template <typename U> class QDisTHN: public QDis
  public:
   QDisTHN(): QDis(), fOwned(kTRUE), fQTHN(NULL){}
 
-  QDisTHN(const Char_t *name, const Char_t *title, Int_t ndims): QDis(), fOwned(kTRUE), fQTHN(new QTHN<U>(name,title,ndims)){}
+  QDisTHN(const Char_t *name, const Char_t *title, Int_t ndims): QDis(), fOwned(kTRUE), fQTHN(new QTHN<U>(name,title,ndims)){SetNameTitleToObject();}
 
   QDisTHN(const QDisTHN<U>& newqdis): QDis(newqdis), fOwned(kTRUE)
   {
     if(newqdis.fQTHN) {
 	fQTHN=(QTHN<U>*)newqdis.fQTHN->Clone();
     } else fQTHN=NULL;
+    SetNameTitleToObject();
   }
 
   QDisTHN(const QTHN<U>& newobject): QDis(), fOwned(kTRUE)
