@@ -35,7 +35,6 @@ template <typename U> class QTHN: public TNamed
     const Long64_t& GetFBinCoord(const Long64_t &fbin) const;
     void GetFBinCoords(const Long64_t &fbin, Int_t *coords) const;
     Double_t Integral(Int_t** binranges=NULL, Bool_t *widths=NULL) const;
-    Bool_t IsBinIncluded(Long64_t &bin, const Int_t *mins, const Int_t *maxs) const;
     const QTHN<U>& operator=(const QTHN<U> &qthn);
     QTHN* Projection(const char *name="_pd", const Int_t *axes=NULL, Int_t naxes=0) const;
     void Reset();
@@ -51,6 +50,7 @@ template <typename U> class QTHN: public TNamed
     void SetFBinContent(const Long64_t &fbin, const U &content);
   protected:
     void ComputeMaxNBins();
+    Bool_t IsFBinIncluded(const Long64_t &bin, const Int_t *mins, const Int_t *maxs) const;
   private:
     Int_t fNDims;
     TAxis **fAxes; //!

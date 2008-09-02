@@ -56,6 +56,7 @@ template <typename U> void QTHN<U>::AddBinContent(const Long64_t &bin, const U &
   } else {
     fBinContent[bidx]+=w;
   }
+  if(bidx<0 || bidx>=fNBins) fprintf(stderr,"Error: bidx=%lli and fNBins=%lli\n",bidx,fNBins);
   fEntries++;
 }
 
@@ -301,7 +302,7 @@ template <typename U> Double_t QTHN<U>::Integral(Int_t** binranges, Bool_t *widt
     }
 
     for(li=0; li<fNBins; li++) {
-      if(IsBinIncluded(li,mins,maxs)) integral+=fBinContent[li];
+      if(IsFBinIncluded(li,mins,maxs)) integral+=fBinContent[li];
     }
     integral*=binvol;
 
@@ -327,7 +328,7 @@ template <typename U> Double_t QTHN<U>::Integral(Int_t** binranges, Bool_t *widt
     } else if(!bwi) {
 
       for(li=0; li<fNBins; li++) {
-	if(IsBinIncluded(li,mins,maxs)) integral+=fBinContent[li];
+	if(IsFBinIncluded(li,mins,maxs)) integral+=fBinContent[li];
       }
 
       //Else if integrating using bin width for some of the directions only
@@ -349,9 +350,10 @@ template <typename U> Double_t QTHN<U>::Integral(Int_t** binranges, Bool_t *widt
   return integral;
 }
 
-template <typename U> Bool_t QTHN<U>::IsBinIncluded(Long64_t &bin, const Int_t *mins, const Int_t *maxs) const
+template <typename U> Bool_t QTHN<U>::IsFBinIncluded(const Long64_t &fbin, const Int_t *mins, const Int_t *maxs) const
 {
   Int_t i;
+  Long64_t bin=fBins[fbin];
   Int_t coord=bin%(fAxes[0]->GetNbins()+2);
   if(coord<mins[0] || coord>maxs[0]) return kFALSE;
 
