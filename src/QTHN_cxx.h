@@ -478,19 +478,19 @@ template <typename U> void QTHN<U>::Scale(const Double_t &scale)
 {
   Long64_t li;
 
-  for(li=0; li<fNBins; li++) fBinContent[li]*=scale;
+  for(li=0; li<fNBins; li++) fBinContent[li]*=(U)scale;
 }
 
 template <typename U> void QTHN<U>::ScaleBinContent(const Long64_t &bin, const Double_t &scale)
 {
   Long64_t fbin=GetFBin(bin);
-  if(fbin!=-1) fBinContent[fbin]*=scale;
+  if(fbin!=-1) fBinContent[fbin]*=(U)scale;
 }
 
 template <typename U> void QTHN<U>::ScaleBinContent(const Int_t *coords, const Double_t &scale)
 {
   Long64_t fbin=GetFBin(coords);
-  if(fbin!=-1) fBinContent[fbin]*=scale;
+  if(fbin!=-1) fBinContent[fbin]*=(U)scale;
 }
 
 template <typename U> void QTHN<U>::ScaleFBinContent(const Long64_t &fbin, const Double_t &scale)
@@ -499,7 +499,7 @@ template <typename U> void QTHN<U>::ScaleFBinContent(const Long64_t &fbin, const
     fprintf(stderr,"QTHN::SetFBinContent: Error: Invalid bin index\n");
     throw 1;
   }
-  fBinContent[fbin]*=scale;
+  fBinContent[fbin]*=(U)scale;
 }
 
 
@@ -536,7 +536,7 @@ template <typename U> void QTHN<U>::SetAxis(Int_t axis, const TAxis *anaxis)
   ComputeMaxNBins();
 }
 
-template <typename U> void QTHN<U>::SetBinContent(const Long64_t &bin, const Double_t &content)
+template <typename U> void QTHN<U>::SetBinContent(const Long64_t &bin, const U &content)
 {
   Long64_t li;
   Long64_t bidx;
@@ -573,12 +573,12 @@ template <typename U> void QTHN<U>::SetBinContent(const Long64_t &bin, const Dou
   }
 }
 
-template <typename U> void QTHN<U>::SetBinContent(const Int_t *coords, const Double_t &content)
+template <typename U> void QTHN<U>::SetBinContent(const Int_t *coords, const U &content)
 {
   SetBinContent(GetBin(coords),content);
 }
 
-template <typename U> void QTHN<U>::SetFBinContent(const Long64_t &fbin, const Double_t &content)
+template <typename U> void QTHN<U>::SetFBinContent(const Long64_t &fbin, const U &content)
 {
   if(fbin<0 || fbin>=fNBins) {
     fprintf(stderr,"QTHN::SetFBinContent: Error: Invalid bin index\n");

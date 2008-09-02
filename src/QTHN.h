@@ -46,9 +46,9 @@ template <typename U> class QTHN: public TNamed
     void SetAxis(Int_t axis, Int_t nbins, Double_t min, Double_t max);
     void SetAxis(Int_t axis, Int_t nbins, Double_t *bins);
     void SetAxis(Int_t axis, const TAxis* anaxis);
-    void SetBinContent(const Long64_t &bin, const Double_t &content);
-    void SetBinContent(const Int_t *coords, const Double_t &content);
-    void SetFBinContent(const Long64_t &fbin, const Double_t &content);
+    void SetBinContent(const Long64_t &bin, const U &content);
+    void SetBinContent(const Int_t *coords, const U &content);
+    void SetFBinContent(const Long64_t &fbin, const U &content);
   protected:
     void ComputeMaxNBins();
   private:
