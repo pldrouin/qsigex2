@@ -453,7 +453,7 @@ QDisTH* QDisTH::MarginalPDF(const char *name, Int_t xaxis, Int_t yaxis) const
   binranges[xaxis]=new Int_t[2];
   if(yaxis!=-1) binranges[yaxis]=new Int_t[2];
 
-  memset(widths,0,3*sizeof(Bool_t));
+  for(i=0; i<3; i++) widths[i]=kTRUE;
   widths[xaxis]=kFALSE;
   if(yaxis!=-1) widths[yaxis]=kFALSE;
 

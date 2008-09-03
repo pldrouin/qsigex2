@@ -139,7 +139,7 @@ template <typename U> TH1* QTHN<U>::GenTH(const char *name) const
       if(!fAxes[0]->GetXbins()->fN) th=new TH1D(name,name,fAxes[0]->GetNbins(),fAxes[0]->GetXmin(),fAxes[0]->GetXmax());
       else th=new TH1D(name,name,fAxes[0]->GetNbins(),fAxes[0]->GetXbins()->GetArray());
 
-      for(li=0; li<=fNBins; li++) {
+      for(li=0; li<fNBins; li++) {
 	GetFBinCoords(li,coords);
 	th->SetBinContent(coords[0],fBinContent[li]);
       }
@@ -150,7 +150,7 @@ template <typename U> TH1* QTHN<U>::GenTH(const char *name) const
       if(fAxes[0]->GetXbins()->fN) th->GetXaxis()->Set(fAxes[0]->GetNbins(),fAxes[0]->GetXbins()->GetArray());
       if(fAxes[1]->GetXbins()->fN) th->GetYaxis()->Set(fAxes[1]->GetNbins(),fAxes[1]->GetXbins()->GetArray());
 
-      for(li=0; li<=fNBins; li++) {
+      for(li=0; li<fNBins; li++) {
 	GetFBinCoords(li,coords);
 	th->SetBinContent(coords[0],coords[1],fBinContent[li]);
       }
@@ -162,7 +162,7 @@ template <typename U> TH1* QTHN<U>::GenTH(const char *name) const
       if(fAxes[1]->GetXbins()->fN) th->GetYaxis()->Set(fAxes[1]->GetNbins(),fAxes[1]->GetXbins()->GetArray());
       if(fAxes[2]->GetXbins()->fN) th->GetZaxis()->Set(fAxes[2]->GetNbins(),fAxes[2]->GetXbins()->GetArray());
 
-      for(li=0; li<=fNBins; li++) {
+      for(li=0; li<fNBins; li++) {
 	GetFBinCoords(li,coords);
 	th->SetBinContent(coords[0],coords[1],coords[2],fBinContent[li]);
       }
@@ -431,7 +431,7 @@ template <typename U> QTHN<U>* QTHN<U>::Projection(const char *name, const Int_t
     }
   }
 
-  for(i=0; i<naxes; i++) biniter[i]=1;
+  for(i=0; i<naxes; i++) biniter[axes[i]]=1;
 
   //Loop over bin indices of projection axes
   do{
@@ -472,6 +472,7 @@ template <typename U> QTHN<U>* QTHN<U>::Projection(const char *name, const Int_t
 
   delete[] indices;
   delete[] biniter;
+  delete[] pbiniter;
 
   return th;
 }
