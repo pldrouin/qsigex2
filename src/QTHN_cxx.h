@@ -350,6 +350,17 @@ template <typename U> Double_t QTHN<U>::Integral(Int_t** binranges, Bool_t *widt
   return integral;
 }
 
+template <typename U> Bool_t QTHN<U>::IsConstantBW(const Int_t &nbins, const Double_t *bins) const
+{
+  if(!nbins) return kTRUE;
+  Double_t bw=bins[1]-bins[0];
+
+  for(Int_t i=1; i<nbins; i++) {
+    if(bins[i+1]-bins[i]!=bw) return kFALSE;
+  }
+  return kTRUE;
+}
+
 template <typename U> Bool_t QTHN<U>::IsFBinIncluded(const Long64_t &fbin, const Int_t *mins, const Int_t *maxs) const
 {
   Int_t i;
@@ -523,8 +534,11 @@ template <typename U> void QTHN<U>::SetAxis(Int_t axis, Int_t nbins, Double_t *b
     fprintf(stderr,"QTHN::SetAxis: Error: axis number is invalid\n");
     throw 1;
   }
+
   if(fAxes[axis]) delete fAxes[axis];
-  fAxes[axis]=new TAxis(nbins,bins);
+
+  if(IsConstantBW(nbins,bins)) fAxes[axis]=new TAxis(nbins,bins[0],bins[nbins]);
+  else fAxes[axis]=new TAxis(nbins,bins);
   ComputeMaxNBins();
 }
 

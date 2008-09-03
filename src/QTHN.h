@@ -50,6 +50,7 @@ template <typename U> class QTHN: public TNamed
     void SetFBinContent(const Long64_t &fbin, const U &content);
   protected:
     void ComputeMaxNBins();
+    Bool_t IsConstantBW(const Int_t &nbins, const Double_t *bins) const;
     Bool_t IsFBinIncluded(const Long64_t &bin, const Int_t *mins, const Int_t *maxs) const;
   private:
     Int_t fNDims;

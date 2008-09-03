@@ -134,6 +134,10 @@ class QDisTH: public QDis
 
   void TerminateProcObj(){Normalize(); UpdateModTime();}
 
+ protected:
+  Bool_t IsConstantBW(const Int_t &nbins, const Double_t *bins) const;
+  Bool_t IsConstantBW(const Int_t &nbins, const Float_t *bins) const;
+
  private:
   void SetNameTitleToObject(){SetNameTitle(fTH->GetName(),fTH->GetTitle());}
   Bool_t fOwned;
