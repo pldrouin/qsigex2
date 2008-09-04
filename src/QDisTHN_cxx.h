@@ -122,7 +122,7 @@ template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, cons
 
     for(i=0; i<naxes; i++) binranges[axes[i]][0]=binranges[axes[i]][1]=biniter[i];
     //Scale the bin value
-    th->fQTHN->SetBinContent(biniter,Integral(binranges,widths));
+    th->fQTHN->SetBinContent(biniter,fQTHN->Integral(binranges,widths));
     biniter[0]++;
 
     i=0;
@@ -156,7 +156,7 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
     Double_t cutintbuf;         //Buffer for integral value(s)
     Int_t nfix=fNFixedCoords;   //Number of fixed coordinates for a conditional PDF
     Bool_t *widths=NULL;
-    Int_t dim=GetDimension();   //PDF dimension
+    Int_t dim=fQTHN->GetNDims(); //PDF dimension
 
     //If not using bin width for normalization for all directions
     if(fNormFlags&kNoBinWidthNorm) {
@@ -192,10 +192,10 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
 	Long64_t li;
 
 	for(li=0; li<fQTHN->GetNFbins(); li++) {
-	  fQTHN->GetBinCoords(li,biniter);
+	  fQTHN->GetFBinCoords(li,biniter);
 	  binvol=(vbsaxis[0]?vbsaxis[0]->GetBinWidth(biniter[0]):1);
 	  for(i=1; i<dim; i++) if(vbsaxis[i]) binvol*=vbsaxis[i]->GetBinWidth(biniter[i]);
-	  fQTHN->SetFBinContent(li,fQTHN->GetFBinContent(li)/binvol);
+	  fQTHN->ScaleFBinContent(li,1/binvol);
 	}
       }
       delete[] vbsaxis;
@@ -236,7 +236,7 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
       //Loop over the bin indices of fixed dimensions
       do{
 	//Compute the integral of the conditional PDF for a given fixed bin
-	scutintbuf=Integral(binranges,widths);
+	scutintbuf=fQTHN->Integral(binranges,widths);
 	//Add the integral value to the total
 	cutintbuf+=scutintbuf;
 
@@ -296,7 +296,7 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
 
       } else {
 	//Compute the integral of the histogram
-	cutintbuf=Integral(NULL,widths);
+	cutintbuf=fQTHN->Integral(NULL,widths);
       }
 
       //If the integral value is not 0, normalize the PDF

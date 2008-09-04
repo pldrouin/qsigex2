@@ -313,7 +313,7 @@ template <typename U> Double_t QTHN<U>::Integral(Int_t** binranges, Bool_t *widt
     if(!widths) {
 
       for(li=0; li<fNBins; li++) {
-	GetBinCoords(li,j);
+	GetFBinCoords(li,j);
 
 	for(i=0; i<fNDims; i++) if(j[i]<mins[i] || j[i]>maxs[i]) break; 
 
@@ -335,7 +335,7 @@ template <typename U> Double_t QTHN<U>::Integral(Int_t** binranges, Bool_t *widt
     } else {
 
       for(li=0; li<fNBins; li++) {
-	GetBinCoords(li,j);
+	GetFBinCoords(li,j);
 
 	for(i=0; i<fNDims; i++) if(j[i]<mins[i] || j[i]>maxs[i]) break; 
 
@@ -510,7 +510,7 @@ template <typename U> void QTHN<U>::ScaleBinContent(const Int_t *coords, const D
 template <typename U> void QTHN<U>::ScaleFBinContent(const Long64_t &fbin, const Double_t &scale)
 {
   if(fbin<0 || fbin>=fNBins) {
-    fprintf(stderr,"QTHN::SetFBinContent: Error: Invalid bin index\n");
+    fprintf(stderr,"QTHN::ScaleFBinContent: Error: Invalid bin index\n");
     throw 1;
   }
   fBinContent[fbin]*=(U)scale;
