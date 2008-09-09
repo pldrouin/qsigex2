@@ -149,9 +149,9 @@ void QProcList::SetParams(Double_t *params)
   QProcessor *qp;
 
   for(i=0; i<fQPL->Count(); i++) {
-    qp=(QProcessor*)(*fQPL)[i];
+    qp=(QProcessor*)(*fQPL).GetArray()[i];
 
-    for(j=0; j<qp->GetNParams(); j++) qp->SetParam(j,params[(*fParamsMapping)[i][j]]);
+    for(j=0; j<qp->GetNParams(); j++) qp->SetParam(j,params[(*fParamsMapping).GetArray()[i].GetArray()[j]]);
   }
 }
 

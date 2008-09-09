@@ -83,12 +83,12 @@ template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, cons
   //CONDITIONAL PDFS ARE NOT SUPPORTED YET
   Int_t dim=fQTHN->GetNDims(); //PDF dimension
 
-  if(naxes<=0 || !axes || naxes>=dim) return NULL;
+  if(naxes<=0 || !axes || naxes>=dim || naxes>=dim-(Int_t)fNFixedCoords) return NULL;
 
   Int_t i;
 
   for(i=0; i<naxes; i++) {
-    if(axes[i]<0 || axes[i]>=dim) {
+    if(axes[i]<0 || axes[i]>=dim-(Int_t)fNFixedCoords) {
       fprintf(stderr,"QDisTHN<U>::MarginalPDF: Error: Invalid axis index: %i\n",axes[i]);
       throw 1;
     }
