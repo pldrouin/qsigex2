@@ -214,8 +214,8 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
 
     //If the histogram has to be normalized as a conditional PDF
     if(nfix){
-      Int_t fcoord,coord;                //Index of the first fixed coordinate
-      Int_t **binranges=new Int_t*[dim]; //Bin indices (for fixed coordinates)
+      Int_t fcoord, coord;                //Index of the first fixed coordinate
+      Int_t **binranges=new Int_t*[dim]; //Bin indices
       Double_t scutintbuf;               //Integral value and error buffers
 
       //If the number of fix dimensions is greater than the total number of
@@ -279,10 +279,10 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
 	    }
 	  } while(coord<dim-nfix);
 	}
-	*(binranges[fcoord]+1)=++*(binranges[fcoord]);
-
 	//Set fcoord to the index of the first fixed dimension
 	fcoord=dim-nfix;
+	*(binranges[fcoord]+1)=++*(binranges[fcoord]);
+	
 	while(*(binranges[fcoord])>nbins[fcoord]){
 	  *(binranges[fcoord]+1)=*(binranges[fcoord])=1;
 	  fcoord++;

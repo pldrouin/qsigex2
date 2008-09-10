@@ -638,8 +638,6 @@ void QDisTH::Normalize(Double_t* integral)
 
       //Loop over the bin indices of fixed dimensions
       do{
-	//Set fcoord to the index of the first fixed dimension
-	fcoord=dim-nfix;
 	//Compute the integral of the conditional PDF for a given fixed bin
 	scutintbuf=Integral(binranges,widths);
 	//Add the integral value to the total
@@ -674,6 +672,8 @@ void QDisTH::Normalize(Double_t* integral)
 	    }
 	  } while(coord<dim-nfix);
 	}
+	//Set fcoord to the index of the first fixed dimension
+	fcoord=dim-nfix;
 	*(binranges[fcoord]+1)=++*(binranges[fcoord]);
 
 	while(*(binranges[fcoord])>nbins[fcoord]){
