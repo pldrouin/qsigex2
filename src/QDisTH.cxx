@@ -428,95 +428,111 @@ Double_t QDisTH::ProbDensity(const Double_t &x,const Double_t &y,const Double_t 
   return (Double_t)fTH->GetBinContent((fTH->GetXaxis())->FindFixBin(x),(fTH->GetYaxis())->FindFixBin(y),(fTH->GetZaxis())->FindFixBin(z));
 }
 
-QDisTH* QDisTH::MarginalPDF(const char *name, Int_t xaxis, Int_t yaxis) const
+QDisTH* QDisTH::MarginalPDF(const char *name, const Int_t xaxis, const Int_t yaxis) const
 {
-  //CONDITIONAL PDFS ARE NOT SUPPORTED YET
   Int_t dim=fTH->GetDimension(); //PDF dimension
+  Int_t nfix=(Int_t)fNFixedCoords>dim?dim:(Int_t)fNFixedCoords; //Number of fixed coordinates for a conditional PDF
+  Int_t naxes=(yaxis==-1)?1:2;
+  Int_t axes[2]={xaxis,yaxis};
 
-  if(dim==1 || (yaxis==-1 && dim<3)) return NULL;
-
-  if(xaxis<0 || xaxis>=dim) {
-    fprintf(stderr,"QDisTH::MarginalPDF: Error: Invalid axis index\n");
-    throw 1;
-  }
-
-  if(yaxis<-1 || yaxis>=dim) {
-    fprintf(stderr,"QDisTH::MarginalPDF: Error: Invalid axis index\n");
-    throw 1;
-  }
-  TAxis *axes[3];
-  QDisTH *th;
-
-  axes[0]=fTH->GetXaxis();
-  axes[1]=fTH->GetYaxis();
-  axes[2]=fTH->GetZaxis();
-
-  if(yaxis==-1) {
-
-    if(!axes[xaxis]->GetXbins()->fN) {
-      th=new QDisTH(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXmin(),axes[xaxis]->GetXmax());
-
-    } else {
-      th=new QDisTH(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXbins()->GetArray());
-    }
-
-  } else {
-
-    if(!axes[xaxis]->GetXbins()->fN) {
-
-      if(!axes[yaxis]->GetXbins()->fN) {
-      th=new QDisTH(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXmin(),axes[xaxis]->GetXmax(),axes[yaxis]->GetNbins(),axes[yaxis]->GetXmin(),axes[yaxis]->GetXmax());
-
-      } else {
-	th=new QDisTH(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXmin(),axes[xaxis]->GetXmax(),axes[yaxis]->GetNbins(),axes[yaxis]->GetXbins()->GetArray());
-      }
-
-    } else {
-
-      if(!axes[yaxis]->GetXbins()->fN) {
-	th=new QDisTH(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXbins()->GetArray(),axes[yaxis]->GetNbins(),axes[yaxis]->GetXmin(),axes[yaxis]->GetXmax());
-
-      } else {
-	th=new QDisTH(name,name,axes[xaxis]->GetNbins(),axes[xaxis]->GetXbins()->GetArray(),axes[yaxis]->GetNbins(),axes[yaxis]->GetXbins()->GetArray());
-      }
-    }
-  }
+  if(naxes>=dim-nfix) return NULL;
 
   Int_t i,j;
-  Bool_t widths[3];
-  Int_t* binranges[3];
 
-  //Initialize binranges pointers to NULL
-  memset(binranges,0,3*sizeof(Int_t*));
+  for(i=0; i<naxes; i++) {
+    if(axes[i]<0 || axes[i]>=dim-nfix) {
+      fprintf(stderr,"QDisTHN<U>::MarginalPDF: Error: Invalid axis index: %i\n",axes[i]);
+      throw 1;
+    }
+  }
 
-  binranges[xaxis]=new Int_t[2];
-  if(yaxis!=-1) binranges[yaxis]=new Int_t[2];
+  Int_t naaxes=naxes+nfix;
+  Int_t *aaxes=new Int_t[naaxes];
+  aaxes[0]=xaxis;
+  if(naxes>1) aaxes[1]=yaxis;
 
-  for(i=0; i<3; i++) widths[i]=kTRUE;
-  widths[xaxis]=kFALSE;
-  if(yaxis!=-1) widths[yaxis]=kFALSE;
+  for(i=0; i<nfix; i++) {
+    aaxes[naxes+i]=i+dim-nfix;
+  }
 
-  if(yaxis==-1) {
+  TAxis *taxes[3];
+  QDisTH *th;
 
-    for(i=1; i<=axes[xaxis]->GetNbins(); i++) { 
-      binranges[xaxis][0]=binranges[xaxis][1]=i;
-      ((TH1&)*th).SetBinContent(i,Integral(binranges,widths));
+  taxes[0]=fTH->GetXaxis();
+  taxes[1]=fTH->GetYaxis();
+  taxes[2]=fTH->GetZaxis();
+
+  if(naaxes==1) {
+
+    if(!taxes[aaxes[0]]->GetXbins()->fN) {
+      th=new QDisTH(name,name,taxes[aaxes[0]]->GetNbins(),taxes[aaxes[0]]->GetXmin(),taxes[aaxes[0]]->GetXmax());
+
+    } else {
+      th=new QDisTH(name,name,taxes[aaxes[0]]->GetNbins(),taxes[aaxes[0]]->GetXbins()->GetArray());
     }
 
   } else {
 
-    for(i=1; i<=axes[xaxis]->GetNbins(); i++) { 
-      binranges[xaxis][0]=binranges[xaxis][1]=i;
+    if(!taxes[aaxes[0]]->GetXbins()->fN) {
 
-      for(j=1; j<=axes[yaxis]->GetNbins(); j++) { 
-	binranges[yaxis][0]=binranges[yaxis][1]=j;
-	((TH1&)*th).SetBinContent(i,j,Integral(binranges,widths));
+      if(!taxes[aaxes[1]]->GetXbins()->fN) {
+	th=new QDisTH(name,name,taxes[aaxes[0]]->GetNbins(),taxes[aaxes[0]]->GetXmin(),taxes[aaxes[0]]->GetXmax(),taxes[aaxes[1]]->GetNbins(),taxes[aaxes[1]]->GetXmin(),taxes[aaxes[1]]->GetXmax());
+
+      } else {
+	th=new QDisTH(name,name,taxes[aaxes[0]]->GetNbins(),taxes[aaxes[0]]->GetXmin(),taxes[aaxes[0]]->GetXmax(),taxes[aaxes[1]]->GetNbins(),taxes[aaxes[1]]->GetXbins()->GetArray());
+      }
+
+    } else {
+
+      if(!taxes[aaxes[1]]->GetXbins()->fN) {
+	th=new QDisTH(name,name,taxes[aaxes[0]]->GetNbins(),taxes[aaxes[0]]->GetXbins()->GetArray(),taxes[aaxes[1]]->GetNbins(),taxes[aaxes[1]]->GetXmin(),taxes[aaxes[1]]->GetXmax());
+
+      } else {
+	th=new QDisTH(name,name,taxes[aaxes[0]]->GetNbins(),taxes[aaxes[0]]->GetXbins()->GetArray(),taxes[aaxes[1]]->GetNbins(),taxes[aaxes[1]]->GetXbins()->GetArray());
       }
     }
   }
 
-  delete[] binranges[xaxis];
-  if(yaxis!=-1) delete[] binranges[yaxis];
+  th->SetNormFlags(GetNormFlags()&!(QDis::kEventsFilled|QDis::kVarBinSizeEventsFilled));
+  th->SetNFixedCoords(GetNFixedCoords());
+
+  Bool_t *widths=new Bool_t[dim];
+  Int_t **binranges=new Int_t*[dim];
+
+  //Initialize binranges pointers to NULL
+  memset(binranges,0,dim*sizeof(Int_t*));
+
+  for(i=0; i<dim; i++) widths[i]=kTRUE;
+
+  for(i=0; i<naaxes; i++) {
+    binranges[aaxes[i]]=new Int_t[2];
+    widths[aaxes[i]]=kFALSE;
+  }
+
+  if(naaxes==1) {
+
+    for(i=1; i<=taxes[aaxes[0]]->GetNbins(); i++) {
+      binranges[aaxes[0]][0]=binranges[aaxes[0]][1]=i;
+      th->fTH->SetBinContent(i,Integral(binranges,widths));
+    }
+
+  } else {
+
+    for(i=1; i<=taxes[aaxes[0]]->GetNbins(); i++) {
+      binranges[aaxes[0]][0]=binranges[aaxes[0]][1]=i;
+
+      for(j=1; j<=taxes[aaxes[1]]->GetNbins(); j++) {
+	binranges[aaxes[1]][0]=binranges[aaxes[1]][1]=j;
+	th->fTH->SetBinContent(i,j,Integral(binranges,widths));
+      }
+    }
+  }
+
+  delete[] widths;
+
+  for(i=0; i<naaxes; i++) delete[] binranges[aaxes[i]];
+  delete[] binranges;
+  delete[] aaxes;
 
   return th;
 }

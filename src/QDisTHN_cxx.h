@@ -80,18 +80,26 @@ template <typename U> Double_t QDisTHN<U>::ProbDensity(const Double_t &x,const D
 
 template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, const Int_t *axes, Int_t naxes) const
 {
-  //CONDITIONAL PDFS ARE NOT SUPPORTED YET
   Int_t dim=fQTHN->GetNDims(); //PDF dimension
+  Int_t nfix=(Int_t)fNFixedCoords>dim?dim:(Int_t)fNFixedCoords; //Number of fixed coordinates for a conditional PDF
 
-  if(naxes<=0 || !axes || naxes>=dim || naxes>=dim-(Int_t)fNFixedCoords) return NULL;
+  if(naxes<=0 || !axes || naxes>=dim-nfix) return NULL;
 
   Int_t i;
 
   for(i=0; i<naxes; i++) {
-    if(axes[i]<0 || axes[i]>=dim-(Int_t)fNFixedCoords) {
+    if(axes[i]<0 || axes[i]>=dim-nfix) {
       fprintf(stderr,"QDisTHN<U>::MarginalPDF: Error: Invalid axis index: %i\n",axes[i]);
       throw 1;
     }
+  }
+
+  Int_t naaxes=naxes+nfix;
+  Int_t *aaxes=new Int_t[naaxes];
+  memcpy(aaxes,axes,naxes*sizeof(Int_t));
+
+  for(i=0; i<nfix; i++) {
+    aaxes[naxes+i]=i+dim-nfix;
   }
 
   TAxis **taxes=new TAxis*[dim];
@@ -99,48 +107,51 @@ template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, cons
 
   for(i=0; i<dim; i++) taxes[i]=fQTHN->GetAxis(i);
 
-  th=new QDisTHN<U>(name,name,naxes);
+  th=new QDisTHN<U>(name,name,naaxes);
+  th->SetNormFlags(GetNormFlags()&!(QDis::kEventsFilled|QDis::kVarBinSizeEventsFilled));
+  th->SetNFixedCoords(GetNFixedCoords());
 
   Bool_t *widths=new Bool_t[dim];
   Int_t **binranges=new Int_t*[dim];
-  Int_t *biniter=new Int_t[naxes];    //Integers used as indices for iteration
+  Int_t *biniter=new Int_t[naaxes];    //Integers used as indices for iteration
 
   //Initialize binranges pointers to NULL
   memset(binranges,0,dim*sizeof(Int_t*));
 
   for(i=0; i<dim; i++) widths[i]=kTRUE;
 
-  for(i=0; i<naxes; i++) {
-    th->SetAxis(i,taxes[axes[i]]);
-    binranges[axes[i]]=new Int_t[2];
-    widths[axes[i]]=kFALSE;
+  for(i=0; i<naaxes; i++) {
+    th->SetAxis(i,taxes[aaxes[i]]);
+    binranges[aaxes[i]]=new Int_t[2];
+    widths[aaxes[i]]=kFALSE;
     biniter[i]=1;
   }
 
   //Loop over bin indices of projection axes
   do{
 
-    for(i=0; i<naxes; i++) binranges[axes[i]][0]=binranges[axes[i]][1]=biniter[i];
+    for(i=0; i<naaxes; i++) binranges[aaxes[i]][0]=binranges[aaxes[i]][1]=biniter[i];
     //Scale the bin value
     th->fQTHN->SetBinContent(biniter,fQTHN->Integral(binranges,widths));
     biniter[0]++;
 
     i=0;
-    while(biniter[i]>taxes[i]->GetNbins()){
+    while(biniter[i]>taxes[aaxes[i]]->GetNbins()){
       biniter[i]=1;
       i++;
 
-      if(i>=naxes) break;
+      if(i>=naaxes) break;
       biniter[i]++;
     }
-  } while(i<naxes);
+  } while(i<naaxes);
 
   delete[] widths;
 
-  for(i=0; i<naxes; i++) delete[] binranges[axes[i]];
+  for(i=0; i<naaxes; i++) delete[] binranges[aaxes[i]];
   delete[] binranges;
   delete[] biniter;
   delete[] taxes;
+  delete[] aaxes;
 
   return th;
 }

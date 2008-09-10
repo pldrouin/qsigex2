@@ -74,11 +74,17 @@ class QDis: public TNamed, public QProcObj
   virtual Int_t GetDimension() const=0;
 
   const Option_t* GetCutExpr() const{return fCutExpr;}
-  Int_t GetNormFlags() const{return fNormFlags;}
+  UInt_t GetNFixedCoords() const{return fNFixedCoords;}
+  enum eNormFlags {kRegularNorm=0, kEventsFilled=1, kVarBinSizeEventsFilled=2, kNoBinWidthNorm=4, kNoNorm=8};
+  UInt_t GetNormFlags() const{return fNormFlags;}
 
   void SetCutExpr(Option_t *cutexpr=NULL){fCutExpr=cutexpr;}
-  enum eNormFlags {kRegularNorm=0, kEventsFilled=1, kVarBinSizeEventsFilled=2, kNoBinWidthNorm=4, kNoNorm=8};
-  void SetNormFlags(eNormFlags normflags=kRegularNorm, UInt_t nfixedcoords=0)
+  void SetNFixedCoords(UInt_t nfixedcoords=0){
+    //The argument specifies the number of fixed coordinates (i.e. number of conditional variables for a
+    //conditional PDF). Fixed coordinates must have the highest axis indices.
+    fNFixedCoords=nfixedcoords;
+  }
+  void SetNormFlags(UInt_t normflags=kRegularNorm)
   {
     //Sets the normalization flags for the QDis object. The available normalization flags are the following:
     //
@@ -93,16 +99,13 @@ class QDis: public TNamed, public QProcObj
     //kNoBinWidthNorm: Do not use bin widths for PDF normalization
     //kNoNorm: No normalization
     //Flags can be combined using a bitwise "OR" operator (|).
-    //The second argument specifies the number of fixed coordinates (i.e. number of conditional variables for a
-    //conditional PDF). Fixed coordinates must have the highest axis indices.
     fNormFlags=normflags;
-    fNFixedCoords=nfixedcoords;
   }
 
  protected:
   virtual void SetNameTitleToObject()=0;
   TString fCutExpr;
-  eNormFlags fNormFlags;
+  UInt_t fNormFlags;
   UInt_t fNFixedCoords;
 
  private:
