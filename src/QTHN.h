@@ -1,3 +1,6 @@
+// Author: Pierre-Luc Drouin <http://www.physics.carleton.ca/~pldrouin>
+// Copyright Carleton University
+
 #ifndef _QTHN_
 #define _QTHN_
 

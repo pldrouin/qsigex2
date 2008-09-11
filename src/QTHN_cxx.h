@@ -1,3 +1,6 @@
+// Author: Pierre-Luc Drouin <http://www.physics.carleton.ca/~pldrouin>
+// Copyright Carleton University
+
 #include "QTHN.h"
 
 template <typename U> QTHN<U>::QTHN(const QTHN &qthn): TNamed(qthn), fNDims(qthn.fNDims), fAxes(NULL), fNBins(qthn.fNBins), fBins(NULL), fEntries(qthn.fEntries), fBinContent(NULL), fZero(qthn.fZero), fMaxNBins(qthn.fMaxNBins)

@@ -20,19 +20,18 @@
 
 using std::cout;
 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// QDis                                                                 //
-//                                                                      //
-// This class is an abstract base class which allows to give a common   //
-// interface to all types of ROOT "functions" (TH1, TH2, TH3, TF1, TF2, //
-// TF3) such that they can be transparently used as probability density //
-// functions. QDis declares a Normalize function that allows to         //
-// normalize the functions using complexe cuts and a ProbDensity        //
-// function that returns the probability density associated with a      //
-// given point.                                                         //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+//                                                                    //
+// QDis                                                               //
+//                                                                    //
+// This class is an abstract base class which allows to give a common //
+// interface to all types of ROOT "functions" (TH1, TH2, TH3, TF1,    //
+// TF2, TF3) such that they can be transparently used as probability  //
+// density functions. QDis declares a Normalize function that allows  //
+// to normalize the functions and a ProbDensity function that returns //
+// the probability density associated with a given point.             //
+//                                                                    //
+////////////////////////////////////////////////////////////////////////
 
 class QDis: public TNamed, public QProcObj
 {
