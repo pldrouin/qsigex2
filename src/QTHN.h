@@ -9,6 +9,9 @@
 #include "TNamed.h"
 #include "TMath.h"
 #include "TAxis.h"
+#include "TH1D.h"
+#include "TH2D.h"
+#include "TH3D.h"
 
 template <typename U> class QTHN: public TNamed
 {
