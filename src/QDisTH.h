@@ -102,7 +102,7 @@ class QDisTH: public QDis
     return *this;
   }
 
-  operator TH1&() const{return *fTH;}
+  operator TH1&() {return *fTH;}
   operator const TH1&() const{return *fTH;}
 
   QDis* CloneQDis() const
