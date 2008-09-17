@@ -634,7 +634,7 @@ void QArrayProcessor::Exec() const
 
 	    //If the number of entries for the current input array does not match the number of entries for the previous triggered input array
 	    if(neaea != neaealast && neaealast != -1) {
-	      fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' does not match the number of entries for the previously triggered input array\n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data());
+	      fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' (%lli) does not match the number of entries for the previously triggered input array (%lli) \n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data(),neaea,neaealast);
 	      throw 1;
 	    }
 	    neaealast=neaea;
@@ -646,7 +646,7 @@ void QArrayProcessor::Exec() const
 
 	    //If the number of entries for the current input array does not match the number of entries for the previous triggered input array
 	    if(nesea != nesealast && nesealast != -1) {
-	      fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' does not match the number of entries for the previously triggered input array\n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data());
+	      fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' (%lli) does not match the number of entries for the previously triggered input array (%lli)\n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data(),neaea,neaealast);
 	      throw 1;
 	    }
 	    nesealast=nesea;
