@@ -68,7 +68,8 @@ template <typename U> class QDisTHN: public QDis
     return *this;
   }
 
-  operator QTHN<U>&(){return *fQTHN;}
+  operator QTHN<U>&() const{return *fQTHN;}
+  operator const QTHN<U>&() const{return *fQTHN;}
 
   QDis* CloneQDis() const
     {
