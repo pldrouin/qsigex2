@@ -402,7 +402,7 @@ void QProcObjProcessor::PrintAnalysisResults() const
     printf("\nInput Objects:\n");
     for(j=0; j<(*fIOIndices)[i].Count(); j++) {
       printf("%3i\t",j);
-      if(dynamic_cast<TObject*>((*fIObjects)[(*fIOIndices)[i][j]])) printf("%s",dynamic_cast<TObject*>((*fIObjects)[(*fIOIndices)[i][j]])->GetName());
+      if(dynamic_cast<TObject*>((*fIObjects)[(*fIOIndices)[i][j]])) printf("%s (%p)",dynamic_cast<TObject*>((*fIObjects)[(*fIOIndices)[i][j]])->GetName(),(*fIObjects)[(*fIOIndices)[i][j]]);
       else printf("%p",(*fIObjects)[(*fIOIndices)[i][j]]);
       printf(" (%i)\n",(*fIOIndices)[i][j]);
     }
@@ -410,7 +410,7 @@ void QProcObjProcessor::PrintAnalysisResults() const
     printf("\nOutput Objects:\n");
     for(j=0; j<(*fOOIndices)[i].Count(); j++) {
       printf("%3i\t",j);
-      if(dynamic_cast<TObject*>((*fOObjects)[(*fOOIndices)[i][j]])) printf("%s",dynamic_cast<TObject*>((*fOObjects)[(*fOOIndices)[i][j]])->GetName());
+      if(dynamic_cast<TObject*>((*fOObjects)[(*fOOIndices)[i][j]])) printf("%s (%p)",dynamic_cast<TObject*>((*fOObjects)[(*fOOIndices)[i][j]])->GetName(),(*fOObjects)[(*fOOIndices)[i][j]]);
       else printf("%p",(*fOObjects)[(*fOOIndices)[i][j]]);
       printf(" (%i)\n",(*fOOIndices)[i][j]);
     }
@@ -422,7 +422,7 @@ void QProcObjProcessor::PrintAnalysisResults() const
   printf("\nAll Input Objects:\n");
   for(i=0; i<fIObjects->Count(); i++) {
     printf("%3i\t",i);
-    if(dynamic_cast<TObject*>((*fIObjects)[i])) printf("%s\t",dynamic_cast<TObject*>((*fIObjects)[i])->GetName());
+    if(dynamic_cast<TObject*>((*fIObjects)[i])) printf("%s (%p)\t",dynamic_cast<TObject*>((*fIObjects)[i])->GetName(),(*fIObjects)[i]);
     else printf("%p\t",(*fIObjects)[i]);
     (*fObjsPDepends)[i].Print();
   }
@@ -430,7 +430,7 @@ void QProcObjProcessor::PrintAnalysisResults() const
   printf("\nAll Output Objects:\n");
   for(i=0; i<fOObjects->Count(); i++) {
     printf("%3i\t",i);
-    if(dynamic_cast<TObject*>((*fOObjects)[i])) printf("%s\n",dynamic_cast<TObject*>((*fOObjects)[i])->GetName());
+    if(dynamic_cast<TObject*>((*fOObjects)[i])) printf("%s (%p)\n",dynamic_cast<TObject*>((*fOObjects)[i])->GetName(),(*fOObjects)[i]);
     else printf("%p\n",(*fOObjects)[i]);
   }
 }
