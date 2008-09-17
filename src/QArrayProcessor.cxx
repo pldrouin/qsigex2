@@ -529,11 +529,11 @@ void QArrayProcessor::Exec() const
     static QList<Bool_t> selprocs;    //Indicate if the needed processes is a selector process or not
     static QList<Bool_t> seldepprocs; //Indicate if the needed processes depends on a selector process or not
     static Bool_t doselection;
-    static Int_t neaea;               //Number of entries for arrays that should contain all events
-    static Int_t neaealast;           //Number of entries for the previous input array that should contain all events
-    static Int_t nesea;               //Number of entries for arrays that should contain only selected events
-    static Int_t nesealast;           //Number of entries for the previous input array that should contain only selected events
-    static Int_t nentries;            //Number of entries used in the events loop
+    static Long64_t neaea;               //Number of entries for arrays that should contain all events
+    static Long64_t neaealast;           //Number of entries for the previous input array that should contain all events
+    static Long64_t nesea;               //Number of entries for arrays that should contain only selected events
+    static Long64_t nesealast;           //Number of entries for the previous input array that should contain only selected events
+    static Long64_t nentries;            //Number of entries used in the events loop
     static Bool_t eventselected;
 
     static Int_t nj;
