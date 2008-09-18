@@ -18,7 +18,7 @@ QSigExFitMinuit::~QSigExFitMinuit()
 Double_t QSigExFitMinuit::EvalFCN(const Double_t *pars, Int_t flag) const
 {
   if(!fMinuit) {
-    fprintf(stderr,"QSigExFitMinuit::Fit: Error: InitFit has not been called\n");
+    fprintf(stderr,"QSigExFitMinuit::EvalFCN: Error: InitFit has not been called\n");
     throw 1;
   }
   Double_t fval, *par;
@@ -67,82 +67,89 @@ Double_t QSigExFitMinuit::Fit()
     throw 1;
   }
 
-  for(i=0; i<fMinimArgs->Count(); i++) minimargs[i]=(*fMinimArgs)[i];
+  try{
 
-  // Reinitialize floating parameters values
-  for (i=0; i<numpar; i++){
-    if(!fParams[i].IsFixed()) {
-      fMinuit->mnparm(i, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+    for(i=0; i<fMinimArgs->Count(); i++) minimargs[i]=(*fMinimArgs)[i];
+
+    // Reinitialize floating parameters values
+    for (i=0; i<numpar; i++){
+      if(!fParams[i].IsFixed()) {
+	fMinuit->mnparm(i, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+      }
     }
-  }
 
-  //**** Call the minimizer ****
-  fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
+    //**** Call the minimizer ****
+    fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
 
-  // set fit parameters to result from this run of the minimizer
-  for (i=0; i<numpar; i++){
-    if(!fParams[i].IsFixed()) {
-      fMinuit->mnpout(i,strbuf,dbuf4,dbuf1,dbuf2,dbuf3,ibuf1); //dbuf4 contains the fitted value
-      fMinuit->mnparm(i, fParams[i].GetName(), dbuf4, fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+    // set fit parameters to result from this run of the minimizer
+    for (i=0; i<numpar; i++){
+      if(!fParams[i].IsFixed()) {
+	fMinuit->mnpout(i,strbuf,dbuf4,dbuf1,dbuf2,dbuf3,ibuf1); //dbuf4 contains the fitted value
+	fMinuit->mnparm(i, fParams[i].GetName(), dbuf4, fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+      }
     }
+    // rerun minimizer
+    fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
+
+    delete[] minimargs;
+
+    ierflg = 0; 
+
+    //Print the covariance matrix
+    //cout << "\nParameter correlations calculated by MIGRAD:"<<"\n";
+    //Double_t dummyd=0;
+    //fMinuit->mnexcm("SHOW COR",&dummyd,0,ierflg);
+
+    //Calculate non-symmetric errors with MINOS:
+    //Minuit calculates errors by finding the change in the parameter value 
+    //required to change the function by fcnerror.
+    //In the case of a Chi-2, 
+    //     fcnerror =1.0 --> 1 sigma
+    //     fcnerror =4.0 --> 2 sigma
+    //     fcnerror =9.0 --> 3 sigma
+    //When minosmaxcalls is positive, it sets the maximum number of function
+    //calls per parameter to its values 
+    dbuf1=fMinosMaxCalls;
+    fMinuit->mnexcm("MINO",&dbuf1,(Int_t)(fMinosMaxCalls>=0),ierflg); 
+
+    fMinuitStatus=fMinuit->fCstatu;
+    fFCNMin=fMinuit->fAmin;
+
+    //Loop over the parameters
+    for(Int_t i=0;i<numpar;i++){
+      //mnpout takes in the index of the parameter we're asking about, and returns
+      //it's name, fitted value, estimate of parameter uncertainty, lower limit
+      //on the parameter value, upper limit on the parameter value, and the
+      //internal parameter number (if the parameter is variable).  See Minuit
+      //documentation for details.  We aren't actually interested in any of this
+      //except the fit value.
+
+      fMinuit->mnpout(i,strbuf,ParamFitVal(i),dbuf1,dbuf2,dbuf3,ibuf1);
+
+      //mnerrs reports the errors calculated by MINOS.  It takes in the index of 
+      //the parameter we're asking about, and returns the positive error, 
+      //negative error (as a negative number), the parabolic parameter error 
+      //and the global correlation coefficient for the parameter.  
+
+      fMinuit->mnerrs(i,ParamPlusFitError(i),ParamMinusFitError(i),dbuf1,dbuf2);
+    }
+
+    Int_t numfpar=fMinuit->GetNumFreePars();        //Number of floating parameters
+    Double_t *covmat=new Double_t[numfpar*numfpar]; //covariance matrix array
+    //Get the covariance matrix from TMinuit
+    fMinuit->mnemat(covmat,numfpar);
+    //Store the matrix in a TMatrixDSym object
+    if(fCovMatrix) {
+      delete fCovMatrix;
+    }
+    fCovMatrix=new TMatrixDSym(numfpar,covmat);
+    //Delete the covariance matrix array
+    delete[] covmat;
+
+  } catch (Int_t e) {
+    fprintf(stderr,"Exception handled by QSigExFit::Fit()\n");
+    throw e;
   }
-  // rerun minimizer
-  fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
-
-  delete[] minimargs;
-
-  ierflg = 0; 
-
-  //Print the covariance matrix
-  //cout << "\nParameter correlations calculated by MIGRAD:"<<"\n";
-  //Double_t dummyd=0;
-  //fMinuit->mnexcm("SHOW COR",&dummyd,0,ierflg);
-
-  //Calculate non-symmetric errors with MINOS:
-  //Minuit calculates errors by finding the change in the parameter value 
-  //required to change the function by fcnerror.
-  //In the case of a Chi-2, 
-  //     fcnerror =1.0 --> 1 sigma
-  //     fcnerror =4.0 --> 2 sigma
-  //     fcnerror =9.0 --> 3 sigma
-  //When minosmaxcalls is positive, it sets the maximum number of function
-  //calls per parameter to its values 
-  dbuf1=fMinosMaxCalls;
-  fMinuit->mnexcm("MINO",&dbuf1,(Int_t)(fMinosMaxCalls>=0),ierflg); 
-
-  fMinuitStatus=fMinuit->fCstatu;
-  fFCNMin=fMinuit->fAmin;
-
-  //Loop over the parameters
-  for(Int_t i=0;i<numpar;i++){
-    //mnpout takes in the index of the parameter we're asking about, and returns
-    //it's name, fitted value, estimate of parameter uncertainty, lower limit
-    //on the parameter value, upper limit on the parameter value, and the
-    //internal parameter number (if the parameter is variable).  See Minuit
-    //documentation for details.  We aren't actually interested in any of this
-    //except the fit value.
-
-    fMinuit->mnpout(i,strbuf,ParamFitVal(i),dbuf1,dbuf2,dbuf3,ibuf1);
-
-    //mnerrs reports the errors calculated by MINOS.  It takes in the index of 
-    //the parameter we're asking about, and returns the positive error, 
-    //negative error (as a negative number), the parabolic parameter error 
-    //and the global correlation coefficient for the parameter.  
-
-    fMinuit->mnerrs(i,ParamPlusFitError(i),ParamMinusFitError(i),dbuf1,dbuf2);
-  }
-
-  Int_t numfpar=fMinuit->GetNumFreePars();        //Number of floating parameters
-  Double_t *covmat=new Double_t[numfpar*numfpar]; //covariance matrix array
-  //Get the covariance matrix from TMinuit
-  fMinuit->mnemat(covmat,numfpar);
-  //Store the matrix in a TMatrixDSym object
-  if(fCovMatrix) {
-    delete fCovMatrix;
-  }
-  fCovMatrix=new TMatrixDSym(numfpar,covmat);
-  //Delete the covariance matrix array
-  delete[] covmat;
 
   return fFCNMin;
 } 

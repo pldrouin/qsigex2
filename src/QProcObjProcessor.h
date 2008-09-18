@@ -66,6 +66,8 @@ class QProcObjProcessor: public QStdProcessor
     QList<QProcObj*>         *fIObjects; //! Input objects 
     QList<QProcObj*>         *fOObjects; //! Output objects 
 
+    mutable QList<Bool_t>	fNeededOO; //Needed output objects
+
     ClassDef(QProcObjProcessor,1) //QProcObj processor
 };
 

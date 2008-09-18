@@ -473,14 +473,12 @@ void QArrayProcessor::Exec() const
 #ifdef DEBUG
   printf("QArrayProcessor::Exec() (processor '%s')...\t",GetName());
 #endif
+
   static QMask pardiffs; //Modified parameters since the last call
   static QMask depmods;  //Required processes due to modified input arrays or input objects
   static Bool_t firstrun;
   pardiffs.Clear();
   depmods.Clear();
-  static QList<Bool_t>         neededia; //Needed input arrays 
-  static QList<Bool_t>         neededoa; //Needed output arrays
-  static QList<Bool_t>         neededoo; //Needed output objects
   static Int_t i,j;
 
   //fLastParams gets cleared by the function Analyze, so this is how the first run is identified
@@ -509,9 +507,9 @@ void QArrayProcessor::Exec() const
 
     firstrun=kFALSE;
   } else {
-    neededia.RedimList(fIANames->Count());
-    neededoa.RedimList(fOANames->Count());
-    neededoo.RedimList(fOObjects->Count());
+    fNeededIA.RedimList(fIANames->Count());
+    fNeededOA.RedimList(fOANames->Count());
+    fNeededOO.RedimList(fOObjects->Count());
     firstrun=kTRUE;
   }
 
@@ -550,9 +548,9 @@ void QArrayProcessor::Exec() const
     neaealast=-1;
     nesealast=-1;
 
-    memset(neededia.GetArray(),0,neededia.Count()*sizeof(Bool_t));
-    memset(neededoa.GetArray(),0,neededoa.Count()*sizeof(Bool_t));
-    memset(neededoo.GetArray(),0,neededoo.Count()*sizeof(Bool_t));
+    memset(fNeededIA.GetArray(),0,fNeededIA.Count()*sizeof(Bool_t));
+    memset(fNeededOA.GetArray(),0,fNeededOA.Count()*sizeof(Bool_t));
+    memset(fNeededOO.GetArray(),0,fNeededOO.Count()*sizeof(Bool_t));
 
     //Loop over all processes
     for(i=0; i<fProcs->Count(); i++) {
@@ -576,30 +574,30 @@ void QArrayProcessor::Exec() const
 	nj=(*fOAIndices)[i].Count();
 	for(j=0; j<nj; j++) {
 	  //Add the current output array to the list of needed output arrays
-	  neededoa[(*fOAIndices)[i][j]]=kTRUE;
+	  fNeededOA[(*fOAIndices)[i][j]]=kTRUE;
 	}
 
 	//Loop over output objets of the current process
 	nj=(*fOOIndices)[i].Count();
 	for(j=0; j<nj; j++) {
 	  //Add the current object to the list of needed output objects
-	  neededoo[(*fOOIndices)[i][j]]=kTRUE;
+	  fNeededOO[(*fOOIndices)[i][j]]=kTRUE;
 	}
 
 	//Loop over input arrays of the current process
 	nj=(*fIAIndices)[i].Count();
 	for(j=0; j<nj; j++) {
 	  //Add the current input array to the list of needed input arrays
-	  neededia[(*fIAIndices)[i][j]]=kTRUE;
+	  fNeededIA[(*fIAIndices)[i][j]]=kTRUE;
 	}
       }
     }
 
     //Loop over all output arrays
-    for(i=0; i<neededoa.Count(); i++) {
+    for(i=0; i<fNeededOA.Count(); i++) {
 
       //If the current output array is needed
-      if(neededoa[i]) {
+      if(fNeededOA[i]) {
 	//Reset the array
 	(*fOArrays)[i]->ResetArray();
 	//Add it to the list of needed output arrays
@@ -609,48 +607,48 @@ void QArrayProcessor::Exec() const
     }
 
     //Loop over all output objects
-    for(i=0; i<neededoo.Count(); i++) {
+    for(i=0; i<fNeededOO.Count(); i++) {
 
       //If the current output object is needed
-      if(neededoo[i]) {
+      if(fNeededOO[i]) {
 	//Add it to the list of needed output objects
 	oobjects.Add((*fOObjects)[i]);
       }
     }
 
     //Loop over all input arrays
-    for(i=0; i<neededia.Count(); i++) {
+    for(i=0; i<fNeededIA.Count(); i++) {
 
       //If the current input array is needed and it is not also an output array
-      if(neededia[i] && oarrays.FindFirst((*fIArrays)[i]) == -1) {
+      if(fNeededIA[i] && oarrays.FindFirst((*fIArrays)[i]) == -1) {
 
-	    //Add it to the list of needed input arrays
-	    iarrays.Add((*fIArrays)[i]);
+	//Add it to the list of needed input arrays
+	iarrays.Add((*fIArrays)[i]);
 
-	  //If the current array should contain all events
-	  if(!(*fIASProc)[i]) {
-	    //Get the number of entries for the current array
-	    neaea=(*fIArrays)[i]->GetEntries();
+	//If the current array should contain all events
+	if(!(*fIASProc)[i]) {
+	  //Get the number of entries for the current array
+	  neaea=(*fIArrays)[i]->GetEntries();
 
-	    //If the number of entries for the current input array does not match the number of entries for the previous triggered input array
-	    if(neaea != neaealast && neaealast != -1) {
-	      fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' (%lli) does not match the number of entries for the previously triggered input array (%lli) \n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data(),neaea,neaealast);
-	      throw 1;
-	    }
-	    neaealast=neaea;
-
-	    //Else if the current array should contain only selected events
-	  } else {
-	    //Get the number of entries for the current array
-	    nesea=(*fIArrays)[i]->GetEntries();
-
-	    //If the number of entries for the current input array does not match the number of entries for the previous triggered input array
-	    if(nesea != nesealast && nesealast != -1) {
-	      fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' (%lli) does not match the number of entries for the previously triggered input array (%lli)\n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data(),neaea,neaealast);
-	      throw 1;
-	    }
-	    nesealast=nesea;
+	  //If the number of entries for the current input array does not match the number of entries for the previous triggered input array
+	  if(neaea != neaealast && neaealast != -1) {
+	    fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' (%lli) does not match the number of entries for the previously triggered input array (%lli) \n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data(),neaea,neaealast);
+	    throw 1;
 	  }
+	  neaealast=neaea;
+
+	  //Else if the current array should contain only selected events
+	} else {
+	  //Get the number of entries for the current array
+	  nesea=(*fIArrays)[i]->GetEntries();
+
+	  //If the number of entries for the current input array does not match the number of entries for the previous triggered input array
+	  if(nesea != nesealast && nesealast != -1) {
+	    fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' (%lli) does not match the number of entries for the previously triggered input array (%lli)\n",(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data(),neaea,neaealast);
+	    throw 1;
+	  }
+	  nesealast=nesea;
+	}
       }
     }
 
@@ -823,7 +821,7 @@ void QArrayProcessor::InitProcess()
       fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Array type '%s' is unknown\n",proto.Data());
       throw 1;
     }
-}
+  }
 
   //Create output buffers
   fBuffers->RedimList(fBuNames->Count());

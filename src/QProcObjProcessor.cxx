@@ -225,7 +225,6 @@ void QProcObjProcessor::Exec() const
   static Bool_t firstrun;
   pardiffs.Clear();
   depmods.Clear();
-  static QList<Bool_t>         neededoo; //Needed output objects
   static Int_t i,j;
   static Int_t nj;
 
@@ -248,7 +247,7 @@ void QProcObjProcessor::Exec() const
 
     firstrun=kFALSE;
   } else {
-    neededoo.RedimList(fOObjects->Count());
+    fNeededOO.RedimList(fOObjects->Count());
     firstrun=kTRUE;
   }
 
@@ -263,7 +262,7 @@ void QProcObjProcessor::Exec() const
     oobjects.Clear();
     procs.Clear();
 
-    memset(neededoo.GetArray(),0,neededoo.Count()*sizeof(Bool_t));
+    memset(fNeededOO.GetArray(),0,fNeededOO.Count()*sizeof(Bool_t));
 
     //Loop over all processes
     for(i=0; i<fProcs->Count(); i++) {
@@ -278,16 +277,16 @@ void QProcObjProcessor::Exec() const
 	nj=(*fOOIndices)[i].Count();
 	for(j=0; j<nj; j++) {
 	  //Add the current object to the list of needed output objects
-	  neededoo[(*fOOIndices)[i][j]]=kTRUE;
+	  fNeededOO[(*fOOIndices)[i][j]]=kTRUE;
 	}
       }
     }
 
     //Loop over all output objects
-    for(i=0; i<neededoo.Count(); i++) {
+    for(i=0; i<fNeededOO.Count(); i++) {
 
       //If the current output object is needed
-      if(neededoo[i]) {
+      if(fNeededOO[i]) {
 	//Add it to the list of needed output objects
 	oobjects.Add((*fOObjects)[i]);
 	//Initialize the object

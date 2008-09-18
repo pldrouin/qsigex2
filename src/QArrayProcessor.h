@@ -87,6 +87,10 @@ class QArrayProcessor: public QStdProcessor
     QList<QProcObj*>         *fOObjects; //! Output objects 
     QList<Double_t>           *fBuffers; //! Buffers for output buffers
 
+    mutable QList<Bool_t>	fNeededIA; //Needed input arrays
+    mutable QList<Bool_t>	fNeededOA; //Needed output arrays
+    mutable QList<Bool_t>	fNeededOO; //Needed output objects
+
     ClassDef(QArrayProcessor,1) //Arrays and objects processor
 };
 
