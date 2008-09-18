@@ -5,7 +5,7 @@ libqsigex.so:
 	cp ./src/libqsigex2.so ./lib/
 
 htmldoc: force
-	cd ./src; root -b -n -q -l htmlgen.C
+	cd ./src; root -b -n -q -l htmlgen.C; mv htmldoc ../
 clean:
 	cd ./src; $(MAKE) clean
 
