@@ -7,4 +7,6 @@
 
 ClassImp(QProcessor)
 
+UInt_t QProcessor::fDefVerbosity=0;
+
 #include "debugger.h"

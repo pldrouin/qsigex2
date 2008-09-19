@@ -12,7 +12,7 @@ class QProcessor: public TNamed
 {
   public:
     QProcessor(): TNamed(), fVerbosity(0) {}
-    QProcessor(const char* name, const char* title): TNamed(name,title), fVerbosity(0) {}
+    QProcessor(const char* name, const char* title): TNamed(name,title), fVerbosity(fDefVerbosity) {}
     QProcessor(const QProcessor &rhs): TNamed(rhs), fVerbosity(0) {}
     virtual ~QProcessor(){}
 
@@ -24,11 +24,14 @@ class QProcessor: public TNamed
     virtual void Exec() const=0;
     virtual void InitProcess()=0;
 
+    static const UInt_t& GetDefVerbosity(){return fDefVerbosity;}
     const UInt_t& GetVerbosity() const{return fVerbosity;}
 
     const QProcessor& operator=(const QProcessor &rhs){TNamed::operator=(rhs); return *this;}
 
     virtual void PrintAnalysisResults() const=0;
+
+    static void SetDefVerbosity(UInt_t verbosity=0){fDefVerbosity=verbosity;}
 
     virtual void SetParam(Int_t index=-1, const Double_t &value=0)=0;
     virtual void SetParam(const char *paramname, const Double_t &value=0)=0;
@@ -46,6 +49,7 @@ class QProcessor: public TNamed
   protected:
   private:
     UInt_t fVerbosity;
+    static UInt_t fDefVerbosity;
 
     ClassDef(QProcessor,1) //Virtual abstract base class for processor classes
 };
