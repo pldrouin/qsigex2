@@ -55,13 +55,9 @@ void QProcList::Analyze()
 
 void QProcList::Exec() const
 {
-#ifdef DEBUG
-  printf("QProcList::Exec() (processor '%s')...\t",GetName());
-#endif
+  if(GetVerbosity()&QProcessor::kShowExec) printf("QProcList('%s')::Exec()\n",GetName());
+
   for(Int_t i=0; i<fQPL->Count(); i++) ((QProcessor*)(*fQPL)[i])->Exec();
-#ifdef DEBUG
-    printf("done\n");
-#endif
 }
 
 void QProcList::InitProcess()

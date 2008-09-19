@@ -74,7 +74,6 @@ class QDis: public TNamed, public QProcObj
 
   const Option_t* GetCutExpr() const{return fCutExpr;}
   UInt_t GetNFixedCoords() const{return fNFixedCoords;}
-  enum eNormFlags {kRegularNorm=0, kEventsFilled=1, kVarBinSizeEventsFilled=2, kNoBinWidthNorm=4, kNoNorm=8};
   UInt_t GetNormFlags() const{return fNormFlags;}
 
   void SetCutExpr(Option_t *cutexpr=NULL){fCutExpr=cutexpr;}
@@ -100,6 +99,7 @@ class QDis: public TNamed, public QProcObj
     //Flags can be combined using a bitwise "OR" operator (|).
     fNormFlags=normflags;
   }
+  enum eNormFlags {kRegularNorm=0, kEventsFilled=1, kVarBinSizeEventsFilled=2, kNoBinWidthNorm=4, kNoNorm=8};
 
  protected:
   virtual void SetNameTitleToObject()=0;

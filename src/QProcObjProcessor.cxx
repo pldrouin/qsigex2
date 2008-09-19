@@ -216,9 +216,7 @@ void QProcObjProcessor::DelProc(const char *procname)
 
 void QProcObjProcessor::Exec() const
 {
-#ifdef DEBUG
-  printf("QProcObjProcessor::Exec() (processor '%s')...\t",GetName());
-#endif
+  if(GetVerbosity()&QProcessor::kShowExec) printf("QProcObjProcessor('%s')::Exec()\n",GetName());
 
   static QMask pardiffs; //Modified parameters since the last call
   static QMask depmods;  //Required processes due to modified input objects
@@ -269,7 +267,8 @@ void QProcObjProcessor::Exec() const
 
       //If the current process has never been run or if it is triggered by the parameters mask
       if(((*fProcsParDepends)[i] && pardiffs) || depmods.GetBit(i) || firstrun) {
-	//printf("Process '%s' will be called\n",(*fProcs)[i].GetName());
+
+	if(GetVerbosity()&QProcessor::kShowExec) printf("\tProcess '%s' will be called\n",(*fProcs)[i].GetName());
 	//Add it to the list of needed processes
 	procs.Add(&(*fProcs)[i]);
 
@@ -312,9 +311,6 @@ void QProcObjProcessor::Exec() const
     (*fLastParams)=(*fParams);
     fLastExec.Set();
   }
-#ifdef DEBUG
-    printf("done\n");
-#endif
 }
 
 Int_t QProcObjProcessor::FindProcIndex(const char *procname) const

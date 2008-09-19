@@ -470,9 +470,7 @@ void QArrayProcessor::DelProc(const char *procname)
 
 void QArrayProcessor::Exec() const
 {
-#ifdef DEBUG
-  printf("QArrayProcessor::Exec() (processor '%s')...\t",GetName());
-#endif
+  if(GetVerbosity()&QProcessor::kShowExec) printf("QArrayProcessor('%s')::Exec()\n",GetName());
 
   static QMask pardiffs; //Modified parameters since the last call
   static QMask depmods;  //Required processes due to modified input arrays or input objects
@@ -557,7 +555,8 @@ void QArrayProcessor::Exec() const
 
       //If the current process has never been run or if it is triggered by the parameters mask
       if(((*fProcsParDepends)[i] && pardiffs) || depmods.GetBit(i) || firstrun) {
-	//printf("Process '%s' will be called\n",(*fProcs)[i].GetName());
+
+	if(GetVerbosity()&QProcessor::kShowExec) printf("\tProcess '%s' will be called\n",(*fProcs)[i].GetName());
 	//Add it to the list of needed processes
 	procs.Add(&(*fProcs)[i]);
 	selprocs.Add((*fSelProcs)[i]);
@@ -723,10 +722,6 @@ void QArrayProcessor::Exec() const
     (*fLastParams)=(*fParams);
     fLastExec.Set();
   }
-
-#ifdef DEBUG
-  printf("done\n");
-#endif
 }
 
 Int_t QArrayProcessor::FindProcIndex(const char *procname) const
