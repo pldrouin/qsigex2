@@ -45,84 +45,84 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xl
 {
 
   if(nbinsy==0) {
-    fTH=new TH1F(name,title,nbinsx,xlow,xhigh);
+    fTH=new TH1F("qdisththobj",title,nbinsx,xlow,xhigh);
 
   } else if(nbinsz==0) {
-    fTH=new TH2F(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh);
+    fTH=new TH2F("qdisththobj",title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh);
 
   } else {
-    fTH=new TH3F(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+    fTH=new TH3F("qdisththobj",title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
   }
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, const Float_t *zbins): QDis(), fOwned(kTRUE)
 {
-  fTH=new TH3F(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
+  fTH=new TH3F("qdisththobj",title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
   if(!IsConstantBW(nbinsz,zbins)) fTH->GetZaxis()->Set(nbinsz,zbins);
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, const Float_t *ybins, Int_t nbinsz, Float_t zlow, Float_t zhigh): QDis(), fOwned(kTRUE)
 {
-  fTH=new TH3F(name,title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
+  fTH=new TH3F("qdisththobj",title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
   if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Float_t *xbins, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, Float_t zlow, Float_t zhigh): QDis(), fOwned(kTRUE)
 {
   if(nbinsy==0) {
-    if(IsConstantBW(nbinsx,xbins)) fTH=new TH1F(name,title,nbinsx,xbins[0],xbins[nbinsx]);
-    else fTH=new TH1F(name,title,nbinsx,xbins);
+    if(IsConstantBW(nbinsx,xbins)) fTH=new TH1F("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx]);
+    else fTH=new TH1F("qdisththobj",title,nbinsx,xbins);
 
   } else if(nbinsz==0) {
-    fTH=new TH2F(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh);
+    fTH=new TH2F("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh);
     if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
 
   } else {
-    fTH=new TH3F(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+    fTH=new TH3F("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
     if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
   }
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xlow, Float_t xhigh, Int_t nbinsy, const Float_t *ybins, Int_t nbinsz, const Float_t *zbins): QDis(), fOwned(kTRUE)
 {
-  fTH=new TH3F(name,title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zbins[0],zbins[nbinsz]);
+  fTH=new TH3F("qdisththobj",title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zbins[0],zbins[nbinsz]);
   if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
   if(!IsConstantBW(nbinsz,zbins)) fTH->GetZaxis()->Set(nbinsz,zbins);
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Float_t *xbins, Int_t nbinsy, Float_t ylow, Float_t yhigh, Int_t nbinsz, const Float_t *zbins): QDis(), fOwned(kTRUE)
 {
-  fTH=new TH3F(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
+  fTH=new TH3F("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
   if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
   if(!IsConstantBW(nbinsz,zbins)) fTH->GetZaxis()->Set(nbinsz,zbins);
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Float_t *xbins, Int_t nbinsy, const Float_t *ybins, Int_t nbinsz, Float_t zlow, Float_t zhigh): QDis(), fOwned(kTRUE)
 {
   if(nbinsz==0) {
-    fTH=new TH2F(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy]);
+    fTH=new TH2F("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy]);
     if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
     if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
 
   } else {
-    fTH=new TH3F(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
+    fTH=new TH3F("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
     if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
     if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
   }
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Float_t *xbins, Int_t nbinsy, const Float_t *ybins, Int_t nbinsz, const Float_t *zbins): QDis(), fOwned(kTRUE)
@@ -130,16 +130,16 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Floa
   Bool_t cbwx, cbwy, cbwz;
 
   if(nbinsy==0) {
-    if(IsConstantBW(nbinsx,xbins)) fTH=new TH1F(name,title,nbinsx,xbins[0],xbins[nbinsx]);
-    else fTH=new TH1F(name,title,nbinsx,xbins);
+    if(IsConstantBW(nbinsx,xbins)) fTH=new TH1F("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx]);
+    else fTH=new TH1F("qdisththobj",title,nbinsx,xbins);
 
   } else if(nbinsz==0) {
     cbwx=IsConstantBW(nbinsx,xbins);
     cbwy=IsConstantBW(nbinsy,ybins);
 
-    if(!cbwx && !cbwy) fTH=new TH2F(name,title,nbinsx,xbins,nbinsy,ybins);
+    if(!cbwx && !cbwy) fTH=new TH2F("qdisththobj",title,nbinsx,xbins,nbinsy,ybins);
     else {
-      fTH=new TH2F(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy]);
+      fTH=new TH2F("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy]);
       if(!cbwx) fTH->GetXaxis()->Set(nbinsx,xbins);
       if(!cbwy) fTH->GetYaxis()->Set(nbinsy,ybins);
     }
@@ -149,100 +149,100 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Floa
     cbwy=IsConstantBW(nbinsy,ybins);
     cbwz=IsConstantBW(nbinsz,zbins);
 
-    if(!cbwx && !cbwy && !cbwz) fTH=new TH3F(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins);
+    if(!cbwx && !cbwy && !cbwz) fTH=new TH3F("qdisththobj",title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins);
     else {
-      fTH=new TH3F(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy],nbinsz,zbins[0],zbins[nbinsz]);
+      fTH=new TH3F("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy],nbinsz,zbins[0],zbins[nbinsz]);
       if(!cbwx) fTH->GetXaxis()->Set(nbinsx,xbins);
       if(!cbwy) fTH->GetYaxis()->Set(nbinsy,ybins);
       if(!cbwz) fTH->GetZaxis()->Set(nbinsz,zbins);
     }
   }
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, Double_t zlow, Double_t zhigh): QDis(), fOwned(kTRUE)
 {
 
   if(nbinsy==0) {
-    fTH=new TH1D(name,title,nbinsx,xlow,xhigh);
+    fTH=new TH1D("qdisththobj",title,nbinsx,xlow,xhigh);
 
   } else if(nbinsz==0) {
-    fTH=new TH2D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh);
+    fTH=new TH2D("qdisththobj",title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh);
 
   } else {
-    fTH=new TH3D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+    fTH=new TH3D("qdisththobj",title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
   }
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, const Double_t *zbins): QDis(), fOwned(kTRUE)
 {
-  fTH=new TH3D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
+  fTH=new TH3D("qdisththobj",title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
   if(!IsConstantBW(nbinsz,zbins)) fTH->GetZaxis()->Set(nbinsz,zbins);
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, const Double_t *ybins, Int_t nbinsz, Double_t zlow, Double_t zhigh): QDis(), fOwned(kTRUE)
 {
-  fTH=new TH3D(name,title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
+  fTH=new TH3D("qdisththobj",title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
   if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Double_t *xbins, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, Double_t zlow, Double_t zhigh): QDis(), fOwned(kTRUE)
 {
   if(nbinsy==0) {
-    if(IsConstantBW(nbinsx,xbins)) fTH=new TH1D(name,title,nbinsx,xbins[0],xbins[nbinsx]);
-    else fTH=new TH1D(name,title,nbinsx,xbins);
+    if(IsConstantBW(nbinsx,xbins)) fTH=new TH1D("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx]);
+    else fTH=new TH1D("qdisththobj",title,nbinsx,xbins);
 
   } else if(nbinsz==0) {
-    fTH=new TH2D(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh);
+    fTH=new TH2D("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh);
     if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
 
   } else {
-    fTH=new TH3D(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+    fTH=new TH3D("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
     if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
   }
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, const Double_t *ybins, Int_t nbinsz, const Double_t *zbins): QDis(), fOwned(kTRUE)
 {
-  fTH=new TH3D(name,title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zbins[0],zbins[nbinsz]);
+  fTH=new TH3D("qdisththobj",title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zbins[0],zbins[nbinsz]);
   if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
   if(!IsConstantBW(nbinsz,zbins)) fTH->GetZaxis()->Set(nbinsz,zbins);
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Double_t *xbins, Int_t nbinsy, Double_t ylow, Double_t yhigh, Int_t nbinsz, const Double_t *zbins): QDis(), fOwned(kTRUE)
 {
-  fTH=new TH3D(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
+  fTH=new TH3D("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
   if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
   if(!IsConstantBW(nbinsz,zbins)) fTH->GetZaxis()->Set(nbinsz,zbins);
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Double_t *xbins, Int_t nbinsy, const Double_t *ybins, Int_t nbinsz, Double_t zlow, Double_t zhigh): QDis(), fOwned(kTRUE)
 {
   if(nbinsz==0) {
-    fTH=new TH2D(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy]);
+    fTH=new TH2D("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy]);
     if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
     if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
 
   } else {
-    fTH=new TH3D(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
+    fTH=new TH3D("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
     if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
     if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
   }
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Double_t *xbins, Int_t nbinsy, const Double_t *ybins, Int_t nbinsz, const Double_t *zbins): QDis(), fOwned(kTRUE)
@@ -250,15 +250,15 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Doub
   Bool_t cbwx, cbwy, cbwz;
 
   if(nbinsy==0) {
-    fTH=new TH1D(name,title,nbinsx,xbins);
+    fTH=new TH1D("qdisththobj",title,nbinsx,xbins);
 
   } else if(nbinsz==0) {
     cbwx=IsConstantBW(nbinsx,xbins);
     cbwy=IsConstantBW(nbinsy,ybins);
 
-    if(!cbwx && !cbwy) fTH=new TH2D(name,title,nbinsx,xbins,nbinsy,ybins);
+    if(!cbwx && !cbwy) fTH=new TH2D("qdisththobj",title,nbinsx,xbins,nbinsy,ybins);
     else {
-      fTH=new TH2D(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy]);
+      fTH=new TH2D("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy]);
       if(!cbwx) fTH->GetXaxis()->Set(nbinsx,xbins);
       if(!cbwy) fTH->GetYaxis()->Set(nbinsy,ybins);
     }
@@ -268,16 +268,16 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Doub
     cbwy=IsConstantBW(nbinsy,ybins);
     cbwz=IsConstantBW(nbinsz,zbins);
 
-    if(!cbwx && !cbwy && !cbwz) fTH=new TH3D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins);
+    if(!cbwx && !cbwy && !cbwz) fTH=new TH3D("qdisththobj",title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins);
     else {
-      fTH=new TH3D(name,title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy],nbinsz,zbins[0],zbins[nbinsz]);
+      fTH=new TH3D("qdisththobj",title,nbinsx,xbins[0],xbins[nbinsx],nbinsy,ybins[0],ybins[nbinsy],nbinsz,zbins[0],zbins[nbinsz]);
       if(!cbwx) fTH->GetXaxis()->Set(nbinsx,xbins);
       if(!cbwy) fTH->GetYaxis()->Set(nbinsy,ybins);
       if(!cbwz) fTH->GetZaxis()->Set(nbinsz,zbins);
     }
   }
   fTH->SetDirectory(NULL);
-  SetNameTitleToObject();
+  SetNameTitle(name,title);
 }
 
 Int_t QDisTH::Fill(const Double_t &x)
