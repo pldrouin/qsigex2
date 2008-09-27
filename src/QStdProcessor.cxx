@@ -31,17 +31,6 @@ void QStdProcessor::DelParam(const char *paramname)
   if((i=FindParamIndex(paramname))!=-1) DelParam(i);
 }
 
-Int_t QStdProcessor::FindParamIndex(const char *paramname) const
-{
-  Int_t ret=(*fParamsNames).FindFirst(paramname);
-
-  if(ret == -1) {
-    fprintf(stderr,"QStdProcessor::FindParamIndex: Error: parameter '%s' not found\n",paramname);
-    throw 1;
-  }
-  return ret;
-}
-
 const QStdProcessor& QStdProcessor::operator=(const QStdProcessor &rhs)
 {
   QProcessor::operator=(rhs);

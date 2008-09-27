@@ -23,7 +23,7 @@ class QStdProcessor: public QProcessor
     void DelParam(Int_t index=-1){fParams->Del(index); fParamsNames->Del(index);}
     void DelParam(const char *paramname);
 
-    Int_t FindParamIndex(const char *paramname) const;
+    Int_t FindParamIndex(const char *paramname) const{return (*fParamsNames).FindFirst(paramname);}
 
     Int_t GetNParams() const{return fParamsNames->Count();}
 
