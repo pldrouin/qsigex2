@@ -60,6 +60,17 @@ void QProcList::Exec() const
   for(Int_t i=0; i<fQPL->Count(); i++) ((QProcessor*)(*fQPL)[i])->Exec();
 }
 
+Int_t QProcList::FindParamIndex(const char *paramname) const
+{
+  Int_t ret=(*fParamsNames).FindFirst(paramname);
+
+  if(ret == -1) {
+    fprintf(stderr,"QProcList::FindParamIndex: Error: parameter '%s' not found\n",paramname);
+    throw 1;
+  }
+  return ret;
+}
+
 void QProcList::InitProcess()
 {
 

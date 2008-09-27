@@ -24,6 +24,8 @@ class QProcessor: public TNamed
     virtual void Exec() const=0;
     virtual void InitProcess()=0;
 
+    virtual Int_t FindParamIndex(const char* paramname) const=0;
+
     static const UInt_t& GetDefVerbosity(){return fDefVerbosity;}
     const UInt_t& GetVerbosity() const{return fVerbosity;}
 

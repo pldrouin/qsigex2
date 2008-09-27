@@ -20,6 +20,8 @@ class QProcList: public QProcessor
 
     void Exec() const;
 
+    Int_t FindParamIndex(const char* paramname) const;
+
     Int_t GetNParams() const{return fParamsNames->Count();}
     Int_t GetNQProcs() const{return fQPL->Count();}
 
