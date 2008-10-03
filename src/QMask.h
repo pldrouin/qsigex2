@@ -6,11 +6,11 @@
 
 #include "debugger.h"
 
-class QMask: public QList<char>
+class QMask: public QList<UChar_t>
 {
   public:
-    QMask(): QList<char>(){}
-    QMask(const QMask &rhs): QList<char>(rhs){}
+    QMask(): QList<UChar_t>(){}
+    QMask(const QMask &rhs): QList<UChar_t>(rhs){}
     virtual ~QMask(){}
     QMask GetComplement(UInt_t nbits) const;
     void Crop();
@@ -18,8 +18,8 @@ class QMask: public QList<char>
     Bool_t GetBit(UInt_t n) const;
     void Print(const Option_t* opt=NULL) const;
     void SetBit(UInt_t n, Bool_t value);
-    const QMask& operator=(const QMask &rhs){QList<char>::operator=(rhs); return *this;}
-    const QMask& operator=(const QList<char> &rhs){QList<char>::operator=(rhs); return *this;}
+    const QMask& operator=(const QMask &rhs){QList<UChar_t>::operator=(rhs); return *this;}
+    const QMask& operator=(const QList<UChar_t> &rhs){QList<UChar_t>::operator=(rhs); return *this;}
     const QMask& operator&=(const QMask &rhs);
     const QMask& operator|=(const QMask &rhs);
     const QMask& operator^=(const QMask &rhs);

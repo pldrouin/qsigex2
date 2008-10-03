@@ -3,7 +3,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class QList<char>-;
+#pragma link C++ class QList<UChar_t>-;
 #pragma link C++ class QList<Bool_t>-;
 #pragma link C++ class QList<Int_t>-;
 #pragma link C++ class QList<Float_t>-;
@@ -11,7 +11,7 @@
 #pragma link C++ class QList<void*>-;
 #pragma link C++ class QList<TString>-;
 #pragma link C++ class QList<QList<TString> >-;
-#pragma link C++ class QList<QList<char> >-;
+#pragma link C++ class QList<QList<UChar_t> >-;
 #pragma link C++ class QList<QList<Bool_t> >-;
 #pragma link C++ class QList<QList<Int_t> >-;
 #pragma link C++ class QList<QList<Double_t> >-;
