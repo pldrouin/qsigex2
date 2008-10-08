@@ -30,6 +30,7 @@ class QProcList: public QProcessor
     void InitProcess();
 
     void PrintAnalysisResults() const;
+    void PrintProcesses(UInt_t level=0) const;
 
     void SetParam(Int_t index=-1, const Double_t &value=0);
     void SetParam(const char *paramname, const Double_t &value=0);

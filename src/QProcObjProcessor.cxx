@@ -430,6 +430,18 @@ void QProcObjProcessor::PrintAnalysisResults() const
   }
 }
 
+void QProcObjProcessor::PrintProcesses(UInt_t level) const
+{
+  Int_t i;
+  Int_t nprocs=fProcs->Count();
+  QNamedProc *proc;
+
+  for(i=0; i<nprocs; i++) {
+    proc=&((*fProcs)[i]);
+    printf("%*s%03i Object process '%s'\n",i,proc->GetName(),level*3,"");
+  }
+}
+
 void QProcObjProcessor::TerminateProcess()
 {
 }

@@ -1030,6 +1030,24 @@ void QArrayProcessor::PrintAnalysisResults() const
   curdir->cd();
 }
 
+void QArrayProcessor::PrintProcesses(UInt_t level) const
+{
+  Int_t i;
+  Int_t nprocs=fProcs->Count();
+  QNamedProc *proc;
+
+  for(i=0; i<nprocs; i++) {
+    proc=&((*fProcs)[i]);
+
+    if(i<fNAEProcs) {
+      printf("%*s%03i All events process '%s'\n",i,proc->GetName(),level*3,"");
+
+    } else {
+      printf("%*s%03i Selected events process '%s'\n",i,proc->GetName(),level*3,"");
+    }
+  }
+}
+
 void QArrayProcessor::TerminateProcess()
 {
   Int_t i;

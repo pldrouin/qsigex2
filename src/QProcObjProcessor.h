@@ -48,6 +48,7 @@ class QProcObjProcessor: public QStdProcessor
     const QProcObjProcessor& operator=(const QProcObjProcessor &rhs);
 
     void PrintAnalysisResults() const;
+    void PrintProcesses(UInt_t level=0) const;
 
     void TerminateProcess();
 

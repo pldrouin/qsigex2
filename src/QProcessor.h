@@ -32,6 +32,7 @@ class QProcessor: public TNamed
     const QProcessor& operator=(const QProcessor &rhs){TNamed::operator=(rhs); return *this;}
 
     virtual void PrintAnalysisResults() const=0;
+    virtual void PrintProcesses(UInt_t level=0) const=0;
 
     static void SetDefVerbosity(UInt_t verbosity=0){fDefVerbosity=verbosity;}
 
