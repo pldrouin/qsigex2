@@ -1,3 +1,4 @@
+#ifndef __INTEL_COMPILER
 #ifndef GCC_VERSION
 #define GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)
 #endif
@@ -6,6 +7,9 @@
 # define EXTERN
 #else
 # define EXTERN extern
+#endif
+#else
+# define EXTERN
 #endif
 
 template <typename U> void QList<U>::Streamer(TBuffer &R__b)
