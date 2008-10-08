@@ -9,7 +9,7 @@
 # LOG
 # Version 1.00  13/08/2002 PL
 
-CXXFLAGS    	+=	-g -I$(shell root-config --incdir) -pipe -Wall -W -Woverloaded-virtual -fPIC -DSWAP_BYTES -DUSE_GETTIMEOFDAY -DUSE_PTHREAD -DIGNORE_DISP_ERRORS -DFORTRAN_UNDERSCORE -fno-strict-aliasing
+CXXFLAGS    	+=	-I$(shell root-config --incdir) -pipe -Wall -W -Woverloaded-virtual -fPIC -DSWAP_BYTES -DUSE_GETTIMEOFDAY -DUSE_PTHREAD -DIGNORE_DISP_ERRORS -DFORTRAN_UNDERSCORE -fno-strict-aliasing
 
 QSIGEX_QCXX	=	$(wildcard Q*.cxx)
 QSIGEX_OBJS	=	$(QSIGEX_QCXX:.cxx=.o)
