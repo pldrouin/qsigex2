@@ -84,6 +84,8 @@ class QDisTF: public QDis
 
   Int_t GetDimension() const{return fTF->GetNdim();}
 
+  TF1* GetTF() const{return fTF;}
+
  private:
   void SetNameTitleToObject(){SetNameTitle(fTF->GetName(),fTF->GetTitle());}
   mutable TF1 *fTF;
