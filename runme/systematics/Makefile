@@ -10,7 +10,7 @@
 ROOTLIBS	=	$(shell root-config --libs) -lMinuit
 ROOTINCLUDE	?=	$(shell root-config --incdir)
 
-CXXFLAGS    	?=	-g -O2 -Wall   -fPIC -I$(ROOTINCLUDE) -I$(QSIGEXDIR)/src
+CXXFLAGS    	+=	-I$(ROOTINCLUDE) -I$(QSIGEXDIR)/src
 
 MOBJ		=	testproc_tree.o testproc_qoa.o
 EXEC		=	$(MOBJ:.o=)
