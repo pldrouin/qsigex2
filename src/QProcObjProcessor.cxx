@@ -438,7 +438,7 @@ void QProcObjProcessor::PrintProcesses(UInt_t level) const
 
   for(i=0; i<nprocs; i++) {
     proc=&((*fProcs)[i]);
-    printf("%*s%03i Object process '%s'\n",i,proc->GetName(),level*3,"");
+    printf("%*s%03i Object process '%s'\n",level*3,"",i,proc->GetName());
   }
 }
 

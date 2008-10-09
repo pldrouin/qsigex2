@@ -1040,10 +1040,10 @@ void QArrayProcessor::PrintProcesses(UInt_t level) const
     proc=&((*fProcs)[i]);
 
     if(i<fNAEProcs) {
-      printf("%*s%03i All events process '%s'\n",i,proc->GetName(),level*3,"");
+      printf("%*s%03i All events process '%s'\n",level*3,"",i,proc->GetName());
 
     } else {
-      printf("%*s%03i Selected events process '%s'\n",i,proc->GetName(),level*3,"");
+      printf("%*s%03i Selected events process '%s'\n",level*3,"",i,proc->GetName());
     }
   }
 }
