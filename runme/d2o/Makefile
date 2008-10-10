@@ -20,7 +20,7 @@ DEP		=	$(OBJ:.o=.d)
 examples: $(EXEC)
 
 $(EXEC): %: %.o $(POBJ)
-	$(CXX) $(CXXFLAGS) $(ROOTLIBS)  -L$(QSIGEXDIR)/lib -lqsigex2 -o $@ $^
+	$(CXX) $(CXXFLAGS) $^ $(ROOTLIBS) -L$(QSIGEXDIR)/lib -lqsigex2 -o $@
 
 $(DEP): %.d: %.cxx
 	@echo "Generating dependency file $@"
