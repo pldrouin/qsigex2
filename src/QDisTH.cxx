@@ -307,7 +307,7 @@ Double_t QDisTH::Integral(Int_t** binranges, Bool_t *widths) const
 
   Int_t i, j[3];
 
-  for(i=0;i<3;i++){
+  for(i=0;i<dim;i++){
     if(binranges && binranges[i]){
       mins[i]=(*(binranges[i])>1)?*(binranges[i]):1;
       maxs[i]=(*(binranges[i]+1)<nbins[i])?*(binranges[i]+1):nbins[i]; 
@@ -316,6 +316,21 @@ Double_t QDisTH::Integral(Int_t** binranges, Bool_t *widths) const
       maxs[i]=nbins[i];
     }
     //cout << mins[i] << "\t" << maxs[i] << "\n";
+  }
+
+  for(i=dim;i<3;i++){
+    mins[i]=maxs[i]=1;
+  }
+
+  Bool_t *widths3=NULL;
+
+  if(widths) {
+    
+    if(dim<3) {
+      widths3=new Bool_t[3];
+      memcpy(widths3,widths,dim*sizeof(Bool_t));
+      memset(widths3+dim,0,(3-dim)*sizeof(Bool_t));
+    } widths3=widths;
   }
 
   Double_t integral=0;
@@ -330,14 +345,14 @@ Double_t QDisTH::Integral(Int_t** binranges, Bool_t *widths) const
   if(!axes[0]->GetXbins()->fN && !axes[1]->GetXbins()->fN && !axes[2]->GetXbins()->fN) {
 
     //If integrating using bin width for all axes
-    if(!widths) {
+    if(!widths3) {
       binvol=axes[0]->GetBinWidth(1);
       for(i=1; i<dim; i++) binvol*=axes[i]->GetBinWidth(1);
 
       //Else if using bin width for only some axes
     } else {
       binvol=1;
-      for(i=0; i<dim; i++) if(widths[i]) binvol*=axes[i]->GetBinWidth(1);
+      for(i=0; i<dim; i++) if(widths3[i]) binvol*=axes[i]->GetBinWidth(1);
     }
 
     for(j[2]=mins[2];j[2]<=maxs[2];j[2]++){
@@ -353,7 +368,7 @@ Double_t QDisTH::Integral(Int_t** binranges, Bool_t *widths) const
   } else {
 
     //If integrating using bin width for all axes
-    if(!widths) {
+    if(!widths3) {
       for(j[2]=mins[2];j[2]<=maxs[2];j[2]++){
 	binwidth2=axes[2]->GetBinWidth(j[2]);
 	for(j[1]=mins[1];j[1]<=maxs[1];j[1]++){
@@ -365,7 +380,7 @@ Double_t QDisTH::Integral(Int_t** binranges, Bool_t *widths) const
       }
 
     //Else if integrating without using bin width at all
-    } else if(!widths[0] && !widths[1] && !widths[2]) {
+    } else if(!widths3[0] && !widths3[1] && !widths3[2]) {
       for(j[2]=mins[2];j[2]<=maxs[2];j[2]++){
 	for(j[1]=mins[1];j[1]<=maxs[1];j[1]++){
 	  for(j[0]=mins[0];j[0]<=maxs[0];j[0]++){
@@ -378,18 +393,20 @@ Double_t QDisTH::Integral(Int_t** binranges, Bool_t *widths) const
     } else {
 
       for(j[2]=mins[2];j[2]<=maxs[2];j[2]++){
-	binwidth2=(widths[2]?axes[2]->GetBinWidth(j[2]):1);
+	binwidth2=(widths3[2]?axes[2]->GetBinWidth(j[2]):1);
 
 	for(j[1]=mins[1];j[1]<=maxs[1];j[1]++){
-	  binvol=(widths[1]?binwidth2*axes[1]->GetBinWidth(j[1]):binwidth2);
+	  binvol=(widths3[1]?binwidth2*axes[1]->GetBinWidth(j[1]):binwidth2);
 
 	  for(j[0]=mins[0];j[0]<=maxs[0];j[0]++){
-	    integral+=fTH->GetBinContent(j[0],j[1],j[2])*(widths[0]?binvol*axes[0]->GetBinWidth(j[0]):binvol);
+	    integral+=fTH->GetBinContent(j[0],j[1],j[2])*(widths3[0]?binvol*axes[0]->GetBinWidth(j[0]):binvol);
 	  }
 	}
       }
     }
   }
+
+  if(dim<3) delete[] widths3;
 
   return integral;
 }
@@ -515,6 +532,7 @@ QDisTH* QDisTH::MarginalPDF(const char *name, const Int_t xaxis, const Int_t yax
       binranges[aaxes[0]][0]=binranges[aaxes[0]][1]=i;
       th->fTH->SetBinContent(i,Integral(binranges,widths));
     }
+    return th;
 
   } else {
 
