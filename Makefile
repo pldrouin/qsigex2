@@ -17,4 +17,4 @@ clear:
 	rm -f lib/* include/*
 
 $(ALLINCS): include/%: src/%
-	cp src/$* $@
+	cp $^ $@
