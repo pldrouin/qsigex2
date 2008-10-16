@@ -1,9 +1,9 @@
 QSLIB		=	libqsigex2.so
 ALLINCS		=	$(addprefix include/,$(notdir $(wildcard src/*.h)))
 
-all: lib/$(QSLIB) $(ALLINCS)
+all: force $(ALLINCS)
 
-lib/$(QSLIB):
+force: 
 	cd ./src; $(MAKE) $(QSLIB)
 	cp ./src/$(QSLIB) ./lib/
 
