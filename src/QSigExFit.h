@@ -24,7 +24,7 @@ class QSigExFit: public TObject
     Int_t FindFreeParamIndex(const char *paramname) const;
     Int_t FindParamIndex(const char *paramname) const;
 
-    virtual Double_t Fit()=0;
+    virtual Double_t Fit(Bool_t fituncerts=kTRUE)=0;
 
     const TMatrixDSym& GetCovMatrix() const{return *fCovMatrix;}
     const static QSigExFit& GetCurInstance(){return *fCurInstance;}

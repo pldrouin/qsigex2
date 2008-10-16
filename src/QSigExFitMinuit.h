@@ -17,7 +17,7 @@ class QSigExFitMinuit: public QSigExFit
 
     Int_t FindMinimArg(const char* name) const;
 
-    Double_t Fit();
+    Double_t Fit(Bool_t fituncerts=kTRUE);
 
     const Double_t& GetMinimArg(Int_t index) const{return (*fMinimArgs)[index];}
     const char* GetMinimName() const
