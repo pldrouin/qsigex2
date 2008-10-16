@@ -1,16 +1,20 @@
-# Makefile
+QSLIB		=	libqsigex2.so
+ALLINCS		=	$(addprefix include/,$(notdir $(wildcard src/*.h)))
 
-#libqsigex2.a:
-#	cd ./src; $(MAKE)
-#	cp ./src/$@ ./lib/
+all: lib/$(QSLIB) $(ALLINCS)
 
-libqsigex2.so:
-	cd ./src; $(MAKE)
-	cp ./src/$@ ./lib/
+lib/$(QSLIB):
+	cd ./src; $(MAKE) $(QSLIB)
+	cp ./src/$(QSLIB) ./lib/
 
 htmldoc: force
 	cd ./src; root -b -n -q -l htmlgen.C; mv htmldoc ../
 clean:
 	cd ./src; $(MAKE) clean
 
-force: ;
+clear:
+	cd ./src; $(MAKE) clear
+	rm -f lib/* include/*
+
+$(ALLINCS): include/%: src/%
+	cp src/$* $@

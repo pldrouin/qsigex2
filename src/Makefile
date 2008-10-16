@@ -40,6 +40,9 @@ clean:
 	rm -f *Dict.cxx
 	rm -f libqsigex2.so
 
+clear: clean
+	rm -f lib*.{so,a}
+
 $(QSIGEX_OBJSDEP) $(QSIGEX_OOBJSDEP) $(QSIGEX_DICTOBJDEP): %.d: %.cxx %.h
 	@echo "Generating dependency file $@"
 	@set -e; rm -f $@
