@@ -359,7 +359,8 @@ Double_t QDisTH::Integral(Int_t** binranges, Bool_t *widths) const
       widths3=new Bool_t[3];
       memcpy(widths3,widths,dim*sizeof(Bool_t));
       memset(widths3+dim,0,(3-dim)*sizeof(Bool_t));
-    } widths3=widths;
+
+    } else widths3=widths;
   }
 
   Double_t integral=0;
