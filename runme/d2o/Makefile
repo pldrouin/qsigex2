@@ -10,7 +10,7 @@
 ROOTLIBS	=	$(shell root-config --libs) -lMinuit
 ROOTINCLUDE	?=	$(shell root-config --incdir)
 
-CXXFLAGS    	+=	-I$(ROOTINCLUDE) -I$(QSIGEXDIR)/src
+CXXFLAGS    	+=	-I$(ROOTINCLUDE) -I$(QSIGEXDIR)/include
 
 MOBJ		=	rund2o_tree.o rund2o_qoa.o
 EXEC		=	$(MOBJ:.o=)
