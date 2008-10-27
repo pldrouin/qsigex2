@@ -298,11 +298,6 @@ void QArrayProcessor::Analyze()
       //If the output is in an array
       if(qlsbuf.Count() == 2) {
 
-	if(fIANames->FindFirst(qlsbuf) != -1) {
-	  fprintf(stderr,"QArrayProcessor: Analyze(): Error with process '%s': Array '%s\t%s' cannot be overwritten\n",proc->GetName(),qlsbuf[0].Data(),qlsbuf[1].Data());
-	  throw 1;
-	}
-
 	//printf("Output to an array\n");
 	oidx=fOANames->AddUnique(qlsbuf);
 
