@@ -436,17 +436,17 @@ void QArrayProcessor::Analyze()
 	}
       }
     }
-  }
 
-  //Loop over all input objects
-  for(j=0; j<fObjsPDepends->Count(); j++) {
+    //Loop over all input objects
+    for(j=0; j<fObjsPDepends->Count(); j++) {
 
-    //If the current process is triggered by the input object
-    if((*fObjsPDepends)[j].GetBit(i)) {
+      //If the current process is triggered by the input object
+      if((*fObjsPDepends)[j].GetBit(i)) {
 
-      //Loop over dependent processes
-      for(k=0; k<dpidx.Count(); k++) {
-	(*fObjsPDepends)[j].SetBit(dpidx[k],kTRUE);
+	//Loop over dependent processes
+	for(k=0; k<dpidx.Count(); k++) {
+	  (*fObjsPDepends)[j].SetBit(dpidx[k],kTRUE);
+	}
       }
     }
   }
@@ -488,7 +488,9 @@ void QArrayProcessor::Exec() const
     for(i=0; i<fIArrays->Count(); i++) {
 
       //If the current input array has been modified after the last run, add its mask to the mask of required processes.
-      if((*fIArrays)[i]->NewerThan(fLastExec)) depmods|=(*fAPDepends)[i];
+      if((*fIArrays)[i]->NewerThan(fLastExec)) {
+	depmods|=(*fAPDepends)[i];
+      }
     }
 
     //Loop over all input objects
