@@ -562,7 +562,6 @@ QDisTH* QDisTH::MarginalPDF(const char *name, const Int_t xaxis, const Int_t yax
       binranges[aaxes[0]][0]=binranges[aaxes[0]][1]=i;
       th->fTH->SetBinContent(i,Integral(binranges,widths));
     }
-    return th;
 
   } else {
 
@@ -575,6 +574,7 @@ QDisTH* QDisTH::MarginalPDF(const char *name, const Int_t xaxis, const Int_t yax
       }
     }
   }
+  th->fTH->SetEntries(fTH->GetEntries());
 
   delete[] widths;
 
@@ -597,6 +597,7 @@ void QDisTH::Normalize(Double_t* integral)
   if(!(fNormFlags&kNoNorm)) {
     Double_t cutintbuf;         //Buffer for integral value(s)
     Int_t nfix=fNFixedCoords;   //Number of fixed coordinates for a conditional PDF
+    Double_t nentries=fTH->GetEntries();
     Bool_t *widths=NULL;
 
     //If not using bin width for normalization for at least one direction
@@ -753,6 +754,7 @@ void QDisTH::Normalize(Double_t* integral)
       //If the integral value is not 0, normalize the PDF
       if (cutintbuf) fTH->Scale(1/cutintbuf);
     }
+    fTH->SetEntries(nentries);
 
     if(integral) *integral=cutintbuf;
     if(widths) delete[] widths;

@@ -144,6 +144,7 @@ template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, cons
       biniter[i]++;
     }
   } while(i<naaxes);
+  th->fQTHN->SetEntries(fQTHN->GetEntries());
 
   delete[] widths;
 

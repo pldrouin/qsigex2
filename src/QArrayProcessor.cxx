@@ -699,7 +699,6 @@ void QArrayProcessor::Exec() const
       //progress(i,kTRUE);
       //printf("\n");
 
-
       //Loop over needed output objects
       for(i=0; i<oobjects.Count(); i++) {
 	//Terminate the object

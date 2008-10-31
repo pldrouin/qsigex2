@@ -488,6 +488,7 @@ template <typename U> QTHN<U>* QTHN<U>::Projection(const char *name, const Int_t
   delete[] biniter;
   delete[] pbiniter;
 
+  th->fEntries=fEntries;
   return th;
 }
 
