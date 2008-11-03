@@ -37,7 +37,7 @@ pthread_mutex_t QOversizeArray::fPriorityMutex=PTHREAD_MUTEX_INITIALIZER;
 
 void printstatus(const char*){}
 
-QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer, const Int_t &npcbuffers): fFilename(filename), fArrayName(arrayname), fTStamp(), fFDesc(0), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)+sizeof(time_t)+sizeof(Int_t)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fWBFirstObjIdx(0), fCurRBIdx(-1), fCurBLRBIdx(-2), fNReadBuffers(0), fPTNRBObjects(-1), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(npcbuffers), fArrayMemSize(0), fArrayIO(0), fAPriority(0), fFileMutex(), fBuffersMutex(), fPBuffersMutex(), fRBDIMutex(), fMWThread(), fMWMutex(), fMWCond(), fMWCMutex(), fMWPCond(), fMWCCond(), fMWAction(kFALSE), fMWBuffer(NULL), fMWWBuffer(NULL), fBLThread(), fBLMutex(), fBLCond(), fBLCMutex(), fBLCCond(), fBLWCond(), fBLAction(kFALSE), fUZQOAB(NULL), fUZBuffers(NULL), fUZBMutex()
+QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer, const Int_t &npcbuffers): fFilename(filename), fArrayName(arrayname), fTStamp(), fFDesc(0), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)+sizeof(time_t)+sizeof(Int_t)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fCRBData(NULL), fWBFirstObjIdx(0), fCurRBIdx(-1), fCurBLRBIdx(-2), fNReadBuffers(0), fPTNRBObjects(-1), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(npcbuffers), fArrayMemSize(0), fArrayIO(0), fAPriority(0), fFileMutex(), fBuffersMutex(), fPBuffersMutex(), fRBDIMutex(), fMWThread(), fMWMutex(), fMWCond(), fMWCMutex(), fMWPCond(), fMWCCond(), fMWAction(kFALSE), fMWBuffer(NULL), fMWWBuffer(NULL), fBLThread(), fBLMutex(), fBLCond(), fBLCMutex(), fBLCCond(), fBLWCond(), fBLAction(kFALSE), fUZQOAB(NULL), fUZBuffers(NULL), fUZBMutex()
 {
   FuncDef(QOversizeArray,1);
   pthread_mutex_init(&fFileMutex,NULL);
@@ -278,7 +278,6 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
 {
   //Do not need to apply locks for reading operations of variables that are only modified in the main thread
   FuncDef(GetEntry,1);
-  static Char_t* sbuf=NULL;
   static Int_t uzbidx=-1;
   static Int_t ibuf;
   //If the entry is out of bound
@@ -306,7 +305,7 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
   if(fCurReadBuffer && ibuf==fCurReadBuffer->fBufferIdx) {
     //Copy the memory
     //printf("Entry %lli\n",entry);
-    memcpy(fBuffer,sbuf+(entry-fCurReadBuffer->fBufferIdx*fNOPerBuffer)*fObjectSize,fObjectSize);
+    memcpy(fBuffer,fCRBData+(entry-fCurReadBuffer->fBufferIdx*fNOPerBuffer)*fObjectSize,fObjectSize);
 
   } else {
     //printf("Calling GetEntry with entry==%lli (buffer index %i)\n",entry,ibuf);
@@ -360,7 +359,7 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
     }
 
     //If the buffer has never been compressed
-    if(fCurReadBuffer->fIsCompressed==0) sbuf=fCurReadBuffer->fBuffer;
+    if(fCurReadBuffer->fIsCompressed==0) fCRBData=fCurReadBuffer->fBuffer;
 
     //Else if the buffer is uncompressed (fIsCompressed==4)
     else {
@@ -371,7 +370,7 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
 
 	if(fUZQOAB[uzbidx]==fCurReadBuffer) {
 	  //printf("GetEntry: Uncompressed buffer %i==%i (%p) is found in fUZQOAB[%i]\n",fCurReadBuffer->fBufferIdx,fUZQOAB[uzbidx]->fBufferIdx,fUZQOAB[uzbidx],uzbidx);
-	  sbuf=fUZBuffers[uzbidx];
+	  fCRBData=fUZBuffers[uzbidx];
 	  break;
 	}
       }
@@ -387,7 +386,7 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
 
     //Copy the memory
     //printf("First Entry %lli from curbuffer %i with compression state %i\t",entry,fCurReadBuffer->fBufferIdx,fCurReadBuffer->fIsCompressed);
-    memcpy(fBuffer,sbuf+(entry-fCurReadBuffer->fBufferIdx*fNOPerBuffer)*fObjectSize,fObjectSize);
+    memcpy(fBuffer,fCRBData+(entry-fCurReadBuffer->fBufferIdx*fNOPerBuffer)*fObjectSize,fObjectSize);
     //printf("...loaded\n");
   }   
 

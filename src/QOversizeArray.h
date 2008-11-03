@@ -95,9 +95,10 @@ class QOversizeArray
     Int_t fMaxBHBDataSize;       //fBufferHeaderSize+fMaxBHBDataSize 
     Long64_t fNObjects;          // Total number of objects
     QOABuffer *fCurReadBuffer;   //! Current read buffer
-    QOABuffer *fFirstReadBuffer; //
+    QOABuffer *fFirstReadBuffer; //!
     QOABuffer *fLastReadBuffer;  //!
     QOABuffer *fWriteBuffer;     //!
+    Char_t    *fCRBData;         //! Pointer to current read buffer uncompressed data
     Long64_t   fWBFirstObjIdx;   // Index of the first object contained in the write buffer. ****Value should be modified only by the main thread
     Int_t fCurRBIdx;             // Current read buffer index. A value of -1 indicates the array is in write mode
     Int_t fCurBLRBIdx;           // Current read buffer index used by buffer loading thread.

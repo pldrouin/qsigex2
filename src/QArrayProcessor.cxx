@@ -801,11 +801,11 @@ void QArrayProcessor::InitProcess()
     proto=(*fIANames)[i][1](0,j);
 
     if(!strcmp(proto,"tree")) {
-      //Create the output array and store the pointer
+      //Create the input array and store the pointer
       (*fIArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fIANames)[i][1](j+3,(*fIANames)[i][1].Length()-j-3),(*fIANames)[i][0], kFALSE));
 
     } else if(!strcmp(proto,"qoa")) {
-      //Create the output array and store the pointer
+      //Create the input array and store the pointer
       (*fIArrays).Add(QProcQOAHandler::LoadQOA((TString)(*fIANames)[i][1](j+3,(*fIANames)[i][1].Length()-j-3),(*fIANames)[i][0], kFALSE));
 
     } else {
