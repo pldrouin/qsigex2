@@ -51,6 +51,7 @@ class QOversizeArray
     void OpenFile();
 
     void PrintInfo() const;
+    static void PrintPriorities();
 
     void ResetArray();
 
