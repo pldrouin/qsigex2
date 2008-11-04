@@ -50,11 +50,11 @@ class QNamedProc: public TNamed
     const Int_t& GetNOObjs() const{return fProcedure->GetNOObjs();}
     const Int_t& GetNParams() const{return fProcedure->GetNParams();}
 
-    Double_t& IVar(Int_t i) const{return fProcedure->IVar(i);}
-    QProcObj* IObj(Int_t i) const{return fProcedure->IObj(i);}
+    const Double_t& IVar(Int_t i) const{return fProcedure->IVar(i);}
+    const QProcObj* IObj(Int_t i) const{return fProcedure->IObj(i);}
     Double_t& OVar(Int_t i) const{return fProcedure->OVar(i);}
     QProcObj* OObj(Int_t i) const{return fProcedure->OObj(i);}
-    Double_t& Param(Int_t i) const{return fProcedure->Param(i);}
+    const Double_t& Param(Int_t i) const{return fProcedure->Param(i);}
 
     const QNamedProc& operator=(const QNamedProc& rhs);
     void SetIVarPtr(Int_t index, Double_t *buf){fProcedure->SetIVarPtr(index,buf);}

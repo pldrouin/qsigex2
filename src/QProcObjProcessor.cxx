@@ -115,7 +115,7 @@ void QProcObjProcessor::Analyze()
     (*fIOIndices)[i].RedimList(niobjs);
     for(j=0; j<niobjs; j++) {
       //Add the object
-      iidx=fIObjects->AddUnique(proc->IObj(j));
+      iidx=fIObjects->AddUnique(const_cast<QProcObj*>(proc->IObj(j)));
 
       if(iidx == -1) {
 	iidx=fIObjects->Count()-1;
@@ -124,7 +124,7 @@ void QProcObjProcessor::Analyze()
       (*fIOIndices)[i][j]=iidx;
       (*fObjsPDepends)[iidx].SetBit(i,kTRUE);
 
-      oidx=fOObjects->FindFirst(proc->IObj(j));
+      oidx=fOObjects->FindFirst(const_cast<QProcObj*>(proc->IObj(j)));
 
       //If the object has been updated by a previous process
       if(oidx != -1) {

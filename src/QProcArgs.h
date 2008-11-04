@@ -19,11 +19,11 @@ class QProcArgs
     const Int_t& GetNOVars() const{return fOBuffers.Count();}
     const Int_t& GetNOObjs() const{return fOObjects.Count();}
     const Int_t& GetNParams() const{return fPBuffers.Count();}
-    Double_t& IVar(Int_t i) const{return *fIBuffers[i];}
-    QProcObj* IObj(Int_t i) const{return fIObjects[i];}
+    const Double_t& IVar(Int_t i) const{return *fIBuffers[i];}
+    const QProcObj* IObj(Int_t i) const{return fIObjects[i];}
     Double_t& OVar(Int_t i) const{return *fOBuffers[i];}
     QProcObj* OObj(Int_t i) const{return fOObjects[i];}
-    Double_t& Param(Int_t i) const{return *fPBuffers[i];}
+    const Double_t& Param(Int_t i) const{return *fPBuffers[i];}
 
   protected:
     void AddIVar(Int_t index=-1, Double_t *buf=NULL){fIBuffers.Add(buf,index);}
