@@ -4,12 +4,7 @@
 #include "TFile.h"
 #include "TLeaf.h"
 #include "QStdProcessor.h"
-#include "QDependentProcs.h"
-#include "QProcTree.h"
-#include "QNamedProc.h"
 #include "QFileUtils.h"
-#include "QMask.h"
-#include "QProgress.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -19,9 +14,9 @@
 class QProcObjProcessor: public QStdProcessor
 {
   public:
-    QProcObjProcessor(): QStdProcessor(), fProcs(new QList<QNamedProc>), fLastParams(new QList<Double_t>), fLastExec(0,0), fIOIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fProcsParDepends(new QList<QMask>), fObjsPDepends(new QList<QMask>), fIObjects(new QList<QProcObj*>), fOObjects(new QList<QProcObj*>) {}
-    QProcObjProcessor(const char* name, const char* title): QStdProcessor(name,title), fProcs(new QList<QNamedProc>), fLastParams(new QList<Double_t>), fLastExec(0,0), fIOIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fProcsParDepends(new QList<QMask>), fObjsPDepends(new QList<QMask>), fIObjects(new QList<QProcObj*>), fOObjects(new QList<QProcObj*>) {}
-    QProcObjProcessor(const QProcObjProcessor &rhs): QStdProcessor(rhs), fProcs(new QList<QNamedProc>(*rhs.fProcs)), fLastParams(new QList<Double_t>), fLastExec(0,0), fIOIndices(new QList<QList<Int_t> >(*rhs.fIOIndices)), fOOIndices(new QList<QList<Int_t> >(*rhs.fOOIndices)), fProcsParDepends(new QList<QMask>(*rhs.fProcsParDepends)), fObjsPDepends(new QList<QMask>(*rhs.fObjsPDepends)), fIObjects(new QList<QProcObj*>(*rhs.fIObjects)), fOObjects(new QList<QProcObj*>(*rhs.fOObjects)) {}
+    QProcObjProcessor(): QStdProcessor(), fIOIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fObjsPDepends(new QList<QMask>), fIObjects(new QList<QProcObj*>), fOObjects(new QList<QProcObj*>) {}
+    QProcObjProcessor(const char* name, const char* title): QStdProcessor(name,title), fIOIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fObjsPDepends(new QList<QMask>), fIObjects(new QList<QProcObj*>), fOObjects(new QList<QProcObj*>) {}
+    QProcObjProcessor(const QProcObjProcessor &rhs): QStdProcessor(rhs), fIOIndices(new QList<QList<Int_t> >(*rhs.fIOIndices)), fOOIndices(new QList<QList<Int_t> >(*rhs.fOOIndices)), fObjsPDepends(new QList<QMask>(*rhs.fObjsPDepends)), fIObjects(new QList<QProcObj*>(*rhs.fIObjects)), fOObjects(new QList<QProcObj*>(*rhs.fOObjects)) {}
     virtual ~QProcObjProcessor();
 
     void AddProc(const char* name, const char* title=NULL, Int_t index=-1);
@@ -38,12 +33,10 @@ class QProcObjProcessor: public QStdProcessor
 
     Int_t FindProcIndex(const char *procname) const;
 
-    Int_t GetNProcs() const{return fProcs->Count();}
-
     QNamedProc& GetProc(Int_t index) const{return (*fProcs)[index];}
     QNamedProc& GetProc(const char *procname) const;
 
-    void InitProcess();
+    void InitProcess(Bool_t allocateparammem=kTRUE);
 
     const QProcObjProcessor& operator=(const QProcObjProcessor &rhs);
 
@@ -57,12 +50,8 @@ class QProcObjProcessor: public QStdProcessor
   protected:
 
   private:
-    QList<QNamedProc> *fProcs;           //-> QNamedProc objects
-    QList<Double_t>   *fLastParams;      //!  Parameters value from last Exec() call
-    mutable TTimeStamp fLastExec;        //!  Time stamp from last Exec() call
     QList<QList<Int_t> > *fIOIndices;    //-> Indices of objects that are used as input for each process
     QList<QList<Int_t> > *fOOIndices;    //-> Indices of objects that are used as output for each process
-    QList<QMask>           *fProcsParDepends; //-> Dependencies of processes on parameters
     QList<QMask >             *fObjsPDepends; //-> Dependencies of processes on input objects
     QList<QProcObj*>         *fIObjects; //! Input objects 
     QList<QProcObj*>         *fOObjects; //! Output objects 

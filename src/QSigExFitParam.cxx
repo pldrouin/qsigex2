@@ -33,7 +33,7 @@ void QSigExFitParam::Print(const Option_t*) const
   printf("\tMaximum value:        %f\n",GetMaxVal());
   printf("\tInitial step value:   %f\n",GetStepVal());
   printf("\tFree parameter index: %i\n",GetFreeParamIndex());
-  printf("\tFixed parameter:      %s\n",(IsFixed() ? "yes":"no"));
+  printf("\tFixed parameter:      %i\n",IsFixed());
 }
 
 void QSigExFitParam::Browse(TBrowser *b)

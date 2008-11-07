@@ -2,6 +2,7 @@
 #define _QPROCESSOR_
 
 #include "TNamed.h"
+#include "QList.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -11,34 +12,47 @@
 class QProcessor: public TNamed
 {
   public:
-    QProcessor(): TNamed(), fVerbosity(0) {}
-    QProcessor(const char* name, const char* title): TNamed(name,title), fVerbosity(fDefVerbosity) {}
-    QProcessor(const QProcessor &rhs): TNamed(rhs), fVerbosity(0) {}
-    virtual ~QProcessor(){}
+    QProcessor(): TNamed(), fParams(new QList<Double_t*>), fOwnsParams(new QList<Bool_t>), fParamsNames(new QList<TString>), fParamsChildIndices(new QList<QList<Int_t> >), fChildParamsMapping(new QList<QList<Int_t> >), fVerbosity(0) {}
+    QProcessor(const char* name, const char* title): TNamed(name,title), fParams(new QList<Double_t*>), fOwnsParams(new QList<Bool_t>), fParamsNames(new QList<TString>), fParamsChildIndices(new QList<QList<Int_t> >), fChildParamsMapping(new QList<QList<Int_t> >), fVerbosity(fDefVerbosity) {}
+    QProcessor(const QProcessor &rhs);
+    virtual ~QProcessor();
 
-    virtual Int_t GetNParams() const=0;
-
-    virtual const char* GetParamName(Int_t index) const=0;
+    Int_t GetNParams() const{return fParamsNames->Count();}
 
     virtual void Analyze()=0;
     virtual void Exec() const=0;
-    virtual void InitProcess()=0;
+    virtual void InitProcess(Bool_t allocateparammem=kTRUE)=0;
 
-    virtual Int_t FindParamIndex(const char* paramname) const=0;
+    void ClearParams();
+
+    Int_t FindParamIndex(const char *paramname) const{return (*fParamsNames).FindFirst(paramname);}
 
     static const UInt_t& GetDefVerbosity(){return fDefVerbosity;}
+
+    const Double_t& GetParam(Int_t index) const{return *((*fParams)[index]);}
+    const Double_t& GetParam(const char *paramname) const;
+#ifdef __CINT__
+    Double_t ** GetParams() const{return fParams->GetArray();}
+#else
+    Double_t const* const* GetParams() const{return fParams->GetArray();}
+#endif
+
+    const char* GetParamName(Int_t index) const{return (*fParamsNames)[index];}
+
     const UInt_t& GetVerbosity() const{return fVerbosity;}
 
-    const QProcessor& operator=(const QProcessor &rhs){TNamed::operator=(rhs); return *this;}
+    const QProcessor& operator=(const QProcessor &rhs);
 
     virtual void PrintAnalysisResults() const=0;
     virtual void PrintProcesses(UInt_t level=0) const=0;
 
     static void SetDefVerbosity(UInt_t verbosity=0){fDefVerbosity=verbosity;}
 
-    virtual void SetParam(Int_t index=-1, const Double_t &value=0)=0;
-    virtual void SetParam(const char *paramname, const Double_t &value=0)=0;
-    virtual void SetParams(Double_t *params)=0;
+    void SetParam(Int_t index=-1, const Double_t &value=0);
+    virtual void SetParamAddress(Int_t index, Double_t *paddr=NULL);
+    void SetParam(const char *paramname, const Double_t &value=0);
+    void SetParamAddress(const char *paramname, Double_t *paddr=NULL);
+    void SetParams(Double_t *params);
 
     virtual void SetVerbosity(UInt_t verbosity=0){fVerbosity=verbosity;}
 
@@ -50,6 +64,11 @@ class QProcessor: public TNamed
     enum eVerbosity {kShowExec=1};
 
   protected:
+    QList<Double_t*>     *fParams;             //-> Buffers for parameters values
+    QList<Bool_t>        *fOwnsParams;         //-> Indicates which parameter buffers are owned by the instance
+    QList<TString>       *fParamsNames;        //-> Parameters names
+    QList<QList<Int_t> > *fParamsChildIndices; //-> List of child indices for each parameter
+    QList<QList<Int_t> > *fChildParamsMapping; //-> For each parameter, parameter index for each child listed in fParamsChildIndices
   private:
     UInt_t fVerbosity;
     static UInt_t fDefVerbosity;

@@ -10,12 +10,8 @@ ClassImp(QArrayProcessor)
 QArrayProcessor::~QArrayProcessor()
 {
   PRINTF2(this,"\tQArrayProcessor::~QArrayProcessor()\n")
-  delete fProcs;
-  fProcs=NULL;
   delete fSelProcs;
   fSelProcs=NULL;
-  delete fLastParams;
-  fLastParams=NULL;
   delete fIANames;
   fIANames=NULL;
   delete fOANames;
@@ -44,8 +40,6 @@ QArrayProcessor::~QArrayProcessor()
   fIASProc=NULL;
   delete fOASProc;
   fOASProc=NULL;
-  delete fProcsParDepends;
-  fProcsParDepends=NULL;
   delete fAPDepends;
   fAPDepends=NULL;
   delete fObjsPDepends;
@@ -131,6 +125,7 @@ void QArrayProcessor::AddPSProc(const char *name, const char *title, void *proc,
 
 void QArrayProcessor::Analyze()
 {
+  QStdProcessor::Analyze();
   Int_t i,j,k;
   QNamedProc *proc;
   QList<TString> params; //Parameters
@@ -142,7 +137,7 @@ void QArrayProcessor::Analyze()
 
   Int_t nprocs=fProcs->Count();
   Int_t nivars, niobjs, novars, noobjs, nparams;
-  Int_t pidx, iidx, oidx;
+  Int_t iidx, oidx;
 
   fIANames->Clear();
   fOANames->Clear();
@@ -182,17 +177,8 @@ void QArrayProcessor::Analyze()
 
     //Loop over the parameters for the current process
     for(j=0; j<nparams; j++) {
-      sbuf=proc->GetParam(j).GetName();
-
-      //If the current parameter is not listed in the list of parameters
-      pidx=fParamsNames->FindFirst(sbuf);
-
-      if(pidx == -1) {
-	fprintf(stderr,"QArrayProcessor::Analyze(): Error with process '%s': Parameter '%s' does not exist\n",proc->GetName(),sbuf.Data());
-	throw 1;
-      }
       //Turn on the bit of the dependency mask for the current parameter
-      (*fProcsParDepends)[i].SetBit(pidx,1);
+      (*fProcsParDepends)[i].SetBit(fParamsNames->FindFirst(proc->GetParam(j).GetName()),1);
     }
 
     //Loop over the input variables for the current process
@@ -481,7 +467,7 @@ void QArrayProcessor::Exec() const
     for(i=0; i<fParams->Count(); i++) {
 
       //If the current parameter value has changed, set the correspongind bit in the parameter mask
-      if((*fParams)[i] != (*fLastParams)[i]) pardiffs.SetBit(i,1);
+      if(*(fParams->GetArray()[i]) != fLastParams->GetArray()[i]) pardiffs.SetBit(i,1);
     }
 
     //Loop over all input arrays
@@ -715,7 +701,7 @@ void QArrayProcessor::Exec() const
     }
 
     //Save the parameters
-    (*fLastParams)=(*fParams);
+    for(i=0; i<fParams->Count(); i++) fLastParams->GetArray()[i]=*(fParams->GetArray()[i]);
     fLastExec.Set();
   }
 }
@@ -739,13 +725,12 @@ QNamedProc& QArrayProcessor::GetProc(const char *procname) const
   return GetProc(0);
 }
 
-void QArrayProcessor::InitProcess()
+void QArrayProcessor::InitProcess(Bool_t allocateparammem)
 {
   TerminateProcess();
   TDirectory *curdir=gDirectory;
   TDirectory *dbuf;
   Int_t i,j;
-  QList<TString> dpn;
   TString proto;
 
   fIArrays->Clear();
@@ -817,6 +802,8 @@ void QArrayProcessor::InitProcess()
   //Create output buffers
   fBuffers->RedimList(fBuNames->Count());
 
+  QStdProcessor::InitProcess(allocateparammem);
+
   Int_t nprocs=fProcs->Count();
   QNamedProc *proc;
   TString sbuf;
@@ -826,12 +813,6 @@ void QArrayProcessor::InitProcess()
   //Loop over the processes
   for(i=0; i<nprocs; i++) {
     proc=&((*fProcs)[i]);
-
-    //Loop over the parameters for the current process
-    for(j=0; j<proc->GetNParams(); j++) {
-      //Set the address to the assign buffer for this parameter
-      proc->SetParamPtr(j,&((*fParams)[fParamsNames->FindFirst(proc->GetParam(j).GetName())]));
-    }
 
     //Loop over the inputs for the current process
     for(j=0; j<proc->GetNIVars(); j++) {
@@ -878,6 +859,7 @@ void QArrayProcessor::InitProcess()
 
   //Erase last parameters
   fLastParams->Clear();
+  fLastParams->RedimList(fParams->Count(),-1,0.);
   fLastExec.SetSec(0);
 
   curdir->cd();
@@ -886,7 +868,6 @@ void QArrayProcessor::InitProcess()
 const QArrayProcessor& QArrayProcessor::operator=(const QArrayProcessor &rhs)
 {
   QStdProcessor::operator=(rhs);
-  *fProcs=*rhs.fProcs;
   *fSelProcs=*rhs.fSelProcs;
   fNAEProcs=rhs.fNAEProcs;
   fAnalysisDir=rhs.fAnalysisDir;
@@ -902,7 +883,6 @@ const QArrayProcessor& QArrayProcessor::operator=(const QArrayProcessor &rhs)
   *fSelDepProcs=*rhs.fSelDepProcs;
   *fIASProc=*rhs.fIASProc;
   *fOASProc=*rhs.fOASProc;
-  *fProcsParDepends=*rhs.fProcsParDepends;
   *fAPDepends=*rhs.fAPDepends;
   *fObjsPDepends=*rhs.fObjsPDepends;
   return *this;

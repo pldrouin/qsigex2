@@ -2,8 +2,11 @@
 #define _QSTDPROCESSOR_
 
 #include "TNamed.h"
-#include "QProcessor.h"
 #include "QList.h"
+#include "QProcessor.h"
+#include "QDependentProcs.h"
+#include "QNamedProc.h"
+#include "QMask.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -13,31 +16,24 @@
 class QStdProcessor: public QProcessor
 {
   public:
-    QStdProcessor(): QProcessor(), fParams(new QList<Double_t>), fParamsNames(new QList<TString>) {}
-    QStdProcessor(const char* name, const char* title): QProcessor(name,title), fParams(new QList<Double_t>), fParamsNames(new QList<TString>) {}
-    QStdProcessor(const QStdProcessor &rhs): QProcessor(rhs), fParams(new QList<Double_t>(*rhs.fParams)), fParamsNames(new QList<TString>(*rhs.fParamsNames)) {}
+    QStdProcessor(): QProcessor(), fProcs(new QList<QNamedProc>), fLastParams(new QList<Double_t>), fLastExec(0,0), fProcsParDepends(new QList<QMask>) {}
+    QStdProcessor(const char* name, const char* title): QProcessor(name,title), fProcs(new QList<QNamedProc>), fLastParams(new QList<Double_t>), fLastExec(0,0), fProcsParDepends(new QList<QMask>) {}
+    QStdProcessor(const QStdProcessor &rhs): QProcessor(rhs), fProcs(new QList<QNamedProc>(*rhs.fProcs)), fLastParams(new QList<Double_t>), fLastExec(0,0), fProcsParDepends(new QList<QMask>(*rhs.fProcsParDepends)){}
     virtual ~QStdProcessor();
 
-    void AddParam(const char *parname, const Double_t &value=0., Int_t index=-1);
+    virtual void Analyze();
 
-    void DelParam(Int_t index=-1){fParams->Del(index); fParamsNames->Del(index);}
-    void DelParam(const char *paramname);
-
-    Int_t FindParamIndex(const char *paramname) const{return (*fParamsNames).FindFirst(paramname);}
-
-    Int_t GetNParams() const{return fParamsNames->Count();}
-
-    const char* GetParamName(Int_t index) const{return (*fParamsNames)[index];}
+    Int_t GetNProcs() const{return fProcs->Count();}
 
     const QStdProcessor& operator=(const QStdProcessor &rhs);
 
-    void SetParam(Int_t index=-1, const Double_t &value=0){(*fParams)[index]=value;}
-    void SetParam(const char *paramname, const Double_t &value=0);
-    void SetParams(Double_t *params);
+    void SetParamAddress(Int_t index, Double_t *paddr=NULL);
 
   protected:
-    QList<Double_t>   *fParams;          //-> Buffers for parameters values
-    QList<TString>    *fParamsNames;     //-> Parameters names
+    QList<QNamedProc> *fProcs;           //-> QNamedProc objects
+    QList<Double_t>   *fLastParams;      //!  Parameters value from last Exec() call
+    mutable TTimeStamp fLastExec;        //!  Time stamp from last Exec() call
+    QList<QMask>           *fProcsParDepends; //-> Dependencies of processes on parameters
   private:
 
     ClassDef(QStdProcessor,1) //QProcessor class for standard processors (virtual abstract base class)

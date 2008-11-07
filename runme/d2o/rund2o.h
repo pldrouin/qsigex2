@@ -13,4 +13,4 @@ Bool_t Selector(QProcArgs &args);
 Bool_t Multiply(QProcArgs &args);
 Bool_t LLSum(QProcArgs &args);
 
-void ELLFunction(Int_t&, Double_t*, Double_t &f, Double_t *par, Int_t);
+void ELLFunction(Int_t&, Double_t*, Double_t &f, Double_t *, Int_t);

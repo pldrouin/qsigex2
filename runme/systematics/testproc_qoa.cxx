@@ -26,19 +26,6 @@ int main()
   ((TH1&)*radius).GetXaxis()->SetTitle("Radius [cm]");
   ((TH1&)*radius).GetYaxis()->SetTitle("Number of events");
 
-  ttp->AddParam("VShiftXM");
-  ttp->AddParam("VShiftXW",4);
-  ttp->AddParam("VShiftYM",1);
-  ttp->AddParam("VShiftYW",4);
-  ttp->AddParam("VShiftZM",2);
-  ttp->AddParam("VShiftZW",4);
-  ttp->AddParam("VScaleM",1);
-  ttp->AddParam("VScaleW",0.1);
-  ttp->AddParam("Rmin",0);
-  ttp->AddParam("Rmax",100);
-  ttp->AddParam("Dummy",0);
-  ttp->AddParam("Dummy2",0);
-
   ttp->AddProc("VShift","VShift",GIShift);
   ttp->AddProc("VScale","VScale",GCScale);
   ttp->AddProc("Pipe","Pipe",Pipe);
@@ -92,6 +79,20 @@ int main()
   ttp->PrintAnalysisResults();
   printf("InitProcess\n");
   ttp->InitProcess();
+
+  ttp->SetParam("VShiftXM");
+  ttp->SetParam("VShiftXW",4);
+  ttp->SetParam("VShiftYM",1);
+  ttp->SetParam("VShiftYW",4);
+  ttp->SetParam("VShiftZM",2);
+  ttp->SetParam("VShiftZW",4);
+  ttp->SetParam("VScaleM",1);
+  ttp->SetParam("VScaleW",0.1);
+  ttp->SetParam("Rmin",0);
+  ttp->SetParam("Rmax",100);
+  ttp->SetParam("Dummy",0);
+  ttp->SetParam("Dummy2",0);
+
   printf("Exec\n");
   ttp->Exec();
   //ttp->SetParam("Dummy",1);

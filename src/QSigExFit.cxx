@@ -82,13 +82,6 @@ void QSigExFit::PrintParams() const
   for(Int_t i=0; i<fParams.Count(); i++) fParams[i].Print();
 }
 
-void QSigExFit::SetParams(Double_t *params)
-{
-  //SHOULD ONLY BE CALLED DURING THE FIT (STATIC MEMBER FUNCTION)
-
-  fCurInstance->fQProcessor->SetParams(params);
-}
-
 void QSigExFit::Browse(TBrowser *b)
 {
   b->Add(&fParams,"Fit Parameters");

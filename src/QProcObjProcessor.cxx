@@ -10,16 +10,10 @@ ClassImp(QProcObjProcessor)
 QProcObjProcessor::~QProcObjProcessor()
 {
   PRINTF2(this,"\tQProcObjProcessor::~QProcObjProcessor()\n")
-  delete fProcs;
-  fProcs=NULL;
-  delete fLastParams;
-  fLastParams=NULL;
   delete fIOIndices;
   fIOIndices=NULL;
   delete fOOIndices;
   fOOIndices=NULL;
-  delete fProcsParDepends;
-  fProcsParDepends=NULL;
   delete fObjsPDepends;
   fObjsPDepends=NULL;
   delete fIObjects;
@@ -62,6 +56,7 @@ void QProcObjProcessor::AddProc(const char *name, const char *title, void *proc,
 
 void QProcObjProcessor::Analyze()
 {
+  QStdProcessor::Analyze();
   Int_t i,j,k;
   QNamedProc *proc;
   QList<TString> params; //Parameters
@@ -69,7 +64,7 @@ void QProcObjProcessor::Analyze()
 
   Int_t nprocs=fProcs->Count();
   Int_t niobjs, noobjs, nparams;
-  Int_t pidx, iidx, oidx;
+  Int_t iidx, oidx;
 
   fObjsPDepends->Clear();
   fIOIndices->Clear();
@@ -98,17 +93,8 @@ void QProcObjProcessor::Analyze()
 
     //Loop over the parameters for the current process
     for(j=0; j<nparams; j++) {
-      sbuf=proc->GetParam(j).GetName();
-
-      //If the current parameter is not listed in the list of parameters
-      pidx=fParamsNames->FindFirst(sbuf);
-
-      if(pidx == -1) {
-	fprintf(stderr,"QProcObjProcessor::Analyze(): Error with process '%s': Parameter '%s' does not exist\n",proc->GetName(),sbuf.Data());
-	throw 1;
-      }
       //Turn on the bit of the dependency mask for the current parameter
-      (*fProcsParDepends)[i].SetBit(pidx,1);
+      (*fProcsParDepends)[i].SetBit(fParamsNames->FindFirst(proc->GetParam(j).GetName()),1);
     }
 
     //Loop over input objects for the current process
@@ -233,7 +219,7 @@ void QProcObjProcessor::Exec() const
     for(i=0; i<fParams->Count(); i++) {
 
       //If the current parameter value has changed, set the correspongind bit in the parameter mask
-      if((*fParams)[i] != (*fLastParams)[i]) pardiffs.SetBit(i,1);
+      if(*(fParams->GetArray()[i]) != fLastParams->GetArray()[i]) pardiffs.SetBit(i,1);
     }
 
     //Loop over all input objects
@@ -308,7 +294,7 @@ void QProcObjProcessor::Exec() const
     }
 
     //Save the parameters
-    (*fLastParams)=(*fParams);
+    for(i=0; i<fParams->Count(); i++) fLastParams->GetArray()[i]=*(fParams->GetArray()[i]);
     fLastExec.Set();
   }
 }
@@ -332,41 +318,24 @@ QNamedProc& QProcObjProcessor::GetProc(const char *procname) const
   return GetProc(0);
 }
 
-void QProcObjProcessor::InitProcess()
+void QProcObjProcessor::InitProcess(Bool_t allocateparammem)
 {
   TerminateProcess();
-  Int_t i,j;
-  QList<TString> dpn;
-
-  Int_t nprocs=fProcs->Count();
-  QNamedProc *proc;
-  TString sbuf;
-
-  //Loop over the processes
-  for(i=0; i<nprocs; i++) {
-    proc=&((*fProcs)[i]);
-
-    //Loop over the parameters for the current process
-    for(j=0; j<proc->GetNParams(); j++) {
-      //Set the address to the assign buffer for this parameter
-      proc->SetParamPtr(j,&((*fParams)[fParamsNames->FindFirst(proc->GetParam(j).GetName())]));
-    }
-  }
+  QStdProcessor::InitProcess(allocateparammem);
 
   //Erase last parameters
   fLastParams->Clear();
+  fLastParams->RedimList(fParams->Count(),-1,0.);
   fLastExec.SetSec(0);
 }
 
 const QProcObjProcessor& QProcObjProcessor::operator=(const QProcObjProcessor &rhs)
 {
   QStdProcessor::operator=(rhs);
-  *fProcs=*rhs.fProcs;
   *fIOIndices=*rhs.fIOIndices;
   *fOOIndices=*rhs.fOOIndices;
   *fIObjects=*rhs.fIObjects;
   *fOObjects=*rhs.fIObjects;
-  *fProcsParDepends=*rhs.fProcsParDepends;
   *fObjsPDepends=*rhs.fObjsPDepends;
   return *this;
 }

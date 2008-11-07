@@ -9,49 +9,62 @@ ClassImp(QStdProcessor)
 
 QStdProcessor::~QStdProcessor()
 {
-  delete fParams;
-  fParams=NULL;
-  delete fParamsNames;
-  fParamsNames=NULL;
+  delete fProcs;
+  fProcs=NULL;
+  delete fLastParams;
+  fLastParams=NULL;
+  delete fProcsParDepends;
+  fProcsParDepends=NULL;
 }
 
-void QStdProcessor::AddParam(const char *parname, const Double_t &value, Int_t index)
+void QStdProcessor::Analyze()
 {
-  if(fParamsNames->FindFirst(parname) != -1) {
-    fprintf(stderr,"QStdProcessor::AddParam: Error: Parameter '%s' already exists\n",parname);
-    throw 1;
+  Int_t i,j;
+  QNamedProc *proc;
+  Int_t nprocs=fProcs->Count();
+  Int_t nparams;
+  Int_t pidx;
+
+  fParamsNames->Clear();
+  fParamsChildIndices->Clear();
+  fChildParamsMapping->Clear();
+
+  for(i=0; i<nprocs; i++) {
+    proc=&((*fProcs)[i]);
+    nparams=proc->GetNParams();
+
+    //Loop over the parameters for the current process
+    for(j=0; j<nparams; j++) {
+      pidx=fParamsNames->AddUnique(proc->GetParam(j).GetName());
+
+      if(pidx==-1) {
+	fParamsChildIndices->RedimList(fParamsNames->Count());
+	fChildParamsMapping->RedimList(fParamsNames->Count());
+      }
+      (*fParamsChildIndices)[pidx].Add(i);
+      (*fChildParamsMapping)[pidx].Add(j);
+    }
   }
-  fParamsNames->Add(parname,index);
-  fParams->Add(value,index);
-}
-
-void QStdProcessor::DelParam(const char *paramname)
-{
-  Int_t i;
-  if((i=FindParamIndex(paramname))!=-1) DelParam(i);
 }
 
 const QStdProcessor& QStdProcessor::operator=(const QStdProcessor &rhs)
 {
   QProcessor::operator=(rhs);
-  *fParams=*rhs.fParams;
-  *fParamsNames=*rhs.fParamsNames;
+  *fProcs=*rhs.fProcs;
+  *fProcsParDepends=*rhs.fProcsParDepends;
   return *this;
 }
 
-void QStdProcessor::SetParam(const char *paramname, const Double_t &value)
+void QStdProcessor::SetParamAddress(Int_t index, Double_t *paddr)
 {
+  QProcessor::SetParamAddress(index,paddr);
   Int_t i;
-  if((i=FindParamIndex(paramname))!=-1) SetParam(i,value);
-  else {
-    fprintf(stderr,"QStdProcessor::SetParam: Error: Parameter '%s' does not exist\n",paramname);
-    throw 1;
-  }
-}
 
-void QStdProcessor::SetParams(Double_t *params)
-{
-  memcpy(fParams->GetArray(),params,fParams->Count()*sizeof(Double_t));
+  //Loop over the children that depend on the current parameter
+  for(i=0; i<(*fParamsChildIndices)[index].Count(); i++) {
+    //Set the address to the assign buffer for this parameter
+    (*fProcs)[(*fParamsChildIndices)[index][i]].SetParamPtr((*fChildParamsMapping)[index][i],(*fParams)[index]);
+  }
 }
 
 #include "debugger.h"

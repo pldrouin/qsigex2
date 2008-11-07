@@ -17,7 +17,7 @@ class QSigExFit: public TObject
     void AddProcOutput(const QProcObj* procobj, Int_t index=-1){fQPOutputs.Add(const_cast<QProcObj*>(procobj),index);}
     void DelProcOutput(Int_t index=-1){fQPOutputs.Del(index);}
 
-    virtual Double_t EvalFCN(const Double_t *pars=NULL, Int_t flag=0) const=0;
+    virtual Double_t EvalFCN() const=0;
 
     void ExecProc() const{fQProcessor->Exec();}
 
@@ -44,7 +44,6 @@ class QSigExFit: public TObject
     void PrintParams() const;
 
     void SetFCNError(Double_t fcnerror){fFCNError=fcnerror;}
-    static void SetParams(Double_t *params); //SHOULD ONLY BE CALLED DURING THE FIT
     void SetProcessor(QProcessor* processor){fQProcessor=processor; Init();}
     void SetVerbose(Int_t verbose=0){fVerbose=verbose;}
 

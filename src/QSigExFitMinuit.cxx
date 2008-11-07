@@ -15,30 +15,17 @@ QSigExFitMinuit::~QSigExFitMinuit()
   }
 }
 
-Double_t QSigExFitMinuit::EvalFCN(const Double_t *pars, Int_t flag) const
+Double_t QSigExFitMinuit::EvalFCN() const
 {
   if(!fMinuit) {
     fprintf(stderr,"QSigExFitMinuit::EvalFCN: Error: InitFit has not been called\n");
     throw 1;
   }
-  Double_t fval, *par;
-  Int_t i;
-  par=new Double_t[GetNParams()];
-
-  if(pars) {
-    memcpy(par,pars,GetNParams()*sizeof(Double_t));
-
-  } else {
-
-    for(i=0; i<GetNParams(); i++) {
-      par[i]=Param(i).GetStartVal();
-    }
-  }
+  Double_t fval;
 
   fCurInstance=this;
-  fMinuit->Eval(GetNVarParams(),NULL,fval,par,flag);
+  fMinuit->Eval(fMinuit->GetNumFreePars(),NULL,fval,fMinuit->fU,0);
 
-  delete[] par;
   return fval;
 }
 
@@ -52,7 +39,7 @@ Int_t QSigExFitMinuit::FindMinimArg(const char* name) const
 
 Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
 {
-  Int_t i;
+  Int_t i,j;
   Double_t* minimargs=new Double_t[fMinimArgs->Count()];
   Int_t ierflg=0;
   Int_t numpar=fParams.Count();
@@ -63,18 +50,29 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
   fCurInstance=this;
 
   if(!fMinuit) {
-    fprintf(stderr,"QSigExFirMinuit::Fit: Error: InitFit has not been called\n");
+    fprintf(stderr,"QSigExFitMinuit::Fit: Error: InitFit has not been called\n");
     throw 1;
   }
 
   try{
 
     for(i=0; i<fMinimArgs->Count(); i++) minimargs[i]=(*fMinimArgs)[i];
+    j=0;
 
     // Reinitialize floating parameters values
     for (i=0; i<numpar; i++){
-      if(!fParams[i].IsFixed()) {
-	fMinuit->mnparm(i, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+
+      //If the parameter is not hided to Minuit
+      if(fParams[i].IsFixed()!=1) {
+
+	if(!fParams[i].IsFixed()) {
+	  fMinuit->mnparm(j, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+	}
+	j++;
+
+      //Else if the parameter is hided
+      } else {
+	fQProcessor->SetParam(i,fParams[i].GetStartVal());
       }
     }
 
@@ -82,11 +80,19 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
     fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
 
     if(fituncerts) {
+      j=0;
+
       // set fit parameters to result from this run of the minimizer
       for (i=0; i<numpar; i++){
-	if(!fParams[i].IsFixed()) {
-	  fMinuit->mnpout(i,strbuf,dbuf4,dbuf1,dbuf2,dbuf3,ibuf1); //dbuf4 contains the fitted value
-	  fMinuit->mnparm(i, fParams[i].GetName(), dbuf4, fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+
+	//If the parameter is not hided to Minuit
+	if(fParams[i].IsFixed()!=1) {
+
+	  if(!fParams[i].IsFixed()) {
+	    fMinuit->mnpout(j,strbuf,dbuf4,dbuf1,dbuf2,dbuf3,ibuf1); //dbuf4 contains the fitted value
+	    fMinuit->mnparm(j, fParams[i].GetName(), dbuf4, fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+	  }
+	  j++;
 	}
       }
       // rerun minimizer
@@ -110,25 +116,34 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
 
     fMinuitStatus=fMinuit->fCstatu;
     fFCNMin=fMinuit->fAmin;
+    j=0;
 
     //Loop over the parameters
     for(Int_t i=0;i<numpar;i++){
-      //mnpout takes in the index of the parameter we're asking about, and returns
-      //it's name, fitted value, estimate of parameter uncertainty, lower limit
-      //on the parameter value, upper limit on the parameter value, and the
-      //internal parameter number (if the parameter is variable).  See Minuit
-      //documentation for details.  We aren't actually interested in any of this
-      //except the fit value.
 
-      fMinuit->mnpout(i,strbuf,ParamFitVal(i),dbuf1,dbuf2,dbuf3,ibuf1);
+      //If the parameter is not hided to Minuit
+      if(fParams[i].IsFixed()!=1) {
+	//mnpout takes in the index of the parameter we're asking about, and returns
+	//it's name, fitted value, estimate of parameter uncertainty, lower limit
+	//on the parameter value, upper limit on the parameter value, and the
+	//internal parameter number (if the parameter is variable).  See Minuit
+	//documentation for details.  We aren't actually interested in any of this
+	//except the fit value.
 
-      //mnerrs reports the errors calculated by MINOS.  It takes in the index of 
-      //the parameter we're asking about, and returns the positive error, 
-      //negative error (as a negative number), the parabolic parameter error 
-      //and the global correlation coefficient for the parameter.  
+	fMinuit->mnpout(j,strbuf,ParamFitVal(i),dbuf1,dbuf2,dbuf3,ibuf1);
 
-      if(fituncerts) fMinuit->mnerrs(i,ParamPlusFitError(i),ParamMinusFitError(i),dbuf1,dbuf2);
-      else ParamPlusFitError(i)=ParamMinusFitError(i)=0;
+	//mnerrs reports the errors calculated by MINOS.  It takes in the index of 
+	//the parameter we're asking about, and returns the positive error, 
+	//negative error (as a negative number), the parabolic parameter error 
+	//and the global correlation coefficient for the parameter.  
+
+	if(fituncerts) fMinuit->mnerrs(j,ParamPlusFitError(i),ParamMinusFitError(i),dbuf1,dbuf2);
+	else ParamPlusFitError(i)=ParamMinusFitError(i)=0;
+	j++;
+
+      } else {
+	ParamFitVal(i)=fQProcessor->GetParam(i);
+      }
     }
 
     if(fCovMatrix) {
@@ -157,7 +172,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
 
 void QSigExFitMinuit::InitFit()
 {
-  Int_t i;
+  Int_t i,j;
   Double_t dbuf;
   Int_t numfpar=0;
 
@@ -201,22 +216,35 @@ void QSigExFitMinuit::InitFit()
   fMinuit->mnexcm("SET ERR", &((Double_t&)fFCNError), 1, ierflg );
 
   ierflg=0;
+  j=0;
 
   //Loop through parameters, and initialize a variable in Minuit for each one.
   for (i=0; i<fParams.Count(); i++){
-    //mnparm implements a parameter definition with a parameter number,
-    //name, starting value, step size, min and max values, and an error flag.
 
-    fMinuit->mnparm(i, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+    //If IsFixed() is not equal to 1, add the parameter to Minuit
+    if(fParams[i].IsFixed()!=1) {
+      //mnparm implements a parameter definition with a parameter number,
+      //name, starting value, step size, min and max values, and an error flag.
+      fMinuit->mnparm(j, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
 
-    //If the parameter is fixed, tell to TMinuit
-    if(fParams[i].IsFixed()){
-      ParamFreeParamIndex(i)=-1;
-      dbuf=i+1;
-      fMinuit->mnexcm("FIX",&dbuf,1,ierflg);     //fix the parameter with that index
+      //If the parameter is fixed, tell to TMinuit
+      if(fParams[i].IsFixed()){
+	ParamFreeParamIndex(i)=-1;
+	dbuf=j+1;
+	fMinuit->mnexcm("FIX",&dbuf,1,ierflg);     //fix the parameter with that index
 
+      //Else if the parameter is free
+      } else {
+	ParamFreeParamIndex(i)=numfpar++;
+      }
+      if(fQProcessor) fQProcessor->SetParamAddress(i,&(fMinuit->fU[j]));
+
+      j++;
+
+      //Else if the parameter is fixed but is not required to be passed to Minuit
     } else {
-      ParamFreeParamIndex(i)=numfpar++;
+      fQProcessor->SetParam(i,fParams[i].GetStartVal());
+      ParamFreeParamIndex(i)=-1;
     }
   }
 }

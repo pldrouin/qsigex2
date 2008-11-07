@@ -54,11 +54,6 @@ int main(int nargs, char* args[])
   QProcBranchHandler::SaveOutputs(kFALSE);
   QProcQOAHandler::SaveOutputs(kFALSE);
 
-  dataproc.AddParam("ncc",2000);
-  dataproc.AddParam("nes",200);
-  dataproc.AddParam("nnc",500);
-  dataproc.AddParam("nbk",124.2);
-
   dataproc.AddProc("Selector","Selector",Selector,NULL,kTRUE);
   dataproc.GetProc("Selector").AddIVar("energy","tree://d2o_data.root:Tree");
   dataproc.GetProc("Selector").AddIVar("radius","tree://d2o_data.root:Tree");
@@ -169,7 +164,7 @@ int main(int nargs, char* args[])
   dataproc.GetProc("LLSum").AddIVar("bk","tree://jointpdf");
   dataproc.GetProc("LLSum").AddOObj(&llsum);
 
-  dataproc.Analyze();
+  //dataproc.Analyze();
   //dataproc.InitProcess();
   //dataproc.PrintAnalysisResults();
 
@@ -196,6 +191,8 @@ int main(int nargs, char* args[])
   fitter.GetCovMatrix().Print();
 
   plist.TerminateProcess();
+
+  f1.Add(&fitter);
 
   f1.Write();
   f1.Close();
@@ -254,12 +251,13 @@ Bool_t LLSum(QProcArgs &args)
   return kTRUE;
 }
 
-void ELLFunction(Int_t&, Double_t*, Double_t &f, Double_t *par, Int_t)
+void ELLFunction(Int_t&, Double_t*, Double_t &f, Double_t *, Int_t)
 {
   static Int_t i;
-  QSigExFit::SetParams(par);
+  static Double_t const* const* pars;
+  pars=QSigExFit::GetCurInstance().GetProcessor()->GetParams();
   QSigExFit::GetCurInstance().ExecProc();
   f=0;
-  for(i=0; i<QSigExFit::GetCurInstance().GetNParams(); i++) f+=par[i];
+  for(i=0; i<QSigExFit::GetCurInstance().GetNParams(); i++) f+=*(pars[i]);
   f=2*(f-(QProcDouble&)QSigExFit::GetCurInstance().GetProcOutput());
 }
