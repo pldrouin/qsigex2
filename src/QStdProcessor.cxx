@@ -47,6 +47,25 @@ void QStdProcessor::Analyze()
   }
 }
 
+Int_t QStdProcessor::FindProcIndex(const char *procname) const
+{
+  for(Int_t i=0; i<fProcs->Count(); i++){
+    if(!strcmp((*fProcs)[i].GetName(),procname)) return i;
+  }
+  return -1;
+}
+
+QNamedProc& QStdProcessor::GetProc(const char *procname) const
+{
+  Int_t i;
+  if((i=FindProcIndex(procname))!=-1){
+    return GetProc(i);
+  }
+  fprintf(stderr,"QStdProcessor::GetProc: Procedure '%s' does not exist\n",procname);
+  throw 1;
+  return GetProc(0);
+}
+
 const QStdProcessor& QStdProcessor::operator=(const QStdProcessor &rhs)
 {
   QProcessor::operator=(rhs);

@@ -299,25 +299,6 @@ void QProcObjProcessor::Exec() const
   }
 }
 
-Int_t QProcObjProcessor::FindProcIndex(const char *procname) const
-{
-  for(Int_t i=0; i<fProcs->Count(); i++){
-    if(!strcmp((*fProcs)[i].GetName(),procname)) return i;
-  }
-  return -1;
-}
-
-QNamedProc& QProcObjProcessor::GetProc(const char *procname) const
-{
-  Int_t i;
-  if((i=FindProcIndex(procname))!=-1){
-    return GetProc(i);
-  }
-  fprintf(stderr,"QProcObjProcessor::GetProc: Procedure '%s' does not exist\n",procname);
-  throw 1;
-  return GetProc(0);
-}
-
 void QProcObjProcessor::InitProcess(Bool_t allocateparammem)
 {
   TerminateProcess();

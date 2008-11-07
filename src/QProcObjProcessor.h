@@ -31,11 +31,6 @@ class QProcObjProcessor: public QStdProcessor
 
     void Exec() const;
 
-    Int_t FindProcIndex(const char *procname) const;
-
-    QNamedProc& GetProc(Int_t index) const{return (*fProcs)[index];}
-    QNamedProc& GetProc(const char *procname) const;
-
     void InitProcess(Bool_t allocateparammem=kTRUE);
 
     const QProcObjProcessor& operator=(const QProcObjProcessor &rhs);

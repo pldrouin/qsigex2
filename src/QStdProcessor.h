@@ -23,7 +23,12 @@ class QStdProcessor: public QProcessor
 
     virtual void Analyze();
 
+    Int_t FindProcIndex(const char *procname) const;
+
     Int_t GetNProcs() const{return fProcs->Count();}
+
+    QNamedProc& GetProc(Int_t index) const{return (*fProcs)[index];}
+    QNamedProc& GetProc(const char *procname) const;
 
     const QStdProcessor& operator=(const QStdProcessor &rhs);
 

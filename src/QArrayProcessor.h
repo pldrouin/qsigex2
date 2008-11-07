@@ -39,9 +39,6 @@ class QArrayProcessor: public QStdProcessor
 
     Int_t GetNPSProcs() const{return fProcs->Count()-fNAEProcs;} //Number of post selection processes
 
-    QNamedProc& GetProc(Int_t index) const{return (*fProcs)[index];}
-    QNamedProc& GetProc(const char *procname) const;
-
     void InitProcess(Bool_t allocateparammem=kTRUE);
 
     const QArrayProcessor& operator=(const QArrayProcessor &rhs);
