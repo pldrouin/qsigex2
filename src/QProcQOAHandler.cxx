@@ -6,6 +6,9 @@ QList<TString> QProcQOAHandler::fFiles;
 QList<TObject*> QProcQOAHandler::fQOAObjs;
 QList<Int_t> QProcQOAHandler::fNObjReqQOA;
 Bool_t QProcQOAHandler::fSaveOutputs=kTRUE;
+UInt_t QProcQOAHandler::fDefNOPerBuffer=131072;
+Int_t QProcQOAHandler::fDefNPCBuffers=3;
+UInt_t QProcQOAHandler::fDefNOAllocBlock=13108;
 
 QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arrayname, Bool_t isoutput, Bool_t incrdeps)
 {
@@ -33,7 +36,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
 	fFiles.Add(pathname);
 	if(incrdeps) fNObjReqQOA.Add(1);
 	else fNObjReqQOA.Add(0);
-	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRecreate,sizeof(Double_t),131072,3));
+	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRecreate,sizeof(Double_t),fDefNOPerBuffer,fDefNPCBuffers,fDefNOAllocBlock));
 
 	return (QProcQOA*)fQOAObjs.GetLast();
       }
@@ -52,7 +55,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
 	fFiles.Add(pathname);
 	if(incrdeps) fNObjReqQOA.Add(1);
 	else fNObjReqQOA.Add(0);
-	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRead,sizeof(Double_t),131072,3));
+	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRead,sizeof(Double_t),0,fDefNPCBuffers,fDefNOAllocBlock));
 
 	return (QProcQOA*)fQOAObjs.GetLast();
       }
@@ -61,6 +64,13 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
     default:
       return NULL;
   }
+}
+
+void QProcQOAHandler::SetDefArrayParams(const UInt_t &nentriesperdiskbuffer, const Int_t &nprecachedbuffers, const UInt_t &nentriessperallocblock)
+{
+  fDefNOPerBuffer=nentriesperdiskbuffer;
+  fDefNPCBuffers=nprecachedbuffers;
+  fDefNOAllocBlock=nentriessperallocblock;
 }
 
 void QProcQOAHandler::UnloadQOA(QProcQOA *array)

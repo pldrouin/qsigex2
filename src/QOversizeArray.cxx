@@ -37,7 +37,7 @@ pthread_mutex_t QOversizeArray::fPriorityMutex=PTHREAD_MUTEX_INITIALIZER;
 
 void printstatus(const char*){}
 
-QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer, const Int_t &npcbuffers): fFilename(filename), fArrayName(arrayname), fTStamp(), fFDesc(0), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)+sizeof(time_t)+sizeof(Int_t)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fCRBData(NULL), fWBFirstObjIdx(0), fCurRBIdx(-1), fCurBLRBIdx(-2), fNReadBuffers(0), fPTNRBObjects(-1), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(npcbuffers), fArrayMemSize(0), fArrayIO(0), fAPriority(0), fFileMutex(), fBuffersMutex(), fPBuffersMutex(), fRBDIMutex(), fMWThread(), fMWMutex(), fMWCond(), fMWCMutex(), fMWPCond(), fMWCCond(), fMWAction(kFALSE), fMWBuffer(NULL), fMWWBuffer(NULL), fBLThread(), fBLMutex(), fBLCond(), fBLCMutex(), fBLCCond(), fBLWCond(), fBLAction(kFALSE), fUZQOAB(NULL), fUZBuffers(NULL), fUZBMutex()
+QOversizeArray::QOversizeArray(const char *filename, const char *arrayname, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer, const Int_t &npcbuffers, const UInt_t &nobjectsallocblock): fFilename(filename), fArrayName(arrayname), fTStamp(), fFDesc(0), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)+sizeof(time_t)+sizeof(Int_t)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fNOAllocBlock(nobjectsallocblock<=nobjectsperbuffer?nobjectsallocblock:nobjectsperbuffer),fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fCRBData(NULL), fWBFirstObjIdx(0), fWBNAllocObjs(0), fCurRBIdx(-1), fCurBLRBIdx(-2), fNReadBuffers(0), fPTNRBObjects(-1), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(npcbuffers>0?npcbuffers:0), fArrayMemSize(0), fArrayIO(0), fAPriority(0), fFileMutex(), fBuffersMutex(), fPBuffersMutex(), fRBDIMutex(), fMWThread(), fMWMutex(), fMWCond(), fMWCMutex(), fMWPCond(), fMWCCond(), fMWAction(kFALSE), fMWBuffer(NULL), fMWWBuffer(NULL), fBLThread(), fBLMutex(), fBLCond(), fBLCMutex(), fBLCCond(), fBLWCond(), fBLAction(kFALSE), fUZQOAB(NULL), fUZBuffers(NULL), fUZBMutex()
 {
   FuncDef(QOversizeArray,1);
   pthread_mutex_init(&fFileMutex,NULL);
@@ -186,81 +186,105 @@ void QOversizeArray::Fill()
   memcpy(fWriteBuffer->fBuffer+(fNObjects-fWBFirstObjIdx)*fObjectSize,fBuffer,fObjectSize);
   fNObjects++;
 
-  //If fWriteBuffer is full
-  if(fNObjects-fWBFirstObjIdx == fNOPerBuffer) {
-    printstatus("Write buffer is full");
-    if(fOpenMode == kRead) {
-      fprintf(stderr,"QOversizeArray::Fill(): Error: File '%s' is opened in read-only mode\n",fFilename.Data());
-      throw 1;
-    }
+  //If fWriteBuffer contains the maximum number of objects allowed by the currently allocated memory
+  if(fNObjects-fWBFirstObjIdx == fWBNAllocObjs) {
+    static UInt_t allocsize;
 
-    static UInt_t nextbufidx;
-    nextbufidx=fWriteBuffer->fBufferIdx+1;
+    if(fWBNAllocObjs<fNOPerBuffer) {
+      fWBNAllocObjs+=fNOAllocBlock;
 
-    //If switching from read mode
-    pthread_mutex_lock(&fBuffersMutex);
-    if(fCurReadBuffer) {
-      fCurReadBuffer=NULL;
-      fCurRBIdx=-1;
+      if(fWBNAllocObjs>fNOPerBuffer) fWBNAllocObjs=fNOPerBuffer;
+      allocsize=fWBNAllocObjs*fObjectSize;
 
-      pthread_mutex_unlock(&fBuffersMutex);
+      fWriteBuffer->fBuffer=(char*)realloc(fWriteBuffer->fBuffer,allocsize);
+      pthread_mutex_lock(&fMSizeMutex);
+      fTotalMemSize+=allocsize-fWriteBuffer->fBufferSize;
+      fArrayMemSize+=allocsize-fWriteBuffer->fBufferSize;
+      pthread_mutex_unlock(&fMSizeMutex);
+      fWriteBuffer->fBufferSize=allocsize;
 
-      //Request the buffer loading thread to go in waiting condition
-      pthread_mutex_lock(&fBLCMutex);
-      pthread_cond_signal(&fBLCond);
-      //Wait for confirmation
-      pthread_cond_wait(&fBLWCond,&fBLCMutex);
-      pthread_mutex_unlock(&fBLCMutex);
-
-      pthread_mutex_lock(&fBuffersMutex);
-    }
-    fWriteBuffer->fPreviousOAB=fLastReadBuffer;
-    fWriteBuffer->fNextOAB=NULL;
-    fWriteBuffer->fIsModified=kTRUE;
-
-    //If this is not the first buffer in the structure
-    if(fLastReadBuffer) {
-      fLastReadBuffer->fNextOAB=fWriteBuffer;
-    } else fFirstReadBuffer=fWriteBuffer;
-    fLastReadBuffer=fWriteBuffer;
-    fNReadBuffers++;
-    fWBFirstObjIdx=fNObjects;
-    pthread_mutex_unlock(&fBuffersMutex);
-    //Add the uncompressed size of the new read buffer to priority calculations
-    fArrayIO+=fMaxBDataSize;
-    pthread_mutex_lock(&fPriorityMutex);
-    fAPriority=1./fArrayIO;
-    pthread_mutex_unlock(&fPriorityMutex);
-
-    pthread_mutex_lock(&fPBuffersMutex);
-    if(fFirstParkedBuffer) {
-      printstatus("Using a parked buffer for the next write buffer");
-      fWriteBuffer=fFirstParkedBuffer;
-      fFirstParkedBuffer=fFirstParkedBuffer->fNextOAB;
-      pthread_mutex_unlock(&fPBuffersMutex);
-      fWriteBuffer->fBufferIdx=nextbufidx;
-      fWriteBuffer->fIsCompressed=0;
-      if(fWriteBuffer->fBufferSize<fMaxBDataSize) {
-	free(fWriteBuffer->fBuffer);
-	fWriteBuffer->fBuffer=(char*)malloc(fMaxBDataSize);
-	pthread_mutex_lock(&fMSizeMutex);
-	fTotalMemSize+=fMaxBDataSize-fWriteBuffer->fBufferSize;
-	fArrayMemSize+=fMaxBDataSize-fWriteBuffer->fBufferSize;
-	pthread_mutex_unlock(&fMSizeMutex);
-	fWriteBuffer->fBufferSize=fMaxBDataSize;
+      //If fWriteBuffer is full
+    } else {
+      printstatus("Write buffer is full");
+      if(fOpenMode == kRead) {
+	fprintf(stderr,"QOversizeArray::Fill(): Error: File '%s' is opened in read-only mode\n",fFilename.Data());
+	throw 1;
       }
 
-    } else {
-      printstatus("Using a new buffer for the next write buffer");
-      pthread_mutex_unlock(&fPBuffersMutex);
-      fWriteBuffer=new QOABuffer(nextbufidx, fMaxBDataSize);
-      pthread_mutex_lock(&fMSizeMutex);
-      fTotalMemSize+=fMaxBDataSize+sizeof(QOABuffer);
-      fArrayMemSize+=fMaxBDataSize+sizeof(QOABuffer);
-      pthread_mutex_unlock(&fMSizeMutex);
-      CheckMemory();
+      static UInt_t nextbufidx;
+      nextbufidx=fWriteBuffer->fBufferIdx+1;
+
+      //If switching from read mode
+      pthread_mutex_lock(&fBuffersMutex);
+      if(fCurReadBuffer) {
+	fCurReadBuffer=NULL;
+	fCurRBIdx=-1;
+
+	pthread_mutex_unlock(&fBuffersMutex);
+
+	//Request the buffer loading thread to go in waiting condition
+	pthread_mutex_lock(&fBLCMutex);
+	pthread_cond_signal(&fBLCond);
+	//Wait for confirmation
+	pthread_cond_wait(&fBLWCond,&fBLCMutex);
+	pthread_mutex_unlock(&fBLCMutex);
+
+	pthread_mutex_lock(&fBuffersMutex);
+      }
+      fWriteBuffer->fPreviousOAB=fLastReadBuffer;
+      fWriteBuffer->fNextOAB=NULL;
+      fWriteBuffer->fIsModified=kTRUE;
+
+      //If this is not the first buffer in the structure
+      if(fLastReadBuffer) {
+	fLastReadBuffer->fNextOAB=fWriteBuffer;
+      } else fFirstReadBuffer=fWriteBuffer;
+      fLastReadBuffer=fWriteBuffer;
+      fNReadBuffers++;
+      fWBFirstObjIdx=fNObjects;
+      pthread_mutex_unlock(&fBuffersMutex);
+      //Add the uncompressed size of the new read buffer to priority calculations
+      fArrayIO+=fMaxBDataSize;
+      pthread_mutex_lock(&fPriorityMutex);
+      fAPriority=1./fArrayIO;
+      pthread_mutex_unlock(&fPriorityMutex);
+
+      pthread_mutex_lock(&fPBuffersMutex);
+      if(fFirstParkedBuffer) {
+	printstatus("Using a parked buffer for the next write buffer");
+	fWriteBuffer=fFirstParkedBuffer;
+	fFirstParkedBuffer=fFirstParkedBuffer->fNextOAB;
+	pthread_mutex_unlock(&fPBuffersMutex);
+	fWriteBuffer->fBufferIdx=nextbufidx;
+	fWriteBuffer->fIsCompressed=0;
+	fWBNAllocObjs=fWriteBuffer->fBufferSize/fObjectSize;
+
+	if(fWBNAllocObjs<fNOAllocBlock) {
+	  free(fWriteBuffer->fBuffer);
+	  fWBNAllocObjs=fNOAllocBlock;
+	  allocsize=fWBNAllocObjs*fObjectSize;
+	  fWriteBuffer->fBuffer=(char*)malloc(allocsize);
+	  pthread_mutex_lock(&fMSizeMutex);
+	  fTotalMemSize+=allocsize-fWriteBuffer->fBufferSize;
+	  fArrayMemSize+=allocsize-fWriteBuffer->fBufferSize;
+	  pthread_mutex_unlock(&fMSizeMutex);
+	  fWriteBuffer->fBufferSize=allocsize;
+	}
+
+      } else {
+	printstatus("Using a new buffer for the next write buffer");
+	pthread_mutex_unlock(&fPBuffersMutex);
+	fWBNAllocObjs=fNOAllocBlock;
+	allocsize=fWBNAllocObjs*fObjectSize;
+	fWriteBuffer=new QOABuffer(nextbufidx, allocsize);
+	pthread_mutex_lock(&fMSizeMutex);
+	fTotalMemSize+=allocsize+sizeof(QOABuffer);
+	fArrayMemSize+=allocsize+sizeof(QOABuffer);
+	pthread_mutex_unlock(&fMSizeMutex);
+	CheckMemory();
+      }
+      //printf("Next write buffer index is %i\n",nextbufidx);
     }
-    //printf("Next write buffer index is %i\n",nextbufidx);
   }
 }
 
@@ -454,7 +478,9 @@ void QOversizeArray::PrintInfo() const
 {
   printf("Array name: %s\n",fArrayName.Data());
   printf("Objects size: %i\n",fObjectSize);
-  printf("Number of objects per buffer: %i\n",fNOPerBuffer);
+  printf("Number of objects per buffer: %u\n",fNOPerBuffer);
+  printf("Number of pre-cached buffers: %i\n",fNPCBuffers);
+  printf("Number of objects per memory allocation block: %u\n",fNOAllocBlock);
   printf("Total number of objects: %lli\n",fNObjects);
   printf("Time stamp: ");fTStamp.Print();
 }
@@ -619,6 +645,8 @@ void QOversizeArray::ReadHeader()
   fNOPerBuffer=uibuf;
   fMaxBDataSize=fObjectSize*fNOPerBuffer;
   fMaxBHBDataSize=fBufferHeaderSize+fMaxBDataSize;
+  
+  if(!fNOAllocBlock || fNOAllocBlock>fNOPerBuffer) fNOAllocBlock=fNOPerBuffer;
 
   if(read(fFDesc, &fNObjects, sizeof(fNObjects))!=sizeof(fNObjects)) {
     perror("QOversizeArray::ReadHeader: Error: ");
@@ -705,16 +733,8 @@ void QOversizeArray::ReadWriteBuffer()
   size_t numobjs=fNObjects%fNOPerBuffer;
   UInt_t bufferidx=fNObjects/fNOPerBuffer;
   Int_t buffersize;
-
-  if(!fWriteBuffer) {
-    fWriteBuffer=new QOABuffer(0, fMaxBDataSize);
-    pthread_mutex_lock(&fMSizeMutex);
-    fTotalMemSize+=fMaxBDataSize+sizeof(QOABuffer);
-    fArrayMemSize+=fMaxBDataSize+sizeof(QOABuffer);
-    pthread_mutex_unlock(&fMSizeMutex);
-    CheckMemory();
-  } 
-  fWriteBuffer->fBufferIdx=bufferidx;
+  UInt_t nallocobjs;
+  UInt_t allocsize;
 
   if(numobjs) {
     pthread_mutex_lock(&fFileMutex);
@@ -727,12 +747,50 @@ void QOversizeArray::ReadWriteBuffer()
       throw 1;
     }
 
+    nallocobjs=(UInt_t)ceil((Double_t)buffersize/(fObjectSize*fNOAllocBlock))*fNOAllocBlock;
+
+    if(!fWriteBuffer) {
+      fWBNAllocObjs=nallocobjs;
+      allocsize=fWBNAllocObjs*fObjectSize;
+      fWriteBuffer=new QOABuffer(0, allocsize);
+      pthread_mutex_lock(&fMSizeMutex);
+      fTotalMemSize+=allocsize+sizeof(QOABuffer);
+      fArrayMemSize+=allocsize+sizeof(QOABuffer);
+      pthread_mutex_unlock(&fMSizeMutex);
+      CheckMemory();
+
+    } else if(fWBNAllocObjs<nallocobjs) {
+      free(fWriteBuffer->fBuffer);
+      fWBNAllocObjs=nallocobjs;
+      allocsize=fWBNAllocObjs*fObjectSize;
+      fWriteBuffer->fBuffer=(char*)malloc(allocsize);
+      pthread_mutex_lock(&fMSizeMutex);
+      fTotalMemSize+=allocsize-fWriteBuffer->fBufferSize;
+      fArrayMemSize+=allocsize-fWriteBuffer->fBufferSize;
+      pthread_mutex_unlock(&fMSizeMutex);
+      fWriteBuffer->fBufferSize=allocsize;
+    }
+
     if(read(fFDesc, fWriteBuffer->fBuffer, buffersize)!=buffersize) {
       perror("QOversizeArray::ReadWriteBuffer: Error: ");
       throw 1;
     }
     pthread_mutex_unlock(&fFileMutex);
+
+  } else {
+
+    if(!fWriteBuffer) {
+      fWBNAllocObjs=fNOAllocBlock;
+      allocsize=fWBNAllocObjs*fObjectSize;
+      fWriteBuffer=new QOABuffer(0, allocsize);
+      pthread_mutex_lock(&fMSizeMutex);
+      fTotalMemSize+=allocsize+sizeof(QOABuffer);
+      fArrayMemSize+=allocsize+sizeof(QOABuffer);
+      pthread_mutex_unlock(&fMSizeMutex);
+      CheckMemory();
+    } 
   }
+  fWriteBuffer->fBufferIdx=bufferidx;
   pthread_mutex_lock(&fBuffersMutex);
   fWBFirstObjIdx=fNObjects-numobjs;
   pthread_mutex_unlock(&fBuffersMutex);
@@ -931,9 +989,10 @@ void QOversizeArray::WriteWriteBuffer() const
   size_t numobjs=fNObjects%fNOPerBuffer;
 
   if(numobjs) {
+    Int_t buffersize=fWriteBuffer->fBufferSize;
     fWriteBuffer->fBufferSize=numobjs*fObjectSize;
     WriteBuffer(fWriteBuffer);
-    fWriteBuffer->fBufferSize=fMaxBDataSize;
+    fWriteBuffer->fBufferSize=buffersize;
   }
 }
 

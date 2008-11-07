@@ -32,7 +32,7 @@ class QOversizeArray
 {
   public:
     enum omode{kRead, kRW, kRecreate};
-    QOversizeArray(const char *filename, const char *arrayname, omode openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=131072, const Int_t &npcbuffers=3);
+    QOversizeArray(const char *filename, const char *arrayname, omode openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=0, const Int_t &npcbuffers=3, const UInt_t &nobjectsallocblock=0);
     virtual ~QOversizeArray();
 
     void CloseFile();
@@ -91,7 +91,8 @@ class QOversizeArray
     omode fOpenMode;             // Array opening mode
     UInt_t fObjectSize;          // Size of a single stored object
     void *fBuffer;               //! Pointer to the current object
-    UInt_t fNOPerBuffer;         // Number of objects per buffer
+    UInt_t fNOPerBuffer;         // Maximum number of objects per buffer
+    UInt_t fNOAllocBlock;        // Number of objects for which memory is allocated at once in the write buffer
     Int_t fMaxBDataSize;         //Maximum buffer data size
     Int_t fMaxBHBDataSize;       //fBufferHeaderSize+fMaxBHBDataSize 
     Long64_t fNObjects;          // Total number of objects
@@ -101,6 +102,7 @@ class QOversizeArray
     QOABuffer *fWriteBuffer;     //!
     Char_t    *fCRBData;         //! Pointer to current read buffer uncompressed data
     Long64_t   fWBFirstObjIdx;   // Index of the first object contained in the write buffer. ****Value should be modified only by the main thread
+    UInt_t     fWBNAllocObjs;    // Number of objects for which memory is allocated in the write buffer
     Int_t fCurRBIdx;             // Current read buffer index. A value of -1 indicates the array is in write mode
     Int_t fCurBLRBIdx;           // Current read buffer index used by buffer loading thread.
     Int_t fNReadBuffers;         // Number of active buffers that are full and ready for reading
