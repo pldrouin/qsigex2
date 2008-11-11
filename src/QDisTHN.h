@@ -81,7 +81,7 @@ template <typename U> class QDisTHN: public QDis
   Int_t Fill(const Double_t &x);
   Int_t Fill(const Double_t &x, const Double_t &y);
   Int_t Fill(const Double_t &x, const Double_t &y, const Double_t &z);
-  Int_t Fill(const Double_t *x);
+  Int_t Fill(const Double_t *x, const U &w=1);
   
   TH1* GenTH(const char *name="_qth2th") const{return fQTHN->GenTH(name);}
 

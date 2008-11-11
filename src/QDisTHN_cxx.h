@@ -44,9 +44,9 @@ template <typename U> Int_t QDisTHN<U>::Fill(const Double_t &x, const Double_t &
   return fQTHN->Fill(xs);
 }
 
-template <typename U> Int_t QDisTHN<U>::Fill(const Double_t *x)
+template <typename U> Int_t QDisTHN<U>::Fill(const Double_t *x, const U &w)
 {
-  return fQTHN->Fill(x);
+  return fQTHN->Fill(x,w);
 }
 
 template <typename U> Double_t QDisTHN<U>::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const
