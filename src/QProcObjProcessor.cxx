@@ -217,8 +217,6 @@ void QProcObjProcessor::DelProc(const char *procname)
 
 void QProcObjProcessor::Exec() const
 {
-  if(GetVerbosity()&QProcessor::kShowExec) printf("QProcObjProcessor('%s')::Exec()\n",GetName());
-
   static QMask pardiffs; //Modified parameters since the last call
   static QMask depmods;  //Required processes due to modified input objects
   static Bool_t firstrun;
@@ -255,6 +253,8 @@ void QProcObjProcessor::Exec() const
 
   //If at least one of the parameters has changed
   if(pardiffs || depmods || firstrun) {
+    if(GetVerbosity()&QProcessor::kShowExec) printf("QProcObjProcessor('%s')::Exec()\n",GetName());
+
     static QList<QProcObj*> oobjects; //List for output objects needing update
     static QList<TObject*> procs;     //List of needed processes
 
@@ -311,6 +311,10 @@ void QProcObjProcessor::Exec() const
     //Save the parameters
     for(i=0; i<fParams->Count(); i++) fLastParams->GetArray()[i]=*(fParams->GetArray()[i]);
     fLastExec.Set();
+
+  } else {
+
+    if(GetVerbosity()&QProcessor::kShowExec2) printf("QProcObjProcessor('%s')::Exec()\n",GetName());
   }
 }
 

@@ -483,8 +483,6 @@ void QArrayProcessor::DelProc(const char *procname)
 
 void QArrayProcessor::Exec() const
 {
-  if(GetVerbosity()&QProcessor::kShowExec) printf("QArrayProcessor('%s')::Exec()\n",GetName());
-
   static QMask pardiffs; //Modified parameters since the last call
   static QMask depmods;  //Required processes due to modified input arrays or input objects
   static Bool_t firstrun;
@@ -531,6 +529,8 @@ void QArrayProcessor::Exec() const
 
   //If at least one of the parameters has changed
   if(pardiffs || depmods || firstrun) {
+    if(GetVerbosity()&QProcessor::kShowExec) printf("QArrayProcessor('%s')::Exec()\n",GetName());
+
     static QList<QProcArray*> iarrays; //List for needed input arrays
     static QList<QProcArray*> oarrays; //List for output arrays needing update
     static QList<QProcObj*> oobjects; //List for output objects needing update
@@ -735,6 +735,10 @@ void QArrayProcessor::Exec() const
     //Save the parameters
     for(i=0; i<fParams->Count(); i++) fLastParams->GetArray()[i]=*(fParams->GetArray()[i]);
     fLastExec.Set();
+
+  } else {
+
+    if(GetVerbosity()&QProcessor::kShowExec2) printf("QArrayProcessor('%s')::Exec()\n",GetName());
   }
 }
 
