@@ -45,6 +45,7 @@
 #pragma link C++ class QProcObj;
 #pragma link C++ class QProcDouble;
 #pragma link C++ class QProcTObject;
+#pragma link C++ class QProcRandom3;
 #pragma link C++ class QProcArray;
 #pragma link C++ class QProcBranchHandler;
 #pragma link C++ class QProcQOAHandler;
