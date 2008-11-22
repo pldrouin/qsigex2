@@ -2,4 +2,4 @@
 
 ClassImp(QProcRandom3)
 
-TRandom3 QProcRandom3::fSRndm(1);
+TRandom3 QProcRandom3::fSRndm(4357);
