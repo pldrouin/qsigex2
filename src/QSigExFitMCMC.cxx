@@ -66,7 +66,7 @@ Double_t QSigExFitMCMC::EvalFCN() const
 
 Double_t QSigExFitMCMC::Fit(Bool_t fituncerts)
 {
-  Int_t i,j,k;
+  Int_t i,j;
   Int_t numpar=fParams.Count();
 
   fCurInstance=this;
@@ -126,7 +126,7 @@ void QSigExFitMCMC::InitFit()
   TerminateFit();
   TDirectory *curdir=gDirectory;
   TDirectory *dbuf;
-  Int_t i,j,k;
+  Int_t i,j;
   TString proto;
 
   fParOArrays->Clear();
