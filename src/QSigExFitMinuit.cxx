@@ -72,7 +72,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
 
       //Else if the parameter is hided
       } else {
-	fQProcessor->SetParam(i,fParams[i].GetStartVal());
+	if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
       }
     }
 
@@ -142,7 +142,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
 	j++;
 
       } else {
-	ParamFitVal(i)=fQProcessor->GetParam(i);
+	ParamFitVal(i)=fParams[i].GetStartVal();
       }
     }
 
@@ -243,7 +243,7 @@ void QSigExFitMinuit::InitFit()
 
       //Else if the parameter is fixed but is not required to be passed to Minuit
     } else {
-      fQProcessor->SetParam(i,fParams[i].GetStartVal());
+      if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
       ParamFreeParamIndex(i)=-1;
     }
   }

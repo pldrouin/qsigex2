@@ -22,6 +22,7 @@ class QProcTBranchWrapper: public QProcArray
     Bool_t NewerThan(const TTimeStamp &) const{return kFALSE;}
     void UpdateModTime(){}
     void ResetArray(){fBranch->DeleteBaskets("all");}
+    void SetBuffer(void* buffer){fBranch->SetAddress(buffer);};
     void TerminateProcObj(){fBranch->GetTree()->SetEntries(fBranch->GetEntries());}
     void UnloadArray();
 

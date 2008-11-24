@@ -20,7 +20,7 @@ class QProcessor: public TNamed
     Int_t GetNParams() const{return fParamsNames->Count();}
 
     virtual void Analyze()=0;
-    virtual void Exec() const=0;
+    virtual void Exec(const Bool_t &forceall=kFALSE) const=0;
     virtual void InitProcess(Bool_t allocateparammem=kTRUE)=0;
 
     void ClearParams();

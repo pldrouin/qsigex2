@@ -47,6 +47,8 @@ class QSigExFit: public TObject
     void SetProcessor(QProcessor* processor){fQProcessor=processor; Init();}
     void SetVerbose(Int_t verbose=0){fVerbose=verbose;}
 
+    virtual void TerminateFit(){}
+
     const QSigExFit& operator=(const QSigExFit &rhs){TObject::operator=(rhs); return *this;}
 
     virtual void Browse(TBrowser *b);

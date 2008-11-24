@@ -19,7 +19,7 @@ class QProcList: public QProcessor
 
     void DelQProcs(Int_t index=-1){fQPL->Del(index);}
 
-    void Exec() const;
+    void Exec(const Bool_t &forceall=kFALSE) const;
 
     Int_t GetNQProcs() const{return fQPL->Count();}
 

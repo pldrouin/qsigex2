@@ -481,17 +481,17 @@ void QArrayProcessor::DelProc(const char *procname)
   }
 }
 
-void QArrayProcessor::Exec() const
+void QArrayProcessor::Exec(const Bool_t &forceall) const
 {
   static QMask pardiffs; //Modified parameters since the last call
   static QMask depmods;  //Required processes due to modified input arrays or input objects
-  static Bool_t firstrun;
+  static Bool_t runall;
   pardiffs.Clear();
   depmods.Clear();
   static Int_t i,j;
 
   //fLastParams gets cleared by the function Analyze, so this is how the first run is identified
-  if(fLastExec.GetSec() != 0) {
+  if(forceall || fLastExec.GetSec() != 0) {
 
     //Loop over parameters
     for(i=0; i<fParams->Count(); i++) {
@@ -516,19 +516,19 @@ void QArrayProcessor::Exec() const
       if((*fIObjects)[i]->NewerThan(fLastExec)) depmods|=(*fObjsPDepends)[i];
     }
 
-    firstrun=kFALSE;
+    runall=forceall;
   } else {
     fNeededIA.RedimList(fIANames->Count());
     fNeededOA.RedimList(fOANames->Count());
     fNeededOO.RedimList(fOObjects->Count());
-    firstrun=kTRUE;
+    runall=kTRUE;
   }
 
   //printf("Mask for the current parameters: ");
   //pardiffs.Print();
 
   //If at least one of the parameters has changed
-  if(pardiffs || depmods || firstrun) {
+  if(pardiffs || depmods || runall) {
     if(GetVerbosity()&QProcessor::kShowExec) printf("QArrayProcessor('%s')::Exec()\n",GetName());
 
     static QList<QProcArray*> iarrays; //List for needed input arrays
@@ -569,7 +569,7 @@ void QArrayProcessor::Exec() const
     for(i=0; i<fProcs->Count(); i++) {
 
       //If the current process has never been run or if it is triggered by the parameters mask
-      if(((*fProcsParDepends)[i] && pardiffs) || depmods.GetBit(i) || firstrun) {
+      if(((*fProcsParDepends)[i] && pardiffs) || depmods.GetBit(i) || runall) {
 
 	if(GetVerbosity()&QProcessor::kShowExec) printf("\tProcess '%s' will be called\n",(*fProcs)[i].GetName());
 	//Add it to the list of needed processes

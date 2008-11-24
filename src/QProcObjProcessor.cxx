@@ -215,11 +215,11 @@ void QProcObjProcessor::DelProc(const char *procname)
   }
 }
 
-void QProcObjProcessor::Exec() const
+void QProcObjProcessor::Exec(const Bool_t &forceall) const
 {
   static QMask pardiffs; //Modified parameters since the last call
   static QMask depmods;  //Required processes due to modified input objects
-  static Bool_t firstrun;
+  static Bool_t runall;
   pardiffs.Clear();
   depmods.Clear();
   static Int_t i,j;
@@ -242,17 +242,17 @@ void QProcObjProcessor::Exec() const
       if((*fIObjects)[i]->NewerThan(fLastExec)) depmods|=(*fObjsPDepends)[i];
     }
 
-    firstrun=kFALSE;
+    runall=forceall;
   } else {
     fNeededOO.RedimList(fOObjects->Count());
-    firstrun=kTRUE;
+    runall=kTRUE;
   }
 
   //printf("Mask for the current parameters: ");
   //pardiffs.Print();
 
   //If at least one of the parameters has changed
-  if(pardiffs || depmods || firstrun) {
+  if(pardiffs || depmods || runall) {
     if(GetVerbosity()&QProcessor::kShowExec) printf("QProcObjProcessor('%s')::Exec()\n",GetName());
 
     static QList<QProcObj*> oobjects; //List for output objects needing update
@@ -267,7 +267,7 @@ void QProcObjProcessor::Exec() const
     for(i=0; i<fProcs->Count(); i++) {
 
       //If the current process has never been run or if it is triggered by the parameters mask
-      if(((*fProcsParDepends)[i] && pardiffs) || depmods.GetBit(i) || firstrun) {
+      if(((*fProcsParDepends)[i] && pardiffs) || depmods.GetBit(i) || runall) {
 
 	if(GetVerbosity()&QProcessor::kShowExec) printf("\tProcess '%s' will be called\n",(*fProcs)[i].GetName());
 	//Add it to the list of needed processes

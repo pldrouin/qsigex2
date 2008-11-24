@@ -29,7 +29,7 @@ class QProcObjProcessor: public QStdProcessor
     void DelProc(Int_t index=-1){fProcs->Del(index);}
     void DelProc(const char *procname);
 
-    void Exec() const;
+    void Exec(const Bool_t &forceall=kFALSE) const;
 
     void InitProcess(Bool_t allocateparammem=kTRUE);
 

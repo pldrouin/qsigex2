@@ -44,11 +44,11 @@ void QProcList::Analyze()
   }
 }
 
-void QProcList::Exec() const
+void QProcList::Exec(const Bool_t &forceall) const
 {
   if(GetVerbosity()&QProcessor::kShowExec2) printf("QProcList('%s')::Exec()\n",GetName());
 
-  for(Int_t i=0; i<fQPL->Count(); i++) ((QProcessor*)(*fQPL)[i])->Exec();
+  for(Int_t i=0; i<fQPL->Count(); i++) ((QProcessor*)(*fQPL)[i])->Exec(forceall);
 }
 
 void QProcList::InitProcess(Bool_t allocateparammem)

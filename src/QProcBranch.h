@@ -21,6 +21,7 @@ class QProcBranch: public QProcArray, public TBranch
     Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0);
     void InitProcObj(){ResetArray();}
     void ResetArray(){DeleteBaskets("all");}
+    void SetBuffer(void* buffer){TBranch::SetAddress(buffer);};
     void TerminateProcObj(){UpdateModTime(); GetTree()->SetEntries(TBranch::GetEntries());}
     void UnloadArray();
 

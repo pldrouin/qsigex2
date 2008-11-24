@@ -33,7 +33,7 @@ class QArrayProcessor: public QStdProcessor
     void DelProc(Int_t index=-1){if(index==-1) index=fProcs->Count()-1; fProcs->Del(index); fSelProcs->Del(index); if(index < fNAEProcs) fNAEProcs--;}
     void DelProc(const char *procname);
 
-    void Exec() const;
+    void Exec(const Bool_t &forceall=kFALSE) const;
 
     Int_t GetNPSProcs() const{return fProcs->Count()-fNAEProcs;} //Number of post selection processes
 
