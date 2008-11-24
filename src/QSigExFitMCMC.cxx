@@ -59,8 +59,23 @@ void QSigExFitMCMC::DelParOutput(const char *paramname)
 
 Double_t QSigExFitMCMC::EvalFCN() const
 {
-  fCurInstance=this;
 
+  if(fCompiledFunc) {
+    Double_t prob;
+    Int_t numpar=fParams.Count();
+    fCurInstance=this;
+    fCompiledFunc(numpar,NULL,prob,fParVals,0);
+    return prob;
+
+  } else if(fQProcessor && fQPOutputs.Count() && dynamic_cast<QProcDouble*>(fQPOutputs[0])) {
+    Double_t &prob=*dynamic_cast<QProcDouble*>(fQPOutputs[0]);
+    fQProcessor->Exec();
+    return prob;
+
+  } else {
+      fprintf(stderr,"Error: QSigExFitMCMC::EvalFCN(): Neither a C function nor a QProcessor with a QProcDouble output has been specified\n");
+      throw 1;
+  }
   return 0;
 }
 
@@ -68,8 +83,6 @@ Double_t QSigExFitMCMC::Fit(Bool_t fituncerts)
 {
   Int_t i,j;
   Int_t numpar=fParams.Count();
-
-  fCurInstance=this;
 
   j=0;
 
@@ -89,29 +102,63 @@ Double_t QSigExFitMCMC::Fit(Bool_t fituncerts)
     }
   }
 
-  Double_t prob,newprob;
   Double_t *oldpars=new Double_t[numpar];
   TRandom3 rnd;
-  fCompiledFunc(numpar,NULL,prob,fParVals,0);
 
-  //Burn-In Here
-  for(i=0; i<fNBurnInIterations+fNParsingIterations; i++) {
-    memcpy(oldpars,fParVals,numpar*sizeof(Double_t));
+  for(j=0; j<fParOArrays->Count(); j++) (*fParOArrays)[j]->InitProcObj();
 
-    for(j=0; j<numpar; j++) fParVals[j]=rnd.Gaus(fParVals[j],fParJumps[j]);
-    fCompiledFunc(numpar,NULL,newprob,fParVals,0);
+  if(fCompiledFunc) {
+    Double_t prob,newprob;
+    fCurInstance=this;
+    fCompiledFunc(numpar,NULL,prob,fParVals,0);
 
-    if(newprob<prob && rnd.Rndm()*prob>newprob) {
-      memcpy(fParVals,oldpars,numpar*sizeof(Double_t));
+    //Burn-In here
+    for(i=0; i<fNBurnInIterations+fNParsingIterations; i++) {
+      memcpy(oldpars,fParVals,numpar*sizeof(Double_t));
 
-    } else {
-      prob=newprob;
+      for(j=0; j<numpar; j++) fParVals[j]=rnd.Gaus(fParVals[j],fParJumps[j]);
+      fCompiledFunc(numpar,NULL,newprob,fParVals,0);
+
+      if(newprob<prob && rnd.Rndm()*prob>newprob) {
+	memcpy(fParVals,oldpars,numpar*sizeof(Double_t));
+
+      } else {
+	prob=newprob;
+      }
+
+      if(i>=fNBurnInIterations) {
+
+	for(j=0; j<fParOArrays->Count(); j++) (*fParOArrays)[j]->Fill();
+      }
     }
 
-    if(i>=fNBurnInIterations) {
+  } else if(fQProcessor && fQPOutputs.Count() && dynamic_cast<QProcDouble*>(fQPOutputs[0])) {
+    Double_t &prob=*dynamic_cast<QProcDouble*>(fQPOutputs[0]);
+    Double_t oldprob;
+    fQProcessor->Exec();
 
-      for(j=0; j<fParOArrays->Count(); j++) (*fParOArrays)[j]->Fill();
+    //Burn-In here
+    for(i=0; i<fNBurnInIterations+fNParsingIterations; i++) {
+      memcpy(oldpars,fParVals,numpar*sizeof(Double_t));
+      oldprob=prob;
+
+      for(j=0; j<numpar; j++) fParVals[j]=rnd.Gaus(fParVals[j],fParJumps[j]);
+      fQProcessor->Exec();
+
+      if(prob<oldprob && rnd.Rndm()*oldprob>prob) {
+	memcpy(fParVals,oldpars,numpar*sizeof(Double_t));
+	prob=oldprob;
+      }
+
+      if(i>=fNBurnInIterations) {
+
+	for(j=0; j<fParOArrays->Count(); j++) (*fParOArrays)[j]->Fill();
+      }
     }
+
+  } else {
+      fprintf(stderr,"Error: QSigExFitMCMC::Fit(): Neither a C function nor a QProcessor with a QProcDouble output has been specified\n");
+      throw 1;
   }
 
   for(j=0; j<fParOArrays->Count(); j++) (*fParOArrays)[j]->TerminateProcObj();
@@ -199,20 +246,13 @@ void QSigExFitMCMC::SetFCN(void (*fcn)(Int_t&, Double_t*, Double_t&f, Double_t*,
 {
   //This overloaded version of QSigExFitMCMC::SetFCN() function is called when fcn is
   //a compiled function (fcn pointer is passed in compiled code or by the CINT
-  //interpreter). It sets the parameters fitter function.
+  //interpreter).
+  //
+  //The function should correspond to a probability density function.
+  //Note that it is optional to use a C function to use QSigExFitMCMC. If this function
+  //is not set, the first output from the QProcessor is used instead.
 
-  fInterpretedFunc=NULL;
   fCompiledFunc=fcn;
-}
-
-void QSigExFitMCMC::SetFCN(void* fcn)
-{
-  //This overloaded version of QSigExFitMCMC::SetFCN() function is called when fcn
-  //is an interpreted function by the CINT interpreter. It sets the parameters
-  //fitter function.
-
-  fCompiledFunc=NULL;
-  fInterpretedFunc=fcn;
 }
 
 void QSigExFitMCMC::TerminateFit()

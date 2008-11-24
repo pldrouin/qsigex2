@@ -253,7 +253,11 @@ void QSigExFitMinuit::SetFCN(void (*fcn)(Int_t&, Double_t*, Double_t&f, Double_t
 {
   //This overloaded version of QSigExFitMinuit::SetFCN() function is called when fcn is
   //a compiled function (fcn pointer is passed in compiled code or by the CINT
-  //interpreter). It sets the parameters fitter function.
+  //interpreter).
+  //
+  //The function should correspond to a Chi2 or a negative log-likelihood. SetFCNError
+  //should be call to set the proper variation of the function that corresponds to an
+  //uncertainty of 1 sigma on the fit parameters.
 
   fInterpretedFunc=NULL;
   fCompiledFunc=fcn;
@@ -262,8 +266,11 @@ void QSigExFitMinuit::SetFCN(void (*fcn)(Int_t&, Double_t*, Double_t&f, Double_t
 void QSigExFitMinuit::SetFCN(void* fcn)
 {
   //This overloaded version of QSigExFitMinuit::SetFCN() function is called when fcn
-  //is an interpreted function by the CINT interpreter. It sets the parameters
-  //fitter function.
+  //is an interpreted function by the CINT interpreter.
+  //
+  //The function should correspond to a Chi2 or a negative log-likelihood. SetFCNError
+  //should be call to set the proper variation of the function that corresponds to an
+  //uncertainty of 1 sigma on the fit parameters.
 
   fCompiledFunc=NULL;
   fInterpretedFunc=fcn;
