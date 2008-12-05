@@ -169,6 +169,8 @@ template <typename U> TH1* QTHN<U>::GenTH(const char *name) const
 	GetFBinCoords(li,coords);
 	th->SetBinContent(coords[0],coords[1],coords[2],fBinContent[li]);
       }
+      break;
+
     default:
       return NULL;
   }
