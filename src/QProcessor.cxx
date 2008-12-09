@@ -104,6 +104,7 @@ void QProcessor::SetParamAddress(Int_t index, Double_t *paddr)
   } else if(!(*fOwnsParams)[index]) {
     (*fOwnsParams)[index]=kTRUE;
     (*fParams)[index]=new Double_t;
+    *((*fParams)[index])=0;
   }
 }
 
