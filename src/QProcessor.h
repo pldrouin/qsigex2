@@ -61,7 +61,7 @@ class QProcessor: public TNamed
     virtual void Browse(TBrowser *b)=0;
     Bool_t IsFolder() const {return kTRUE;}
 
-    enum eVerbosity {kShowExec=1, kShowExec2=2};
+    enum eVerbosity {kShowExec=1, kShowExec2=3};
 
   protected:
     QList<Double_t*>     *fParams;             //-> Buffers for parameters values

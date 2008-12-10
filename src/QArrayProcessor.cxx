@@ -497,7 +497,9 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     for(i=0; i<fParams->Count(); i++) {
 
       //If the current parameter value has changed, set the correspongind bit in the parameter mask
-      if(*(fParams->GetArray()[i]) != fLastParams->GetArray()[i]) pardiffs.SetBit(i,1);
+      if(*(fParams->GetArray()[i]) != fLastParams->GetArray()[i]) {
+	pardiffs.SetBit(i,1);
+      }
     }
 
     //Loop over all input arrays
@@ -524,12 +526,15 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     runall=kTRUE;
   }
 
-  //printf("Mask for the current parameters: ");
-  //pardiffs.Print();
-
   //If at least one of the parameters has changed
   if(pardiffs || depmods || runall) {
+
     if(GetVerbosity()&QProcessor::kShowExec) printf("QArrayProcessor('%s')::Exec()\n",GetName());
+    //printf("runall: %i\n",runall);
+    //printf("Parameter mask for the current parameters: ");
+    //pardiffs.Print();
+    //printf("Object mask for the current parameters: ");
+    //depmods.Print();
 
     static QList<QProcArray*> iarrays; //List for needed input arrays
     static QList<QProcArray*> oarrays; //List for output arrays needing update
