@@ -63,6 +63,7 @@ void QSigExFit::InitFit()
   Int_t i,j;
 
   for (i=0; i<fParams.Count(); i++){
+    ParamMasterIndex(i)=-1;
 
     if(fQProcessor) {
 

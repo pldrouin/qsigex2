@@ -62,7 +62,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
     // Reinitialize floating parameters values
     for (i=0; i<numpar; i++){
 
-      if(!fParams[i].IsSlave()) {
+      if(fParams[i].GetMasterIndex()==-1) {
 
 	//If the parameter is not hided to Minuit
 	if(fParams[i].IsFixed()!=1) {
@@ -90,7 +90,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
       for (i=0; i<numpar; i++){
 
 	//If the parameter is not hided to Minuit
-	if(fParams[i].IsFixed()!=1 && !fParams[i].IsSlave()) {
+	if(fParams[i].IsFixed()!=1 && fParams[i].GetMasterIndex()==-1) {
 
 	  if(!fParams[i].IsFixed()) {
 	    fMinuit->mnpout(j,strbuf,dbuf4,dbuf1,dbuf2,dbuf3,ibuf1); //dbuf4 contains the fitted value
@@ -228,7 +228,7 @@ void QSigExFitMinuit::InitFit()
   for (i=0; i<fParams.Count(); i++){
 
     //If the current parameter is not a slave of another param, add it to Minuit
-    if(!fParams[i].IsSlave()) {
+    if(fParams[i].GetMasterIndex()==-1) {
 
       //If IsFixed() is not equal to 1, add the parameter to Minuit
       if(fParams[i].IsFixed()!=1) {
@@ -260,8 +260,8 @@ void QSigExFitMinuit::InitFit()
       //otherwise, update the buffer address
     } else {
 
-      if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].IsSlave(),i);
-      ParamFreeParamIndex(i)=fParams[fParams[i].IsSlave()].GetFreeParamIndex();
+      if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].GetMasterIndex(),i);
+      ParamFreeParamIndex(i)=fParams[fParams[i].GetMasterIndex()].GetFreeParamIndex();
     }
   }
 }

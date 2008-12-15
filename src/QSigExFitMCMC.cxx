@@ -87,7 +87,7 @@ Double_t QSigExFitMCMC::Fit(Bool_t fituncerts)
   // Reinitialize floating parameters values
   for (i=0; i<fParams.Count(); i++){
 
-    if(!fParams[i].IsSlave()) {
+    if(fParams[i].GetMasterIndex()==-1) {
 
       //If the parameter is not hided to Minuit
       if(!fParams[i].IsFixed()) {
@@ -189,7 +189,7 @@ void QSigExFitMCMC::InitFit()
   //Loop through parameters, and initialize parameter value for each one
   for (i=0; i<fParams.Count(); i++){
 
-    if(!fParams[i].IsSlave()) {
+    if(fParams[i].GetMasterIndex()==-1) {
 
       //If parameter is variable
       if(!fParams[i].IsFixed()) {
@@ -206,8 +206,8 @@ void QSigExFitMCMC::InitFit()
       }
 
     } else {
-      if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].IsSlave(),i);
-      ParamFreeParamIndex(i)=fParams[fParams[i].IsSlave()].GetFreeParamIndex();
+      if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].GetMasterIndex(),i);
+      ParamFreeParamIndex(i)=fParams[fParams[i].GetMasterIndex()].GetFreeParamIndex();
     }
   }
 

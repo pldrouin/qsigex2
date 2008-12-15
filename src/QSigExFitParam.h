@@ -20,7 +20,7 @@ class QSigExFitParam: public QNamedVar<Double_t>
     const Double_t& GetStepVal() const{return *fStepVal;}
     const Int_t& GetFreeParamIndex() const{return *fFreeParamIndex;}
     Int_t IsFixed() const{return *fFixed;}
-    Int_t IsSlave() const{return *fMasterIndex;}
+    Int_t GetMasterIndex() const{return *fMasterIndex;}
 
     void Print(const Option_t* opt=NULL) const;
 

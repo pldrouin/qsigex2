@@ -36,7 +36,7 @@ void QSigExFitParam::Print(const Option_t*) const
   printf("\tInitial step value:   %f\n",GetStepVal());
   printf("\tFree parameter index: %i\n",GetFreeParamIndex());
   printf("\tFixed parameter:      %i\n",IsFixed());
-  printf("\tMaster index:         %i\n",IsSlave());
+  printf("\tMaster index:         %i\n",GetMasterIndex());
 }
 
 void QSigExFitParam::Browse(TBrowser *b)
