@@ -127,23 +127,31 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
 
       //If the parameter is not hided to Minuit
       if(fParams[i].IsFixed()!=1) {
-	//mnpout takes in the index of the parameter we're asking about, and returns
-	//it's name, fitted value, estimate of parameter uncertainty, lower limit
-	//on the parameter value, upper limit on the parameter value, and the
-	//internal parameter number (if the parameter is variable).  See Minuit
-	//documentation for details.  We aren't actually interested in any of this
-	//except the fit value.
 
-	fMinuit->mnpout(j,strbuf,ParamFitVal(i),dbuf1,dbuf2,dbuf3,ibuf1);
+	if(fParams[i].GetMasterIndex()!=-1) {
+	  //mnpout takes in the index of the parameter we're asking about, and returns
+	  //it's name, fitted value, estimate of parameter uncertainty, lower limit
+	  //on the parameter value, upper limit on the parameter value, and the
+	  //internal parameter number (if the parameter is variable).  See Minuit
+	  //documentation for details.  We aren't actually interested in any of this
+	  //except the fit value.
 
-	//mnerrs reports the errors calculated by MINOS.  It takes in the index of 
-	//the parameter we're asking about, and returns the positive error, 
-	//negative error (as a negative number), the parabolic parameter error 
-	//and the global correlation coefficient for the parameter.  
+	  fMinuit->mnpout(j,strbuf,ParamFitVal(i),dbuf1,dbuf2,dbuf3,ibuf1);
 
-	if(fituncerts) fMinuit->mnerrs(j,ParamPlusFitError(i),ParamMinusFitError(i),dbuf1,dbuf2);
-	else ParamPlusFitError(i)=ParamMinusFitError(i)=0;
-	j++;
+	  //mnerrs reports the errors calculated by MINOS.  It takes in the index of 
+	  //the parameter we're asking about, and returns the positive error, 
+	  //negative error (as a negative number), the parabolic parameter error 
+	  //and the global correlation coefficient for the parameter.  
+
+	  if(fituncerts) fMinuit->mnerrs(j,ParamPlusFitError(i),ParamMinusFitError(i),dbuf1,dbuf2);
+	  else ParamPlusFitError(i)=ParamMinusFitError(i)=0;
+	  j++;
+
+	} else {
+	  ParamFitVal(i)=fParams[fParams[i].GetMasterIndex()].GetValue();
+	  ParamPlusFitError(i)=fParams[fParams[i].GetMasterIndex()].GetPlusFitError();
+	  ParamMinusFitError(i)=fParams[fParams[i].GetMasterIndex()].GetMinusFitError();
+	}
 
       } else {
 	ParamFitVal(i)=fParams[i].GetStartVal();
