@@ -128,7 +128,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
       //If the parameter is not hided to Minuit
       if(fParams[i].IsFixed()!=1) {
 
-	if(fParams[i].GetMasterIndex()!=-1) {
+	if(fParams[i].GetMasterIndex()==-1) {
 	  //mnpout takes in the index of the parameter we're asking about, and returns
 	  //it's name, fitted value, estimate of parameter uncertainty, lower limit
 	  //on the parameter value, upper limit on the parameter value, and the
