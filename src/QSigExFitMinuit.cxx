@@ -63,7 +63,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
     for (i=0; i<numpar; i++){
 
       //If the parameter is not hided to Minuit
-      if(fParams[i].IsFixed()!=1) {
+      if(fParams[i].IsFixed()!=1 && !fParams[i].IsSlave()) {
 
 	if(!fParams[i].IsFixed()) {
 	  fMinuit->mnparm(j, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
@@ -72,6 +72,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
 
       //Else if the parameter is hided
       } else {
+
 	if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
       }
     }
@@ -86,7 +87,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
       for (i=0; i<numpar; i++){
 
 	//If the parameter is not hided to Minuit
-	if(fParams[i].IsFixed()!=1) {
+	if(fParams[i].IsFixed()!=1 && !fParams[i].IsSlave()) {
 
 	  if(!fParams[i].IsFixed()) {
 	    fMinuit->mnpout(j,strbuf,dbuf4,dbuf1,dbuf2,dbuf3,ibuf1); //dbuf4 contains the fitted value
@@ -172,7 +173,9 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
 
 void QSigExFitMinuit::InitFit()
 {
-  Int_t i,j;
+  QSigExFit::InitFit();
+
+  Int_t i,j,k;
   Double_t dbuf;
   Int_t numfpar=0;
 
@@ -225,24 +228,34 @@ void QSigExFitMinuit::InitFit()
     if(fParams[i].IsFixed()!=1) {
       //mnparm implements a parameter definition with a parameter number,
       //name, starting value, step size, min and max values, and an error flag.
-      fMinuit->mnparm(j, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+      //If the current parameter is not a slave of another param, add it to Minuit
+      if(!fParams[i].IsSlave()) {
+	fMinuit->mnparm(j, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
 
-      //If the parameter is fixed, tell to TMinuit
-      if(fParams[i].IsFixed()){
-	ParamFreeParamIndex(i)=-1;
-	dbuf=j+1;
-	fMinuit->mnexcm("FIX",&dbuf,1,ierflg);     //fix the parameter with that index
+	//If the parameter is fixed, tell to TMinuit
+	if(fParams[i].IsFixed()){
+	  ParamFreeParamIndex(i)=-1;
+	  dbuf=j+1;
+	  fMinuit->mnexcm("FIX",&dbuf,1,ierflg);     //fix the parameter with that index
 
-      //Else if the parameter is free
+	  //Else if the parameter is free
+	} else {
+	  ParamFreeParamIndex(i)=numfpar++;
+	}
+
+	if(fQProcessor) fQProcessor->SetParamAddress(i,&(fMinuit->fU[j]));
+	j++;
+
+	//otherwise, update the buffer address
       } else {
-	ParamFreeParamIndex(i)=numfpar++;
-      }
-      if(fQProcessor) fQProcessor->SetParamAddress(i,&(fMinuit->fU[j]));
 
-      j++;
+	if(fQProcessor) fQProcessor->SetParamAddress(i,const_cast<Double_t*>(&fQProcessor->GetParam(fParams[i].IsSlave())));
+	ParamFreeParamIndex(i)=fParams[fParams[i].IsSlave()].GetFreeParamIndex();
+      }
 
       //Else if the parameter is fixed but is not required to be passed to Minuit
     } else {
+
       if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
       ParamFreeParamIndex(i)=-1;
     }

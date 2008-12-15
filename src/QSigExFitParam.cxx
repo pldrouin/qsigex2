@@ -14,6 +14,8 @@ QSigExFitParam::~QSigExFitParam()
   fStepVal=NULL;
   delete fFixed;
   fFixed=NULL;
+  delete fMasterIndex;
+  fMasterIndex=NULL;
   delete fPlusFitError;
   fPlusFitError=NULL;
   delete fMinusFitError;
@@ -34,6 +36,7 @@ void QSigExFitParam::Print(const Option_t*) const
   printf("\tInitial step value:   %f\n",GetStepVal());
   printf("\tFree parameter index: %i\n",GetFreeParamIndex());
   printf("\tFixed parameter:      %i\n",IsFixed());
+  printf("\tMaster index:         %i\n",IsSlave());
 }
 
 void QSigExFitParam::Browse(TBrowser *b)
@@ -46,4 +49,5 @@ void QSigExFitParam::Browse(TBrowser *b)
   b->Add(fStepVal);
   b->Add(fFreeParamIndex);
   b->Add(fFixed);
+  b->Add(fMasterIndex);
 }

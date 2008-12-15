@@ -58,6 +58,31 @@ void QSigExFit::Init()
   }
 }
 
+void QSigExFit::InitFit()
+{
+  Int_t i,j;
+
+  for (i=0; i<fParams.Count(); i++){
+
+    if(fQProcessor) {
+
+      for (j=0; j<fParams.Count(); j++) {
+
+	if(&fQProcessor->GetParam(i)==&fQProcessor->GetParam(j)) {
+
+	  if(fParams[i].IsFixed()!=fParams[j].IsFixed() || fParams[i].GetMaxVal()!=fParams[j].GetMaxVal() || fParams[i].GetMinVal()!=fParams[j].GetMinVal() || fParams[i].GetStartVal()!=fParams[j].GetStartVal() || fParams[i].GetStepVal()!=fParams[j].GetStepVal()) {
+	    fprintf(stderr,"QSigExFit::InitFit: Error: Slave parameter '%s' does not have the same configuration than master parameter '%s'\n",fParams[i].GetName(),fParams[j].GetName());
+	    throw 1;
+	  }
+	  ParamMasterIndex(i)=j;
+	  printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[i].GetName(),fParams[j].GetName());
+	  break;
+	}
+      }
+    }
+  }
+}
+
 Int_t QSigExFit::GetNVarParams() const
 {
   Int_t i,n=0;

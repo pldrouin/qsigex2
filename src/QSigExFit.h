@@ -36,7 +36,7 @@ class QSigExFit: public TObject
     const QProcObj& GetProcOutput(Int_t index=-1) const{return *fQPOutputs[index];}
 
     void Init();
-    virtual void InitFit()=0;
+    virtual void InitFit();
 
     QSigExFitParam& Param(Int_t index) const{return fParams[index];}
     QSigExFitParam& Param(const char* paramname) const;
@@ -58,6 +58,7 @@ class QSigExFit: public TObject
     Double_t& ParamFitVal(Int_t i){return (Double_t&)fParams[i];}
     Double_t& ParamMinusFitError(Int_t i){return fParams[i].MinusFitError();}
     Double_t& ParamPlusFitError(Int_t i){return fParams[i].PlusFitError();}
+    Int_t& ParamMasterIndex(Int_t i){return fParams[i].MasterIndex();}
     Int_t& ParamFreeParamIndex(Int_t i){return fParams[i].FreeParamIndex();}
 
     QProcessor *fQProcessor; //!

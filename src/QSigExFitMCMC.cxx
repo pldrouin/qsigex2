@@ -90,7 +90,7 @@ Double_t QSigExFitMCMC::Fit(Bool_t fituncerts)
   for (i=0; i<numpar; i++){
 
     //If the parameter is not hided to Minuit
-    if(!fParams[i].IsFixed()) {
+    if(!fParams[i].IsFixed() && !fParams[i].IsSlave()) {
 
       fParVals[j]=fParams[i].GetStartVal();
       fParJumps[i]=fParams[i].GetStepVal();
@@ -181,6 +181,8 @@ void QSigExFitMCMC::InitFit()
   fParVals=new Double_t[GetNVarParams()];
   fParJumps=new Double_t[GetNVarParams()];
 
+  QSigExFit::InitFit();
+
   j=0;
 
   //Loop through parameters, and initialize parameter value for each one
@@ -188,14 +190,19 @@ void QSigExFitMCMC::InitFit()
 
     //If parameter is variable
     if(!fParams[i].IsFixed()) {
-      fParVals[j]=fParams[i].GetStartVal();
-      fParJumps[i]=fParams[i].GetStepVal();
 
-      if(fQProcessor) fQProcessor->SetParamAddress(i,fParVals+j);
+      if(!fParams[i].IsSlave()) {
+	fParVals[j]=fParams[i].GetStartVal();
+	fParJumps[i]=fParams[i].GetStepVal();
 
-      j++;
+	if(fQProcessor) fQProcessor->SetParamAddress(i,fParVals+j);
+	j++;
 
-      //Else if the parameter is fixed but is not required to be passed to Minuit
+      } else {
+	if(fQProcessor) fQProcessor->SetParamAddress(i,const_cast<Double_t*>(&fQProcessor->GetParam(fParams[i].IsSlave())));
+      }
+
+      //Else if the parameter is fixed
     } else {
       if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
       ParamFreeParamIndex(i)=-1;

@@ -7,9 +7,9 @@
 class QSigExFitParam: public QNamedVar<Double_t>
 {
   public:
-    QSigExFitParam(const char* name): QNamedVar<Double_t>(name,0.), fStartVal(new QNamedVar<Double_t>("Start Value",0.)), fMinVal(new QNamedVar<Double_t>("Minimum Value",-0.5e7)), fMaxVal(new QNamedVar<Double_t>("Maximum Value",0.5e7)), fStepVal(new QNamedVar<Double_t>("Step Value",1.)), fFixed(new QNamedVar<Int_t>("Is Fixed",kFALSE)), fPlusFitError(new QNamedVar<Double_t>("Plus Fit Error",-1.0)), fMinusFitError(new QNamedVar<Double_t>("Minus Fit Error","-1.0")), fFreeParamIndex(new QNamedVar<Int_t>("Free Parameter Index",-1)) {}
-    QSigExFitParam(): QNamedVar<Double_t>(), fStartVal(new QNamedVar<Double_t>("Start Value",0.)), fMinVal(new QNamedVar<Double_t>("Minimum Value",-0.5e7)), fMaxVal(new QNamedVar<Double_t>("Maximum Value",0.5e7)), fStepVal(new QNamedVar<Double_t>("Step Value",1.)), fFixed(new QNamedVar<Int_t>("Is Fixed",kFALSE)), fPlusFitError(new QNamedVar<Double_t>("Plus Fit Error",-1.0)), fMinusFitError(new QNamedVar<Double_t>("Minus Fit Error","-1.0")), fFreeParamIndex(new QNamedVar<Int_t>("Free Parameter Index",-1)) {}
-    QSigExFitParam(const QSigExFitParam& rhs): QNamedVar<Double_t>(rhs), fStartVal(new QNamedVar<Double_t>(*rhs.fStartVal)), fMinVal(new QNamedVar<Double_t>(*rhs.fMinVal)), fMaxVal(new QNamedVar<Double_t>(*rhs.fMaxVal)), fStepVal(new QNamedVar<Double_t>(*rhs.fStepVal)), fFixed(new QNamedVar<Int_t>(*rhs.fFixed)), fPlusFitError(new QNamedVar<Double_t>(*rhs.fPlusFitError)), fMinusFitError(new QNamedVar<Double_t>(*rhs.fMinusFitError)), fFreeParamIndex(new QNamedVar<Int_t>(*rhs.fFreeParamIndex)) {}
+    QSigExFitParam(const char* name): QNamedVar<Double_t>(name,0.), fStartVal(new QNamedVar<Double_t>("Start Value",0.)), fMinVal(new QNamedVar<Double_t>("Minimum Value",-0.5e7)), fMaxVal(new QNamedVar<Double_t>("Maximum Value",0.5e7)), fStepVal(new QNamedVar<Double_t>("Step Value",1.)), fFixed(new QNamedVar<Int_t>("Is Fixed",kFALSE)), fMasterIndex(new QNamedVar<Int_t>("Master Index",kFALSE)), fPlusFitError(new QNamedVar<Double_t>("Plus Fit Error",-1.0)), fMinusFitError(new QNamedVar<Double_t>("Minus Fit Error","-1.0")), fFreeParamIndex(new QNamedVar<Int_t>("Free Parameter Index",-1)) {}
+    QSigExFitParam(): QNamedVar<Double_t>(), fStartVal(new QNamedVar<Double_t>("Start Value",0.)), fMinVal(new QNamedVar<Double_t>("Minimum Value",-0.5e7)), fMaxVal(new QNamedVar<Double_t>("Maximum Value",0.5e7)), fStepVal(new QNamedVar<Double_t>("Step Value",1.)), fFixed(new QNamedVar<Int_t>("Is Fixed",kFALSE)), fMasterIndex(new QNamedVar<Int_t>("Is Fixed",kFALSE)), fPlusFitError(new QNamedVar<Double_t>("Plus Fit Error",-1.0)), fMinusFitError(new QNamedVar<Double_t>("Minus Fit Error","-1.0")), fFreeParamIndex(new QNamedVar<Int_t>("Free Parameter Index",-1)) {}
+    QSigExFitParam(const QSigExFitParam& rhs): QNamedVar<Double_t>(rhs), fStartVal(new QNamedVar<Double_t>(*rhs.fStartVal)), fMinVal(new QNamedVar<Double_t>(*rhs.fMinVal)), fMaxVal(new QNamedVar<Double_t>(*rhs.fMaxVal)), fStepVal(new QNamedVar<Double_t>(*rhs.fStepVal)), fFixed(new QNamedVar<Int_t>(*rhs.fFixed)), fMasterIndex(new QNamedVar<Int_t>(*rhs.fMasterIndex)), fPlusFitError(new QNamedVar<Double_t>(*rhs.fPlusFitError)), fMinusFitError(new QNamedVar<Double_t>(*rhs.fMinusFitError)), fFreeParamIndex(new QNamedVar<Int_t>(*rhs.fFreeParamIndex)) {}
     virtual ~QSigExFitParam();
 
     const Double_t& GetStartVal() const{return *fStartVal;}
@@ -20,6 +20,7 @@ class QSigExFitParam: public QNamedVar<Double_t>
     const Double_t& GetStepVal() const{return *fStepVal;}
     const Int_t& GetFreeParamIndex() const{return *fFreeParamIndex;}
     Int_t IsFixed() const{return *fFixed;}
+    Int_t IsSlave() const{return *fMasterIndex;}
 
     void Print(const Option_t* opt=NULL) const;
 
@@ -41,6 +42,7 @@ class QSigExFitParam: public QNamedVar<Double_t>
     operator Double_t&(){return QNamedVar<Double_t>::operator Double_t&();}
     Double_t& MinusFitError(){return *fMinusFitError;}
     Double_t& PlusFitError(){return *fPlusFitError;}
+    Int_t& MasterIndex(){return *fMasterIndex;}
     Int_t& FreeParamIndex(){return *fFreeParamIndex;}
 
     QNamedVar<Double_t> *fStartVal; //->
@@ -48,6 +50,7 @@ class QSigExFitParam: public QNamedVar<Double_t>
     QNamedVar<Double_t> *fMaxVal; //->
     QNamedVar<Double_t> *fStepVal; //->
     QNamedVar<Int_t>    *fFixed; //->
+    QNamedVar<Int_t>    *fMasterIndex; //->
     QNamedVar<Double_t> *fPlusFitError; //->
     QNamedVar<Double_t> *fMinusFitError; //->
     QNamedVar<Int_t>    *fFreeParamIndex; //->
