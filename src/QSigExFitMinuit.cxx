@@ -178,7 +178,7 @@ void QSigExFitMinuit::InitFit()
 {
   QSigExFit::InitFit();
 
-  Int_t i,j,k;
+  Int_t i,j;
   Double_t dbuf;
   Int_t numfpar=0;
 
