@@ -66,7 +66,7 @@ void QSigExFit::InitFit()
 
     if(fQProcessor) {
 
-      for (j=0; j<fParams.Count(); j++) {
+      for (j=0; j<i; j++) {
 
 	if(&fQProcessor->GetParam(i)==&fQProcessor->GetParam(j)) {
 
