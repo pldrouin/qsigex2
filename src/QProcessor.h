@@ -25,6 +25,8 @@ class QProcessor: public TNamed
 
     void ClearParams();
 
+    void CopyParamAddress(Int_t fromidx, Int_t toidx);
+
     Int_t FindParamIndex(const char *paramname) const{return (*fParamsNames).FindFirst(paramname);}
 
     static const UInt_t& GetDefVerbosity(){return fDefVerbosity;}
@@ -51,7 +53,7 @@ class QProcessor: public TNamed
     void SetParam(Int_t index=-1, const Double_t &value=0);
     virtual void SetParamAddress(Int_t index, Double_t *paddr=NULL);
     void SetParam(const char *paramname, const Double_t &value=0);
-    void SetParamAddress(const char *paramname, Double_t *paddr=NULL);
+    virtual void SetParamAddress(const char *paramname, Double_t *paddr=NULL);
     void SetParams(Double_t *params);
 
     virtual void SetVerbosity(UInt_t verbosity=0){fVerbosity=verbosity;}

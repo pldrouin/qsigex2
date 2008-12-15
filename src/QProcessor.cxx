@@ -41,6 +41,11 @@ void QProcessor::ClearParams()
   fOwnsParams->Clear();
 }
 
+void QProcessor::CopyParamAddress(Int_t fromidx, Int_t toidx)
+{
+  SetParamAddress(toidx,(*fParams)[fromidx]);
+}
+
 const Double_t& QProcessor::GetParam(const char *paramname) const
 {
   Int_t i;

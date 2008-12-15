@@ -32,6 +32,7 @@ class QProcList: public QProcessor
     QProcessor& operator[](Int_t index) const{return *((QProcessor*)(*fQPL)[index]);}
 
     void SetParamAddress(Int_t index, Double_t *paddr=NULL);
+    void SetParamAddress(const char *paramname, Double_t *paddr=NULL){QProcessor::SetParamAddress(paramname,paddr);}
 
     void TerminateProcess();
 

@@ -249,7 +249,7 @@ void QSigExFitMinuit::InitFit()
 	//otherwise, update the buffer address
       } else {
 
-	if(fQProcessor) fQProcessor->SetParamAddress(i,const_cast<Double_t*>(&fQProcessor->GetParam(fParams[i].IsSlave())));
+	if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].IsSlave(),i);
 	ParamFreeParamIndex(i)=fParams[fParams[i].IsSlave()].GetFreeParamIndex();
       }
 

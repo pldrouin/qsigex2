@@ -33,6 +33,7 @@ class QStdProcessor: public QProcessor
     const QStdProcessor& operator=(const QStdProcessor &rhs);
 
     void SetParamAddress(Int_t index, Double_t *paddr=NULL);
+    void SetParamAddress(const char *paramname, Double_t *paddr=NULL){QProcessor::SetParamAddress(paramname,paddr);}
 
   protected:
     QList<QNamedProc> *fProcs;           //-> QNamedProc objects

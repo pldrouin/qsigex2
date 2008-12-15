@@ -197,7 +197,7 @@ void QSigExFitMCMC::InitFit()
       j++;
 
       } else {
-	if(fQProcessor) fQProcessor->SetParamAddress(i,const_cast<Double_t*>(&fQProcessor->GetParam(fParams[i].IsSlave())));
+	if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].IsSlave(),i);
       }
 
       //Else if the parameter is fixed but is not required to be passed to Minuit
