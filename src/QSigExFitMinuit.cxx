@@ -62,18 +62,21 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
     // Reinitialize floating parameters values
     for (i=0; i<numpar; i++){
 
-      //If the parameter is not hided to Minuit
-      if(fParams[i].IsFixed()!=1 && !fParams[i].IsSlave()) {
+      if(!fParams[i].IsSlave()) {
 
-	if(!fParams[i].IsFixed()) {
-	  fMinuit->mnparm(j, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+	//If the parameter is not hided to Minuit
+	if(fParams[i].IsFixed()!=1) {
+
+	  if(!fParams[i].IsFixed()) {
+	    fMinuit->mnparm(j, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+	  }
+	  j++;
+
+	  //Else if the parameter is hided
+	} else {
+
+	  if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
 	}
-	j++;
-
-      //Else if the parameter is hided
-      } else {
-
-	if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
       }
     }
 
@@ -224,12 +227,13 @@ void QSigExFitMinuit::InitFit()
   //Loop through parameters, and initialize a variable in Minuit for each one.
   for (i=0; i<fParams.Count(); i++){
 
-    //If IsFixed() is not equal to 1, add the parameter to Minuit
-    if(fParams[i].IsFixed()!=1) {
-      //mnparm implements a parameter definition with a parameter number,
-      //name, starting value, step size, min and max values, and an error flag.
-      //If the current parameter is not a slave of another param, add it to Minuit
-      if(!fParams[i].IsSlave()) {
+    //If the current parameter is not a slave of another param, add it to Minuit
+    if(!fParams[i].IsSlave()) {
+
+      //If IsFixed() is not equal to 1, add the parameter to Minuit
+      if(fParams[i].IsFixed()!=1) {
+	//mnparm implements a parameter definition with a parameter number,
+	//name, starting value, step size, min and max values, and an error flag.
 	fMinuit->mnparm(j, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
 
 	//If the parameter is fixed, tell to TMinuit
@@ -246,18 +250,18 @@ void QSigExFitMinuit::InitFit()
 	if(fQProcessor) fQProcessor->SetParamAddress(i,&(fMinuit->fU[j]));
 	j++;
 
-	//otherwise, update the buffer address
+	//Else if the parameter is fixed but is not required to be passed to Minuit
       } else {
 
-	if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].IsSlave(),i);
-	ParamFreeParamIndex(i)=fParams[fParams[i].IsSlave()].GetFreeParamIndex();
+	if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
+	ParamFreeParamIndex(i)=-1;
       }
 
-      //Else if the parameter is fixed but is not required to be passed to Minuit
+      //otherwise, update the buffer address
     } else {
 
-      if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
-      ParamFreeParamIndex(i)=-1;
+      if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].IsSlave(),i);
+      ParamFreeParamIndex(i)=fParams[fParams[i].IsSlave()].GetFreeParamIndex();
     }
   }
 }

@@ -87,16 +87,19 @@ Double_t QSigExFitMCMC::Fit(Bool_t fituncerts)
   // Reinitialize floating parameters values
   for (i=0; i<fParams.Count(); i++){
 
-    //If the parameter is not hided to Minuit
-    if(!fParams[i].IsFixed() && !fParams[i].IsSlave()) {
+    if(!fParams[i].IsSlave()) {
 
-      fParVals[numpar]=fParams[i].GetStartVal();
-      fParJumps[numpar]=fParams[i].GetStepVal();
-      numpar++;
+      //If the parameter is not hided to Minuit
+      if(!fParams[i].IsFixed()) {
 
-      //Else if the parameter is hided
-    } else {
-      if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
+	fParVals[numpar]=fParams[i].GetStartVal();
+	fParJumps[numpar]=fParams[i].GetStepVal();
+	numpar++;
+
+	//Else if the parameter is hided
+      } else {
+	if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
+      }
     }
   }
 
@@ -186,24 +189,25 @@ void QSigExFitMCMC::InitFit()
   //Loop through parameters, and initialize parameter value for each one
   for (i=0; i<fParams.Count(); i++){
 
-    //If parameter is variable
-    if(!fParams[i].IsFixed()) {
+    if(!fParams[i].IsSlave()) {
 
-      if(!fParams[i].IsSlave()) {
-      fParVals[j]=fParams[i].GetStartVal();
-      fParJumps[i]=fParams[i].GetStepVal();
+      //If parameter is variable
+      if(!fParams[i].IsFixed()) {
+	fParVals[j]=fParams[i].GetStartVal();
+	fParJumps[i]=fParams[i].GetStepVal();
 
-      if(fQProcessor) fQProcessor->SetParamAddress(i,fParVals+j);
-      j++;
+	if(fQProcessor) fQProcessor->SetParamAddress(i,fParVals+j);
+	j++;
 
+	//Else if the parameter is fixed but is not required to be passed to Minuit
       } else {
-	if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].IsSlave(),i);
+	if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
+	ParamFreeParamIndex(i)=-1;
       }
 
-      //Else if the parameter is fixed but is not required to be passed to Minuit
     } else {
-      if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
-      ParamFreeParamIndex(i)=-1;
+      if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].IsSlave(),i);
+      ParamFreeParamIndex(i)=fParams[fParams[i].IsSlave()].GetFreeParamIndex();
     }
   }
 
