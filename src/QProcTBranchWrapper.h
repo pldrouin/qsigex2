@@ -11,8 +11,9 @@
 class QProcTBranchWrapper: public QProcArray
 {
   public:
-    QProcTBranchWrapper(TBranch *branch): QProcArray(), fBranch(branch), fBuffer(NULL), fOwnsBuffer(kFALSE), fCBType(0), fCBuffer(NULL) {SetBuffer();}
+    QProcTBranchWrapper(TBranch *branch): QProcArray(), fBranch(branch), fBuffer(NULL), fOwnsBuffer(kFALSE), fOwnsCBuffer(kFALSE), fCBType(0), fCBuffer(NULL) {SetBuffer();}
     virtual ~QProcTBranchWrapper();
+    void ClearBuffer();
     Int_t Fill();
     TBranch* GetBranch(){return fBranch;}
     void* GetBuffer() const{return fBuffer;}
@@ -22,15 +23,15 @@ class QProcTBranchWrapper: public QProcArray
     Bool_t NewerThan(const TTimeStamp &) const{return kFALSE;}
     void UpdateModTime(){}
     void ResetArray(){fBranch->DeleteBaskets("all");}
-    void SetBuffer(void* buffer){fBranch->SetAddress(buffer);};
+    void SetBuffer(void *buffer=NULL);
     void TerminateProcObj(){fBranch->GetTree()->SetEntries(fBranch->GetEntries());}
     void UnloadArray();
 
   protected:
-    void SetBuffer();
     TBranch *fBranch; //!
     Double_t *fBuffer; //!
     Bool_t fOwnsBuffer; //!
+    Bool_t fOwnsCBuffer; //!
     Char_t fCBType; //!
     void *fCBuffer; //!
     enum {

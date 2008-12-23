@@ -12,23 +12,24 @@
 class QProcBranch: public QProcArray, public TBranch
 {
   public:
-    QProcBranch(): QProcArray(), TBranch(), fBuffer(NULL), fOwnsBuffer(kFALSE), fCBType(0), fCBuffer(NULL) {}
+    QProcBranch(): QProcArray(), TBranch(), fBuffer(NULL), fOwnsBuffer(kFALSE), fOwnsCBuffer(kFALSE), fCBType(0), fCBuffer(NULL) {}
     QProcBranch(TTree* tree, const char* name, void* address, const char* leaflist, Int_t basketsize = 32000, Int_t compress = -1);
     virtual ~QProcBranch();
+    void ClearBuffer();
     Int_t Fill();
     void* GetBuffer() const{return fBuffer;}
     Long64_t GetEntries() const{return TBranch::GetEntries();}
     Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0);
     void InitProcObj(){ResetArray();}
     void ResetArray(){DeleteBaskets("all");}
-    void SetBuffer(void* buffer){TBranch::SetAddress(buffer);};
+    void SetBuffer(void *buffer=NULL);
     void TerminateProcObj(){UpdateModTime(); GetTree()->SetEntries(TBranch::GetEntries());}
     void UnloadArray();
 
   protected:
-    void SetBuffer();
     Double_t *fBuffer; //!
     Bool_t fOwnsBuffer; //!
+    Bool_t fOwnsCBuffer; //!
     Char_t fCBType; //!
     void *fCBuffer; //!
     enum {

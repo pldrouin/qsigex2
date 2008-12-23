@@ -28,15 +28,24 @@ QDisTH::QDisTH(const Char_t* filename, const Char_t* objectname): fOwned(kTRUE)
 
   TDirectory *curdir=gDirectory;
   TFile f(filename,"READ");
+  TObject *obj;
+  obj=f.Get(objectname);
   fTH=dynamic_cast<TH1*>(f.Get(objectname));
 
-  if(!fTH){
+  if(dynamic_cast<TH1*>(obj)) {
+    fTH=dynamic_cast<TH1*>(obj);
+    SetNameTitleToObject();
+    fTH->SetDirectory(NULL);
+
+  } else if(dynamic_cast<QDisTH*>(obj)) {
+    *this=*dynamic_cast<QDisTH*>(obj);
+    delete dynamic_cast<QDisTH*>(obj);
+
+  } else {
     cout << "QDisTH::QDisTH: Object '" << objectname << "' in file '" << filename << "' doesn't exist\n"; 
     throw 1;
   }
 
-  fTH->SetDirectory(NULL);
-  
   f.Close();
   curdir->cd();
 }

@@ -4,21 +4,31 @@ ClassImp(QProcTBranchWrapper)
 
 QProcTBranchWrapper::~QProcTBranchWrapper()
 {
+  ClearBuffer();
+}
+
+void QProcTBranchWrapper::ClearBuffer()
+{
   if(fCBuffer == NULL) {
 
     if(fOwnsBuffer) {
       delete fBuffer;
       fBuffer=NULL;
+      fBranch->SetAddress(NULL);
     }
 
   } else {
 
-    if(fOwnsBuffer) {
+    if(fOwnsCBuffer) {
       free(fCBuffer);
       fCBuffer=NULL;
+      fBranch->SetAddress(NULL);
     }
-    delete fBuffer;
-    fBuffer=NULL;
+
+    if(fOwnsBuffer) {
+      delete fBuffer;
+      fBuffer=NULL;
+    }
   }
 }
 
@@ -90,8 +100,10 @@ Int_t QProcTBranchWrapper::GetEntry(Long64_t entry, Int_t dummy)
   return ret;
 }
 
-void QProcTBranchWrapper::SetBuffer()
+void QProcTBranchWrapper::SetBuffer(void *buffer)
 {
+  ClearBuffer();
+
   TLeaf *lbuf;
   const char *cabuf;
 
@@ -107,14 +119,22 @@ void QProcTBranchWrapper::SetBuffer()
   //If the data type is a Double_t, the buffer is assigned directly to the branch
   if(!strcmp(cabuf,"Double_t")) {
 
-    //If there is no buffer assigned to the branch
-    if(!fBranch->GetAddress()) {
-    //Create a new buffer
-    fBuffer=new Double_t;
-    fBranch->SetAddress(fBuffer);
-    fOwnsBuffer=kTRUE;
+    //If there is no buffer assigned to the branch or if a buffer pointer is provided
+    if(!fBranch->GetAddress() || buffer) {
 
-    //Else if there is already a buffer assigned to the branch
+      if(buffer) {
+	fBuffer=(Double_t*)buffer;
+	fBranch->SetAddress(buffer);
+	fOwnsBuffer=kFALSE;
+
+      } else {
+	//Create a new buffer
+	fBuffer=new Double_t;
+	fBranch->SetAddress(fBuffer);
+	fOwnsBuffer=kTRUE;
+      }
+
+    //Else if there is already a buffer assigned to the branch and no buffer pointer is provided
     } else {
       //Get the buffer address from the branch
       fBuffer=(Double_t*)fBranch->GetAddress();
@@ -123,8 +143,16 @@ void QProcTBranchWrapper::SetBuffer()
 
     //Else if the input branch has a different basic data type, assign a different temporary buffer
   } else {
-    //Create a new Double_t buffer for the branch
-    fBuffer=new Double_t;
+
+    if(buffer) {
+      fBuffer=(Double_t*)buffer;
+      fOwnsBuffer=kFALSE;
+
+    } else {
+      //Create a new Double_t buffer for the branch
+      fBuffer=new Double_t;
+      fOwnsBuffer=kTRUE;
+    }
 
     if(!strcmp(cabuf,"Float_t")) {
       fCBType=kFloat_t;
@@ -185,12 +213,12 @@ void QProcTBranchWrapper::SetBuffer()
 	  fCBuffer=malloc(sizeof(Bool_t));
       }
       fBranch->SetAddress(fCBuffer);
-      fOwnsBuffer=kTRUE;
+      fOwnsCBuffer=kTRUE;
 
       //Else if there is already a buffer for this branch
     } else {
       fCBuffer=fBranch->GetAddress();
-      fOwnsBuffer=kFALSE;
+      fOwnsCBuffer=kFALSE;
     }
   }
 }

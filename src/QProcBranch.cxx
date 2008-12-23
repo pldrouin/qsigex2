@@ -2,28 +2,38 @@
 
 ClassImp(QProcBranch)
 
-QProcBranch::QProcBranch(TTree* tree, const char* name, void* address, const char* leaflist, Int_t basketsize, Int_t compress): QProcArray(), TBranch(tree,name,address,leaflist,basketsize,compress), fBuffer(NULL), fOwnsBuffer(kFALSE), fCBType(0), fCBuffer(NULL)
+QProcBranch::QProcBranch(TTree* tree, const char* name, void* address, const char* leaflist, Int_t basketsize, Int_t compress): QProcArray(), TBranch(tree,name,address,leaflist,basketsize,compress), fBuffer(NULL), fOwnsBuffer(kFALSE), fOwnsCBuffer(kFALSE), fCBType(0), fCBuffer(NULL)
 {
   SetBuffer();
 }
 
 QProcBranch::~QProcBranch()
 {
+  ClearBuffer();
+}
+
+void QProcBranch::ClearBuffer()
+{
   if(fCBuffer == NULL) {
 
     if(fOwnsBuffer) {
       delete fBuffer;
       fBuffer=NULL;
+      SetAddress(NULL);
     }
 
   } else {
 
-    if(fOwnsBuffer) {
+    if(fOwnsCBuffer) {
       free(fCBuffer);
       fCBuffer=NULL;
+      SetAddress(NULL);
     }
-    delete fBuffer;
-    fBuffer=NULL;
+
+    if(fOwnsBuffer) {
+      delete fBuffer;
+      fBuffer=NULL;
+    }
   }
 }
 
@@ -95,8 +105,10 @@ Int_t QProcBranch::GetEntry(Long64_t entry, Int_t dummy)
   return ret;
 }
 
-void QProcBranch::SetBuffer()
+void QProcBranch::SetBuffer(void *buffer)
 {
+  ClearBuffer();
+
   TLeaf *lbuf;
   const char *cabuf;
 
@@ -112,14 +124,22 @@ void QProcBranch::SetBuffer()
   //If the data type is a Double_t, the buffer is assigned directly to the branch
   if(!strcmp(cabuf,"Double_t")) {
 
-    //If there is no buffer assigned to the branch
-    if(!GetAddress()) {
-    //Create a new buffer
-    fBuffer=new Double_t;
-    SetAddress(fBuffer);
-    fOwnsBuffer=kTRUE;
+    //If there is no buffer assigned to the branch or if a buffer pointer is provided
+    if(!GetAddress() || buffer) {
 
-    //Else if there is already a buffer assigned to the branch
+      if(buffer) {
+	fBuffer=(Double_t*)buffer;
+	SetAddress(buffer);
+	fOwnsBuffer=kFALSE;
+
+      } else {
+	//Create a new buffer
+	fBuffer=new Double_t;
+	SetAddress(fBuffer);
+	fOwnsBuffer=kTRUE;
+      }
+
+    //Else if there is already a buffer assigned to the branch and no buffer pointer is provided
     } else {
       //Get the buffer address from the branch
       fBuffer=(Double_t*)GetAddress();
@@ -128,8 +148,16 @@ void QProcBranch::SetBuffer()
 
     //Else if the input branch has a different basic data type, assign a different temporary buffer
   } else {
-    //Create a new Double_t buffer for the branch
-    fBuffer=new Double_t;
+
+    if(buffer) {
+      fBuffer=(Double_t*)buffer;
+      fOwnsBuffer=kFALSE;
+
+    } else {
+      //Create a new Double_t buffer for the branch
+      fBuffer=new Double_t;
+      fOwnsBuffer=kTRUE;
+    }
 
     if(!strcmp(cabuf,"Float_t")) {
       fCBType=kFloat_t;
@@ -190,12 +218,12 @@ void QProcBranch::SetBuffer()
 	  fCBuffer=malloc(sizeof(Bool_t));
       }
       SetAddress(fCBuffer);
-      fOwnsBuffer=kTRUE;
+      fOwnsCBuffer=kTRUE;
 
       //Else if there is already a buffer for this branch
     } else {
       fCBuffer=GetAddress();
-      fOwnsBuffer=kFALSE;
+      fOwnsCBuffer=kFALSE;
     }
   }
 }
