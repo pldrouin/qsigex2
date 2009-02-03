@@ -2,11 +2,13 @@
 
 ClassImp(QProcRandom3)
 
+UInt_t QProcRandom3::fInitGSeed(4357);
 TRandom3 QProcRandom3::fSRndm(4357);
 QList<QProcObj*> QProcRandom3::fSInstances;
 
 void QProcRandom3::SetGSeed(UInt_t seed)
 {
+  fInitGSeed=seed;
   fSRndm.SetSeed(seed);
 
   for(Int_t i=0; i<fSInstances.Count(); i++) {
