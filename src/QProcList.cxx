@@ -44,6 +44,23 @@ void QProcList::Analyze()
   }
 }
 
+void QProcList::DeleteChildren(Int_t nsublevels)
+{
+  Int_t i;
+
+  if(nsublevels) {
+
+    for(i=0; i<fQPL->Count(); i++) {
+
+      if(dynamic_cast<QProcList*>(fQPL->GetArray()[i])) {
+	dynamic_cast<QProcList*>(fQPL->GetArray()[i])->DeleteChildren(nsublevels-1);
+      }
+    }
+  }
+
+  for(i=0; i<fQPL->Count(); i++) delete fQPL->GetArray()[i]; 
+}
+
 void QProcList::Exec(const Bool_t &forceall) const
 {
   if(GetVerbosity()&QProcessor::kShowExec2) printf("QProcList('%s')::Exec()\n",GetName());

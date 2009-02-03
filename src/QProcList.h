@@ -17,7 +17,7 @@ class QProcList: public QProcessor
 
     void Analyze();
 
-    void DelQProcs(Int_t index=-1){fQPL->Del(index);}
+    void DeleteChildren(Int_t nsublevels=0);
 
     void Exec(const Bool_t &forceall=kFALSE) const;
 
@@ -30,6 +30,8 @@ class QProcList: public QProcessor
 
     const QProcList& operator=(const QProcList &rhs);
     QProcessor& operator[](Int_t index) const{return *((QProcessor*)(*fQPL)[index]);}
+
+    void RemoveQProc(Int_t index=-1){fQPL->Del(index);}
 
     void SetParamAddress(Int_t index, Double_t *paddr=NULL);
     void SetParamAddress(const char *paramname, Double_t *paddr=NULL){QProcessor::SetParamAddress(paramname,paddr);}
