@@ -54,7 +54,7 @@ template <typename U> class QTHN: public TNamed
     virtual void SetBinContent(const Long64_t &bin, const U &content);
     void SetBinContent(const Int_t *coords, const U &content);
     void SetEntries(Double_t n){fEntries=n;}
-    void SetFBinContent(const Long64_t &fbin, const U &content);
+    virtual void SetFBinContent(const Long64_t &fbin, const U &content);
   protected:
     virtual void ComputeNBins();
     Bool_t IsConstantBW(const Int_t &nbins, const Double_t *bins) const;

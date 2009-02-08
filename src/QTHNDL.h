@@ -24,6 +24,7 @@ template <typename U> class QTHNDL: public QTHN<U>
     const QTHNDL<U>& operator=(const QTHNDL<U> &qthn);
     void Reset();
     void SetBinContent(const Long64_t &bin, const U &content);
+    void SetFBinContent(const Long64_t &fbin, const U &content);
   protected:
     void ComputeNBins();
     Long64_t *fFBins; //!

@@ -40,6 +40,7 @@ template <typename U> void QTHNDL<U>::AddBinContent(const Long64_t &bin, const U
 	}
 
 	for(li=QTHN<U>::fNFBins-1; li>bidx; li--) {
+          fFBins[QTHN<U>::fBins[li-1]]=li;
 	  QTHN<U>::fBins[li]=QTHN<U>::fBins[li-1];
 	  QTHN<U>::fFBinContent[li]=QTHN<U>::fFBinContent[li-1];
 	}
@@ -119,6 +120,7 @@ template <typename U> void QTHNDL<U>::SetBinContent(const Long64_t &bin, const U
       fFBins[bin]=-1;
 
       for(Long64_t li=bidx; li<QTHN<U>::fNFBins; li++) {
+        fFBins[QTHN<U>::fBins[li+1]]=li;
 	QTHN<U>::fBins[li]=QTHN<U>::fBins[li+1];
 	QTHN<U>::fFBinContent[li]=QTHN<U>::fFBinContent[li+1];
       }
@@ -143,6 +145,7 @@ template <typename U> void QTHNDL<U>::SetBinContent(const Long64_t &bin, const U
       }
 
       for(li=QTHN<U>::fNFBins-1; li>bidx; li--) {
+        fFBins[QTHN<U>::fBins[li-1]]=li;
 	QTHN<U>::fBins[li]=QTHN<U>::fBins[li-1];
 	QTHN<U>::fFBinContent[li]=QTHN<U>::fFBinContent[li-1];
       }
@@ -155,12 +158,37 @@ template <typename U> void QTHNDL<U>::SetBinContent(const Long64_t &bin, const U
       fFBins[bin]=-1;
 
       for(Long64_t li=bidx; li<QTHN<U>::fNFBins; li++) {
+        fFBins[QTHN<U>::fBins[li+1]]=li;
 	QTHN<U>::fBins[li]=QTHN<U>::fBins[li+1];
 	QTHN<U>::fFBinContent[li]=QTHN<U>::fFBinContent[li+1];
       }
       QTHN<U>::fBins=(Long64_t*)realloc(QTHN<U>::fBins,QTHN<U>::fNFBins*sizeof(Long64_t));
       QTHN<U>::fFBinContent=(U*)realloc(QTHN<U>::fFBinContent,QTHN<U>::fNFBins*sizeof(U));
     }
+  }
+}
+
+template <typename U> void QTHNDL<U>::SetFBinContent(const Long64_t &fbin, const U &content)
+{
+  if(fbin<0 || fbin>=QTHN<U>::fNFBins) {
+    fprintf(stderr,"QTHNDL::SetFBinContent: Error: Invalid bin index\n");
+    throw 1;
+  }
+
+  if(content) {
+    QTHN<U>::fFBinContent[fbin]=content;
+
+  } else {
+    fFBins[QTHN<U>::fBins[fbin]]=-1;
+    QTHN<U>::fNFBins--;
+
+    for(Long64_t li=fbin; li<QTHN<U>::fNFBins; li++) {
+      fFBins[QTHN<U>::fBins[li+1]]=li;
+      QTHN<U>::fBins[li]=QTHN<U>::fBins[li+1];
+      QTHN<U>::fFBinContent[li]=QTHN<U>::fFBinContent[li+1];
+    }
+    QTHN<U>::fBins=(Long64_t*)realloc(QTHN<U>::fBins,QTHN<U>::fNFBins*sizeof(Long64_t));
+    QTHN<U>::fFBinContent=(U*)realloc(QTHN<U>::fFBinContent,QTHN<U>::fNFBins*sizeof(U));
   }
 }
 
