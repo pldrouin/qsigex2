@@ -19,18 +19,19 @@ template <typename U> void QTHN<U>::Streamer(TBuffer &R__b)
       R__b >> fAxes[i]; 
     }
 
-    R__b >> fNBins;
+    R__b >> fNFBins;
     if(fBins) {
       free(fBins);
-      free(fBinContent);
+      free(fFBinContent);
     }
-    fBins=(Long64_t*)malloc(fNBins*sizeof(Long64_t));
-    fBinContent=(U*)malloc(fNBins*sizeof(U));
+    fBins=(Long64_t*)malloc(fNFBins*sizeof(Long64_t));
+    fFBinContent=(U*)malloc(fNFBins*sizeof(U));
 
-    for(li=0; li<fNBins; li++) {
+    for(li=0; li<fNFBins; li++) {
       R__b >> fBins[li];
-      R__b >> fBinContent[li];
+      R__b >> fFBinContent[li];
     }
+    ComputeNBins();
     R__b.CheckByteCount(R__s, R__c, QTHN<U>::IsA());
   } else {
     TAxis *abuf;
@@ -51,11 +52,11 @@ template <typename U> void QTHN<U>::Streamer(TBuffer &R__b)
       }
     }
 
-    R__b << fNBins;
+    R__b << fNFBins;
 
-    for(li=0; li<fNBins; li++) {
+    for(li=0; li<fNFBins; li++) {
       R__b << fBins[li];
-      R__b << fBinContent[li];
+      R__b << fFBinContent[li];
     }
     R__b.SetByteCount(R__c, kTRUE);
   }

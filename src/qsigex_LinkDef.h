@@ -74,6 +74,9 @@
 #pragma link C++ class QTHN<Double_t>-;
 #pragma link C++ class QTHN<Float_t>-;
 #pragma link C++ class QTHN<Int_t>-;
+#pragma link C++ class QTHNDL<Double_t>-;
+#pragma link C++ class QTHNDL<Float_t>-;
+#pragma link C++ class QTHNDL<Int_t>-;
 #pragma link C++ class QFileUtils;
 #pragma link C++ class QTTreeUtils;
 

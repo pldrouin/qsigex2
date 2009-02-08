@@ -14,7 +14,7 @@ CXXFLAGS        +=      -fPIC -I$(shell root-config --incdir)
 
 QSIGEX_QCXX	=	$(wildcard Q*.cxx)
 QSIGEX_OBJS	=	$(QSIGEX_QCXX:.cxx=.o)
-QSIGEX_CLHD     =       $(QSIGEX_QCXX:.cxx=.h) QList.h QNamedVar.h QTHN.h QDisTHN.h
+QSIGEX_CLHD     =       $(QSIGEX_QCXX:.cxx=.h) QList.h QNamedVar.h QTHN.h QTHNDL.h QDisTHN.h
 
 QSIGEX_DICTOBJ	=	qsigex_Dict.o
 QSIGEX_LINKDEF	=	qsigex_LinkDef.h
