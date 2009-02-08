@@ -22,7 +22,6 @@ template <typename U> void QTHNDL<U>::AddBinContent(const Long64_t &bin, const U
     QTHN<U>::fEntries++;
 
   } else {
-    //Copying code from QTHN here to avoid using the if statement twice
     Long64_t li;
     Long64_t bidx;
 
@@ -45,6 +44,7 @@ template <typename U> void QTHNDL<U>::AddBinContent(const Long64_t &bin, const U
 	  QTHN<U>::fFBinContent[li]=QTHN<U>::fFBinContent[li-1];
 	}
 	QTHN<U>::fBins[bidx]=bin;
+	fFBins[bin]=bidx;
 	QTHN<U>::fFBinContent[bidx]=w;
       }
 
@@ -109,52 +109,58 @@ template <typename U> void QTHNDL<U>::SetBinContent(const Long64_t &bin, const U
   }
 
   if(fFBins[bin]!=-1) {
-    QTHN<U>::fFBinContent[fFBins[bin]]=content;
+
+    if(content) {
+      QTHN<U>::fFBinContent[fFBins[bin]]=content;
+
+    } else {
+      Long64_t bidx=fFBins[bin];
+      QTHN<U>::fNFBins--;
+      fFBins[bin]=-1;
+
+      for(Long64_t li=bidx; li<QTHN<U>::fNFBins; li++) {
+	QTHN<U>::fBins[li]=QTHN<U>::fBins[li+1];
+	QTHN<U>::fFBinContent[li]=QTHN<U>::fFBinContent[li+1];
+      }
+      QTHN<U>::fBins=(Long64_t*)realloc(QTHN<U>::fBins,QTHN<U>::fNFBins*sizeof(Long64_t));
+      QTHN<U>::fFBinContent=(U*)realloc(QTHN<U>::fFBinContent,QTHN<U>::fNFBins*sizeof(U));
+    }
 
   } else {
-    //Copying code from QTHN here to avoid using the if statement twice
     Long64_t li;
     Long64_t bidx;
 
     bidx=std::lower_bound(QTHN<U>::fBins,QTHN<U>::fBins+QTHN<U>::fNFBins, bin)-QTHN<U>::fBins;
 
-    if(bidx==QTHN<U>::fNFBins || QTHN<U>::fBins[bidx]!=bin) {
+    if(content) {
+      QTHN<U>::fNFBins++;
+      QTHN<U>::fBins=(Long64_t*)realloc(QTHN<U>::fBins,QTHN<U>::fNFBins*sizeof(Long64_t));
+      QTHN<U>::fFBinContent=(U*)realloc(QTHN<U>::fFBinContent,QTHN<U>::fNFBins*sizeof(U));
 
-      if(content) {
-	QTHN<U>::fNFBins++;
-	QTHN<U>::fBins=(Long64_t*)realloc(QTHN<U>::fBins,QTHN<U>::fNFBins*sizeof(Long64_t));
-	QTHN<U>::fFBinContent=(U*)realloc(QTHN<U>::fFBinContent,QTHN<U>::fNFBins*sizeof(U));
-
-	if(!QTHN<U>::fBins || !QTHN<U>::fFBinContent) {
-	  fprintf(stderr,"QTHNDL::AddBinContent: Error: Could not allocate memory\n");
-	  throw 1;
-	}
-
-	for(li=QTHN<U>::fNFBins-1; li>bidx; li--) {
-	  QTHN<U>::fBins[li]=QTHN<U>::fBins[li-1];
-	  QTHN<U>::fFBinContent[li]=QTHN<U>::fFBinContent[li-1];
-	}
-	QTHN<U>::fBins[bidx]=bin;
-	QTHN<U>::fFBinContent[bidx]=content;
+      if(!QTHN<U>::fBins || !QTHN<U>::fFBinContent) {
+	fprintf(stderr,"QTHNDL::AddBinContent: Error: Could not allocate memory\n");
+	throw 1;
       }
+
+      for(li=QTHN<U>::fNFBins-1; li>bidx; li--) {
+	QTHN<U>::fBins[li]=QTHN<U>::fBins[li-1];
+	QTHN<U>::fFBinContent[li]=QTHN<U>::fFBinContent[li-1];
+      }
+      QTHN<U>::fBins[bidx]=bin;
+      fFBins[bin]=bidx;
+      QTHN<U>::fFBinContent[bidx]=content;
 
     } else {
+      QTHN<U>::fNFBins--;
+      fFBins[bin]=-1;
 
-      if(content) {
-	QTHN<U>::fFBinContent[bidx]=content;
-
-      } else {
-	QTHN<U>::fNFBins--;
-
-	for(Long64_t li=bidx; li<QTHN<U>::fNFBins; li++) {
-	  QTHN<U>::fBins[li]=QTHN<U>::fBins[li+1];
-	  QTHN<U>::fFBinContent[li]=QTHN<U>::fFBinContent[li+1];
-	}
-	QTHN<U>::fBins=(Long64_t*)realloc(QTHN<U>::fBins,QTHN<U>::fNFBins*sizeof(Long64_t));
-	QTHN<U>::fFBinContent=(U*)realloc(QTHN<U>::fFBinContent,QTHN<U>::fNFBins*sizeof(U));
+      for(Long64_t li=bidx; li<QTHN<U>::fNFBins; li++) {
+	QTHN<U>::fBins[li]=QTHN<U>::fBins[li+1];
+	QTHN<U>::fFBinContent[li]=QTHN<U>::fFBinContent[li+1];
       }
+      QTHN<U>::fBins=(Long64_t*)realloc(QTHN<U>::fBins,QTHN<U>::fNFBins*sizeof(Long64_t));
+      QTHN<U>::fFBinContent=(U*)realloc(QTHN<U>::fFBinContent,QTHN<U>::fNFBins*sizeof(U));
     }
-
   }
 }
 
