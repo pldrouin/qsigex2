@@ -8,7 +8,7 @@ template <typename U> QTHN<U>::QTHN(const QTHN &qthn): TNamed(qthn), fNDims(qthn
   Int_t i;
   fAxes=new TAxis*[fNDims];
 
-  for(i=0; i<fNDims; i++) fAxes[i]=(TAxis*)qthn.fAxes[i]->Clone();
+  for(i=0; i<fNDims; i++) fAxes[i]=qthn.fAxes[i]?(TAxis*)qthn.fAxes[i]->Clone():NULL;
   fBins=(Long64_t*)malloc(fNFBins*sizeof(Long64_t));
   memcpy(fBins,qthn.fBins,fNFBins*sizeof(Long64_t));
   fFBinContent=(U*)malloc(fNFBins*sizeof(U));
@@ -390,7 +390,7 @@ template <typename U> const QTHN<U>& QTHN<U>::operator=(const QTHN<U> &qthn)
   Int_t i;
   fAxes=new TAxis*[fNDims];
 
-  for(i=0; i<fNDims; i++) fAxes[i]=(TAxis*)qthn.fAxes[i]->Clone();
+  for(i=0; i<fNDims; i++) fAxes[i]=qthn.fAxes[i]?(TAxis*)qthn.fAxes[i]->Clone():NULL;
   fBins=(Long64_t*)malloc(fNFBins*sizeof(Long64_t));
   memcpy(fBins,qthn.fBins,fNFBins*sizeof(Long64_t));
   fFBinContent=(U*)malloc(fNFBins*sizeof(U));
