@@ -424,9 +424,7 @@ template <typename U> QTHN<U>* QTHN<U>::Projection(const char *name, const Int_t
   }
 
   if(th) {
-    th->Reset();
-    th->fAxes=new TAxis*[naxes];
-    th->fNDims=naxes;
+    th->SetNDims(naxes);
     th->SetNameTitle(name,name);
 
   } else th=new QTHN<U>(name,name,naxes);

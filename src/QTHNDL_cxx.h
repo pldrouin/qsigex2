@@ -97,9 +97,7 @@ template <typename U> const QTHNDL<U>& QTHNDL<U>::operator=(const QTHNDL<U> &qth
 template <typename U> QTHN<U>* QTHNDL<U>::Projection(const char *name, const Int_t *axes, Int_t naxes, QTHN<U> *th) const
 {
   if(th) {
-    th->Reset();
-    th->fAxes=new TAxis*[naxes];
-    th->fNDims=naxes;
+    th->SetNDims(naxes);
     th->SetNameTitle(name,name);
 
   } else th=new QTHNDL<U>(name,name,naxes);
