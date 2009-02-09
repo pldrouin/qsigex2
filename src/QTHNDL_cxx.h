@@ -34,11 +34,6 @@ template <typename U> void QTHNDL<U>::AddBinContent(const Long64_t &bin, const U
 	QTHN<U>::fBins=(Long64_t*)realloc(QTHN<U>::fBins,QTHN<U>::fNFBins*sizeof(Long64_t));
 	QTHN<U>::fFBinContent=(U*)realloc(QTHN<U>::fFBinContent,QTHN<U>::fNFBins*sizeof(U));
 
-	if(!QTHN<U>::fBins || !QTHN<U>::fFBinContent) {
-	  fprintf(stderr,"QTHNDL::AddBinContent: Error: Could not allocate memory\n");
-	  throw 1;
-	}
-
 	for(li=QTHN<U>::fNFBins-1; li>bidx; li--) {
           fFBins[QTHN<U>::fBins[li-1]]=li;
 	  QTHN<U>::fBins[li]=QTHN<U>::fBins[li-1];
@@ -148,11 +143,6 @@ template <typename U> void QTHNDL<U>::SetBinContent(const Long64_t &bin, const U
       QTHN<U>::fNFBins++;
       QTHN<U>::fBins=(Long64_t*)realloc(QTHN<U>::fBins,QTHN<U>::fNFBins*sizeof(Long64_t));
       QTHN<U>::fFBinContent=(U*)realloc(QTHN<U>::fFBinContent,QTHN<U>::fNFBins*sizeof(U));
-
-      if(!QTHN<U>::fBins || !QTHN<U>::fFBinContent) {
-	fprintf(stderr,"QTHNDL::AddBinContent: Error: Could not allocate memory\n");
-	throw 1;
-      }
 
       for(li=QTHN<U>::fNFBins-1; li>bidx; li--) {
         fFBins[QTHN<U>::fBins[li-1]]=li;

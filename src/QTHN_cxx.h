@@ -43,11 +43,6 @@ template <typename U> void QTHN<U>::AddBinContent(const Long64_t &bin, const U &
       fBins=(Long64_t*)realloc(fBins,fNFBins*sizeof(Long64_t));
       fFBinContent=(U*)realloc(fFBinContent,fNFBins*sizeof(U));
 
-      if(!fBins || !fFBinContent) {
-	fprintf(stderr,"QTHN::AddBinContent: Error: Could not allocate memory\n");
-	throw 1;
-      }
-
       for(li=fNFBins-1; li>bidx; li--) {
 	fBins[li]=fBins[li-1];
 	fFBinContent[li]=fFBinContent[li-1];
@@ -579,11 +574,6 @@ template <typename U> void QTHN<U>::SetBinContent(const Long64_t &bin, const U &
       fNFBins++;
       fBins=(Long64_t*)realloc(fBins,fNFBins*sizeof(Long64_t));
       fFBinContent=(U*)realloc(fFBinContent,fNFBins*sizeof(U));
-
-      if(!fBins || !fFBinContent) {
-	fprintf(stderr,"QTHN::AddBinContent: Error: Could not allocate memory\n");
-	throw 1;
-      }
 
       for(li=fNFBins-1; li>bidx; li--) {
 	fBins[li]=fBins[li-1];
