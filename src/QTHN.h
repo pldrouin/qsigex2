@@ -42,7 +42,7 @@ template <typename U> class QTHN: public TNamed
     void GetFBinCoords(const Long64_t &fbin, Int_t *coords) const;
     Double_t Integral(Int_t** binranges=NULL, Bool_t *widths=NULL) const;
     const QTHN<U>& operator=(const QTHN<U> &qthn);
-    QTHN* Projection(const char *name="_pd", const Int_t *axes=NULL, Int_t naxes=0) const;
+    virtual QTHN<U>* Projection(const char *name="_pd", const Int_t *axes=NULL, Int_t naxes=0, QTHN<U> *th=NULL) const;
     virtual void Reset();
     void Scale(const Double_t &scale);
     void ScaleBinContent(const Long64_t &bin, const Double_t &scale);

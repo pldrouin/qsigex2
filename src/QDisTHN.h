@@ -8,6 +8,7 @@
 #include "TFile.h"
 #include "QDis.h"
 #include "QTHN.h"
+#include "QTHNDL.h"
 #include <iostream>
 
 using std::cout;
@@ -16,7 +17,7 @@ using std::cout;
 //                                                                  //
 // QDisTHN                                                          //
 //                                                                  //
-// This class creates a probability density function from a TH      //
+// This class creates a probability density function from a THN     //
 // object. The class is derived from abstract base class QDis       //
 // that gives a common interface to all type of p.d.f.. It          //
 // implements a Normalize function that allows to normalize the     //
@@ -29,7 +30,7 @@ template <typename U> class QDisTHN: public QDis
  public:
   QDisTHN(): QDis(), fOwned(kTRUE), fQTHN(NULL){}
 
-  QDisTHN(const Char_t *name, const Char_t *title, Int_t ndims): QDis(), fOwned(kTRUE), fQTHN(new QTHN<U>(name,title,ndims)){SetNameTitleToObject();}
+  QDisTHN(const Char_t *name, const Char_t *title, Int_t ndims, Bool_t useqdthndl=kFALSE): QDis(), fOwned(kTRUE), fQTHN(useqdthndl?new QTHNDL<U>(name,title,ndims):new QTHN<U>(name,title,ndims)){SetNameTitleToObject();}
 
   QDisTHN(const QDisTHN<U>& newqdis): QDis(newqdis), fOwned(kTRUE)
   {

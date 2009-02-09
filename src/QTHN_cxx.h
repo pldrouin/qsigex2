@@ -408,7 +408,7 @@ template <typename U> void QTHN<U>::Reset()
   fEntries=0;
 }
 
-template <typename U> QTHN<U>* QTHN<U>::Projection(const char *name, const Int_t *axes, Int_t naxes) const
+template <typename U> QTHN<U>* QTHN<U>::Projection(const char *name, const Int_t *axes, Int_t naxes, QTHN<U> *th) const
 {
   const Int_t nsdims=fNDims-naxes;
 
@@ -423,8 +423,13 @@ template <typename U> QTHN<U>* QTHN<U>::Projection(const char *name, const Int_t
     }
   }
 
-  QTHN<U> *th;
-  th=new QTHN<U>(name,name,naxes);
+  if(th) {
+    th->Reset();
+    th->fAxes=new TAxis*[naxes];
+    th->fNDims=naxes;
+    th->SetNameTitle(name,name);
+
+  } else th=new QTHN<U>(name,name,naxes);
 
   for(i=0; i<naxes; i++) {
     th->SetAxis(i,fAxes[axes[i]]);

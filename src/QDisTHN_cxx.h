@@ -7,7 +7,7 @@
 //                                                                  //
 // QDisTHN                                                          //
 //                                                                  //
-// This class creates a probability density function from a TH      //
+// This class creates a probability density function from a THN     //
 // object. The class is derived from abstract base class QDis       //
 // that gives a common interface to all type of p.d.f.. It          //
 // implements a Normalize function that allows to normalize the     //
@@ -107,7 +107,7 @@ template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, cons
 
   for(i=0; i<dim; i++) taxes[i]=fQTHN->GetAxis(i);
 
-  th=new QDisTHN<U>(name,name,naaxes);
+  th=new QDisTHN<U>(name,name,naaxes,dynamic_cast<QTHNDL<U>*>(fQTHN));
   th->SetNormFlags(GetNormFlags()&!(QDis::kEventsFilled|QDis::kVarBinSizeEventsFilled));
   th->SetNFixedCoords(GetNFixedCoords());
 
