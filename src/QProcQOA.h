@@ -21,7 +21,6 @@ class QProcQOA: public QProcArray, public QOversizeArray
     void InitProcObj(){QOversizeArray::ResetArray();}
     void ResetArray(){QOversizeArray::ResetArray();}
     void SetBuffer(void* buffer){QOversizeArray::SetBuffer(buffer);};
-    void TerminateProcObj(){UpdateModTime();}
     void UnloadArray();
     void UpdateModTime(){QOversizeArray::UpdateTimeStamp();}
 

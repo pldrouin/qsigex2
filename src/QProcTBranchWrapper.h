@@ -24,7 +24,7 @@ class QProcTBranchWrapper: public QProcArray
     void UpdateModTime(){}
     void ResetArray(){fBranch->DeleteBaskets("all");}
     void SetBuffer(void *buffer=NULL);
-    void TerminateProcObj(){UpdateModTime(); fBranch->GetTree()->SetEntries(fBranch->GetEntries());}
+    void TerminateProcObj(){fBranch->GetTree()->SetEntries(fBranch->GetEntries());}
     void UnloadArray();
 
   protected:

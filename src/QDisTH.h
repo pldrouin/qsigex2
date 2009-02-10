@@ -133,7 +133,7 @@ class QDisTH: public QDis
   QDisTH* MarginalPDF(const char *name="_md", const Int_t xaxis=0, const Int_t yaxis=-1) const;
   //QDisTH* MarginalPDF2D(const char *name="_m1d", Int_t xaxis=0, Int_t yaxis=1) const;
 
-  void TerminateProcObj(){Normalize(); UpdateModTime();}
+  void TerminateProcObj(){Normalize();}
 
  protected:
   Bool_t IsConstantBW(const Int_t &nbins, const Double_t *bins) const;

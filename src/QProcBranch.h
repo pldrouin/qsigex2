@@ -23,7 +23,7 @@ class QProcBranch: public QProcArray, public TBranch
     void InitProcObj(){ResetArray();}
     void ResetArray(){DeleteBaskets("all");}
     void SetBuffer(void *buffer=NULL);
-    void TerminateProcObj(){UpdateModTime(); GetTree()->SetEntries(TBranch::GetEntries());}
+    void TerminateProcObj(){GetTree()->SetEntries(TBranch::GetEntries());}
     void UnloadArray();
 
   protected:

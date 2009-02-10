@@ -105,7 +105,7 @@ template <typename U> class QDisTHN: public QDis
   void SetAxis(Int_t axis, Int_t nbins, Double_t *bins){fQTHN->SetAxis(axis,nbins,bins);}
   void SetAxis(Int_t axis, const TAxis* anaxis){fQTHN->SetAxis(axis,anaxis);}
 
-  void TerminateProcObj(){Normalize(); UpdateModTime();}
+  void TerminateProcObj(){Normalize();}
 
  private:
   void SetNameTitleToObject(){SetNameTitle(fQTHN->GetName(),fQTHN->GetTitle());}

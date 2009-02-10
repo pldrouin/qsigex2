@@ -834,6 +834,8 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     for(i=0; i<oarrays.Count(); i++) {
       //Terminate the output array
       oarrays[i]->TerminateProcObj();
+      //Update the modification time
+      oobjects[i]->UpdateModTime();
     }
 
     //Save the parameters
