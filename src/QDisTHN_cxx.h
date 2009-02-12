@@ -200,7 +200,7 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
 	} else if(!widths || widths[i]) scale*=fQTHN->GetAxis(i)->GetBinWidth(1);
       }
 
-      if(hasvbaxes) {
+      if(hasvbaxes && !kNoBinWidthNorm) {
 	Long64_t li;
 
 	for(li=0; li<fQTHN->GetNFbins(); li++) {

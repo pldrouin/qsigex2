@@ -93,7 +93,8 @@ class QDis: public TNamed, public QProcObj
     //               variable bin size. Has no effect for a conditional PDF.
     //kVarBinSizeEventsFilled: PDF with variable bin size for which the histogram bin content corresponds to
     //                         a number of events (should not normalize more than once using this option).
-    //                         Has no effect for histograms having constant bin width in all directions.
+    //                         Has no effect for histograms having constant bin width in all directions or if
+    //                         using kNoBinWidthNorm.
     //kNoBinWidthNorm: Do not use bin widths for PDF normalization
     //kNoNorm: No normalization
     //Flags can be combined using a bitwise "OR" operator (|).
