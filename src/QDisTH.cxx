@@ -642,7 +642,7 @@ void QDisTH::Normalize(Double_t* integral)
       if(!vbsaxis[1] && (!widths || widths[1])) scale*=fTH->GetYaxis()->GetBinWidth(1);
       if(!vbsaxis[2] && (!widths || widths[2])) scale*=fTH->GetZaxis()->GetBinWidth(1);
 
-      if((vbsaxis[0] || vbsaxis[1] || vbsaxis[2]) && !kNoBinWidthNorm) {
+      if((vbsaxis[0] || vbsaxis[1] || vbsaxis[2]) && !(fNormFlags&kNoBinWidthNorm)) {
 
 	//Loop over all bins
 	for(biniter[2]=1;biniter[2]<=nbins[2];biniter[2]++){
