@@ -549,7 +549,7 @@ QDisTH* QDisTH::MarginalPDF(const char *name, const Int_t xaxis, const Int_t yax
     }
   }
 
-  th->SetNormFlags(GetNormFlags()&!(QDis::kEventsFilled|QDis::kVarBinSizeEventsFilled));
+  th->SetNormFlags(GetNormFlags()&~(QDis::kEventsFilled|QDis::kVarBinSizeEventsFilled));
   th->SetNFixedCoords(GetNFixedCoords());
 
   Bool_t *widths=new Bool_t[dim];

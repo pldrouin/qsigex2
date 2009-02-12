@@ -108,7 +108,7 @@ template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, cons
   for(i=0; i<dim; i++) taxes[i]=fQTHN->GetAxis(i);
 
   th=new QDisTHN<U>(name,name,naaxes,dynamic_cast<QTHNDL<U>*>(fQTHN));
-  th->SetNormFlags(GetNormFlags()&!(QDis::kEventsFilled|QDis::kVarBinSizeEventsFilled));
+  th->SetNormFlags(GetNormFlags()&~(QDis::kEventsFilled|QDis::kVarBinSizeEventsFilled));
   th->SetNFixedCoords(GetNFixedCoords());
 
   Bool_t *widths=new Bool_t[dim];
