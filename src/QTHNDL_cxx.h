@@ -152,18 +152,6 @@ template <typename U> void QTHNDL<U>::SetBinContent(const Long64_t &bin, const U
       QTHN<U>::fBins[bidx]=bin;
       fFBins[bin]=bidx;
       QTHN<U>::fFBinContent[bidx]=content;
-
-    } else {
-      QTHN<U>::fNFBins--;
-      fFBins[bin]=-1;
-
-      for(Long64_t li=bidx; li<QTHN<U>::fNFBins; li++) {
-        fFBins[QTHN<U>::fBins[li+1]]=li;
-	QTHN<U>::fBins[li]=QTHN<U>::fBins[li+1];
-	QTHN<U>::fFBinContent[li]=QTHN<U>::fFBinContent[li+1];
-      }
-      QTHN<U>::fBins=(Long64_t*)realloc(QTHN<U>::fBins,QTHN<U>::fNFBins*sizeof(Long64_t));
-      QTHN<U>::fFBinContent=(U*)realloc(QTHN<U>::fFBinContent,QTHN<U>::fNFBins*sizeof(U));
     }
   }
 }
