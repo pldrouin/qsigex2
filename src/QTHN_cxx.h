@@ -193,6 +193,112 @@ template <typename U> Long64_t QTHN<U>::GetBin(const Int_t *coords) const
   return bin;
 }
 
+template <typename U> void QTHN<U>::GetCorrelationMatrix(TMatrixDSym* covmat, Bool_t width, Bool_t varianceondiag) const
+{
+  Int_t i,j;
+
+  GetCovarianceMatrix(covmat,width);
+
+  for(i=0; i<fNDims; i++) {
+
+    for(j=i+1; j<fNDims; j++) {
+      (*covmat)[i][j]=(*covmat)[j][i]=(*covmat)[i][j]/TMath::Sqrt((*covmat)[i][i]*(*covmat)[j][j]);
+    }
+  }
+
+  if(!varianceondiag) {
+    for(i=0; i<fNDims; i++) (*covmat)[i][i]=1;
+  }
+}
+
+template <typename U> void QTHN<U>::GetCovarianceMatrix(TMatrixDSym* covmat, Bool_t width) const
+{
+  Int_t i,j;
+  Long64_t li;
+  TAxis **vbsaxis=new TAxis*[fNDims];      //array of axis using variable bin width
+  Int_t *vbaindex=new Int_t[fNDims];
+  Int_t nvbaxes=0;
+  Int_t *coords=new Int_t[fNDims];
+  Double_t *means=new Double_t[fNDims];
+  Double_t *covs=new Double_t[fNDims*(fNDims+1)/2];
+  Double_t integral=0;
+  memset(means,0,fNDims*sizeof(Double_t));
+  memset(covs,0,fNDims*(fNDims+1)/2*sizeof(Double_t));
+
+  if(width) {
+    memset(vbsaxis,0,fNDims*sizeof(TAxis*)); //Initialize axis pointers to NULL
+
+    for(i=0; i<fNDims; i++) {
+      //Add TAxis pointers to vbsaxis for axis having variable bin width
+
+      if(fAxes[i]->GetNbins()>1 && fAxes[i]->GetXbins()->fN) {
+	vbsaxis[nvbaxes]=fAxes[i];
+	vbaindex[nvbaxes]=i;
+	nvbaxes++;
+      }
+    }
+  }
+
+  if(width && nvbaxes) {
+    Double_t binvol;
+
+    for(li=0; li<fNFBins; li++) {
+      GetFBinCoords(li,coords);
+      binvol=vbsaxis[0]->GetBinWidth(coords[vbaindex[0]]);
+
+      for(i=1; i<nvbaxes; i++) binvol*=vbsaxis[i]->GetBinWidth(coords[vbaindex[i]]);
+      binvol*=fFBinContent[li];
+      integral+=binvol;
+
+      for(i=0; i<fNDims; i++) {
+	means[i]+=fAxes[i]->GetBinCenter(coords[i])*binvol;
+
+	for(j=i; i<fNDims; j++) {
+	  covs[(2*fNDims-1-i)*i/2+j]+=fAxes[i]->GetBinCenter(coords[i])*fAxes[j]->GetBinCenter(coords[j])*binvol;
+	}
+      }
+    }
+
+  } else {
+
+    for(li=0; li<fNFBins; li++) {
+      GetFBinCoords(li,coords);
+      integral+=fFBinContent[li];
+
+      for(i=0; i<fNDims; i++) {
+	means[i]+=fAxes[i]->GetBinCenter(coords[i])*fFBinContent[li];
+
+	for(j=i; j<fNDims; j++) {
+	  covs[(2*fNDims-1-i)*i/2+j]+=fAxes[i]->GetBinCenter(coords[i])*fAxes[j]->GetBinCenter(coords[j])*fFBinContent[li];
+	}
+      }
+    }
+  }
+
+  covmat->ResizeTo(fNDims,fNDims);
+  memset(covmat->GetMatrixArray(),0,fNDims*fNDims*sizeof(Double_t));
+
+  if(integral) {
+
+    for(i=0; i<fNDims; i++) {
+      means[i]/=integral;
+    }
+
+    for(i=0; i<fNDims; i++) {
+
+      for(j=i; j<fNDims; j++) {
+	(*covmat)[i][j]=(*covmat)[j][i]=covs[(2*fNDims-1-i)*i/2+j]/integral-means[i]*means[j];
+      }
+    }
+  }
+
+  delete[] means;
+  delete[] covs;
+  delete[] coords;
+  delete[] vbsaxis;
+  delete[] vbaindex;
+}
+
 template <typename U> Long64_t QTHN<U>::GetFBin(const Int_t *coords) const
 {
   Long64_t bin=GetBin(coords);
@@ -259,6 +365,71 @@ template <typename U> void QTHN<U>::GetFBinCoords(const Long64_t &fbin, Int_t *c
     bin=(bin-coords[i-1])/(fAxes[i-1]->GetNbins()+2);
     coords[i]=bin%(fAxes[i]->GetNbins()+2);
   }
+}
+
+template <typename U> void QTHN<U>::GetMeans(Double_t means[], Bool_t width) const
+{
+  Int_t i;
+  Long64_t li;
+  TAxis **vbsaxis=new TAxis*[fNDims];      //array of axis using variable bin width
+  Int_t *vbaindex=new Int_t[fNDims];
+  Int_t nvbaxes=0;
+  Int_t *coords=new Int_t[fNDims];
+  Double_t integral=0;
+  memset(means,0,fNDims*sizeof(Double_t));
+
+  if(width) {
+    memset(vbsaxis,0,fNDims*sizeof(TAxis*)); //Initialize axis pointers to NULL
+
+    for(i=0; i<fNDims; i++) {
+      //Add TAxis pointers to vbsaxis for axis having variable bin width
+
+      if(fAxes[i]->GetNbins()>1 && fAxes[i]->GetXbins()->fN) {
+	vbsaxis[nvbaxes]=fAxes[i];
+	vbaindex[nvbaxes]=i;
+	nvbaxes++;
+      }
+    }
+  }
+
+  if(width && nvbaxes) {
+    Double_t binvol;
+
+    for(li=0; li<fNFBins; li++) {
+      GetFBinCoords(li,coords);
+      binvol=vbsaxis[0]->GetBinWidth(coords[vbaindex[0]]);
+
+      for(i=1; i<nvbaxes; i++) binvol*=vbsaxis[i]->GetBinWidth(coords[vbaindex[i]]);
+      binvol*=fFBinContent[li];
+      integral+=binvol;
+
+      for(i=0; i<fNDims; i++) {
+	means[i]+=fAxes[i]->GetBinCenter(coords[i])*binvol;
+      }
+    }
+
+  } else {
+
+    for(li=0; li<fNFBins; li++) {
+      GetFBinCoords(li,coords);
+      integral+=fFBinContent[li];
+
+      for(i=0; i<fNDims; i++) {
+	means[i]+=fAxes[i]->GetBinCenter(coords[i])*fFBinContent[li];
+      }
+    }
+  }
+
+  if(integral) {
+
+    for(i=0; i<fNDims; i++) {
+      means[i]/=integral;
+    }
+  }
+
+  delete[] coords;
+  delete[] vbsaxis;
+  delete[] vbaindex;
 }
 
 template <typename U> Double_t QTHN<U>::Integral(Int_t** binranges, Bool_t *widths) const

@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include "TNamed.h"
+#include "TMatrixTSym.h"
 #include "TMath.h"
 #include "TAxis.h"
 #include "TH1D.h"
@@ -30,6 +31,8 @@ template <typename U> class QTHN: public TNamed
     TH1* GenTH(const char *name="_th") const;
     TAxis* GetAxis(Int_t axis) const;
     Long64_t GetBin(const Int_t *coords) const;
+    void GetCorrelationMatrix(TMatrixDSym* covmat, Bool_t width=kTRUE, Bool_t varianceondiag=kFALSE) const;
+    void GetCovarianceMatrix(TMatrixDSym* covmat, Bool_t width=kTRUE) const;
     virtual Long64_t GetFBin(const Int_t *coords) const;
     virtual Long64_t GetFBin(const Long64_t &bin) const;
     const Int_t& GetNDims() const {return fNDims;}
@@ -40,6 +43,7 @@ template <typename U> class QTHN: public TNamed
     void GetBinCoords(Long64_t bin, Int_t *coords) const;
     const Long64_t& GetFBinCoord(const Long64_t &fbin) const;
     void GetFBinCoords(const Long64_t &fbin, Int_t *coords) const;
+    void GetMeans(Double_t means[], Bool_t width=kTRUE) const;
     Double_t Integral(Int_t** binranges=NULL, Bool_t *widths=NULL) const;
     const QTHN<U>& operator=(const QTHN<U> &qthn);
     virtual QTHN<U>* Projection(const char *name="_pd", const Int_t *axes=NULL, Int_t naxes=0, QTHN<U> *th=NULL) const;
