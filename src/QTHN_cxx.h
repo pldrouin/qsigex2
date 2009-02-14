@@ -253,7 +253,7 @@ template <typename U> void QTHN<U>::GetCovarianceMatrix(TMatrixDSym* covmat, Boo
       for(i=0; i<fNDims; i++) {
 	means[i]+=fAxes[i]->GetBinCenter(coords[i])*binvol;
 
-	for(j=i; i<fNDims; j++) {
+	for(j=i; j<fNDims; j++) {
 	  covs[(2*fNDims-1-i)*i/2+j]+=fAxes[i]->GetBinCenter(coords[i])*fAxes[j]->GetBinCenter(coords[j])*binvol;
 	}
       }
