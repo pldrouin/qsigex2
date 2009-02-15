@@ -318,6 +318,14 @@ template <typename U> Long64_t QTHN<U>::GetFBin(const Long64_t &bin) const
   return bidx;
 }
 
+template <typename U> const U& QTHN<U>::GetBinContent(const Int_t *coords) const
+{
+  Long64_t bin=GetBin(coords);
+  Long64_t li=TMath::BinarySearch(fNFBins, fBins, bin);
+  if(fBins[li]==bin) return fFBinContent[li];
+  return fZero;
+}
+
 template <typename U> const U& QTHN<U>::GetBinContent(const Long64_t &bin) const
 {
   Long64_t li=TMath::BinarySearch(fNFBins, fBins, bin);
