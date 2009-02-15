@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include "TNamed.h"
-#include "TMatrixTSym.h"
+#include "TMatrixDSym.h"
 #include "TMath.h"
 #include "TAxis.h"
 #include "TH1D.h"
