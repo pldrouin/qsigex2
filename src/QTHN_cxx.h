@@ -320,17 +320,12 @@ template <typename U> Long64_t QTHN<U>::GetFBin(const Long64_t &bin) const
 
 template <typename U> const U& QTHN<U>::GetBinContent(const Int_t *coords) const
 {
-  if(!fNFBins) return fZero;
   Long64_t bin=GetBin(coords);
-  Long64_t li=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
-
-  if(li==fNFBins || fBins[li]!=bin) return fZero;
-  return fFBinContent[li];
+  return GetBinContent(bin);
 }
 
 template <typename U> const U& QTHN<U>::GetBinContent(const Long64_t &bin) const
 {
-  if(!fNFBins) return fZero;
   Long64_t li=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
 
   if(li==fNFBins || fBins[li]!=bin) return fZero;
