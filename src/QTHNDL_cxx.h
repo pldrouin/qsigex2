@@ -25,7 +25,7 @@ template <typename U> void QTHNDL<U>::AddBinContent(const Long64_t &bin, const U
     Long64_t li;
     Long64_t bidx;
 
-    bidx=std::lower_bound(QTHN<U>::fBins,QTHN<U>::fBins+QTHN<U>::fNFBins, bin)-QTHN<U>::fBins;
+    bidx=std::lower_bound(QTHN<U>::fBins, QTHN<U>::fBins+QTHN<U>::fNFBins, bin)-QTHN<U>::fBins;
 
     if(bidx==QTHN<U>::fNFBins || QTHN<U>::fBins[bidx]!=bin) {
 
@@ -137,7 +137,7 @@ template <typename U> void QTHNDL<U>::SetBinContent(const Long64_t &bin, const U
     Long64_t li;
     Long64_t bidx;
 
-    bidx=std::lower_bound(QTHN<U>::fBins,QTHN<U>::fBins+QTHN<U>::fNFBins, bin)-QTHN<U>::fBins;
+    bidx=std::lower_bound(QTHN<U>::fBins, QTHN<U>::fBins+QTHN<U>::fNFBins, bin)-QTHN<U>::fBins;
 
     if(content) {
       QTHN<U>::fNFBins++;

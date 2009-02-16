@@ -34,7 +34,7 @@ template <typename U> void QTHN<U>::AddBinContent(const Long64_t &bin, const U &
     throw 1;
   }
 
-  bidx=std::lower_bound(fBins,fBins+fNFBins, bin)-fBins;
+  bidx=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
 
   if(bidx==fNFBins || fBins[bidx]!=bin) {
 
@@ -304,7 +304,7 @@ template <typename U> Long64_t QTHN<U>::GetFBin(const Int_t *coords) const
   Long64_t bin=GetBin(coords);
   Long64_t bidx;
 
-  bidx=std::lower_bound(fBins,fBins+fNFBins, bin)-fBins;
+  bidx=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
 
   if(bidx==fNFBins || fBins[bidx]!=bin) return -1;
   return bidx;
@@ -312,7 +312,7 @@ template <typename U> Long64_t QTHN<U>::GetFBin(const Int_t *coords) const
 
 template <typename U> Long64_t QTHN<U>::GetFBin(const Long64_t &bin) const
 {
-  Long64_t bidx=std::lower_bound(fBins,fBins+fNFBins, bin)-fBins;
+  Long64_t bidx=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
 
   if(bidx==fNFBins || fBins[bidx]!=bin) return -1;
   return bidx;
@@ -320,17 +320,21 @@ template <typename U> Long64_t QTHN<U>::GetFBin(const Long64_t &bin) const
 
 template <typename U> const U& QTHN<U>::GetBinContent(const Int_t *coords) const
 {
+  if(!fNFBins) return fZero;
   Long64_t bin=GetBin(coords);
-  Long64_t li=TMath::BinarySearch(fNFBins, fBins, bin);
-  if(fBins[li]==bin) return fFBinContent[li];
-  return fZero;
+  Long64_t li=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
+
+  if(li==fNFBins || fBins[li]!=bin) return fZero;
+  return fFBinContent[li];
 }
 
 template <typename U> const U& QTHN<U>::GetBinContent(const Long64_t &bin) const
 {
-  Long64_t li=TMath::BinarySearch(fNFBins, fBins, bin);
-  if(fBins[li]==bin) return fFBinContent[li];
-  return fZero;
+  if(!fNFBins) return fZero;
+  Long64_t li=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
+
+  if(li==fNFBins || fBins[li]!=bin) return fZero;
+  return fFBinContent[li];
 }
 
 template <typename U> const U& QTHN<U>::GetFBinContent(const Long64_t &fbin) const
@@ -745,7 +749,7 @@ template <typename U> void QTHN<U>::SetBinContent(const Long64_t &bin, const U &
     throw 1;
   }
 
-  bidx=std::lower_bound(fBins,fBins+fNFBins, bin)-fBins;
+  bidx=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
 
   if(bidx==fNFBins || fBins[bidx]!=bin) {
 
