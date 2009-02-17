@@ -835,7 +835,7 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
       //Terminate the output array
       oarrays[i]->TerminateProcObj();
       //Update the modification time
-      oobjects[i]->UpdateModTime();
+      oarrays[i]->UpdateModTime();
     }
 
     //Save the parameters
