@@ -27,9 +27,17 @@ template <typename U> class QTHN: public TNamed
     virtual void Clear(Option_t* option="");
     virtual TObject* Clone(const char* newname = NULL) const{QTHN<U>* ret=new QTHN(*this); if(newname) ret->SetName(newname); return ret;}
     Int_t Fill(const Double_t *x, const U &w=1);
+#ifdef __CINT__
     Int_t Fill(const Double_t **x, const U &w=1);
+#else
+    Int_t Fill(Double_t const* const* x, const U &w=1);
+#endif
     Long64_t FindBin(const Double_t *x) const;
+#ifdef __CINT__
     Long64_t FindBin(const Double_t **x) const;
+#else
+    Long64_t FindBin(Double_t const* const* x) const;
+#endif
     TH1* GenTH(const char *name="_th") const;
     TAxis* GetAxis(Int_t axis) const;
     Long64_t GetBin(const Int_t *coords) const;
