@@ -34,7 +34,7 @@ template <typename U> class QTHN: public TNamed
     virtual const U& GetBinContent(const Long64_t &bin) const{return fBinContent[bin];}
     void GetCorrelationMatrix(TMatrixDSym* covmat, Bool_t width=kTRUE, Bool_t varianceondiag=kFALSE) const;
     void GetCovarianceMatrix(TMatrixDSym* covmat, Bool_t width=kTRUE) const;
-    virtual Long64_t GetFBin(const Int_t *coords) const{GetBin(coords);}
+    virtual Long64_t GetFBin(const Int_t *coords) const{return GetBin(coords);}
     virtual Long64_t GetFBin(const Long64_t &bin) const{return bin;}
     const Int_t& GetNDims() const {return fNDims;}
     virtual const Long64_t& GetNFbins() const {return fNBins;}

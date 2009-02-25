@@ -30,9 +30,6 @@ template <typename U> QTHN<U>::QTHN(const Char_t *name, const Char_t *title, Int
 
 template <typename U> void QTHN<U>::AddBinContent(const Long64_t &bin, const U &w)
 {
-  Long64_t li;
-  Long64_t bidx;
-
   if(bin<0 || bin>=fNBins) {
     fprintf(stderr,"QTHN::AddBinContent: Error: Invalid bin index\n");
     throw 1;
