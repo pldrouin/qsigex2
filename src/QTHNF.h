@@ -18,6 +18,7 @@ template <typename U> class QTHNF: public QTHN<U>
   public:
     QTHNF(): QTHN<U>(), fNFBins(0), fBins(NULL), fZero(0){};
     QTHNF(const QTHNF &qthn);
+    QTHNF(const QTHN<U> &qthn);
     QTHNF(const Char_t *name, const Char_t *title, Int_t ndims): QTHN<U>(name,title,ndims), fNFBins(0), fBins(NULL), fZero(0){}
     virtual ~QTHNF(){Clear();}
     virtual void AddBinContent(const Long64_t &bin, const U &w=1);
@@ -34,6 +35,7 @@ template <typename U> class QTHNF: public QTHN<U>
     const Long64_t& GetFBinCoord(const Long64_t &fbin) const;
     void GetFBinCoords(const Long64_t &fbin, Int_t *coords) const;
     const QTHNF<U>& operator=(const QTHNF<U> &qthn);
+    const QTHNF<U>& operator=(const QTHN<U> &qthn);
     virtual QTHN<U>* Projection(const char *name="_pd", const Int_t *axes=NULL, Int_t naxes=0, QTHN<U> *th=NULL) const;
     virtual void Reset();
     void ScaleBinContent(const Long64_t &bin, const Double_t &scale);

@@ -10,7 +10,13 @@ template <typename U> QTHN<U>::QTHN(const QTHN &qthn): TNamed(qthn), fNDims(qthn
 
   for(i=0; i<fNDims; i++) fAxes[i]=qthn.fAxes[i]?(TAxis*)qthn.fAxes[i]->Clone():NULL;
   fBinContent=(U*)malloc(fNBins*sizeof(U));
-  memcpy(fBinContent,qthn.fBinContent,fNBins*sizeof(U));
+  memset(fBinContent,0,fNBins*sizeof(U));
+  Long64_t li;
+  Long64_t nfbins=qthn.GetNFbins();
+
+  for(li=0; li<nfbins; li++) {
+    fBinContent[qthn.GetFBinCoord(li)]=qthn.GetFBinContent(li);
+  }
 }
 
 template <typename U> QTHN<U>::QTHN(const Char_t *name, const Char_t *title, Int_t ndims): TNamed(name,title), fNDims(ndims), fAxes(new TAxis*[ndims]), fBinContent(NULL), fNBins(0)
@@ -477,10 +483,16 @@ template <typename U> const QTHN<U>& QTHN<U>::operator=(const QTHN<U> &qthn)
   fNBins=qthn.fNBins;
   Int_t i;
   fAxes=new TAxis*[fNDims];
-
   for(i=0; i<fNDims; i++) fAxes[i]=qthn.fAxes[i]?(TAxis*)qthn.fAxes[i]->Clone():NULL;
   fBinContent=(U*)malloc(fNBins*sizeof(U));
-  memcpy(fBinContent,qthn.fBinContent,fNBins*sizeof(U));
+
+  memset(fBinContent,0,fNBins*sizeof(U));
+  Long64_t li;
+  Long64_t nfbins=qthn.GetNFbins();
+
+  for(li=0; li<nfbins; li++) {
+    fBinContent[qthn.GetFBinCoord(li)]=qthn.GetFBinContent(li);
+  }
   return *this;
 }
 

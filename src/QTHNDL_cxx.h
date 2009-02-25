@@ -102,7 +102,7 @@ template <typename U> QTHN<U>* QTHNDL<U>::Projection(const char *name, const Int
     th->SetNameTitle(name,name);
 
   } else th=new QTHNDL<U>(name,name,naxes);
-  return QTHN<U>::Projection(name,axes,naxes,th);
+  return QTHNF<U>::Projection(name,axes,naxes,th);
 }
 
 template <typename U> void QTHNDL<U>::Reset()

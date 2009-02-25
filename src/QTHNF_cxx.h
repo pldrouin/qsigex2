@@ -18,6 +18,31 @@ template <typename U> QTHNF<U>::QTHNF(const QTHNF &qthn): QTHN<U>(), fNFBins(qth
   memcpy(QTHN<U>::fBinContent,qthn.fBinContent,fNFBins*sizeof(U));
 }
 
+template <typename U> QTHNF<U>::QTHNF(const QTHN<U> &qthn): QTHN<U>(), fNFBins(0), fBins(NULL), fZero(0)
+{
+  SetNameTitle(qthn.GetName(),qthn.GetTitle());
+  Int_t i;
+  Long64_t li;
+  QTHN<U>::fNDims=qthn.fNDims;
+  QTHN<U>::fAxes=new TAxis*[QTHN<U>::fNDims];
+  for(i=0; i<QTHN<U>::fNDims; i++) QTHN<U>::fAxes[i]=qthn.fAxes[i]?(TAxis*)qthn.fAxes[i]->Clone():NULL;
+  QTHN<U>::fEntries=qthn.fEntries;
+  QTHN<U>::fNBins=qthn.fNBins;
+  fBins=(Long64_t*)malloc(QTHN<U>::fNBins*sizeof(Long64_t));
+  QTHN<U>::fBinContent=(U*)malloc(QTHN<U>::fNBins*sizeof(U));
+
+  for(li=0; li<qthn.fNBins; li++) {
+
+    if(qthn.fBinContent[li]) {
+      fBins[fNFBins]=li;
+      QTHN<U>::fBinContent[fNFBins]=qthn.fBinContent[li];
+      fNFBins++;
+    }
+  }
+  fBins=(Long64_t*)realloc(fBins,fNFBins*sizeof(Long64_t));
+  QTHN<U>::fBinContent=(U*)realloc(QTHN<U>::fBinContent,fNFBins*sizeof(U));
+}
+
 template <typename U> void QTHNF<U>::AddBinContent(const Long64_t &bin, const U &w)
 {
   Long64_t li;
@@ -175,6 +200,34 @@ template <typename U> const QTHNF<U>& QTHNF<U>::operator=(const QTHNF<U> &qthn)
   return *this;
 }
 
+template <typename U> const QTHNF<U>& QTHNF<U>::operator=(const QTHN<U> &qthn)
+{
+  Clear();
+  TNamed::operator=(qthn);
+  Int_t i;
+  Long64_t li;
+  QTHN<U>::fNDims=qthn.fNDims;
+  QTHN<U>::fAxes=new TAxis*[QTHN<U>::fNDims];
+  for(i=0; i<QTHN<U>::fNDims; i++) QTHN<U>::fAxes[i]=qthn.fAxes[i]?(TAxis*)qthn.fAxes[i]->Clone():NULL;
+  QTHN<U>::fEntries=qthn.fEntries;
+  QTHN<U>::fNBins=qthn.fNBins;
+  fBins=(Long64_t*)malloc(QTHN<U>::fNBins*sizeof(Long64_t));
+  QTHN<U>::fBinContent=(U*)malloc(QTHN<U>::fNBins*sizeof(U));
+
+  for(li=0; li<qthn.fNBins; li++) {
+
+    if(qthn.fBinContent[li]) {
+      fBins[fNFBins]=li;
+      QTHN<U>::fBinContent[fNFBins]=qthn.fBinContent[li];
+      fNFBins++;
+    }
+  }
+  fBins=(Long64_t*)realloc(fBins,fNFBins*sizeof(Long64_t));
+  QTHN<U>::fBinContent=(U*)realloc(QTHN<U>::fBinContent,fNFBins*sizeof(U));
+
+  return *this;
+}
+
 template <typename U> void QTHNF<U>::Reset()
 {
   if(fNFBins) {
@@ -187,90 +240,12 @@ template <typename U> void QTHNF<U>::Reset()
 
 template <typename U> QTHN<U>* QTHNF<U>::Projection(const char *name, const Int_t *axes, Int_t naxes, QTHN<U> *th) const
 {
-  const Int_t nsdims=QTHN<U>::fNDims-naxes;
-
-  if(naxes<=0 || !axes || naxes>=QTHN<U>::fNDims) return NULL;
-
-  Int_t i,j,l,m;
-
-  for(i=0; i<naxes; i++) {
-    if(axes[i]<0 || axes[i]>=QTHN<U>::fNDims) {
-      fprintf(stderr,"QTHNF<U>::Projection: Error: Invalid axis index: %i\n",axes[i]);
-      throw 1;
-    }
-  }
-
   if(th) {
     th->SetNDims(naxes);
     th->SetNameTitle(name,name);
 
   } else th=new QTHNF<U>(name,name,naxes);
-
-  for(i=0; i<naxes; i++) {
-    th->SetAxis(i,QTHN<U>::fAxes[axes[i]]);
-  }
-
-  Int_t *indices=new Int_t[nsdims]; //Axes indices for axes that are not projected
-  Int_t *biniter=new Int_t[QTHN<U>::fNDims]; //Integers used as indices for iteration over bins of original histogram
-  Int_t *pbiniter=new Int_t[naxes]; //Integers used as indices for iteration over bins of projected histogram
-  U dbuf;
-  l=0;
-
-  for(i=0; i<QTHN<U>::fNDims; i++) {
-
-    m=0;
-    for(j=0; j<naxes; j++) if(axes[j]==i) m++;
-    if(!m) {
-      indices[l]=i;
-      l++;
-    }
-  }
-
-  for(i=0; i<naxes; i++) biniter[axes[i]]=1;
-
-  //Loop over bin indices of projection axes
-  do{
-    dbuf=0;
-
-    for(i=0; i<nsdims; i++) biniter[indices[i]]=1;
-
-    do{
-      dbuf+=GetBinContent(GetBin(biniter));
-      biniter[indices[0]]++;
-      
-      i=0;
-      while(biniter[indices[i]]>QTHN<U>::fAxes[indices[i]]->GetNbins()){
-	biniter[indices[i]]=1;
-	i++;
-
-	if(i>=nsdims) break;
-	biniter[indices[i]]++;
-      }
-
-    } while(i<nsdims);
-
-    for(i=0; i<naxes; i++) pbiniter[i]=biniter[axes[i]];
-    th->SetBinContent(pbiniter,dbuf);
-
-    biniter[axes[0]]++;
-
-    i=0;
-    while(biniter[axes[i]]>QTHN<U>::fAxes[axes[i]]->GetNbins()){
-      biniter[axes[i]]=1;
-      i++;
-
-      if(i>=naxes) break;
-      biniter[axes[i]]++;
-    }
-
-  } while(i<naxes);
-
-  delete[] indices;
-  delete[] biniter;
-  delete[] pbiniter;
-
-  th->fEntries=QTHN<U>::fEntries;
-  return th;
+  return QTHN<U>::Projection(name,axes,naxes,th);
 }
 
 template <typename U> void QTHNF<U>::ScaleBinContent(const Long64_t &bin, const Double_t &scale)
