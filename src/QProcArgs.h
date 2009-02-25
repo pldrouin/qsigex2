@@ -20,10 +20,35 @@ class QProcArgs
     const Int_t& GetNOObjs() const{return fOObjects.Count();}
     const Int_t& GetNParams() const{return fPBuffers.Count();}
     const Double_t& IVar(Int_t i) const{return *fIBuffers[i];}
+#ifdef __CINT__
+    Double_t ** IVars() const{return fIBuffers.GetArray();}
+#else
+    Double_t const* const* IVars() const{return fIBuffers.GetArray();}
+#endif
     const QProcObj* IObj(Int_t i) const{return fIObjects[i];}
+#ifdef __CINT__
+    QProcObj ** IObjs() const{return fIObjects.GetArray();}
+#else
+    QProcObj const* const* IObjs() const{return fIObjects.GetArray();}
+#endif
     Double_t& OVar(Int_t i) const{return *fOBuffers[i];}
+#ifdef __CINT__
+    Double_t ** OVars() const{return fOBuffers.GetArray();}
+#else
+    Double_t const* const* OVars() const{return fOBuffers.GetArray();}
+#endif
     QProcObj* OObj(Int_t i) const{return fOObjects[i];}
+#ifdef __CINT__
+    QProcObj ** OObjs() const{return fOObjects.GetArray();}
+#else
+    QProcObj const* const* OObjs() const{return fOObjects.GetArray();}
+#endif
     const Double_t& Param(Int_t i) const{return *fPBuffers[i];}
+#ifdef __CINT__
+    Double_t ** Params() const{return fPBuffers.GetArray();}
+#else
+    Double_t const* const* Params() const{return fPBuffers.GetArray();}
+#endif
 
   protected:
     void AddIVar(Int_t index=-1, Double_t *buf=NULL){fIBuffers.Add(buf,index);}

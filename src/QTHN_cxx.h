@@ -81,6 +81,13 @@ template <typename U> Int_t QTHN<U>::Fill(const Double_t *x, const U &w)
   return bin;
 }
 
+template <typename U> Int_t QTHN<U>::Fill(const Double_t **x, const U &w)
+{
+  Long64_t bin=FindBin(x);
+  AddBinContent(bin,w);
+  return bin;
+}
+
 template <typename U> Long64_t QTHN<U>::FindBin(const Double_t *x) const
 {
   Int_t i;
@@ -88,6 +95,17 @@ template <typename U> Long64_t QTHN<U>::FindBin(const Double_t *x) const
 
   for(i=fNDims-2; i>=0; i--) {
     bin=bin*(fAxes[i]->GetNbins()+2)+fAxes[i]->FindFixBin(x[i]);
+  }
+  return bin;
+}
+
+template <typename U> Long64_t QTHN<U>::FindBin(const Double_t **x) const
+{
+  Int_t i;
+  Long64_t bin=fAxes[fNDims-1]->FindFixBin(*(x[fNDims-1]));
+
+  for(i=fNDims-2; i>=0; i--) {
+    bin=bin*(fAxes[i]->GetNbins()+2)+fAxes[i]->FindFixBin(*(x[i]));
   }
   return bin;
 }
