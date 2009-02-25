@@ -8,6 +8,7 @@
 #include "TFile.h"
 #include "QDis.h"
 #include "QTHN.h"
+#include "QTHNF.h"
 #include "QTHNDL.h"
 #include <iostream>
 
@@ -30,7 +31,9 @@ template <typename U> class QDisTHN: public QDis
  public:
   QDisTHN(): QDis(), fOwned(kTRUE), fQTHN(NULL){}
 
-  QDisTHN(const Char_t *name, const Char_t *title, Int_t ndims, Bool_t useqdthndl=kFALSE): QDis(), fOwned(kTRUE), fQTHN(useqdthndl?new QTHNDL<U>(name,title,ndims):new QTHN<U>(name,title,ndims)){SetNameTitleToObject();}
+  enum eQTHNTypes {kQTHN, kQTHNF, kQTHNDL};
+
+  QDisTHN(const Char_t *name, const Char_t *title, Int_t ndims, Int_t qthntype=kQTHNF);
 
   QDisTHN(const QDisTHN<U>& newqdis): QDis(newqdis), fOwned(kTRUE)
   {

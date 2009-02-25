@@ -15,6 +15,23 @@
 //                                                                  //
 //////////////////////////////////////////////////////////////////////
 
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, Int_t ndims, Int_t qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,ndims);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,ndims);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,ndims);
+  }
+  SetNameTitleToObject();
+}
+
 template <typename U> Int_t QDisTHN<U>::Fill(const Double_t &x)
 {
   if(fQTHN->GetNDims()!=1) {
@@ -107,7 +124,12 @@ template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, cons
 
   for(i=0; i<dim; i++) taxes[i]=fQTHN->GetAxis(i);
 
-  th=new QDisTHN<U>(name,name,naaxes,dynamic_cast<QTHNDL<U>*>(fQTHN));
+  Int_t type=kQTHN;
+
+  if(dynamic_cast<QTHNF<U>*>(fQTHN)) type=kQTHNF;
+  else if(dynamic_cast<QTHNDL<U>*>(fQTHN)) type=kQTHNDL;
+
+  th=new QDisTHN<U>(name,name,naaxes,type);
   th->SetNormFlags(GetNormFlags()&~(QDis::kEventsFilled|QDis::kVarBinSizeEventsFilled));
   th->SetNFixedCoords(GetNFixedCoords());
 
