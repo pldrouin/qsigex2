@@ -12,6 +12,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3D.h"
+#include "TMatrixDSym.h"
 
 template <typename U> class QTHN: public TNamed
 {
@@ -38,6 +39,7 @@ template <typename U> class QTHN: public TNamed
     virtual Long64_t GetFBin(const Long64_t &bin) const{return bin;}
     const Int_t& GetNDims() const {return fNDims;}
     virtual const Long64_t& GetNFbins() const {return fNBins;}
+    const Long64_t& GetNbins() const {return fNBins;}
     const Double_t& GetEntries() const{return fEntries;}
     virtual const U& GetFBinContent(const Long64_t &fbin) const{return fBinContent[fbin];}
     void GetBinCoords(Long64_t bin, Int_t *coords) const;

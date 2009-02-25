@@ -26,7 +26,6 @@ template <typename U> class QTHNF: public QTHN<U>
     void AddFBinContent(const Long64_t &fbin, const U &w=1);
     virtual void Clear(Option_t* option="");
     TObject* Clone(const char* newname = NULL) const{QTHNF<U>* ret=new QTHNF(*this); if(newname) ret->SetName(newname); return ret;}
-    Long64_t GetBin(const Int_t *coords) const;
     virtual Long64_t GetFBin(const Int_t *coords) const;
     virtual Long64_t GetFBin(const Long64_t &bin) const;
     const Long64_t& GetNFbins() const {return fNFBins;}
