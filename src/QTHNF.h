@@ -29,7 +29,6 @@ template <typename U> class QTHNF: public QTHN<U>
     virtual Long64_t GetFBin(const Int_t *coords) const;
     virtual Long64_t GetFBin(const Long64_t &bin) const;
     const Long64_t& GetNFbins() const {return fNFBins;}
-    virtual const U& GetBinContent(const Int_t *coords) const;
     virtual const U& GetBinContent(const Long64_t &bin) const;
     const U& GetFBinContent(const Long64_t &fbin) const;
     const Long64_t& GetFBinCoord(const Long64_t &fbin) const;

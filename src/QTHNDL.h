@@ -22,7 +22,6 @@ template <typename U> class QTHNDL: public QTHNF<U>
     TObject* Clone(const char* newname = NULL) const{QTHNDL<U>* ret=new QTHNDL(*this); if(newname) ret->SetName(newname); return ret;}
     Long64_t GetFBin(const Int_t *coords) const{return fFBins[QTHN<U>::GetBin(coords)];}
     Long64_t GetFBin(const Long64_t &bin) const;
-    const U& GetBinContent(const Int_t *coords) const;
     const U& GetBinContent(const Long64_t &bin) const;
     const QTHNDL<U>& operator=(const QTHNDL<U> &qthn);
     const QTHNDL<U>& operator=(const QTHNF<U> &qthn){Clear(); QTHNF<U>::operator=(qthn); ComputeNBins(); return *this;}

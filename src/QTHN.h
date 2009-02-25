@@ -31,7 +31,7 @@ template <typename U> class QTHN: public TNamed
     TH1* GenTH(const char *name="_th") const;
     TAxis* GetAxis(Int_t axis) const;
     Long64_t GetBin(const Int_t *coords) const;
-    virtual const U& GetBinContent(const Int_t *coords) const;
+    const U& GetBinContent(const Int_t *coords) const;
     virtual const U& GetBinContent(const Long64_t &bin) const{return fBinContent[bin];}
     void GetCorrelationMatrix(TMatrixDSym* covmat, Bool_t width=kTRUE, Bool_t varianceondiag=kFALSE) const;
     void GetCovarianceMatrix(TMatrixDSym* covmat, Bool_t width=kTRUE) const;

@@ -68,12 +68,6 @@ template <typename U> Long64_t QTHNDL<U>::GetFBin(const Long64_t &bin) const
   return fFBins[bin];
 }
 
-template <typename U> const U& QTHNDL<U>::GetBinContent(const Int_t *coords) const
-{
-  Long64_t bin=QTHNF<U>::GetBin(coords);
-  return GetBinContent(bin);
-}
-
 template <typename U> const U& QTHNDL<U>::GetBinContent(const Long64_t &bin) const
 {
 

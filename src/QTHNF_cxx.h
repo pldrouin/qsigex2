@@ -128,12 +128,6 @@ template <typename U> Long64_t QTHNF<U>::GetFBin(const Long64_t &bin) const
   return bidx;
 }
 
-template <typename U> const U& QTHNF<U>::GetBinContent(const Int_t *coords) const
-{
-  Long64_t bin=QTHN<U>::GetBin(coords);
-  return GetBinContent(bin);
-}
-
 template <typename U> const U& QTHNF<U>::GetBinContent(const Long64_t &bin) const
 {
   Long64_t li=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
