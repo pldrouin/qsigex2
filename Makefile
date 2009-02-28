@@ -1,6 +1,12 @@
 QSLIB		=	libqsigex2.so
 ALLINCS		=	$(addprefix include/,$(notdir $(wildcard src/*.h)))
 
+QSSAFE		=	1
+
+ifneq (${QSSAFE},"")
+CXXFLAGS	+=	-DQSSAFE
+endif
+
 all: force $(ALLINCS)
 
 force: 

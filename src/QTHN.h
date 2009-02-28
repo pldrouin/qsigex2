@@ -26,7 +26,7 @@ template <typename U> class QTHN: public TNamed
     virtual void AddFBinContent(const Long64_t &fbin, const U &w=1){AddBinContent(fbin,w);}
     virtual void Clear(Option_t* option="");
     virtual TObject* Clone(const char* newname = NULL) const{QTHN<U>* ret=new QTHN(*this); if(newname) ret->SetName(newname); return ret;}
-    void Fill(const Double_t *x, const U &w=1){AddBinContent(FindBin(x));}
+    void Fill(Double_t const * const &x, const U &w=1){AddBinContent(FindBin(x));}
     template <typename V> Long64_t FindBin(const V &x0) const;
     template <typename V> Long64_t FindBin(const V &x0, const V &x1) const;
     template <typename V> Long64_t FindBin(const V &x0, const V &x1, const V &x2) const;
