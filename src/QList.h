@@ -54,21 +54,21 @@ template <typename U> class QList: public TObject
 
   virtual ~QList(){PRINTF4(this,"\tQList<",typeid(U).name(),">::~QList()\n") Clear();}
 
-  void Add(const QList<U>& newqlist, Int_t index=-1);
-  void Add(const U& newelement,Int_t index=-1);
-  void Add(const U* newelements, Int_t nelements, Int_t index=-1);
-  Int_t AddUnique(const QList<U>& newqlist, Int_t index=-1);
-  Int_t AddUnique(const U& newelement,Int_t index=-1);
-  Int_t AddUnique(const U* newelements, Int_t nelements, Int_t index=-1);
+  void Add(const QList<U>& newqlist, const Int_t &index=-1);
+  void Add(const U& newelement, const Int_t &index=-1);
+  void Add(const U* newelements, const Int_t &nelements, const Int_t &index=-1);
+  Int_t AddUnique(const QList<U>& newqlist, const Int_t &index=-1);
+  Int_t AddUnique(const U& newelement, const Int_t &index=-1);
+  Int_t AddUnique(const U* newelements, const Int_t &nelements, const Int_t &index=-1);
 
   void Set(const QList<U>& newqlist);
   void Set(const U& newelement);
-  void Set(const U* newelements, Int_t nelements);
+  void Set(const U* newelements, const Int_t &nelements);
 
-  Int_t Del(const QList<U>& delqlist, Int_t maxmatches=1);
+  Int_t Del(const QList<U>& delqlist, const Int_t &maxmatches=1);
   //  Int_t Del(const U& delu, Int_t maxmatches=1);
-  Int_t Del(const U* delus, Int_t nelements=1, Int_t maxmatches=1);
-  void Del(Int_t index=-1, Int_t nelements=1);
+  Int_t Del(const U* delus, const Int_t &nelements=1, const Int_t &maxmatches=1);
+  void Del(const Int_t &index=-1, const Int_t &nelements=1);
 
   void Browse(TBrowser *b);
   Bool_t IsFolder() const {return kTRUE;}
@@ -90,12 +90,12 @@ template <typename U> class QList: public TObject
   U* GetArray() const{return fUArray;}
   U& GetLast() const;
   
-  QList<Int_t> Find(const QList<U>& qlist,Int_t maxmatches=0) const;
-  QList<Int_t> Find(const U& u,Int_t maxmatches=0) const;
-  QList<Int_t> Find(const U* us, Int_t nelements, Int_t maxmatches=0) const;
+  QList<Int_t> Find(const QList<U>& qlist, const Int_t &maxmatches=0) const;
+  QList<Int_t> Find(const U& u, const Int_t &maxmatches=0) const;
+  QList<Int_t> Find(const U* us, const Int_t &nelements, const Int_t &maxmatches=0) const;
   Int_t FindFirst(const QList<U>& qlist) const;
   Int_t FindFirst(const U& u) const;
-  Int_t FindFirst(const U* us, Int_t nelements) const;
+  Int_t FindFirst(const U* us, const Int_t &nelements) const;
 
   template<typename V> friend Bool_t operator==(const QList<V>& lhs,const QList<V>& rhs);
   template<typename V> friend Bool_t operator!=(const QList<V>& lhs,const QList<V>& rhs);
@@ -104,13 +104,13 @@ template <typename U> class QList: public TObject
   template<typename V> friend Bool_t operator<(const QList<V>& lhs,const QList<V>& rhs);
   template<typename V> friend Bool_t operator>(const QList<V>& lhs,const QList<V>& rhs);
 
-  U& operator[](Int_t index) const;
-  const QList<U>& operator()(Int_t index1,Int_t index2,Int_t step=1) const;
+  U& operator[](const Int_t &index) const;
+  const QList<U>& operator()(const Int_t &index1, const Int_t &index2) const;
   QList<U>* Clone(const char* newname = "") const{PRINTF4(this,"\tQList<U>* QList<",typeid(U).name(),">::Clone()\n") newname=0; return new QList<U>(*this); }
   U* CloneArray() const;
 
-  Int_t RedimList(Int_t newdim,Int_t index=-1);
-  Int_t RedimList(Int_t newdim,Int_t index,const U& fillvalue);
+  Int_t RedimList(const Int_t &newdim, Int_t index=-1);
+  Int_t RedimList(const Int_t &newdim, const Int_t &index, const U& fillvalue);
 
   void Clear(Option_t* option = "")
     {
@@ -122,7 +122,7 @@ template <typename U> class QList: public TObject
       }
 
       if(!fIsChild){
-	for(Int_t i=0;i<fNElements;i++) {fUArray[i].~U();}
+	for(Int_t i=fNElements-1; i>=0; --i) {fUArray[i].~U();}
 	free(fUArray);
       }
 

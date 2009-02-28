@@ -4,7 +4,7 @@
 
 ClassImp(QMask)
 
-QMask QMask::GetComplement(UInt_t nbits) const
+QMask QMask::GetComplement(const UInt_t &nbits) const
 {
   Int_t nwbytes=nbits/8;
   Int_t mod=nbits%8;
@@ -15,17 +15,17 @@ QMask QMask::GetComplement(UInt_t nbits) const
 
   if(nnbytes <= Count()) {
 
-    for(i=0; i<nnbytes; i++) {
+    for(i=nnbytes-1; i>=0; --i) {
       ret.GetArray()[i]=~GetArray()[i];
     }
 
   } else {
 
-    for(i=0; i<Count(); i++) {
+    for(i=Count()-1; i>=0; --i) {
       ret.GetArray()[i]=~GetArray()[i];
     }
 
-    for(i=Count(); i<nnbytes; i++) {
+    for(i=Count(); i<nnbytes; ++i) {
       ret.GetArray()[i]=255;
     }
   }
@@ -60,11 +60,11 @@ QMask QMask::GetComplement(UInt_t nbits) const
 void QMask::Crop()
 {
   Int_t i;
-  for(i=Count()-1; i>=0 && GetArray()[i] == 0; i--){}
+  for(i=Count()-1; i>=0 && GetArray()[i] == 0; --i){}
   if(i>-1) RedimList(i+1);
 }
 
-void QMask::FillMask(UInt_t nbits)
+void QMask::FillMask(const UInt_t &nbits)
 {
   UInt_t nwbytes=nbits/8;
   UInt_t mod=nbits%8;
@@ -98,30 +98,23 @@ void QMask::FillMask(UInt_t nbits)
   }
 }
 
-Bool_t QMask::GetBit(UInt_t n) const
-{
-  Int_t nbytes=n/8;
-  if(nbytes >= Count()) return kFALSE;
-  return (GetArray()[nbytes]>>(n%8))&1;
-}
-
 void QMask::Print(const Option_t *) const
 {
   Int_t i,j;
   Bool_t skip=kTRUE;
 
-  for(i=Count()-1; i>=0; i--) {
+  for(i=Count()-1; i>=0; --i) {
     if(skip && operator[](i) == 0) continue;
     skip=kFALSE;
     
-    for(j=7; j>=0; j--) printf("%i",GetBit(i*8+j));
+    for(j=7; j>=0; --j) printf("%i",GetBit(i*8+j));
     printf(" ");
   }
   if(skip) printf("(empty)");
   printf("\n");
 }
 
-void QMask::SetBit(UInt_t n, Bool_t value)
+void QMask::SetBit(const UInt_t &n, const Bool_t &value)
 {
   Int_t nbytes=n/8;
   Int_t bshift=n%8;
@@ -142,7 +135,7 @@ const QMask& QMask::operator&=(const QMask &rhs)
 
   if(Count() > rhs.Count()) RedimList(rhs.Count());
 
-  for(Int_t i=0; i<Count(); i++) {
+  for(Int_t i=Count()-1; i>=0; --i) {
     GetArray()[i]&=rhs[i];
   }
 
@@ -153,7 +146,7 @@ const QMask& QMask::operator|=(const QMask &rhs)
 {
   if(Count() > rhs.Count()) {
 
-    for(Int_t i=0; i<rhs.Count(); i++) {
+    for(Int_t i=rhs.Count()-1; i>=0; --i) {
       GetArray()[i]|=rhs[i];
     }
 
@@ -161,7 +154,7 @@ const QMask& QMask::operator|=(const QMask &rhs)
     Int_t size=Count();
     RedimList(rhs.Count());
 
-    for(Int_t i=0; i<size; i++) {
+    for(Int_t i=size-1; i>=0; --i) {
       GetArray()[i]|=rhs[i];
     }
     memcpy(GetArray()+size,rhs.GetArray()+size,Count()-size);
@@ -174,7 +167,7 @@ const QMask& QMask::operator^=(const QMask &rhs)
 {
   if(Count() > rhs.Count()) {
 
-    for(Int_t i=0; i<rhs.Count(); i++) {
+    for(Int_t i=rhs.Count()-1; i>=0; --i) {
       GetArray()[i]^=rhs[i];
     }
 
@@ -182,7 +175,7 @@ const QMask& QMask::operator^=(const QMask &rhs)
     Int_t size=Count();
     RedimList(rhs.Count());
 
-    for(Int_t i=0; i<size; i++) {
+    for(Int_t i=size-1; i>=0; --i) {
       GetArray()[i]^=rhs[i];
     }
     memcpy(GetArray()+size,rhs.GetArray()+size,Count()-size);
@@ -191,7 +184,7 @@ const QMask& QMask::operator^=(const QMask &rhs)
   return *this;
 }
 
-QMask QMask::operator>>(UInt_t n) const
+QMask QMask::operator>>(const UInt_t &n) const
 {
   QMask ret;
   Int_t nbytes=n/8;
@@ -205,7 +198,7 @@ QMask QMask::operator>>(UInt_t n) const
     } else {
       Int_t bshift=n%8;
 
-      for(Int_t i=0; i<Count()-nbytes-1; i++) {
+      for(Int_t i=0; i<Count()-nbytes-1; ++i) {
 	ret[i]=(GetArray()[i+nbytes]>>bshift)|(GetArray()[i+nbytes+1]<<(8-bshift));
       }
       ret[Count()-nbytes-1]=(GetLast()>>bshift);
@@ -214,7 +207,7 @@ QMask QMask::operator>>(UInt_t n) const
   return ret;
 }
 
-QMask QMask::operator<<(UInt_t n) const
+QMask QMask::operator<<(const UInt_t &n) const
 {
   QMask ret;
   Int_t nbytes=n/8;
@@ -228,7 +221,7 @@ QMask QMask::operator<<(UInt_t n) const
     } else {
       Int_t bshift=n%8;
 
-      for(Int_t i=Count()-1; i>nbytes; i--) {
+      for(Int_t i=Count()-1; i>nbytes; --i) {
 	ret[i]=(GetArray()[i-nbytes]<<bshift)|(GetArray()[i-nbytes-1]>>(8-bshift));
       }
       ret[nbytes]=(GetArray()[0]<<bshift);
@@ -241,7 +234,7 @@ QMask::operator Bool_t() const
 {
   if(!Count()) return kFALSE;
 
-  for(Int_t i=0; i<Count(); i++) {
+  for(Int_t i=0; i<Count(); ++i) {
 
     if(GetArray()[i] != 0) return kTRUE;
   }
@@ -258,7 +251,7 @@ QMask operator&(const QMask &lhs, const QMask &rhs)
     ret.RedimList(lhs.Count());
   }
 
-  for(Int_t i=0; i<ret.Count(); i++) {
+  for(Int_t i=ret.Count()-1; i>=0; --i) {
     ret.GetArray()[i]=lhs.GetArray()[i]&rhs.GetArray()[i];
   }
 
@@ -272,14 +265,14 @@ QMask operator|(const QMask &lhs, const QMask &rhs)
   if(lhs.Count() > rhs.Count()) {
     ret=lhs;
 
-    for(Int_t i=0; i<rhs.Count(); i++) {
+    for(Int_t i=rhs.Count()-1; i>=0; --i) {
       ret.GetArray()[i]|=rhs.GetArray()[i];
     }
 
   } else {
     ret=rhs;
 
-    for(Int_t i=0; i<lhs.Count(); i++) {
+    for(Int_t i=lhs.Count()-1; i>=0; --i) {
       ret.GetArray()[i]|=lhs.GetArray()[i];
     }
   }
@@ -294,14 +287,14 @@ QMask operator^(const QMask &lhs, const QMask &rhs)
   if(lhs.Count() > rhs.Count()) {
     ret=lhs;
 
-    for(Int_t i=0; i<rhs.Count(); i++) {
+    for(Int_t i=rhs.Count()-1; i>=0; --i) {
       ret.GetArray()[i]^=rhs.GetArray()[i];
     }
 
   } else {
     ret=rhs;
 
-    for(Int_t i=0; i<lhs.Count(); i++) {
+    for(Int_t i=lhs.Count()-1; i>=0; --i) {
       ret.GetArray()[i]^=lhs.GetArray()[i];
     }
   }
@@ -313,13 +306,13 @@ Bool_t operator&&(const QMask &lhs, const QMask &rhs)
 {
   if(lhs.Count() > rhs.Count()) {
 
-    for(Int_t i=0; i<rhs.Count(); i++) {
+    for(Int_t i=0; i<rhs.Count(); ++i) {
       if(lhs.GetArray()[i]&rhs.GetArray()[i]) return kTRUE;
     }
 
   } else {
 
-    for(Int_t i=0; i<lhs.Count(); i++) {
+    for(Int_t i=0; i<lhs.Count(); ++i) {
       if(lhs.GetArray()[i]&rhs.GetArray()[i]) return kTRUE;
     }
   }
@@ -331,11 +324,11 @@ Bool_t operator||(const QMask &lhs, const QMask &rhs)
 {
   Int_t i;
 
-  for(i=0; i<lhs.Count(); i++) {
+  for(i=0; i<lhs.Count(); ++i) {
     if(lhs.GetArray()[i]) return kTRUE;
   }
 
-  for(i=0; i<rhs.Count(); i++) {
+  for(i=0; i<rhs.Count(); ++i) {
     if(rhs.GetArray()[i]) return kTRUE;
   }
 

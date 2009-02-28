@@ -12,19 +12,19 @@ class QMask: public QList<UChar_t>
     QMask(): QList<UChar_t>(){}
     QMask(const QMask &rhs): QList<UChar_t>(rhs){}
     virtual ~QMask(){}
-    QMask GetComplement(UInt_t nbits) const;
+    QMask GetComplement(const UInt_t &nbits) const;
     void Crop();
-    void FillMask(UInt_t nbits);
-    Bool_t GetBit(UInt_t n) const;
+    void FillMask(const UInt_t &nbits);
+    inline Bool_t GetBit(const UInt_t &n) const{Int_t nbytes=n/8; if(nbytes >= Count()) return kFALSE; return (GetArray()[nbytes]>>(n%8))&1;}
     void Print(const Option_t* opt=NULL) const;
-    void SetBit(UInt_t n, Bool_t value);
+    void SetBit(const UInt_t &n, const Bool_t &value);
     const QMask& operator=(const QMask &rhs){QList<UChar_t>::operator=(rhs); return *this;}
     const QMask& operator=(const QList<UChar_t> &rhs){QList<UChar_t>::operator=(rhs); return *this;}
     const QMask& operator&=(const QMask &rhs);
     const QMask& operator|=(const QMask &rhs);
     const QMask& operator^=(const QMask &rhs);
-    QMask operator>>(UInt_t n) const;
-    QMask operator<<(UInt_t n) const;
+    QMask operator>>(const UInt_t &n) const;
+    QMask operator<<(const UInt_t &n) const;
     operator Bool_t() const;
 
     friend QMask operator&(const QMask &lhs, const QMask &rhs);
