@@ -19,7 +19,8 @@ class QProcBranch: public QProcArray, public TBranch
     Int_t Fill();
     void* GetBuffer() const{return fBuffer;}
     Long64_t GetEntries() const{return TBranch::GetEntries();}
-    Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0);
+    void LoadEntry(const Long64_t &entry = 0);
+    Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0){LoadEntry(entry); return 0;}
     void InitProcObj(){ResetArray();}
     void ResetArray(){DeleteBaskets("all");}
     void SetBuffer(void *buffer=NULL);

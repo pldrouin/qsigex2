@@ -65,9 +65,9 @@ Int_t QProcTBranchWrapper::Fill()
   return fBranch->Fill();
 }
 
-Int_t QProcTBranchWrapper::GetEntry(Long64_t entry, Int_t dummy)
+void QProcTBranchWrapper::LoadEntry(const Long64_t &entry)
 {
-  Int_t ret=fBranch->GetEntry(entry,dummy);
+  fBranch->GetEntry(entry);
 
   if(fCBuffer) {
 
@@ -97,7 +97,6 @@ Int_t QProcTBranchWrapper::GetEntry(Long64_t entry, Int_t dummy)
 	*fBuffer=*((Bool_t*)fCBuffer);
     }
   }
-  return ret;
 }
 
 void QProcTBranchWrapper::SetBuffer(void *buffer)

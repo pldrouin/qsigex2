@@ -70,9 +70,9 @@ Int_t QProcBranch::Fill()
   return TBranch::Fill();
 }
 
-Int_t QProcBranch::GetEntry(Long64_t entry, Int_t dummy)
+void QProcBranch::LoadEntry(const Long64_t &entry)
 {
-  Int_t ret=TBranch::GetEntry(entry,dummy);
+  TBranch::GetEntry(entry);
 
   if(fCBuffer) {
 
@@ -102,7 +102,6 @@ Int_t QProcBranch::GetEntry(Long64_t entry, Int_t dummy)
 	*fBuffer=*((Bool_t*)fCBuffer);
     }
   }
-  return ret;
 }
 
 void QProcBranch::SetBuffer(void *buffer)

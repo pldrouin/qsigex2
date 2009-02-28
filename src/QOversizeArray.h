@@ -43,7 +43,7 @@ class QOversizeArray
     void* GetBuffer() const{return fBuffer;}
     Long64_t GetEntries() const{return fNObjects;}
 
-    Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0);
+    void LoadEntry(const Long64_t &entry = 0);
 
     const omode& GetOpenMode(){return fOpenMode;}
 

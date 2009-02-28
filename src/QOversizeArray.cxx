@@ -288,16 +288,16 @@ void QOversizeArray::Fill()
   }
 }
 
-Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
+void QOversizeArray::LoadEntry(const Long64_t &entry)
 {
   //Do not need to apply locks for reading operations of variables that are only modified in the main thread
-  FuncDef(GetEntry,1);
+  FuncDef(LoadEntry,1);
   static Int_t uzbidx=-1;
   static Int_t ibuf;
   //If the entry is out of bound
   if(entry<0 || entry>=fNObjects) {
-    fprintf(stderr,"QOversizeArray::GetEntry: Error: Entry index is invalid\n");
-    return 0;
+    fprintf(stderr,"QOversizeArray::LoadEntry: Error: Entry index is invalid\n");
+    return;
   }
 
   //If the entry is located in the write buffer. Do not need a lock since only the main thread access the write buffer
@@ -310,7 +310,7 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
     }
 
     memcpy(fBuffer,fWriteBuffer->fBuffer+(entry-fWBFirstObjIdx)*fObjectSize,fObjectSize);
-    return fObjectSize;
+    return;
   }
 
   ibuf=entry/fNOPerBuffer;
@@ -322,7 +322,7 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
     memcpy(fBuffer,fCRBData+(entry-fCurReadBuffer->fBufferIdx*fNOPerBuffer)*fObjectSize,fObjectSize);
 
   } else {
-    //printf("Calling GetEntry with entry==%lli (buffer index %i)\n",entry,ibuf);
+    //printf("Calling LoadEntry with entry==%lli (buffer index %i)\n",entry,ibuf);
     pthread_mutex_lock(&fBuffersMutex);
     fCurRBIdx=ibuf;
 
@@ -335,15 +335,15 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
     if(!fCurReadBuffer || fCurReadBuffer->fBufferIdx != fCurRBIdx) {
       pthread_mutex_unlock(&fBuffersMutex);
       pthread_mutex_lock(&fBLMutex);
-      //printf("GetEntry is waiting for buffer %i to load\n",fCurRBIdx);
+      //printf("LoadEntry is waiting for buffer %i to load\n",fCurRBIdx);
       //printf("Buffer address is %p\n",bbuf);
       pthread_mutex_lock(&fBLCMutex);
       pthread_cond_signal(&fBLCond);
       pthread_mutex_unlock(&fBLMutex);
-      printstatus("GetEntry is waiting for a confirmation");
+      printstatus("LoadEntry is waiting for a confirmation");
       pthread_cond_wait(&fBLCCond, &fBLCMutex);
       pthread_mutex_unlock(&fBLCMutex);
-      printstatus("GetEntry received a confirmation");
+      printstatus("LoadEntry received a confirmation");
 
       pthread_mutex_lock(&fBuffersMutex);
       if(!fCurReadBuffer) fCurReadBuffer=fFirstReadBuffer;
@@ -356,14 +356,14 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
     } else if(fCurReadBuffer->fIsCompressed != 0 && fCurReadBuffer->fIsCompressed != 4) {
       pthread_mutex_unlock(&fBuffersMutex);
       pthread_mutex_lock(&fBLMutex);
-      //printf("GetEntry is waiting for buffer %i to unzip\n",fCurRBIdx);
+      //printf("LoadEntry is waiting for buffer %i to unzip\n",fCurRBIdx);
       pthread_mutex_lock(&fBLCMutex);
       pthread_cond_signal(&fBLCond);
       pthread_mutex_unlock(&fBLMutex);
-      printstatus("GetEntry is waiting for a confirmation");
+      printstatus("LoadEntry is waiting for a confirmation");
       pthread_cond_wait(&fBLCCond, &fBLCMutex);
       pthread_mutex_unlock(&fBLCMutex);
-      printstatus("GetEntry received a confirmation");
+      printstatus("LoadEntry received a confirmation");
 
     } else {
       pthread_mutex_unlock(&fBuffersMutex);
@@ -383,7 +383,7 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
       for(uzbidx=0;;++uzbidx) {
 
 	if(fUZQOAB[uzbidx]==fCurReadBuffer) {
-	  //printf("GetEntry: Uncompressed buffer %i==%i (%p) is found in fUZQOAB[%i]\n",fCurReadBuffer->fBufferIdx,fUZQOAB[uzbidx]->fBufferIdx,fUZQOAB[uzbidx],uzbidx);
+	  //printf("LoadEntry: Uncompressed buffer %i==%i (%p) is found in fUZQOAB[%i]\n",fCurReadBuffer->fBufferIdx,fUZQOAB[uzbidx]->fBufferIdx,fUZQOAB[uzbidx],uzbidx);
 	  fCRBData=fUZBuffers[uzbidx];
 	  break;
 	}
@@ -404,7 +404,7 @@ Int_t QOversizeArray::GetEntry(Long64_t entry, Int_t)
     //printf("...loaded\n");
   }   
 
-  return fObjectSize;
+  return;
 }
 
 void QOversizeArray::OpenFile()
