@@ -114,9 +114,9 @@ class QDisTH: public QDis
 
   void Draw(Option_t *option=""){fTH->Draw(option);}
 
-  Int_t Fill(const Double_t &x);
-  Int_t Fill(const Double_t &x, const Double_t &y);
-  Int_t Fill(const Double_t &x, const Double_t &y, const Double_t &z);
+  void Fill(const Double_t &x);
+  void Fill(const Double_t &x, const Double_t &y);
+  void Fill(const Double_t &x, const Double_t &y, const Double_t &z);
   
   Int_t GetDimension() const{return fTH->GetDimension();}
 

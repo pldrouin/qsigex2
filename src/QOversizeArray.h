@@ -16,6 +16,7 @@ struct pthread_cond_t;
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
+#include <algorithm>
 #include <errno.h>
 
 #include "Rtypes.h"

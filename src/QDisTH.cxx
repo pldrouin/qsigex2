@@ -318,19 +318,19 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Doub
   SetNameTitle(name,title);
 }
 
-Int_t QDisTH::Fill(const Double_t &x)
+void QDisTH::Fill(const Double_t &x)
 {
-  return fTH->Fill(x);
+  fTH->Fill(x);
 }
 
-Int_t QDisTH::Fill(const Double_t &x, const Double_t &y)
+void QDisTH::Fill(const Double_t &x, const Double_t &y)
 {
-  return dynamic_cast<TH2*>(fTH)->Fill(x,y);
+  dynamic_cast<TH2*>(fTH)->Fill(x,y);
 }
 
-Int_t QDisTH::Fill(const Double_t &x, const Double_t &y, const Double_t &z)
+void QDisTH::Fill(const Double_t &x, const Double_t &y, const Double_t &z)
 {
-  return dynamic_cast<TH3*>(fTH)->Fill(x,y,z);
+  dynamic_cast<TH3*>(fTH)->Fill(x,y,z);
 }
 
 Double_t QDisTH::Integral(Int_t** binranges, Bool_t *widths) const

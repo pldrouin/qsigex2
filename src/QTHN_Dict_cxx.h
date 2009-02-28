@@ -4,7 +4,6 @@ template <typename U> void QTHN<U>::Streamer(TBuffer &R__b)
 
   UInt_t R__s, R__c;
   Int_t i;
-  Long64_t li;
 
   if (R__b.IsReading()) {
     Version_t R__v = R__b.ReadVersion(&R__s, &R__c); if (R__v) { }
@@ -12,21 +11,19 @@ template <typename U> void QTHN<U>::Streamer(TBuffer &R__b)
     R__b >> fNDims;
 
     if(fAxes) delete[] fAxes;
-    fAxes=new TAxis*[fNDims];
+    fAxes=new QAxis*[fNDims];
 
     for(i=0; i<fNDims; i++) {
       R__b >> fAxes[i]; 
     }
     ComputeNBins();
     R__b >> fEntries;
+    R__b.ReadFastArray(fBinContent,fNBins);
 
-    for(li=0; li<fNBins; li++) {
-      R__b >> fBinContent[li];
-    }
     R__b.CheckByteCount(R__s, R__c, QTHN<U>::IsA());
 
   } else {
-    TAxis *abuf;
+    QAxis *abuf;
     R__c = R__b.WriteVersion(QTHN<U>::IsA(), kTRUE);
     TNamed::Streamer(R__b);
     R__b << fNDims;
@@ -34,7 +31,7 @@ template <typename U> void QTHN<U>::Streamer(TBuffer &R__b)
     for(i=0; i<fNDims; i++) {
 
       if(!fAxes[i]) {
-	abuf=new TAxis;
+	abuf=new QAxis;
 	R__b << abuf;
 	delete abuf;
 
@@ -43,10 +40,8 @@ template <typename U> void QTHN<U>::Streamer(TBuffer &R__b)
       }
     }
     R__b << fEntries;
+    R__b.WriteFastArray(fBinContent,fNBins);
 
-    for(li=0; li<fNBins; li++) {
-      R__b << fBinContent[li];
-    }
     R__b.SetByteCount(R__c, kTRUE);
   }
 }

@@ -507,7 +507,7 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
   if(forceall || fLastExec.GetSec() != 0) {
 
     //Loop over parameters
-    for(i=0; i<fParams->Count(); i++) {
+    for(i=fParams->Count()-1; i>=0; --i) {
 
       //If the current parameter value has changed, set the correspongind bit in the parameter mask
       if(*(fParams->GetArray()[i]) != fLastParams->GetArray()[i]) {
@@ -516,7 +516,7 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     }
 
     //Loop over all input arrays
-    for(i=0; i<fIArrays->Count(); i++) {
+    for(i=fIArrays->Count()-1; i>=0; --i) {
 
       //If the current input array has been modified after the last run, add its mask to the mask of required processes.
       if((*fIArrays)[i]->NewerThan(fLastExec)) {
@@ -525,7 +525,7 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     }
 
     //Loop over all input objects
-    for(i=0; i<fIObjects->Count(); i++) {
+    for(i=fIObjects->Count()-1; i>=0; --i) {
 
       //If the current input object has been modified after the last run, add its mask to the mask of required processes
       if((*fIObjects)[i]->NewerThan(fLastExec)) depmods|=(*fObjsPDepends)[i];
@@ -565,8 +565,6 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     static Long64_t nesealast;           //Number of entries for the previous input array that should contain only selected events
     static Bool_t eventselected;
 
-    static Int_t nj;
-
     iaarrays.Clear();
     isarrays.Clear();
     oarrays.Clear();
@@ -585,7 +583,7 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     memset(fNeededOO.GetArray(),0,fNeededOO.Count()*sizeof(Bool_t));
 
     //Loop over all processes
-    for(i=0; i<fProcs->Count(); i++) {
+    for(i=0; i<fProcs->Count(); ++i) {
 
       //If the current process has never been run or if it is triggered by the parameters mask
       if(((*fProcsParDepends)[i] && pardiffs) || depmods.GetBit(i) || runall) {
@@ -604,22 +602,19 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
 	}
 
 	//Loop over the output arrays of the current process
-	nj=(*fOAIndices)[i].Count();
-	for(j=0; j<nj; j++) {
+	for(j=(*fOAIndices)[i].Count()-1; j>=0; --j) {
 	  //Add the current output array to the list of needed output arrays
 	  fNeededOA[(*fOAIndices)[i][j]]=kTRUE;
 	}
 
 	//Loop over output objets of the current process
-	nj=(*fOOIndices)[i].Count();
-	for(j=0; j<nj; j++) {
+	for(j=(*fOOIndices)[i].Count()-1; j>=0; --j) {
 	  //Add the current object to the list of needed output objects
 	  fNeededOO[(*fOOIndices)[i][j]]=kTRUE;
 	}
 
 	//Loop over input arrays of the current process
-	nj=(*fIAIndices)[i].Count();
-	for(j=0; j<nj; j++) {
+	for(j=(*fIAIndices)[i].Count()-1; j>=0; --j) {
 	  //Add the current input array to the list of needed input arrays
 	  fNeededIA[(*fIAIndices)[i][j]]=kTRUE;
 	}
@@ -627,7 +622,7 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     }
 
     //Loop over all output arrays
-    for(i=0; i<fNeededOA.Count(); i++) {
+    for(i=fNeededOA.Count()-1; i>=0; --i) {
 
       //If the current output array is needed
       if(fNeededOA[i]) {
@@ -640,17 +635,19 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     }
 
     //Loop over all output objects
-    for(i=0; i<fNeededOO.Count(); i++) {
+    for(i=fNeededOO.Count()-1; i>=0; --i) {
 
       //If the current output object is needed
       if(fNeededOO[i]) {
 	//Add it to the list of needed output objects
 	oobjects.Add((*fOObjects)[i]);
+	//Initialize the object
+	(*fOObjects)[i]->InitProcObj();
       }
     }
 
     //Loop over all input arrays
-    for(i=0; i<fNeededIA.Count(); i++) {
+    for(i=0; i<fNeededIA.Count(); ++i) {
 
       //If the current input array is needed and it is not also an output array
       if(fNeededIA[i] && oarrays.FindFirst((*fIArrays)[i]) == -1) {
@@ -688,33 +685,27 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
       }
     }
 
-    //Loop over needed output objects
-    for(i=0; i<oobjects.Count(); i++) {
-      //Initialize the object
-      oobjects[i]->InitProcObj();
-    }
-
     //If all absolute input arrays contain selected events
     if(neaealast==-1) {
 
       //Loop over the selected events
-      for(i=0; i<nesealast; i++) {
+      for(i=0; i<nesealast; ++i) {
 	//printf("Entry %i/%i\n",i,nesealast);
 
 	//Load all triggered input arrays
-	for(j=0; j<isarrays.Count(); j++) {
+	for(j=isarrays.Count()-1; j>=0; --j) {
 	  //printf("\tInput array %i/%i\n",j,isarrays.Count());
 	  isarrays.GetArray()[j]->GetEntry(i);
 	}
 
 	//Loop over all triggered processes
-	for(j=0; j<procs.Count(); j++) {
+	for(j=0; j<procs.Count(); ++j) {
 	  //Exec the process
 	  ((QNamedProc*)procs.GetArray()[j])->Exec();
 	}
 
 	//Save all triggered output arrays
-	for(j=0; j<oarrays.Count(); j++) {
+	for(j=oarrays.Count()-1; j>=0; --j) {
 	  oarrays.GetArray()[j]->Fill();
 	}
       }
@@ -723,18 +714,18 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     } else if(nesealast==-1) {
 
       //Loop over all events
-      for(i=0; i<neaealast; i++) {
+      for(i=0; i<neaealast; ++i) {
 	//printf("Entry %i/%i\n",i,neaealast);
 
 	//Load all triggered input arrays
-	for(j=0; j<iaarrays.Count(); j++) {
+	for(j=iaarrays.Count()-1; j>=0; --j) {
 	  //printf("\tInput array %i/%i\n",j,iaarrays.Count());
 	  iaarrays.GetArray()[j]->GetEntry(i);
 	}
 	eventselected=kTRUE;
 
 	//Loop over all triggered non-post-selection processes
-	for(j=0; j<naeprocs; j++) {
+	for(j=0; j<naeprocs; ++j) {
 	  //Exec the process. If it is a selector process, use the output to check if the entry is selected or not
 	  if(selprocs[j]) eventselected&=((QNamedProc*)procs.GetArray()[j])->Exec();
 	  else ((QNamedProc*)procs.GetArray()[j])->Exec();
@@ -742,7 +733,7 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
 
 	//Assertion: Post-selection processes that depend on a selected events array are called only for selected events
 	//Loop over all triggered post-selection processes
-	for(j=naeprocs; j<procs.Count(); j++) {
+	for(j=naeprocs; j<procs.Count(); ++j) {
 	  //If the process does not depend on a selector process or if the entry is selected, execute it
 	  if(!seldepprocs[j] || eventselected) ((QNamedProc*)procs.GetArray()[j])->Exec();
 	}
@@ -750,7 +741,7 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
 	//Assertion: Output arrays are filled when they do not depend directly or indirectly on a selector process or
 	//when an event is selected.
 	//Save all triggered output arrays
-	for(j=0; j<oarrays.Count(); j++) {
+	for(j=oarrays.Count()-1; j>=0; --j) {
 	  //printf("\tOutput array %i/%i\n",j,oarrays.Count());
 	  if(!oasproc[j] || eventselected) oarrays.GetArray()[j]->Fill();
 	}
@@ -760,62 +751,62 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     } else {
 
       //Loop over selected events
-      for(i=0; i<nesealast; i++) {
+      for(i=0; i<nesealast; ++i) {
 	//printf("Entry %i/%i\n",i,nesealast);
 
 	//Load all triggered input selected events arrays
-	for(j=0; j<isarrays.Count(); j++) {
+	for(j=isarrays.Count()-1; j>=0; --j) {
 	  //printf("\tInput array %i/%i\n",j,isarrays.Count());
 	  isarrays.GetArray()[j]->GetEntry(i);
 	}
 
 	//Loop over all triggered non-post-selection events processes
-	for(j=0; j<naeprocs; j++) {
+	for(j=0; j<naeprocs; ++j) {
 	  //Exec the process if it depends on a selected events array
 	  if(seldepprocs[j]) ((QNamedProc*)procs.GetArray()[j])->Exec();
 	}
 
 	//Assertion: Post-selection processes that depend on a selected events array are called only for selected events
 	//Loop over all triggered post-selection processes
-	for(j=naeprocs; j<procs.Count(); j++) {
+	for(j=naeprocs; j<procs.Count(); ++j) {
 	  //If the process depends on a selector process
 	  if(seldepprocs[j]) ((QNamedProc*)procs.GetArray()[j])->Exec();
 	}
 
 	//Assertion: Output arrays are filled when it depends directly or indirectly on a selector process.
 	//Save all triggered output arrays
-	for(j=0; j<oarrays.Count(); j++) {
+	for(j=oarrays.Count()-1; j>=0; --j) {
 	  //printf("\tOutput array %i/%i\n",j,oarrays.Count());
 	  if(oasproc[j]) oarrays.GetArray()[j]->Fill();
 	}
       }
 
       //Loop over all events
-      for(i=0; i<neaealast; i++) {
+      for(i=0; i<neaealast; ++i) {
 	//printf("Entry %i/%i\n",i,neaealast);
 
 	//Load all triggered input all events arrays
-	for(j=0; j<iaarrays.Count(); j++) {
+	for(j=iaarrays.Count()-1; j>=0; --j) {
 	  //printf("\tInput array %i/%i\n",j,iaarrays.Count());
 	  iaarrays.GetArray()[j]->GetEntry(i);
 	}
 
 	//Loop over all triggered non-post-selection events processes
-	for(j=0; j<naeprocs; j++) {
+	for(j=0; j<naeprocs; ++j) {
 	  //Exec the process if it depends on a selected events array
 	  if(!seldepprocs[j]) ((QNamedProc*)procs.GetArray()[j])->Exec();
 	}
 
 	//Assertion: Post-selection processes that depend on a selected events array are called only for selected events
 	//Loop over all triggered post-selection processes
-	for(j=naeprocs; j<procs.Count(); j++) {
+	for(j=naeprocs; j<procs.Count(); ++j) {
 	  //If the process does not depend on a selector process, execute it
 	  if(!seldepprocs[j]) ((QNamedProc*)procs.GetArray()[j])->Exec();
 	}
 
 	//Assertion: Output arrays are filled when it does not depend directly or indirectly on a selector process.
 	//Save all triggered output arrays
-	for(j=0; j<oarrays.Count(); j++) {
+	for(j=oarrays.Count()-1; j>=0; --j) {
 	  //printf("\tOutput array %i/%i\n",j,oarrays.Count());
 	  if(!oasproc[j]) oarrays.GetArray()[j]->Fill();
 	}
@@ -823,7 +814,7 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     }
 
     //Loop over needed output objects
-    for(i=0; i<oobjects.Count(); i++) {
+    for(i=oobjects.Count()-1; i>=0; --i) {
       //Terminate the object
       oobjects[i]->TerminateProcObj();
       //Update the modification time for the object
@@ -831,7 +822,7 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     }
 
     //Loop over needed output arrays
-    for(i=0; i<oarrays.Count(); i++) {
+    for(i=oarrays.Count()-1; i>=0; --i) {
       //Terminate the output array
       oarrays[i]->TerminateProcObj();
       //Update the modification time
@@ -839,7 +830,7 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     }
 
     //Save the parameters
-    for(i=0; i<fParams->Count(); i++) fLastParams->GetArray()[i]=*(fParams->GetArray()[i]);
+    for(i=fParams->Count()-1; i>=0; --i) fLastParams->GetArray()[i]=*(fParams->GetArray()[i]);
     fLastExec.Set();
 
   } else {

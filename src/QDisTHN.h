@@ -33,7 +33,7 @@ template <typename U> class QDisTHN: public QDis
 
   enum eQTHNTypes {kQTHN, kQTHNF, kQTHNDL};
 
-  QDisTHN(const Char_t *name, const Char_t *title, Int_t ndims, Int_t qthntype=kQTHNF);
+  QDisTHN(const Char_t *name, const Char_t *title, const Int_t &ndims, const Int_t &qthntype=kQTHNF);
 
   QDisTHN(const QDisTHN<U>& newqdis): QDis(newqdis), fOwned(kTRUE)
   {
@@ -82,10 +82,10 @@ template <typename U> class QDisTHN: public QDis
 
   void Draw(Option_t*){}
 
-  Int_t Fill(const Double_t &x);
-  Int_t Fill(const Double_t &x, const Double_t &y);
-  Int_t Fill(const Double_t &x, const Double_t &y, const Double_t &z);
-  Int_t Fill(const Double_t *x, const U &w=1);
+  template <typename V> void Fill(const V &x){fQTHN->AddBinContent(fQTHN->FindBin(x));}
+  template <typename V> void Fill(const V &x, const V &y){fQTHN->AddBinContent(fQTHN->FindBin(x,y));}
+  template <typename V> void Fill(const V &x, const V &y, const V &z){fQTHN->AddBinContent(fQTHN->FindBin(x,y,z));}
+  void Fill(const Double_t *x, const U &w=1){fQTHN->Fill(x,w);}
   
   TH1* GenTH(const char *name="_qth2th") const{return fQTHN->GenTH(name);}
 
@@ -95,18 +95,18 @@ template <typename U> class QDisTHN: public QDis
 
   void InitProcObj(){fQTHN->Reset();}
 
-  Double_t Integral(Int_t** binranges=NULL, Bool_t *widths=NULL) const{return fQTHN->Integral(binranges,widths);}
+  Double_t Integral(const Int_t** binranges=NULL, const Bool_t *widths=NULL) const{return fQTHN->Integral(binranges,widths);}
 
   void Normalize(Double_t* integral=NULL);
 
   Double_t ProbDensity(const Double_t &x,const Double_t &y=0,const Double_t &z=0) const;
   Double_t ProbDensity(const Double_t *x) const{return fQTHN->GetBinContent(fQTHN->FindBin(x));}
 
-  QDisTHN<U>* MarginalPDF(const char *name="_md", const Int_t *axes=NULL, Int_t naxes=0) const;
+  QDisTHN<U>* MarginalPDF(const char *name="_md", const Int_t *axes=NULL, const Int_t &naxes=0) const;
 
-  void SetAxis(Int_t axis, Int_t nbins, Double_t min, Double_t max){fQTHN->SetAxis(axis,nbins,min,max);}
-  void SetAxis(Int_t axis, Int_t nbins, Double_t *bins){fQTHN->SetAxis(axis,nbins,bins);}
-  void SetAxis(Int_t axis, const TAxis* anaxis){fQTHN->SetAxis(axis,anaxis);}
+  void SetAxis(const Int_t &axis, const Int_t &nbins, const Double_t &min, const Double_t &max){fQTHN->SetAxis(axis,nbins,min,max);}
+  void SetAxis(const Int_t &axis, const Int_t &nbins, const Double_t *bins){fQTHN->SetAxis(axis,nbins,bins);}
+  void SetAxis(const Int_t &axis, const QAxis* anaxis){fQTHN->SetAxis(axis,anaxis);}
 
   void TerminateProcObj(){Normalize();}
 

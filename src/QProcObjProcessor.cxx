@@ -223,20 +223,19 @@ void QProcObjProcessor::Exec(const Bool_t &forceall) const
   pardiffs.Clear();
   depmods.Clear();
   static Int_t i,j;
-  static Int_t nj;
 
   //fLastExec gets cleared by the function Analyze, so this is how the first run is identified
   if(fLastExec.GetSec() != 0) {
 
     //Loop over parameters
-    for(i=0; i<fParams->Count(); i++) {
+    for(i=fParams->Count()-1; i>=0; --i) {
 
       //If the current parameter value has changed, set the correspongind bit in the parameter mask
       if(*(fParams->GetArray()[i]) != fLastParams->GetArray()[i]) pardiffs.SetBit(i,1);
     }
 
     //Loop over all input objects
-    for(i=0; i<fIObjects->Count(); i++) {
+    for(i=fIObjects->Count()-1; i>=0; --i) {
 
       //If the current input object has been modified after the last run, add its mask to the mask of required processes
       if((*fIObjects)[i]->NewerThan(fLastExec)) depmods|=(*fObjsPDepends)[i];
@@ -274,8 +273,7 @@ void QProcObjProcessor::Exec(const Bool_t &forceall) const
 	procs.Add(&(*fProcs)[i]);
 
 	//Loop over output objets of the current process
-	nj=(*fOOIndices)[i].Count();
-	for(j=0; j<nj; j++) {
+	for(j=(*fOOIndices)[i].Count()-1; j>=0; --j) {
 	  //Add the current object to the list of needed output objects
 	  fNeededOO[(*fOOIndices)[i][j]]=kTRUE;
 	}
@@ -283,7 +281,7 @@ void QProcObjProcessor::Exec(const Bool_t &forceall) const
     }
 
     //Loop over all output objects
-    for(i=0; i<fNeededOO.Count(); i++) {
+    for(i=fNeededOO.Count()-1; i>=0; --i) {
 
       //If the current output object is needed
       if(fNeededOO[i]) {
@@ -295,13 +293,13 @@ void QProcObjProcessor::Exec(const Bool_t &forceall) const
     }
 
     //Loop over all triggered processes
-    for(j=0; j<procs.Count(); j++) {
+    for(j=0; j<procs.Count(); --j) {
       //Exec the process.
       ((QNamedProc*)procs.GetArray()[j])->Exec();
     }
 
     //Loop over needed output objects
-    for(i=0; i<oobjects.Count(); i++) {
+    for(i=oobjects.Count()-1; i>=0; --i) {
       //Terminate the object
       oobjects[i]->TerminateProcObj();
       //Update the modification time for the object
@@ -309,7 +307,7 @@ void QProcObjProcessor::Exec(const Bool_t &forceall) const
     }
 
     //Save the parameters
-    for(i=0; i<fParams->Count(); i++) fLastParams->GetArray()[i]=*(fParams->GetArray()[i]);
+    for(i=fParams->Count()-1; i>=0; --i) fLastParams->GetArray()[i]=*(fParams->GetArray()[i]);
     fLastExec.Set();
 
   } else {

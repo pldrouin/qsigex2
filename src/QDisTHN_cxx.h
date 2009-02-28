@@ -15,7 +15,7 @@
 //                                                                  //
 //////////////////////////////////////////////////////////////////////
 
-template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, Int_t ndims, Int_t qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &ndims, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
 {
   switch(qthntype) {
     case kQTHN:
@@ -32,40 +32,6 @@ template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *titl
   SetNameTitleToObject();
 }
 
-template <typename U> Int_t QDisTHN<U>::Fill(const Double_t &x)
-{
-  if(fQTHN->GetNDims()!=1) {
-    fprintf(stderr,"QDisTHN::Fill: Error: Histogram dimension is not 1\n");
-    throw 1;
-  }
-  return fQTHN->Fill(&x);
-}
-
-template <typename U> Int_t QDisTHN<U>::Fill(const Double_t &x, const Double_t &y)
-{
-  if(fQTHN->GetNDims()!=2) {
-    fprintf(stderr,"QDisTHN::Fill: Error: Histogram dimension is not 2\n");
-    throw 1;
-  }
-  const Double_t xs[2]={x,y};
-  return fQTHN->Fill(xs);
-}
-
-template <typename U> Int_t QDisTHN<U>::Fill(const Double_t &x, const Double_t &y, const Double_t &z)
-{
-  if(fQTHN->GetNDims()!=3) {
-    fprintf(stderr,"QDisTHN::Fill: Error: Histogram dimension is not 3\n");
-    throw 1;
-  }
-  const Double_t xs[3]={x,y,z};
-  return fQTHN->Fill(xs);
-}
-
-template <typename U> Int_t QDisTHN<U>::Fill(const Double_t *x, const U &w)
-{
-  return fQTHN->Fill(x,w);
-}
-
 template <typename U> Double_t QDisTHN<U>::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const
 {
  //This function returns the probability density associated with a point which
@@ -73,29 +39,18 @@ template <typename U> Double_t QDisTHN<U>::ProbDensity(const Double_t &x,const D
  //arguments of extra dimensions are optional. Before calling this function,
  //the user must call QDisTHN<U>::Normalize() to normalize the p.d.f. properly. 
 
- if(fQTHN->GetNDims()>3) {
-    fprintf(stderr,"QDisTHN::Fill: Error: Histogram dimension is greater than 3.\n");
-    throw 1;
- }
-
  switch(fQTHN->GetNDims()) {
    case 1:
-     return fQTHN->GetBinContent(fQTHN->FindBin(&x));
+     return fQTHN->GetBinContent(fQTHN->FindBin(x));
    case 2:
-     {
-       const Double_t xs[2]={x,y};
-       return fQTHN->GetBinContent(fQTHN->FindBin(xs));
-     }
+       return fQTHN->GetBinContent(fQTHN->FindBin(x,y));
    case 3:
-     {
-       const Double_t xs[3]={x,y,z};
-       return fQTHN->GetBinContent(fQTHN->FindBin(xs));
-     }
+       return fQTHN->GetBinContent(fQTHN->FindBin(x,y,z));
  }
  return 0;
 }
 
-template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, const Int_t *axes, Int_t naxes) const
+template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, const Int_t *axes, const Int_t &naxes) const
 {
   Int_t dim=fQTHN->GetNDims(); //PDF dimension
   Int_t nfix=(Int_t)fNFixedCoords>dim?dim:(Int_t)fNFixedCoords; //Number of fixed coordinates for a conditional PDF
@@ -119,7 +74,7 @@ template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, cons
     aaxes[naxes+i]=i+dim-nfix;
   }
 
-  TAxis **taxes=new TAxis*[dim];
+  QAxis **taxes=new QAxis*[dim];
   QDisTHN<U> *th;
 
   for(i=0; i<dim; i++) taxes[i]=fQTHN->GetAxis(i);
@@ -158,7 +113,7 @@ template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, cons
     biniter[0]++;
 
     i=0;
-    while(biniter[i]>taxes[aaxes[i]]->GetNbins()){
+    while(biniter[i]>taxes[aaxes[i]]->GetNBins()){
       biniter[i]=1;
       i++;
 
@@ -204,19 +159,19 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
     Double_t scale=fQTHN->GetEntries(); //scaling factor used for normalization of histograms filled with number of events
 
     //Get the number of bins for each dimension
-    for(i=0; i<dim; i++) nbins[i]=fQTHN->GetAxis(i)->GetNbins();
+    for(i=dim-1; i>=0; --i) nbins[i]=fQTHN->GetAxis(i)->GetNBins();
 
     //Normalization of histograms with variable size for which the bin content corresponds to a number of events
     if(fNormFlags&(kEventsFilled|kVarBinSizeEventsFilled)){
-      TAxis **vbsaxis=new TAxis*[dim];      //array of axis using variable bin width
+      QAxis **vbsaxis=new QAxis*[dim];      //array of axis using variable bin width
       Double_t binvol;                      //buffer for variable bin width/area/volume
-      memset(vbsaxis,0,dim*sizeof(TAxis*)); //Initialize axis pointers to NULL
+      memset(vbsaxis,0,dim*sizeof(QAxis*)); //Initialize axis pointers to NULL
       Bool_t hasvbaxes=kFALSE;
 
-      for(i=0; i<dim; i++) {
-        //Add TAxis pointers to vbsaxis for axis having variable bin width
+      for(i=dim-1; i>=0; --i) {
+        //Add QAxis pointers to vbsaxis for axis having variable bin width
 
-	if(fQTHN->GetAxis(i)->GetNbins()>1 && fQTHN->GetAxis(i)->GetXbins()->fN) {
+	if(fQTHN->GetAxis(i)->GetNBins()>1 && fQTHN->GetAxis(i)->GetBins()) {
 	  vbsaxis[i]=fQTHN->GetAxis(i);
 	  hasvbaxes=kTRUE;
 	} else if(!widths || widths[i]) scale*=fQTHN->GetAxis(i)->GetBinWidth(1);
@@ -225,10 +180,10 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
       if(hasvbaxes && !(fNormFlags&kNoBinWidthNorm)) {
 	Long64_t li;
 
-	for(li=0; li<fQTHN->GetNFbins(); li++) {
+	for(li=fQTHN->GetNFbins()-1; li>=0; --li) {
 	  fQTHN->GetFBinCoords(li,biniter);
 	  binvol=(vbsaxis[0]?vbsaxis[0]->GetBinWidth(biniter[0]):1);
-	  for(i=1; i<dim; i++) if(vbsaxis[i]) binvol*=vbsaxis[i]->GetBinWidth(biniter[i]);
+	  for(i=1; i<dim; ++i) if(vbsaxis[i]) binvol*=vbsaxis[i]->GetBinWidth(biniter[i]);
 	  fQTHN->ScaleFBinContent(li,1/binvol);
 	}
       }
@@ -255,11 +210,11 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
       if(!widths) {
 	widths=new Bool_t[dim];
 	//Loop over non-fixed dimensions
-	for(fcoord=0; fcoord<dim-nfix; fcoord++) widths[fcoord]=kTRUE;
+	for(fcoord=dim-nfix-1; fcoord>=0; --fcoord) widths[fcoord]=kTRUE;
       }
 
       //Loop over the fixed dimensions
-      for(fcoord=dim-nfix; fcoord<dim; fcoord++){
+      for(fcoord=dim-nfix; fcoord<dim; ++fcoord){
 	//Allocate memory for the current fixed dimension
 	binranges[fcoord]=new Int_t[2];
 	//Initialize the binrange for the current fixed dimension to 1
@@ -277,10 +232,10 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
 	//If the integral value is not 0
 	if(scutintbuf){
 	  //Loop over the indices of non-fixed dimensions
-	  for(coord=0; coord<dim-nfix; coord++) biniter[coord]=1;
+	  for(coord=dim-nfix-1; coord>=0; --coord) biniter[coord]=1;
 
 	  //Loop over the indices of fixed dimensions
-	  for(coord=dim-nfix;coord<dim;coord++){
+	  for(coord=dim-nfix; coord<dim; ++coord){
 	    //Set the biniter elements that are associated to fixed variables
 	    //to the current bin
 	    biniter[coord]=*(binranges[coord]);
@@ -316,7 +271,7 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
       } while(fcoord<dim);
 
       //Loop over the fixed dimensions
-      for(fcoord=dim-nfix; fcoord<dim; fcoord++){
+      for(fcoord=dim-nfix; fcoord<dim; ++fcoord){
 	//Delete the array
 	delete[] binranges[fcoord];
       }
