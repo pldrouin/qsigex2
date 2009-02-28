@@ -19,14 +19,14 @@ class QArrayProcessor: public QStdProcessor
     QArrayProcessor(const QArrayProcessor &rhs): QStdProcessor(rhs), fSelProcs(new QList<Bool_t>(*rhs.fSelProcs)), fTrigAEProcs(new QList<Bool_t>(*rhs.fTrigAEProcs)), fNAEProcs(0), fAnalysisDir(rhs.fAnalysisDir), fIANames(new QList<QList<TString> >(*rhs.fIANames)), fOANames(new QList<QList<TString> >(*rhs.fOANames)), fBuNames(new QList<TString>(*rhs.fBuNames)), fIAIndices(new QList<QList<Int_t> >(*rhs.fIAIndices)), fIOIndices(new QList<QList<Int_t> >(*rhs.fIOIndices)), fOAIndices(new QList<QList<Int_t> >(*rhs.fOAIndices)), fOOIndices(new QList<QList<Int_t> >(*rhs.fOOIndices)), fSelDepProcs(new QList<Bool_t>(*rhs.fSelDepProcs)), fIASProc(new QList<Bool_t>(*rhs.fIASProc)), fOASProc(new QList<Bool_t>(*rhs.fOASProc)), fAPDepends(new QList<QMask>(*rhs.fAPDepends)), fObjsPDepends(new QList<QMask>(*rhs.fObjsPDepends)), fIArrays(new QList<QProcArray*>), fIObjects(new QList<QProcObj*>(*rhs.fIObjects)), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>(*rhs.fOObjects)), fBuffers(new QList<Double_t>){}
     virtual ~QArrayProcessor();
 
-    void AddProc(const char* name, const char* title=NULL, Bool_t selector=kFALSE, Int_t index=-1);
-    void AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname=NULL, Bool_t selector=kFALSE, Int_t index=-1);
-    void AddProc(const char *name, const char *title, const char *procname, Bool_t selector=kFALSE, Int_t index=-1);
-    void AddProc(const char *name, const char *title, void *proc, const char *procname=NULL, Bool_t selector=kFALSE, Int_t index=-1);
-    void AddPSProc(const char* name, const char* title=NULL, Bool_t selectedonly=kFALSE, Int_t index=-1);
-    void AddPSProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname=NULL, Bool_t selectedonly=kFALSE, Int_t index=-1);
-    void AddPSProc(const char *name, const char *title, const char *procname, Bool_t selectedonly=kFALSE, Int_t index=-1);
-    void AddPSProc(const char *name, const char *title, void *proc, const char *procname=NULL, Bool_t selectedonly=kFALSE, Int_t index=-1);
+    Int_t AddProc(const char* name, const char* title=NULL, Bool_t selector=kFALSE, Int_t index=-1);
+    Int_t AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname=NULL, Bool_t selector=kFALSE, Int_t index=-1);
+    Int_t AddProc(const char *name, const char *title, const char *procname, Bool_t selector=kFALSE, Int_t index=-1);
+    Int_t AddProc(const char *name, const char *title, void *proc, const char *procname=NULL, Bool_t selector=kFALSE, Int_t index=-1);
+    Int_t AddPSProc(const char* name, const char* title=NULL, Bool_t selectedonly=kFALSE, Int_t index=-1);
+    Int_t AddPSProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname=NULL, Bool_t selectedonly=kFALSE, Int_t index=-1);
+    Int_t AddPSProc(const char *name, const char *title, const char *procname, Bool_t selectedonly=kFALSE, Int_t index=-1);
+    Int_t AddPSProc(const char *name, const char *title, void *proc, const char *procname=NULL, Bool_t selectedonly=kFALSE, Int_t index=-1);
 
     void Analyze();
 

@@ -22,36 +22,40 @@ QProcObjProcessor::~QProcObjProcessor()
   fOObjects=NULL;
 }
 
-void QProcObjProcessor::AddProc(const char *name, const char *title, Int_t index)
+Int_t QProcObjProcessor::AddProc(const char *name, const char *title, Int_t index)
 {
   PRINTF8(this,"\tQProcObjProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Int_t index<",index,">)\n")
 
-  fProcs->RedimList(fProcs->Count()+1,index);
+  index=fProcs->RedimList(fProcs->Count()+1,index);
   (*fProcs)[index].SetNameTitle(name,title);
+  return index;
 }
 
-void QProcObjProcessor::AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname, Int_t index)
+Int_t QProcObjProcessor::AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname, Int_t index)
 {
   PRINTF12(this,"\tQProcObjProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t (*proc)(QProcArgs&)<",proc,">, const char *procname<'",procname,"'>, Int_t index<",index,">)\n")
 
-  AddProc(name,title,index);
+  index=AddProc(name,title,index);
   (*fProcs)[index].SetProc(proc,procname);
+  return index;
 }
 
-void QProcObjProcessor::AddProc(const char *name, const char *title, const char *procname, Int_t index)
+Int_t QProcObjProcessor::AddProc(const char *name, const char *title, const char *procname, Int_t index)
 {
   PRINTF10(this,"\tQProcObjProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, const char *procname<'",procname,"'>, Int_t index<",index,">)\n")
 
-  AddProc(name,title,index);
+  index=AddProc(name,title,index);
   (*fProcs)[index].SetProc(procname);
+  return index;
 }
 
-void QProcObjProcessor::AddProc(const char *name, const char *title, void *proc, const char *procname, Int_t index)
+Int_t QProcObjProcessor::AddProc(const char *name, const char *title, void *proc, const char *procname, Int_t index)
 {
   PRINTF12(this,"\tQProcObjProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, void *proc<",proc,">, const char *procname<'",procname,"'>, Int_t index<",index,">)\n")
 
-  AddProc(name,title,index);
+  index=AddProc(name,title,index);
   (*fProcs)[index].SetProc(proc,procname);
+  return index;
 }
 
 void QProcObjProcessor::Analyze()

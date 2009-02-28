@@ -19,10 +19,10 @@ class QProcObjProcessor: public QStdProcessor
     QProcObjProcessor(const QProcObjProcessor &rhs): QStdProcessor(rhs), fIOIndices(new QList<QList<Int_t> >(*rhs.fIOIndices)), fOOIndices(new QList<QList<Int_t> >(*rhs.fOOIndices)), fObjsPDepends(new QList<QMask>(*rhs.fObjsPDepends)), fIObjects(new QList<QProcObj*>(*rhs.fIObjects)), fOObjects(new QList<QProcObj*>(*rhs.fOObjects)) {}
     virtual ~QProcObjProcessor();
 
-    void AddProc(const char* name, const char* title=NULL, Int_t index=-1);
-    void AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname=NULL, Int_t index=-1);
-    void AddProc(const char *name, const char *title, const char *procname, Int_t index=-1);
-    void AddProc(const char *name, const char *title, void *proc, const char *procname=NULL, Int_t index=-1);
+    Int_t AddProc(const char* name, const char* title=NULL, Int_t index=-1);
+    Int_t AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname=NULL, Int_t index=-1);
+    Int_t AddProc(const char *name, const char *title, const char *procname, Int_t index=-1);
+    Int_t AddProc(const char *name, const char *title, void *proc, const char *procname=NULL, Int_t index=-1);
 
     void Analyze();
 

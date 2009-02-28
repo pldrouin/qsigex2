@@ -50,7 +50,7 @@ QArrayProcessor::~QArrayProcessor()
   fBuffers=NULL;
 }
 
-void QArrayProcessor::AddProc(const char *name, const char *title, Bool_t selector, Int_t index)
+Int_t QArrayProcessor::AddProc(const char *name, const char *title, Bool_t selector, Int_t index)
 {
   PRINTF10(this,"\tQArrayProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
 
@@ -59,36 +59,40 @@ void QArrayProcessor::AddProc(const char *name, const char *title, Bool_t select
   fProcs->RedimList(fProcs->Count()+1,index);
   fSelProcs->Add(selector,index);
   (*fProcs)[index].SetNameTitle(name,title);
+  return index;
 }
 
-void QArrayProcessor::AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname, Bool_t selector, Int_t index)
+Int_t QArrayProcessor::AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname, Bool_t selector, Int_t index)
 {
   PRINTF14(this,"\tQArrayProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t (*proc)(QProcArgs&)<",proc,">, const char *procname<'",procname,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
 
   index=AEProcIndexToIndex(index);
   AddProc(name,title,selector,index);
   (*fProcs)[index].SetProc(proc,procname);
+  return index;
 }
 
-void QArrayProcessor::AddProc(const char *name, const char *title, const char *procname, Bool_t selector, Int_t index)
+Int_t QArrayProcessor::AddProc(const char *name, const char *title, const char *procname, Bool_t selector, Int_t index)
 {
   PRINTF12(this,"\tQArrayProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, const char *procname<'",procname,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
 
   index=AEProcIndexToIndex(index);
   AddProc(name,title,selector,index);
   (*fProcs)[index].SetProc(procname);
+  return index;
 }
 
-void QArrayProcessor::AddProc(const char *name, const char *title, void *proc, const char *procname, Bool_t selector, Int_t index)
+Int_t QArrayProcessor::AddProc(const char *name, const char *title, void *proc, const char *procname, Bool_t selector, Int_t index)
 {
   PRINTF14(this,"\tQArrayProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, void *proc<",proc,">, const char *procname<'",procname,"'>, Bool_t selector<",selector,">, Int_t index<",index,">)\n")
 
   index=AEProcIndexToIndex(index);
   AddProc(name,title,selector,index);
   (*fProcs)[index].SetProc(proc,procname);
+  return index;
 }
 
-void QArrayProcessor::AddPSProc(const char *name, const char *title, Bool_t selectedonly, Int_t index)
+Int_t QArrayProcessor::AddPSProc(const char *name, const char *title, Bool_t selectedonly, Int_t index)
 {
   PRINTF10(this,"\tQArrayProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
 
@@ -96,33 +100,37 @@ void QArrayProcessor::AddPSProc(const char *name, const char *title, Bool_t sele
   fProcs->RedimList(fProcs->Count()+1,index);
   fSelProcs->Add(selectedonly,index);
   (*fProcs)[index].SetNameTitle(name,title);
+  return index;
 }
 
-void QArrayProcessor::AddPSProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname, Bool_t selectedonly, Int_t index)
+Int_t QArrayProcessor::AddPSProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname, Bool_t selectedonly, Int_t index)
 {
   PRINTF14(this,"\tQArrayProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, Bool_t (*proc)(QProcArgs&)<",proc,">, const char *procname<'",procname,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
 
   index=PSProcIndexToIndex(index);
   AddPSProc(name,title,selectedonly,index);
   (*fProcs)[index].SetProc(proc,procname);
+  return index;
 }
 
-void QArrayProcessor::AddPSProc(const char *name, const char *title, const char *procname, Bool_t selectedonly, Int_t index)
+Int_t QArrayProcessor::AddPSProc(const char *name, const char *title, const char *procname, Bool_t selectedonly, Int_t index)
 {
   PRINTF12(this,"\tQArrayProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, const char *procname<'",procname,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
 
   index=PSProcIndexToIndex(index);
   AddPSProc(name,title,selectedonly,index);
   (*fProcs)[index].SetProc(procname);
+  return index;
 }
 
-void QArrayProcessor::AddPSProc(const char *name, const char *title, void *proc, const char *procname, Bool_t selectedonly, Int_t index)
+Int_t QArrayProcessor::AddPSProc(const char *name, const char *title, void *proc, const char *procname, Bool_t selectedonly, Int_t index)
 {
   PRINTF14(this,"\tQArrayProcessor::AddPSProc(const char *name<'",name,"'>, const char *title<'",title,"'>, void *proc<",proc,">, const char *procname<'",procname,"'>, Bool_t selectedonly<",selectedonly,">, Int_t index<",index,">)\n")
 
   index=PSProcIndexToIndex(index);
   AddPSProc(name,title,selectedonly,index);
   (*fProcs)[index].SetProc(proc,procname);
+  return index;
 }
 
 void QArrayProcessor::Analyze()

@@ -490,7 +490,7 @@ template <typename U> U& QList<U>::operator[](const Int_t &index) const
 
   PRINTF3("fNElements:",fNElements,"\n")
 
-#ifdef QSSAFE
+#ifndef QSFAST
   try{
     if(index<0 || index>=fNElements) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed (" << index << ")\n"; throw 4000;}
     
