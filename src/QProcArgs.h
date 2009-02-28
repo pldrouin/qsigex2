@@ -19,31 +19,31 @@ class QProcArgs
     const Int_t& GetNOVars() const{return fOBuffers.Count();}
     const Int_t& GetNOObjs() const{return fOObjects.Count();}
     const Int_t& GetNParams() const{return fPBuffers.Count();}
-    const Double_t& IVar(Int_t i) const{return *fIBuffers[i];}
+    const Double_t& IVar(const Int_t &i) const{return *fIBuffers[i];}
 #ifdef __CINT__
     Double_t ** IVars() const{return fIBuffers.GetArray();}
 #else
     Double_t const* const* IVars() const{return fIBuffers.GetArray();}
 #endif
-    const QProcObj* IObj(Int_t i) const{return fIObjects[i];}
+    const QProcObj* IObj(const Int_t &i) const{return fIObjects[i];}
 #ifdef __CINT__
     QProcObj ** IObjs() const{return fIObjects.GetArray();}
 #else
     QProcObj const* const* IObjs() const{return fIObjects.GetArray();}
 #endif
-    Double_t& OVar(Int_t i) const{return *fOBuffers[i];}
+    Double_t& OVar(const Int_t &i) const{return *fOBuffers[i];}
 #ifdef __CINT__
     Double_t ** OVars() const{return fOBuffers.GetArray();}
 #else
     Double_t const* const* OVars() const{return fOBuffers.GetArray();}
 #endif
-    QProcObj* OObj(Int_t i) const{return fOObjects[i];}
+    QProcObj* OObj(const Int_t &i) const{return fOObjects[i];}
 #ifdef __CINT__
     QProcObj ** OObjs() const{return fOObjects.GetArray();}
 #else
     QProcObj const* const* OObjs() const{return fOObjects.GetArray();}
 #endif
-    const Double_t& Param(Int_t i) const{return *fPBuffers[i];}
+    const Double_t& Param(const Int_t &i) const{return *fPBuffers[i];}
 #ifdef __CINT__
     Double_t ** Params() const{return fPBuffers.GetArray();}
 #else
@@ -51,31 +51,31 @@ class QProcArgs
 #endif
 
   protected:
-    void AddIVar(Int_t index=-1, Double_t *buf=NULL){fIBuffers.Add(buf,index);}
-    void AddIObj(Int_t index=-1, QProcObj *obj=NULL){fIObjects.Add(obj,index);}
-    void AddOVar(Int_t index=-1, Double_t *buf=NULL){fOBuffers.Add(buf,index);}
-    void AddOObj(Int_t index=-1, QProcObj *obj=NULL){fOObjects.Add(obj,index);}
-    void AddParam(Int_t index=-1, Double_t *buf=NULL){fPBuffers.Add(buf,index);}
+    void AddIVar(const Int_t &index=-1, Double_t* const buf=NULL){fIBuffers.Add(buf,index);}
+    void AddIObj(const Int_t &index=-1, QProcObj* const obj=NULL){fIObjects.Add(obj,index);}
+    void AddOVar(const Int_t &index=-1, Double_t* const buf=NULL){fOBuffers.Add(buf,index);}
+    void AddOObj(const Int_t &index=-1, QProcObj* const obj=NULL){fOObjects.Add(obj,index);}
+    void AddParam(const Int_t &index=-1, Double_t* const buf=NULL){fPBuffers.Add(buf,index);}
     void ClearIVars(){fIBuffers.Clear();}
     void ClearIObjs(){fIObjects.Clear();}
     void ClearOVars(){fOBuffers.Clear();}
     void ClearOObjs(){fOObjects.Clear();}
     void ClearParams(){fPBuffers.Clear();}
-    void DelIVar(Int_t index=-1){fIBuffers.Del(index);}
-    void DelIObj(Int_t index=-1){fIObjects.Del(index);}
-    void DelOVar(Int_t index=-1){fOBuffers.Del(index);}
-    void DelOObj(Int_t index=-1){fOObjects.Del(index);}
-    void DelParam(Int_t index=-1){fPBuffers.Del(index);}
-    void SetIVarPtr(Int_t index, Double_t *buf){fIBuffers[index]=buf;}
-    void SetIObjPtr(Int_t index, QProcObj *obj){fIObjects[index]=obj;}
-    void SetOVarPtr(Int_t index, Double_t *buf){fOBuffers[index]=buf;}
-    void SetOObjPtr(Int_t index, QProcObj *obj){fOObjects[index]=obj;}
-    void SetParamPtr(Int_t index, Double_t *buf){fPBuffers[index]=buf;}
-    void SetNIVars(Int_t n){fIBuffers.RedimList(n,-1,NULL);}
-    void SetNIObjs(Int_t n){fIObjects.RedimList(n,-1,NULL);}
-    void SetNOVars(Int_t n){fOBuffers.RedimList(n,-1,NULL);}
-    void SetNOObjs(Int_t n){fOObjects.RedimList(n,-1,NULL);}
-    void SetNParams(Int_t n){fPBuffers.RedimList(n,-1,NULL);}
+    void DelIVar(const Int_t &index=-1){fIBuffers.Del(index);}
+    void DelIObj(const Int_t &index=-1){fIObjects.Del(index);}
+    void DelOVar(const Int_t &index=-1){fOBuffers.Del(index);}
+    void DelOObj(const Int_t &index=-1){fOObjects.Del(index);}
+    void DelParam(const Int_t &index=-1){fPBuffers.Del(index);}
+    void SetIVarPtr(const Int_t &index, Double_t* const buf){fIBuffers[index]=buf;}
+    void SetIObjPtr(const Int_t &index, QProcObj* const obj){fIObjects[index]=obj;}
+    void SetOVarPtr(const Int_t &index, Double_t* const buf){fOBuffers[index]=buf;}
+    void SetOObjPtr(const Int_t &index, QProcObj* const obj){fOObjects[index]=obj;}
+    void SetParamPtr(const Int_t &index, Double_t* const buf){fPBuffers[index]=buf;}
+    void SetNIVars(const Int_t &n){fIBuffers.RedimList(n,-1,NULL);}
+    void SetNIObjs(const Int_t &n){fIObjects.RedimList(n,-1,NULL);}
+    void SetNOVars(const Int_t &n){fOBuffers.RedimList(n,-1,NULL);}
+    void SetNOObjs(const Int_t &n){fOObjects.RedimList(n,-1,NULL);}
+    void SetNParams(const Int_t &n){fPBuffers.RedimList(n,-1,NULL);}
 
     friend class QProcedure;
     friend Bool_t operator==(const QProcArgs &lhs, const QProcArgs &rhs);

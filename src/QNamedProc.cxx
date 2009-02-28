@@ -7,31 +7,31 @@
 
 ClassImp(QNamedProc)
 
-void QNamedProc::AddIVar(const char *name, const char *title, Int_t index, Double_t *buf)
+void QNamedProc::AddIVar(const char *name, const char *title, const Int_t &index, Double_t* const buf)
 {
   QNamedVar<TString> var(name,title);
   fIVarsNames->Add(var,index);
   fProcedure->AddIVar(index,buf);
 }
 
-void QNamedProc::AddIObj(QProcObj *obj, Int_t index)
+void QNamedProc::AddIObj(QProcObj* const obj, const Int_t &index)
 {
   fProcedure->AddIObj(index,obj);
 }
 
-void QNamedProc::AddOVar(const char *name, const char *title, Int_t index, Double_t *buf)
+void QNamedProc::AddOVar(const char *name, const char *title, const Int_t &index, Double_t* const buf)
 {
   QNamedVar<TString> var(name,title);
   fOVarsNames->Add(var,index); 
   fProcedure->AddOVar(index,buf);
 }
 
-void QNamedProc::AddOObj(QProcObj *obj, Int_t index)
+void QNamedProc::AddOObj(QProcObj* const obj, const Int_t &index)
 {
   fProcedure->AddOObj(index,obj);
 }
 
-void QNamedProc::AddParam(const char *name, const char *title, Int_t index, Double_t *buf)
+void QNamedProc::AddParam(const char *name, const char *title, const Int_t &index, Double_t* const buf)
 {
   QNamedVar<TString> var(name,title);
   fParamsNames->Add(var,index);
