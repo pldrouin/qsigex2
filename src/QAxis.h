@@ -18,7 +18,7 @@ class QAxis: public TNamed
     QAxis(const Char_t *name, const Char_t *title, const Int_t &nbins, const Int_t* bins): TNamed(name,title), fNBins(nbins), fMin(bins[0]), fMax(bins[nbins]), fBWidth((fMax-fMin)/fNBins){fBins=new Double_t[fNBins+1]; for(Int_t i=0; i<=nbins; i++) fBins[i]=bins[i];}
     QAxis(const QAxis &rhs): TNamed(rhs), fNBins(rhs.fNBins), fMin(rhs.fMin), fMax(rhs.fMax), fBWidth(rhs.fBWidth){if(rhs.fBins) {fBins=new Double_t[fNBins+1]; memcpy(fBins,rhs.fBins,(fNBins+1)*sizeof(Double_t));}}
     ~QAxis(){Clear();}
-    void Clear(){if(fBins) {delete[] fBins; fBins=NULL;}}
+    void Clear(Option_t* option = ""){if(fBins) {delete[] fBins; fBins=NULL;}}
     TObject* Clone(const char* newname = NULL) const{QAxis *ret=new QAxis(*this); if(newname) ret->SetName(newname); return ret;}
 
     template <typename U> Int_t FindBin(const U& x) const{
