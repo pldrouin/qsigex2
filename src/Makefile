@@ -30,8 +30,8 @@ QSIGEX_DICTOBJDEP	=	$(QSIGEX_DICTOBJ:.o=.d)
 #	rm -rf $@ && ar rcs $@ $^
 
 libqsigex2.so: $(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ)
-	$(CXX) $(CXXFLAGS) -shared -L$(shell root-config --libdir) $(shell root-config --libs) -lMinuit -o $@ $^
-#	$(CXX) $(CXXFLAGS) -shared -L$(shell root-config --libdir) -lMinuit -o $@ $^
+#	$(CXX) $(CXXFLAGS) -shared -L$(shell root-config --libdir) $(shell root-config --libs) -lMinuit -o $@ $^
+	$(CXX) $(CXXFLAGS) -shared -L$(shell root-config --libdir) -lMinuit -o $@ $^
 
 clean:
 	rm -f *.d

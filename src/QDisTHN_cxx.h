@@ -32,22 +32,297 @@ template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *titl
   SetNameTitleToObject();
 }
 
+/*
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t &zlow, const Float_t &zhigh, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t *zbins, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t &zlow, const Float_t &zhigh, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t &zlow, const Float_t &zhigh, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t *zbins, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zbins);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zbins);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zbins);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t *zbins, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zbins);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zbins);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zbins);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t &zlow, const Float_t &zhigh, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t *zbins, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t &ylow, const Double_t &yhigh, const Int_t &nbinsz, const Double_t &zlow, const Double_t &zhigh, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t &ylow, const Double_t &yhigh, const Int_t &nbinsz, const Double_t *zbins, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t &zlow, const Double_t &zhigh, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t &ylow, const Double_t &yhigh, const Int_t &nbinsz, const Double_t &zlow, const Double_t &zhigh, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zbins);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zbins);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zbins);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t &ylow, const Double_t &yhigh, const Int_t &nbinsz, const Double_t *zbins, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zbins);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zbins);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zbins);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t &zlow, const Double_t &zhigh, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh);
+  }
+  SetNameTitleToObject();
+}
+
+template <typename U> QDisTHN<U>::QDisTHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins, const Int_t &qthntype): QDis(), fOwned(kTRUE), fQTHN(NULL)
+{
+  switch(qthntype) {
+    case kQTHN:
+      fQTHN=new QTHN<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins);
+      break;
+
+    case kQTHNF:
+      fQTHN=new QTHNF<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins);
+      break;
+
+    case kQTHNDL:
+      fQTHN=new QTHNDL<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins);
+  }
+  SetNameTitleToObject();
+}
+*/
+
+
 template <typename U> Double_t QDisTHN<U>::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const
 {
- //This function returns the probability density associated with a point which
- //coordinates are (x,y,z). For p.d.f. with less than 3 dimensions, the
- //arguments of extra dimensions are optional. Before calling this function,
- //the user must call QDisTHN<U>::Normalize() to normalize the p.d.f. properly. 
+  //This function returns the probability density associated with a point which
+  //coordinates are (x,y,z). For p.d.f. with less than 3 dimensions, the
+  //arguments of extra dimensions are optional. Before calling this function,
+  //the user must call QDisTHN<U>::Normalize() to normalize the p.d.f. properly. 
 
- switch(fQTHN->GetNDims()) {
-   case 1:
-     return fQTHN->GetBinContent(fQTHN->FindBin(x));
-   case 2:
-       return fQTHN->GetBinContent(fQTHN->FindBin(x,y));
-   case 3:
-       return fQTHN->GetBinContent(fQTHN->FindBin(x,y,z));
- }
- return 0;
+  switch(fQTHN->GetNDims()) {
+    case 1:
+      return fQTHN->GetBinContent(fQTHN->FindBin(x));
+    case 2:
+      return fQTHN->GetBinContent(fQTHN->FindBin(x,y));
+    case 3:
+      return fQTHN->GetBinContent(fQTHN->FindBin(x,y,z));
+  }
+  return 0;
 }
 
 template <typename U> QDisTHN<U>* QDisTHN<U>::MarginalPDF(const char *name, const Int_t *axes, const Int_t &naxes) const
@@ -169,7 +444,7 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
       Bool_t hasvbaxes=kFALSE;
 
       for(i=dim-1; i>=0; --i) {
-        //Add QAxis pointers to vbsaxis for axis having variable bin width
+	//Add QAxis pointers to vbsaxis for axis having variable bin width
 
 	if(fQTHN->GetAxis(i)->GetNBins()>1 && fQTHN->GetAxis(i)->GetBins()) {
 	  vbsaxis[i]=fQTHN->GetAxis(i);
@@ -260,7 +535,7 @@ template <typename U> void QDisTHN<U>::Normalize(Double_t* integral)
 	//Set fcoord to the index of the first fixed dimension
 	fcoord=dim-nfix;
 	*(binranges[fcoord]+1)=++*(binranges[fcoord]);
-	
+
 	while(*(binranges[fcoord])>nbins[fcoord]){
 	  *(binranges[fcoord]+1)=*(binranges[fcoord])=1;
 	  fcoord++;
