@@ -1,6 +1,7 @@
 #ifndef _QAXIS_
 #define _QAXIS_
 
+#include <algorithm>
 #include "TNamed.h"
 
 class QAxis: public TNamed
