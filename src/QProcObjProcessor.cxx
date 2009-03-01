@@ -297,7 +297,7 @@ void QProcObjProcessor::Exec(const Bool_t &forceall) const
     }
 
     //Loop over all triggered processes
-    for(j=0; j<procs.Count(); --j) {
+    for(j=0; j<procs.Count(); ++j) {
       //Exec the process.
       ((QNamedProc*)procs.GetArray()[j])->Exec();
     }

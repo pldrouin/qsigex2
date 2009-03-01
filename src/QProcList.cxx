@@ -35,7 +35,7 @@ void QProcList::Analyze()
       pidx=fParamsNames->AddUnique(((QProcessor*)(*fQPL)[i])->GetParamName(j));
 
       if(pidx==-1) {
-	fParamsChildIndices->RedimList(fParamsNames->Count());
+	pidx=fParamsChildIndices->RedimList(fParamsNames->Count());
 	fChildParamsMapping->RedimList(fParamsNames->Count());
       }
       (*fParamsChildIndices)[pidx].Add(i);
