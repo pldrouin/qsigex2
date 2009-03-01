@@ -74,7 +74,6 @@ template <typename U> class QTHN: public TNamed
     virtual void SetFBinContent(const Long64_t &fbin, const U &content){SetBinContent(fbin, content);}
   protected:
     virtual void ComputeNBins();
-    Bool_t IsConstantBW(const Int_t &nbins, const Double_t *bins) const;
     virtual Bool_t IsFBinIncluded(const Long64_t &bin, const Int_t *mins, const Int_t *maxs) const;
     Int_t fNDims;
     QAxis **fAxes; //!

@@ -452,17 +452,6 @@ template <typename U> Double_t QTHN<U>::Integral(Int_t const* const* binranges, 
   return integral;
 }
 
-template <typename U> Bool_t QTHN<U>::IsConstantBW(const Int_t &nbins, const Double_t *bins) const
-{
-  if(!nbins) return kTRUE;
-  Double_t bw=bins[1]-bins[0];
-
-  for(Int_t i=1; i<nbins; i++) {
-    if(bins[i+1]-bins[i]!=bw) return kFALSE;
-  }
-  return kTRUE;
-}
-
 template <typename U> Bool_t QTHN<U>::IsFBinIncluded(const Long64_t &fbin, const Int_t *mins, const Int_t *maxs) const
 {
   Long64_t bin=fbin;
@@ -624,9 +613,7 @@ template <typename U> void QTHN<U>::SetAxis(const Int_t &axis, const Int_t &nbin
   }
 
   if(fAxes[axis]) delete fAxes[axis];
-
-  if(IsConstantBW(nbins,bins)) fAxes[axis]=new QAxis(nbins,bins[0],bins[nbins]);
-  else fAxes[axis]=new QAxis(nbins,bins);
+  fAxes[axis]=new QAxis(nbins,bins);
   ComputeNBins();
   Reset();
 }
