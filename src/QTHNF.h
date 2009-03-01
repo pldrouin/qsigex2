@@ -23,7 +23,7 @@ template <typename U> class QTHNF: public QTHN<U>
     virtual ~QTHNF(){Clear();}
     virtual void AddBinContent(const Long64_t &bin, const U &w=1);
     void AddBinContent(const Int_t *coords, const U &w=1){AddBinContent(QTHN<U>::GetBin(coords),w);}
-    void AddFBinContent(const Long64_t &fbin, const U &w=1){QTHN<U>::fBinContent[fbin]+=w; QTHN<U>::fEntries++;}
+    void AddFBinContent(const Long64_t &fbin, const U &w=1){QTHN<U>::fBinContent[fbin]+=w; QTHN<U>::fEntries+=w;}
     virtual void Clear(Option_t* option="");
     TObject* Clone(const char* newname = NULL) const{QTHNF<U>* ret=new QTHNF(*this); if(newname) ret->SetName(newname); return ret;}
     virtual Long64_t GetFBin(const Int_t *coords) const;

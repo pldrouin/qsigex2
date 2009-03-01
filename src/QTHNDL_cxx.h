@@ -13,7 +13,7 @@ template <typename U> void QTHNDL<U>::AddBinContent(const Long64_t &bin, const U
 {
   if(fFBins[bin]!=-1) {
     QTHN<U>::fBinContent[fFBins[bin]]+=w;
-    QTHN<U>::fEntries++;
+    QTHN<U>::fEntries+=w;
 
   } else {
     Long64_t bidx=std::lower_bound(QTHNF<U>::fBins, QTHNF<U>::fBins+QTHNF<U>::fNFBins, bin)-QTHNF<U>::fBins;
@@ -38,7 +38,7 @@ template <typename U> void QTHNDL<U>::AddBinContent(const Long64_t &bin, const U
     } else {
       QTHN<U>::fBinContent[bidx]+=w;
     }
-    QTHN<U>::fEntries++;
+    QTHN<U>::fEntries+=w;
   }
 }
 

@@ -21,7 +21,7 @@ template <typename U> class QTHN: public TNamed
     QTHN(const QTHN &qthn);
     QTHN(const Char_t *name, const Char_t *title, const Int_t &ndims);
     virtual ~QTHN(){Clear();}
-    virtual void AddBinContent(const Long64_t &bin, const U &w=1){fBinContent[bin]+=w; fEntries++;}
+    virtual void AddBinContent(const Long64_t &bin, const U &w=1){fBinContent[bin]+=w; fEntries+=w;}
     void AddBinContent(const Int_t *coords, const U &w=1){AddBinContent(GetBin(coords),w);}
     virtual void AddFBinContent(const Long64_t &fbin, const U &w=1){AddBinContent(fbin,w);}
     virtual void Clear(Option_t* option="");

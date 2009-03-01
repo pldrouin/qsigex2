@@ -63,7 +63,7 @@ template <typename U> void QTHNF<U>::AddBinContent(const Long64_t &bin, const U 
   } else {
     QTHN<U>::fBinContent[bidx]+=w;
   }
-  QTHN<U>::fEntries++;
+  QTHN<U>::fEntries+=w;
 }
 
 template <typename U> void QTHNF<U>::Clear(Option_t* option)
