@@ -38,7 +38,7 @@ void QStdProcessor::Analyze()
       pidx=fParamsNames->AddUnique(proc->GetParam(j).GetName());
 
       if(pidx==-1) {
-	fParamsChildIndices->RedimList(fParamsNames->Count());
+	pidx=fParamsChildIndices->RedimList(fParamsNames->Count());
 	fChildParamsMapping->RedimList(fParamsNames->Count());
       }
       (*fParamsChildIndices)[pidx].Add(i);
