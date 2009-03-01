@@ -42,15 +42,15 @@ class QArrayProcessor: public QStdProcessor
     const QArrayProcessor& operator=(const QArrayProcessor &rhs);
 
     void PrintAnalysisResults() const;
-    void PrintProcesses(UInt_t level=0) const;
+    void PrintProcesses(const UInt_t &level=0) const;
 
     void TerminateProcess();
 
     void Browse(TBrowser *b);
 
   protected:
-    Int_t AEProcIndexToIndex(Int_t index);
-    Int_t PSProcIndexToIndex(Int_t index);
+    Int_t AEProcIndexToIndex(const Int_t &index);
+    Int_t PSProcIndexToIndex(const Int_t &index);
 
   private:
     QList<Bool_t>            *fSelProcs; //-> List of selector processes / of post-selection processes that explicitely process only selected events

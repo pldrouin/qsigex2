@@ -1130,7 +1130,7 @@ void QArrayProcessor::PrintAnalysisResults() const
   curdir->cd();
 }
 
-void QArrayProcessor::PrintProcesses(UInt_t level) const
+void QArrayProcessor::PrintProcesses(const UInt_t &level) const
 {
   Int_t i;
   Int_t nprocs=fProcs->Count();
@@ -1163,7 +1163,7 @@ void QArrayProcessor::Browse(TBrowser *b)
   } 
 }
 
-Int_t QArrayProcessor::AEProcIndexToIndex(Int_t index){
+Int_t QArrayProcessor::AEProcIndexToIndex(const Int_t &index){
   if(index == -1) return fNAEProcs;
 
   if(index > fNAEProcs) {
@@ -1174,7 +1174,7 @@ Int_t QArrayProcessor::AEProcIndexToIndex(Int_t index){
   return index;
 }
 
-Int_t QArrayProcessor::PSProcIndexToIndex(Int_t index){
+Int_t QArrayProcessor::PSProcIndexToIndex(const Int_t &index){
   if(index == -1) return fProcs->Count();
 
   if(index < fNAEProcs) {

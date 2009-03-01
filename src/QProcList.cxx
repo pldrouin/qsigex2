@@ -44,7 +44,7 @@ void QProcList::Analyze()
   }
 }
 
-void QProcList::DeleteChildren(Int_t nsublevels)
+void QProcList::DeleteChildren(const Int_t &nsublevels)
 {
   Int_t i;
 
@@ -109,7 +109,7 @@ void QProcList::PrintAnalysisResults() const
   }
 }
 
-void QProcList::PrintProcesses(UInt_t level) const
+void QProcList::PrintProcesses(const UInt_t &level) const
 {
   Int_t i;
 
@@ -126,7 +126,7 @@ const QProcList& QProcList::operator=(const QProcList &rhs)
   return *this;
 }
 
-void QProcList::SetParamAddress(Int_t index, Double_t *paddr)
+void QProcList::SetParamAddress(const Int_t &index, Double_t* const paddr)
 {
   QProcessor::SetParamAddress(index,paddr);
   Int_t i;

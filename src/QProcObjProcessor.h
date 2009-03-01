@@ -26,7 +26,7 @@ class QProcObjProcessor: public QStdProcessor
 
     void Analyze();
 
-    void DelProc(Int_t index=-1){fProcs->Del(index);}
+    void DelProc(const Int_t &index=-1){fProcs->Del(index);}
     void DelProc(const char *procname);
 
     void Exec(const Bool_t &forceall=kFALSE) const;
@@ -36,7 +36,7 @@ class QProcObjProcessor: public QStdProcessor
     const QProcObjProcessor& operator=(const QProcObjProcessor &rhs);
 
     void PrintAnalysisResults() const;
-    void PrintProcesses(UInt_t level=0) const;
+    void PrintProcesses(const UInt_t &level=0) const;
 
     void TerminateProcess();
 

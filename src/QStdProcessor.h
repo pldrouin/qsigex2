@@ -27,13 +27,13 @@ class QStdProcessor: public QProcessor
 
     Int_t GetNProcs() const{return fProcs->Count();}
 
-    QNamedProc& GetProc(Int_t index) const{return (*fProcs)[index];}
+    QNamedProc& GetProc(const Int_t &index) const{return (*fProcs)[index];}
     QNamedProc& GetProc(const char *procname) const;
 
     const QStdProcessor& operator=(const QStdProcessor &rhs);
 
-    void SetParamAddress(Int_t index, Double_t *paddr=NULL);
-    void SetParamAddress(const char *paramname, Double_t *paddr=NULL){QProcessor::SetParamAddress(paramname,paddr);}
+    void SetParamAddress(const Int_t &index, Double_t* const paddr=NULL);
+    void SetParamAddress(const char *paramname, Double_t* const paddr=NULL){QProcessor::SetParamAddress(paramname,paddr);}
 
   protected:
     QList<QNamedProc> *fProcs;           //-> QNamedProc objects

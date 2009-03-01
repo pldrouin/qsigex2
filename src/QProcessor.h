@@ -17,7 +17,7 @@ class QProcessor: public TNamed
     QProcessor(const QProcessor &rhs);
     virtual ~QProcessor();
 
-    Int_t GetNParams() const{return fParamsNames->Count();}
+    const Int_t &GetNParams() const{return fParamsNames->Count();}
 
     virtual void Analyze()=0;
     virtual void Exec(const Bool_t &forceall=kFALSE) const=0;
@@ -25,13 +25,13 @@ class QProcessor: public TNamed
 
     void ClearParams();
 
-    void CopyParamAddress(Int_t fromidx, Int_t toidx);
+    void CopyParamAddress(const Int_t &fromidx, const Int_t &toidx);
 
     Int_t FindParamIndex(const char *paramname) const{return (*fParamsNames).FindFirst(paramname);}
 
     static const UInt_t& GetDefVerbosity(){return fDefVerbosity;}
 
-    const Double_t& GetParam(Int_t index) const{return *((*fParams)[index]);}
+    const Double_t& GetParam(const Int_t &index) const{return *((*fParams)[index]);}
     const Double_t& GetParam(const char *paramname) const;
 #ifdef __CINT__
     Double_t ** GetParams() const{return fParams->GetArray();}
@@ -39,24 +39,24 @@ class QProcessor: public TNamed
     Double_t const* const* GetParams() const{return fParams->GetArray();}
 #endif
 
-    const char* GetParamName(Int_t index) const{return (*fParamsNames)[index];}
+    const char* GetParamName(const Int_t &index) const{return (*fParamsNames)[index];}
 
     const UInt_t& GetVerbosity() const{return fVerbosity;}
 
     const QProcessor& operator=(const QProcessor &rhs);
 
     virtual void PrintAnalysisResults() const=0;
-    virtual void PrintProcesses(UInt_t level=0) const=0;
+    virtual void PrintProcesses(const UInt_t &level=0) const=0;
 
-    static void SetDefVerbosity(UInt_t verbosity=0){fDefVerbosity=verbosity;}
+    static void SetDefVerbosity(const UInt_t &verbosity=0){fDefVerbosity=verbosity;}
 
-    void SetParam(Int_t index=-1, const Double_t &value=0);
-    virtual void SetParamAddress(Int_t index, Double_t *paddr=NULL);
+    void SetParam(const Int_t &index, const Double_t &value=0);
+    virtual void SetParamAddress(const Int_t &index, Double_t* const paddr=NULL);
     void SetParam(const char *paramname, const Double_t &value=0);
-    virtual void SetParamAddress(const char *paramname, Double_t *paddr=NULL);
-    void SetParams(Double_t *params);
+    virtual void SetParamAddress(const char *paramname, Double_t* const paddr=NULL);
+    void SetParams(Double_t const* const params);
 
-    virtual void SetVerbosity(UInt_t verbosity=0){fVerbosity=verbosity;}
+    virtual void SetVerbosity(const UInt_t &verbosity=0){fVerbosity=verbosity;}
 
     virtual void TerminateProcess()=0;
 

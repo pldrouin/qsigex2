@@ -15,11 +15,11 @@ class QProcedure
     virtual ~QProcedure(){}
     virtual const QProcedure& operator=(const QProcedure &rhs){fArgs=rhs.fArgs; return *this;}
 
-    virtual void AddIVar(Int_t index=-1, Double_t *buf=NULL){fArgs.AddIVar(index,buf);}
-    virtual void AddIObj(Int_t index=-1, QProcObj *obj=NULL){fArgs.AddIObj(index,obj);}
-    virtual void AddOVar(Int_t index=-1, Double_t *buf=NULL){fArgs.AddOVar(index,buf);}
-    virtual void AddOObj(Int_t index=-1, QProcObj *obj=NULL){fArgs.AddOObj(index,obj);}
-    virtual void AddParam(Int_t index=-1, Double_t *buf=NULL){fArgs.AddParam(index,buf);}
+    virtual void AddIVar(const Int_t &index=-1, Double_t* const buf=NULL){fArgs.AddIVar(index,buf);}
+    virtual void AddIObj(const Int_t &index=-1, QProcObj* const obj=NULL){fArgs.AddIObj(index,obj);}
+    virtual void AddOVar(const Int_t &index=-1, Double_t* const buf=NULL){fArgs.AddOVar(index,buf);}
+    virtual void AddOObj(const Int_t &index=-1, QProcObj* const obj=NULL){fArgs.AddOObj(index,obj);}
+    virtual void AddParam(const Int_t &index=-1, Double_t* const buf=NULL){fArgs.AddParam(index,buf);}
 
     void ClearIVars(){fArgs.ClearIVars();}
     void ClearIObjs(){fArgs.ClearIObjs();}
@@ -29,11 +29,11 @@ class QProcedure
 
     virtual QProcedure* Clone() const=0;
 
-    void DelIVar(Int_t index=-1){fArgs.DelIVar(index);}
-    void DelIObj(Int_t index=-1){fArgs.DelIObj(index);}
-    void DelOVar(Int_t index=-1){fArgs.DelOVar(index);}
-    void DelOObj(Int_t index=-1){fArgs.DelOObj(index);}
-    void DelParam(Int_t index=-1){fArgs.DelParam(index);}
+    void DelIVar(const Int_t &index=-1){fArgs.DelIVar(index);}
+    void DelIObj(const Int_t &index=-1){fArgs.DelIObj(index);}
+    void DelOVar(const Int_t &index=-1){fArgs.DelOVar(index);}
+    void DelOObj(const Int_t &index=-1){fArgs.DelOObj(index);}
+    void DelParam(const Int_t &index=-1){fArgs.DelParam(index);}
 
     const Int_t& GetNIVars() const{return fArgs.GetNIVars();}
     const Int_t& GetNIObjs() const{return fArgs.GetNIObjs();}
@@ -41,23 +41,23 @@ class QProcedure
     const Int_t& GetNOObjs() const{return fArgs.GetNOObjs();}
     const Int_t& GetNParams() const{return fArgs.GetNParams();}
 
-    const Double_t& IVar(Int_t i) const{return fArgs.IVar(i);}
-    const QProcObj* IObj(Int_t i) const{return fArgs.IObj(i);}
-    Double_t& OVar(Int_t i) const{return fArgs.OVar(i);}
-    QProcObj* OObj(Int_t i) const{return fArgs.OObj(i);}
-    const Double_t& Param(Int_t i) const{return fArgs.Param(i);}
+    const Double_t& IVar(const Int_t &i) const{return fArgs.IVar(i);}
+    const QProcObj* IObj(const Int_t &i) const{return fArgs.IObj(i);}
+    Double_t& OVar(const Int_t &i) const{return fArgs.OVar(i);}
+    QProcObj* OObj(const Int_t &i) const{return fArgs.OObj(i);}
+    const Double_t& Param(const Int_t &i) const{return fArgs.Param(i);}
 
-    void SetIVarPtr(Int_t index, Double_t *buf){fArgs.SetIVarPtr(index,buf);}
-    void SetIObjPtr(Int_t index, QProcObj *obj){fArgs.SetIObjPtr(index,obj);}
-    void SetOVarPtr(Int_t index, Double_t *buf){fArgs.SetOVarPtr(index,buf);}
-    void SetOObjPtr(Int_t index, QProcObj *obj){fArgs.SetOObjPtr(index,obj);}
-    void SetParamPtr(Int_t index, Double_t *buf){fArgs.SetParamPtr(index,buf);}
+    void SetIVarPtr(const Int_t &index, Double_t* const buf){fArgs.SetIVarPtr(index,buf);}
+    void SetIObjPtr(const Int_t &index, QProcObj* const obj){fArgs.SetIObjPtr(index,obj);}
+    void SetOVarPtr(const Int_t &index, Double_t* const buf){fArgs.SetOVarPtr(index,buf);}
+    void SetOObjPtr(const Int_t &index, QProcObj* const obj){fArgs.SetOObjPtr(index,obj);}
+    void SetParamPtr(const Int_t &index, Double_t* const buf){fArgs.SetParamPtr(index,buf);}
 
-    void SetNIVars(Int_t n){fArgs.SetNIVars(n);}
-    void SetNIObjs(Int_t n){fArgs.SetNIObjs(n);}
-    void SetNOVars(Int_t n){fArgs.SetNOVars(n);}
-    void SetNOObjs(Int_t n){fArgs.SetNOObjs(n);}
-    void SetNParams(Int_t n){fArgs.SetNParams(n);}
+    void SetNIVars(const Int_t &n){fArgs.SetNIVars(n);}
+    void SetNIObjs(const Int_t &n){fArgs.SetNIObjs(n);}
+    void SetNOVars(const Int_t &n){fArgs.SetNOVars(n);}
+    void SetNOObjs(const Int_t &n){fArgs.SetNOObjs(n);}
+    void SetNParams(const Int_t &n){fArgs.SetNParams(n);}
 
     virtual Bool_t Exec()=0;
 

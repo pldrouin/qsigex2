@@ -74,7 +74,7 @@ const QStdProcessor& QStdProcessor::operator=(const QStdProcessor &rhs)
   return *this;
 }
 
-void QStdProcessor::SetParamAddress(Int_t index, Double_t *paddr)
+void QStdProcessor::SetParamAddress(const Int_t &index, Double_t* const paddr)
 {
   QProcessor::SetParamAddress(index,paddr);
   Int_t i;

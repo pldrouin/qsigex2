@@ -41,7 +41,7 @@ void QProcessor::ClearParams()
   fOwnsParams->Clear();
 }
 
-void QProcessor::CopyParamAddress(Int_t fromidx, Int_t toidx)
+void QProcessor::CopyParamAddress(const Int_t &fromidx, const Int_t &toidx)
 {
   SetParamAddress(toidx,(*fParams)[fromidx]);
 }
@@ -85,7 +85,7 @@ const QProcessor& QProcessor::operator=(const QProcessor &rhs)
   return *this;
 }
 
-void QProcessor::SetParam(Int_t index, const Double_t &value)
+void QProcessor::SetParam(const Int_t &index, const Double_t &value)
 {
   if((*fOwnsParams)[index]) {
     *(*fParams)[index]=value;
@@ -96,7 +96,7 @@ void QProcessor::SetParam(Int_t index, const Double_t &value)
   }
 }
 
-void QProcessor::SetParamAddress(Int_t index, Double_t *paddr)
+void QProcessor::SetParamAddress(const Int_t &index, Double_t* const paddr)
 {
   if(paddr && (*fOwnsParams)[index]) {
     delete (*fParams)[index];
@@ -123,7 +123,7 @@ void QProcessor::SetParam(const char *paramname, const Double_t &value)
   }
 }
 
-void QProcessor::SetParamAddress(const char *paramname, Double_t *paddr)
+void QProcessor::SetParamAddress(const char *paramname, Double_t* const paddr)
 {
   Int_t i;
   if((i=FindParamIndex(paramname))!=-1) SetParamAddress(i,paddr);
@@ -133,7 +133,7 @@ void QProcessor::SetParamAddress(const char *paramname, Double_t *paddr)
   }
 }
 
-void QProcessor::SetParams(Double_t *params)
+void QProcessor::SetParams(Double_t const* const params)
 {
   for(Int_t i=0; i<fParams->Count(); i++) SetParam(i,params[i]);
 }

@@ -401,7 +401,7 @@ void QProcObjProcessor::PrintAnalysisResults() const
   }
 }
 
-void QProcObjProcessor::PrintProcesses(UInt_t level) const
+void QProcObjProcessor::PrintProcesses(const UInt_t &level) const
 {
   Int_t i;
   Int_t nprocs=fProcs->Count();
