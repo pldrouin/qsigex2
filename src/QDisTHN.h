@@ -80,7 +80,7 @@ template <typename U> class QDisTHN: public QDis
       return new QDisTHN<U>(*this);
     }
 
-  void Draw(Option_t*){}
+  void Draw(Option_t *option=""){fQTHN->Draw(option);}
 
   template <typename V> void Fill(const V &x){fQTHN->AddBinContent(fQTHN->FindBin(x));}
   template <typename V> void Fill(const V &x, const V &y){fQTHN->AddBinContent(fQTHN->FindBin(x,y));}
