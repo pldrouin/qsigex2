@@ -15,7 +15,7 @@ class QProcRandom3: public QProcObj, public TRandom3
     UInt_t GetInitSeed() const{return fInitSeed;}
     void InitProcObj(){TRandom3::SetSeed(fInitSeed);}
     static void SetGSeed(const UInt_t &seed=0);
-    void SetSeed(const UInt_t &seed=0){fInitSeed=seed; TRandom3::SetSeed(seed);}
+    void SetSeed(UInt_t seed=0){fInitSeed=seed; TRandom3::SetSeed(seed);}
   protected:
     UInt_t fInitSeed;
     static UInt_t fInitGSeed;
