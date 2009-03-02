@@ -32,13 +32,19 @@ using std::cout;
 class QDisTF: public QDis
 {
  public:
-  QDisTF(): QDis(), fTF(NULL){}
+  QDisTF(): QDis(), fTF(NULL), fNDims(0){}
 
   QDisTF(const QDisTF& newqdis): QDis(newqdis)
   {
     PRINTF2(this,"\tQDisTF::QDisTF(const QDisTF& newqdis)\n")
-    if(newqdis.fTF) fTF=(TF1*)newqdis.fTF->Clone();
-    else fTF=NULL;
+    if(newqdis.fTF) {
+      fTF=(TF1*)newqdis.fTF->Clone();
+      fNDims=fTF->GetNdim();
+
+    } else {
+      fTF=NULL;
+      fNDims=0;
+    }
   }
 
   QDisTF(const Char_t* filename, const Char_t* objectname);
@@ -47,6 +53,7 @@ class QDisTF: public QDis
   {
     PRINTF2(this,"\tQDisTF::QDisTF(const TF& newobject)\n")
     fTF=(TF1*)newobject.Clone();
+    fNDims=fTF->GetNdim();
     SetNameTitleToObject();
   }
 
@@ -60,7 +67,11 @@ class QDisTF: public QDis
     if(fTF) delete fTF;
     if(newqdis.fTF) {
       fTF=(TF1*)newqdis.fTF->Clone();
-    } else fTF=NULL;
+      fNDims=fTF->GetNdim();
+    } else {
+      fTF=NULL;
+      fNDims=0;
+    }
     return *this;
   }
 
@@ -75,20 +86,25 @@ class QDisTF: public QDis
 
   void Draw(Option_t *option=""){fTF->Draw(option);}
 
-  Double_t ProbDensity(const Double_t &x,const Double_t &y=0,const Double_t &z=0) const;
+  Double_t Eval(const Double_t &x0) const;
+  Double_t Eval(const Double_t &x0, const Double_t &x1) const;
+  Double_t Eval(const Double_t &x0, const Double_t &x1, const Double_t &x2) const;
+  Double_t Eval(Double_t const* const &x) const;
 
   Double_t Integral(Double_t xlo,Double_t xhi,Double_t ylo=0,Double_t yhi=0, Double_t zlo=0, Double_t zhi=0) const; 
   Double_t Integral(Option_t* domain) const;
 
   void Normalize(Double_t* integral=NULL);
 
-  Int_t GetDimension() const{return fTF->GetNdim();}
+  const Int_t& GetNDims() const{return fNDims;}
 
   TF1* GetTF() const{return fTF;}
 
  private:
   void SetNameTitleToObject(){SetNameTitle(fTF->GetName(),fTF->GetTitle());}
   mutable TF1 *fTF;
+  mutable Int_t fNDims; //!
+  mutable Double_t fEval; //!
   ClassDef(QDisTF,2) //Derived class from QDis that allows to get probabilities from a TF
 };
 #include "debugger.h"

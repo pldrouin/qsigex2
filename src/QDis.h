@@ -36,18 +36,18 @@ using std::cout;
 class QDis: public TNamed, public QProcObj
 {
  public:
-  QDis(): fCutExpr(), fNormFlags(kRegularNorm), fNFixedCoords(0)
+  QDis(): TNamed(), QProcObj(), fCutExpr(), fNormFlags(kRegularNorm), fNFixedCoords(0)
     {
       PRINTF2(this,"\tQDis::QDis()\n")
     }
+
+  QDis(const Char_t *name, const Char_t *title): TNamed(name,title), QProcObj(), fCutExpr(), fNormFlags(kRegularNorm), fNFixedCoords(0){}
   
-  QDis(const QDis& rhs): TNamed(rhs), QProcObj(rhs){*this=rhs;}
+  QDis(const QDis& rhs): TNamed(rhs), QProcObj(rhs), fCutExpr(), fNormFlags(kRegularNorm), fNFixedCoords(0){*this=rhs;}
 
   virtual ~QDis();
 
-  virtual Double_t ProbDensity(const Double_t &x,const Double_t &y=0,const Double_t &z=0) const=0;
   virtual Double_t Derivative(const Double_t&) const {return 0;};
-  
 
   virtual QDis* CloneQDis() const=0;
 
@@ -70,7 +70,7 @@ class QDis: public TNamed, public QProcObj
       gPad->Update();
     }
 
-  virtual Int_t GetDimension() const=0;
+  virtual const Int_t& GetNDims() const=0;
 
   const Option_t* GetCutExpr() const{return fCutExpr;}
   UInt_t GetNFixedCoords() const{return fNFixedCoords;}
@@ -103,7 +103,6 @@ class QDis: public TNamed, public QProcObj
   enum eNormFlags {kRegularNorm=0, kEventsFilled=1, kVarBinSizeEventsFilled=2, kNoBinWidthNorm=4, kNoNorm=8};
 
  protected:
-  virtual void SetNameTitleToObject()=0;
   TString fCutExpr;
   UInt_t fNormFlags;
   UInt_t fNFixedCoords;

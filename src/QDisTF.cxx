@@ -34,30 +34,39 @@ QDisTF::QDisTF(const Char_t* filename, const Char_t* objectname)
     cout << "QDisTF::QDisTF: Object '" << objectname << "' in file '" << filename << "' doesn't exist\n"; 
     throw 1;
   }
+  fNDims=fTF->GetNdim();
 
   f.Close();
   curdir->cd();
 }
 
-Double_t QDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const
+Double_t QDisTF::Eval(const Double_t &x0) const
 {
-  //This function returns the probability density associated with a point which
-  //coordinates are (x,y,z). For p.d.f. with less than 3 dimensions, the
-  //arguments of extra dimensions are optional. Before calling this function,
-  //the user must call QDisTF::Normalize() to normalize the p.d.f. properly. 
-
-  PRINTF2(this,"\tDouble_t QDisTF::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const\n")
-
-  try{
-
-    return (Double_t)const_cast<TF1*>(fTF)->Eval(x,y,z);
-
-  } catch (Int_t i){
-    cout << "Exception handled by QDisTF::ProbDensity\n";
-    throw i;
-  }
+    return (Double_t)const_cast<TF1*>(fTF)->Eval(x0);
 }
 
+Double_t QDisTF::Eval(const Double_t &x0, const Double_t &x1) const
+{
+    return (Double_t)const_cast<TF1*>(fTF)->Eval(x0,x1);
+}
+
+Double_t QDisTF::Eval(const Double_t &x0, const Double_t &x1, const Double_t &x2) const
+{
+    return (Double_t)const_cast<TF1*>(fTF)->Eval(x0,x1,x2);
+}
+
+Double_t QDisTF::Eval(Double_t const* const &x) const
+{
+  switch(fTF->GetNdim()) {
+    case 1:
+      return (Double_t)const_cast<TF1*>(fTF)->Eval(x[0]);
+    case 2:
+      return (Double_t)const_cast<TF1*>(fTF)->Eval(x[0],x[1]);
+    case 3:
+      return (Double_t)const_cast<TF1*>(fTF)->Eval(x[0],x[1],x[2]);
+  }
+  return 0;
+}
 
 Double_t QDisTF::Integral(Double_t xlo, Double_t xhi, Double_t ylo, Double_t yhi, Double_t zlo, Double_t zhi) const
 {

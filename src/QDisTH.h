@@ -37,7 +37,7 @@ using std::cout;
 class QDisTH: public QDis
 {
  public:
-  QDisTH(): QDis(), fOwned(kTRUE), fTH(NULL){}
+  QDisTH(): QDis(), fOwned(kTRUE), fTH(NULL), fNDims(0){}
 
   QDisTH(const QDisTH& newqdis): QDis(newqdis), fOwned(kTRUE)
   {
@@ -45,7 +45,11 @@ class QDisTH: public QDis
     if(newqdis.fTH) {
 	fTH=(TH1*)newqdis.fTH->Clone();
 	fTH->SetDirectory(NULL);
-    } else fTH=NULL;
+        fNDims=fTH->GetDimension();
+    } else {
+      fTH=NULL;
+      fNDims=0;
+    }
   }
 
   QDisTH(const Char_t* filename, const Char_t* objectname);
@@ -55,6 +59,7 @@ class QDisTH: public QDis
     PRINTF2(this,"\tQDisTH::QDisTH(const TH& newobject)\n")
     fTH=(TH1*)newobject.Clone();
     fTH->SetDirectory(NULL);
+    fNDims=fTH->GetDimension();
     SetNameTitleToObject();
   }
 
@@ -62,6 +67,7 @@ class QDisTH: public QDis
   {
     PRINTF2(this,"\tQDisTH::QDisTH(TH *object)\n")
     fTH=object;
+    fNDims=fTH->GetDimension();
     SetNameTitleToObject();
   }
 
@@ -94,9 +100,11 @@ class QDisTH: public QDis
     if(newqdis.fTH) {
       fTH=(TH1*)newqdis.fTH->Clone();
       fOwned=kTRUE;
+      fNDims=fTH->GetDimension();
       fTH->SetDirectory(NULL);
     } else {
       fTH=NULL;
+      fNDims=0;
       fOwned=kTRUE;
     }
     return *this;
@@ -114,11 +122,16 @@ class QDisTH: public QDis
 
   void Draw(Option_t *option=""){fTH->Draw(option);}
 
+  Double_t Eval(const Double_t &x0) const;
+  Double_t Eval(const Double_t &x0, const Double_t &x1) const;
+  Double_t Eval(const Double_t &x0, const Double_t &x1, const Double_t &x2) const;
+  Double_t Eval(Double_t const* const &x) const;
+
   void Fill(const Double_t &x);
   void Fill(const Double_t &x, const Double_t &y);
   void Fill(const Double_t &x, const Double_t &y, const Double_t &z);
   
-  Int_t GetDimension() const{return fTH->GetDimension();}
+  const Int_t& GetNDims() const{return fNDims;}
 
   TH1* GetTH() const{return fTH;} 
 
@@ -127,8 +140,6 @@ class QDisTH: public QDis
   Double_t Integral(Int_t** binranges=NULL, Bool_t *widths=NULL) const;
 
   void Normalize(Double_t* integral=NULL);
-
-  Double_t ProbDensity(const Double_t &x,const Double_t &y=0,const Double_t &z=0) const;
 
   QDisTH* MarginalPDF(const char *name="_md", const Int_t xaxis=0, const Int_t yaxis=-1) const;
   //QDisTH* MarginalPDF2D(const char *name="_m1d", Int_t xaxis=0, Int_t yaxis=1) const;
@@ -143,6 +154,7 @@ class QDisTH: public QDis
   void SetNameTitleToObject(){SetNameTitle(fTH->GetName(),fTH->GetTitle());}
   Bool_t fOwned;
   TH1 *fTH;
+  Int_t fNDims; //!
 
   ClassDef(QDisTH,2) //Derived class from QDis that allows to get probabilities from a TH
 };

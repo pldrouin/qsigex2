@@ -70,17 +70,15 @@
 #pragma link C++ class QDis;
 #pragma link C++ class QDisTF;
 #pragma link C++ class QDisTH-;
-#pragma link C++ class QDisTHN<Double_t>;
-#pragma link C++ class QDisTHN<Float_t>;
-#pragma link C++ class QTHN<Double_t>-;
-#pragma link C++ class QTHN<Float_t>-;
-#pragma link C++ class QTHN<Int_t>-;
-#pragma link C++ class QTHNF<Double_t>-;
-#pragma link C++ class QTHNF<Float_t>-;
-#pragma link C++ class QTHNF<Int_t>-;
-#pragma link C++ class QTHNDL<Double_t>-;
-#pragma link C++ class QTHNDL<Float_t>-;
-#pragma link C++ class QTHNDL<Int_t>-;
+#pragma link C++ class QHN<Double_t>-;
+#pragma link C++ class QHN<Float_t>-;
+#pragma link C++ class QHN<Int_t>-;
+#pragma link C++ class QHNF<Double_t>-;
+#pragma link C++ class QHNF<Float_t>-;
+#pragma link C++ class QHNF<Int_t>-;
+#pragma link C++ class QHNDL<Double_t>-;
+#pragma link C++ class QHNDL<Float_t>-;
+#pragma link C++ class QHNDL<Int_t>-;
 #pragma link C++ class QFileUtils;
 #pragma link C++ class QTTreeUtils;
 

@@ -1,13 +1,13 @@
-template <typename U> void QTHN<U>::Streamer(TBuffer &R__b)
+template <typename U> void QHN<U>::Streamer(TBuffer &R__b)
 { 
-  // Stream an object of class QTHN<U>.
+  // Stream an object of class QHN<U>.
 
   UInt_t R__s, R__c;
   Int_t i;
 
   if (R__b.IsReading()) {
     Version_t R__v = R__b.ReadVersion(&R__s, &R__c); if (R__v) { }
-    TNamed::Streamer(R__b);
+    QDis::Streamer(R__b);
     R__b >> fNDims;
 
     if(fAxes) delete[] fAxes;
@@ -20,12 +20,12 @@ template <typename U> void QTHN<U>::Streamer(TBuffer &R__b)
     R__b >> fEntries;
     R__b.ReadFastArray(fBinContent,fNBins);
 
-    R__b.CheckByteCount(R__s, R__c, QTHN<U>::IsA());
+    R__b.CheckByteCount(R__s, R__c, QHN<U>::IsA());
 
   } else {
     QAxis *abuf;
-    R__c = R__b.WriteVersion(QTHN<U>::IsA(), kTRUE);
-    TNamed::Streamer(R__b);
+    R__c = R__b.WriteVersion(QHN<U>::IsA(), kTRUE);
+    QDis::Streamer(R__b);
     R__b << fNDims;
 
     for(i=0; i<fNDims; i++) {

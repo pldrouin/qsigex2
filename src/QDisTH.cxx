@@ -36,6 +36,7 @@ QDisTH::QDisTH(const Char_t* filename, const Char_t* objectname): fOwned(kTRUE)
     fTH=dynamic_cast<TH1*>(obj);
     SetNameTitleToObject();
     fTH->SetDirectory(NULL);
+    fNDims=fTH->GetDimension();
 
   } else if(dynamic_cast<QDisTH*>(obj)) {
     *this=*dynamic_cast<QDisTH*>(obj);
@@ -63,6 +64,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xl
   } else {
     fTH=new TH3F(qdtn,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
   }
+  fNDims=fTH->GetDimension();
   fTH->SetDirectory(NULL);
   SetNameTitle(name,title);
 }
@@ -74,6 +76,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xl
   fTH=new TH3F(qdtn,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
   if(!IsConstantBW(nbinsz,zbins)) fTH->GetZaxis()->Set(nbinsz,zbins);
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -84,6 +87,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xl
   fTH=new TH3F(qdtn,title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
   if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -104,6 +108,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Floa
     if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
   }
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -115,6 +120,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Float_t xl
   if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
   if(!IsConstantBW(nbinsz,zbins)) fTH->GetZaxis()->Set(nbinsz,zbins);
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -126,6 +132,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Floa
   if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
   if(!IsConstantBW(nbinsz,zbins)) fTH->GetZaxis()->Set(nbinsz,zbins);
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -144,6 +151,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Floa
     if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
   }
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -182,6 +190,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Floa
     }
   }
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -199,6 +208,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t x
     fTH=new TH3D(qdtn,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh);
   }
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -209,6 +219,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t x
   fTH=new TH3D(qdtn,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins[0],zbins[nbinsz]);
   if(!IsConstantBW(nbinsz,zbins)) fTH->GetZaxis()->Set(nbinsz,zbins);
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -219,6 +230,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t x
   fTH=new TH3D(qdtn,title,nbinsx,xlow,xhigh,nbinsy,ybins[0],ybins[nbinsy],nbinsz,zlow,zhigh);
   if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -239,6 +251,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Doub
     if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
   }
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -250,6 +263,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, Double_t x
   if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
   if(!IsConstantBW(nbinsz,zbins)) fTH->GetZaxis()->Set(nbinsz,zbins);
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -261,6 +275,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Doub
   if(!IsConstantBW(nbinsx,xbins)) fTH->GetXaxis()->Set(nbinsx,xbins);
   if(!IsConstantBW(nbinsz,zbins)) fTH->GetZaxis()->Set(nbinsz,zbins);
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -279,6 +294,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Doub
     if(!IsConstantBW(nbinsy,ybins)) fTH->GetYaxis()->Set(nbinsy,ybins);
   }
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -315,6 +331,7 @@ QDisTH::QDisTH(const Char_t *name, const Char_t *title, Int_t nbinsx, const Doub
     }
   }
   fTH->SetDirectory(NULL);
+  fNDims=fTH->GetDimension();
   SetNameTitle(name,title);
 }
 
@@ -472,16 +489,32 @@ Bool_t QDisTH::IsConstantBW(const Int_t &nbins, const Float_t *bins) const
   return kTRUE;
 }
 
-Double_t QDisTH::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const
+Double_t QDisTH::Eval(const Double_t &x0) const
 {
- //This function returns the probability density associated with a point which
- //coordinates are (x,y,z). For p.d.f. with less than 3 dimensions, the
- //arguments of extra dimensions are optional. Before calling this function,
- //the user must call QDisTH::Normalize() to normalize the p.d.f. properly. 
+  return (Double_t)fTH->GetBinContent((fTH->GetXaxis())->FindFixBin(x0));
+}
 
-  PRINTF2(this,"\tDouble_t QDisTH::ProbDensity(const Double_t &x,const Double_t &y,const Double_t &z) const\n")  
+Double_t QDisTH::Eval(const Double_t &x0, const Double_t &x1) const
+{
+  return (Double_t)fTH->GetBinContent((fTH->GetXaxis())->FindFixBin(x0),(fTH->GetYaxis())->FindFixBin(x1));
+}
 
-  return (Double_t)fTH->GetBinContent((fTH->GetXaxis())->FindFixBin(x),(fTH->GetYaxis())->FindFixBin(y),(fTH->GetZaxis())->FindFixBin(z));
+Double_t QDisTH::Eval(const Double_t &x0, const Double_t &x1, const Double_t &x2) const
+{
+  return (Double_t)fTH->GetBinContent((fTH->GetXaxis())->FindFixBin(x0),(fTH->GetYaxis())->FindFixBin(x1),(fTH->GetZaxis())->FindFixBin(x2));
+}
+
+Double_t QDisTH::Eval(Double_t const* const &x) const
+{
+  switch(fTH->GetDimension()) {
+    case 1:
+      return (Double_t)fTH->GetBinContent((fTH->GetXaxis())->FindFixBin(x[0]));
+    case 2:
+      return (Double_t)fTH->GetBinContent((fTH->GetXaxis())->FindFixBin(x[0]),(fTH->GetYaxis())->FindFixBin(x[1]));
+    case 3:
+      return (Double_t)fTH->GetBinContent((fTH->GetXaxis())->FindFixBin(x[0]),(fTH->GetYaxis())->FindFixBin(x[1]),(fTH->GetZaxis())->FindFixBin(x[2]));
+  }
+  return 0;
 }
 
 QDisTH* QDisTH::MarginalPDF(const char *name, const Int_t xaxis, const Int_t yaxis) const
