@@ -9,6 +9,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3D.h"
+#include "TMath.h"
 #include "TMatrixDSym.h"
 #include "QDis.h"
 #include "QAxis.h"
