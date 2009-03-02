@@ -512,6 +512,51 @@ template <typename U> Long64_t QHN<U>::GetBin(const Int_t *coords) const
   return bin;
 }
 
+template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1) const
+{
+    return (Long64_t)coord1*(fAxes[0]->GetNBins()+2)+coord0;
+}
+
+template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2) const
+{
+    return ((Long64_t)coord2*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
+}
+
+template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3) const
+{
+    return (((Long64_t)coord3*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
+}
+
+template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4) const
+{
+    return ((((Long64_t)coord4*(fAxes[3]->GetNBins()+2)+coord3)*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
+}
+
+template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5) const
+{
+    return (((((Long64_t)coord5*(fAxes[4]->GetNBins()+2)+coord4)*(fAxes[3]->GetNBins()+2)+coord3)*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
+}
+
+template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6) const
+{
+    return ((((((Long64_t)coord6*(fAxes[5]->GetNBins()+2)+coord5)*(fAxes[4]->GetNBins()+2)+coord4)*(fAxes[3]->GetNBins()+2)+coord3)*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
+}
+
+template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7) const
+{
+    return (((((((Long64_t)coord7*(fAxes[6]->GetNBins()+2)+coord6)*(fAxes[5]->GetNBins()+2)+coord5)*(fAxes[4]->GetNBins()+2)+coord4)*(fAxes[3]->GetNBins()+2)+coord3)*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
+}
+
+template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7, const Int_t &coord8) const
+{
+    return ((((((((Long64_t)coord8*(fAxes[7]->GetNBins()+2)+coord7)*(fAxes[6]->GetNBins()+2)+coord6)*(fAxes[5]->GetNBins()+2)+coord5)*(fAxes[4]->GetNBins()+2)+coord4)*(fAxes[3]->GetNBins()+2)+coord3)*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
+}
+
+template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7, const Int_t &coord8, const Int_t &coord9) const
+{
+    return (((((((((Long64_t)coord9*(fAxes[8]->GetNBins()+2)+coord8)*(fAxes[7]->GetNBins()+2)+coord7)*(fAxes[6]->GetNBins()+2)+coord6)*(fAxes[5]->GetNBins()+2)+coord5)*(fAxes[4]->GetNBins()+2)+coord4)*(fAxes[3]->GetNBins()+2)+coord3)*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
+}
+
 template <typename U> void QHN<U>::GetBinCoords(Long64_t bin, Int_t *coords) const
 {
   coords[0]=bin%(fAxes[0]->GetNBins()+2);
@@ -1033,6 +1078,7 @@ template <typename U> void QHN<U>::Normalize(Double_t* integral)
     delete[] biniter;
   }
 }
+
 template <typename U> const QHN<U>& QHN<U>::operator=(const QHN<U> &qthn)
 {
   Clear();
@@ -1056,7 +1102,7 @@ template <typename U> const QHN<U>& QHN<U>::operator=(const QHN<U> &qthn)
 
 template <typename U> void QHN<U>::Reset()
 {
-  memset(fBinContent,0,fNBins*sizeof(Double_t));
+  memset(fBinContent,0,fNBins*sizeof(U));
   fEntries=0;
 }
 

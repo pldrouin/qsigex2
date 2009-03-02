@@ -79,6 +79,7 @@
 #pragma link C++ class QHNDL<Double_t>-;
 #pragma link C++ class QHNDL<Float_t>-;
 #pragma link C++ class QHNDL<Int_t>-;
+#pragma link C++ class QPHN-;
 #pragma link C++ class QFileUtils;
 #pragma link C++ class QTTreeUtils;
 

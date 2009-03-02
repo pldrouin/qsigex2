@@ -64,6 +64,10 @@ template <typename U> class QHNDL: public QHNF<U>
     ClassDef(QHNDL,1) //Multidimensional histogram template class optimized for iteration over filled bins, but having a double list to speed up random access of filled bins.
 };
 
+typedef QHNDL<Double_t> QHNDL_D;
+typedef QHNDL<Float_t> QHNDL_F;
+typedef QHNDL<Int_t> QHNDL_I;
+
 #include "QHNDL_cxx.h"
 
 #endif

@@ -74,8 +74,28 @@ template <typename U> class QHN: public QDis
     const U& Eval(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8) const{return GetBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8));}
     const U& Eval(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8, const Float_t &x9) const{return GetBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8,x9));}
     const U& Eval(Float_t const* const &x) const{return GetBinContent(FindBin(x));}
-    void Fill(Double_t const * const &x, const U &w=1){AddBinContent(FindBin(x));}
-    void Fill(Float_t const * const &x, const U &w=1){AddBinContent(FindBin(x));}
+    virtual void Fill(Double_t const * const &x, const U &w=1){AddBinContent(FindBin(x),w);}
+    virtual void Fill(const Double_t &x0){AddBinContent(FindBin(x0));}
+    virtual void Fill(const Double_t &x0, const Double_t &x1){AddBinContent(FindBin(x0,x1));}
+    virtual void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2){AddBinContent(FindBin(x0,x1,x2));}
+    virtual void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3){AddBinContent(FindBin(x0,x1,x2,x3));}
+    virtual void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4){AddBinContent(FindBin(x0,x1,x2,x3,x4));}
+    virtual void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5));}
+    virtual void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6));}
+    virtual void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7));}
+    virtual void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7, const Double_t &x8){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8));}
+    virtual void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7, const Double_t &x8, const Double_t &x9){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8,x9));}
+    virtual void Fill(Float_t const * const &x, const U &w=1){AddBinContent(FindBin(x),w);}
+    virtual void Fill(const Float_t &x0){AddBinContent(FindBin(x0));}
+    virtual void Fill(const Float_t &x0, const Float_t &x1){AddBinContent(FindBin(x0,x1));}
+    virtual void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2){AddBinContent(FindBin(x0,x1,x2));}
+    virtual void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3){AddBinContent(FindBin(x0,x1,x2,x3));}
+    virtual void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4){AddBinContent(FindBin(x0,x1,x2,x3,x4));}
+    virtual void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5));}
+    virtual void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6));}
+    virtual void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7));}
+    virtual void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8));}
+    virtual void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8, const Float_t &x9){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8,x9));}
     Long64_t FindBin(const Double_t &x0) const;
     Long64_t FindBin(const Double_t &x0, const Double_t &x1) const;
     Long64_t FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2) const;
@@ -101,8 +121,26 @@ template <typename U> class QHN: public QDis
     TH1* GenTH(const char *name="_th") const;
     QAxis* GetAxis(const Int_t &axis) const{return fAxes[axis];}
     Long64_t GetBin(const Int_t *coords) const;
+    Long64_t GetBin(const Int_t &coord0, const Int_t &coord1) const;
+    Long64_t GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2) const;
+    Long64_t GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3) const;
+    Long64_t GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4) const;
+    Long64_t GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5) const;
+    Long64_t GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6) const;
+    Long64_t GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7) const;
+    Long64_t GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7, const Int_t &coord8) const;
+    Long64_t GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7, const Int_t &coord8, const Int_t &coord9) const;
     const U& GetBinContent(const Int_t *coords) const{return GetBinContent(GetBin(coords));}
     virtual const U& GetBinContent(const Long64_t &bin) const{return fBinContent[bin];}
+    const U& GetBinContent(const Int_t &coord0, const Int_t &coord1) const{return GetBinContent(GetBin(coord0,coord1));}
+    const U& GetBinContent(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2) const{return GetBinContent(GetBin(coord0,coord1,coord2));}
+    const U& GetBinContent(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3) const{return GetBinContent(GetBin(coord0,coord1,coord2,coord3));}
+    const U& GetBinContent(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4) const{return GetBinContent(GetBin(coord0,coord1,coord2,coord3,coord4));}
+    const U& GetBinContent(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5) const{return GetBinContent(GetBin(coord0,coord1,coord2,coord3,coord4,coord5));}
+    const U& GetBinContent(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6) const{return GetBinContent(GetBin(coord0,coord1,coord2,coord3,coord4,coord5,coord6));}
+    const U& GetBinContent(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7) const{return GetBinContent(GetBin(coord0,coord1,coord2,coord3,coord4,coord5,coord6,coord7));}
+    const U& GetBinContent(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7, const Int_t &coord8) const{return GetBinContent(GetBin(coord0,coord1,coord2,coord3,coord4,coord5,coord6,coord7,coord8));}
+    const U& GetBinContent(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7, const Int_t &coord8, const Int_t &coord9) const{return GetBinContent(GetBin(coord0,coord1,coord2,coord3,coord4,coord5,coord6,coord7,coord8,coord9));}
     void GetCorrelationMatrix(TMatrixDSym* covmat, Bool_t width=kTRUE, Bool_t varianceondiag=kFALSE) const;
     void GetCovarianceMatrix(TMatrixDSym* covmat, Bool_t width=kTRUE) const;
     virtual Long64_t GetFBin(const Int_t *coords) const{return GetBin(coords);}
@@ -152,6 +190,10 @@ template <typename U> class QHN: public QDis
 
     ClassDef(QHN,1) //Multidimensional histogram template class optimized for random access
 };
+
+typedef QHN<Double_t> QHN_D;
+typedef QHN<Float_t> QHN_F;
+typedef QHN<Int_t> QHN_I;
 
 #include "QHN_cxx.h"
 

@@ -46,7 +46,6 @@ template <typename U> class QHNF: public QHN<U>
 
     virtual ~QHNF(){Clear();}
     virtual void AddBinContent(const Long64_t &bin, const U &w=1);
-    void AddBinContent(const Int_t *coords, const U &w=1){AddBinContent(QHN<U>::GetBin(coords),w);}
     void AddFBinContent(const Long64_t &fbin, const U &w=1){QHN<U>::fBinContent[fbin]+=w; QHN<U>::fEntries+=w;}
     virtual void Clear(Option_t* option="");
     TObject* Clone(const char* newname = NULL) const{QHNF<U>* ret=new QHNF(*this); if(newname) ret->SetName(newname); return ret;}
@@ -78,6 +77,10 @@ template <typename U> class QHNF: public QHN<U>
 
     ClassDef(QHNF,1) //Multidimensional histogram template class optimized for memory and iteration over filled bins
 };
+
+typedef QHNF<Double_t> QHNF_D;
+typedef QHNF<Float_t> QHNF_F;
+typedef QHNF<Int_t> QHNF_I;
 
 #include "QHNF_cxx.h"
 
