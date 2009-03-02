@@ -203,13 +203,13 @@ Bool_t PDFEval(QProcArgs &args)
 {
   switch(args.GetNIVars()) {
     case 1:
-      args.OVar(0)=((QDisTH*)args.IObj(0))->ProbDensity(args.IVar(0));
+      args.OVar(0)=((QDisTH*)args.IObj(0))->Eval(args.IVar(0));
       break;
     case 2:
-      args.OVar(0)=((QDisTH*)args.IObj(0))->ProbDensity(args.IVar(0),args.IVar(1));
+      args.OVar(0)=((QDisTH*)args.IObj(0))->Eval(args.IVar(0),args.IVar(1));
       break;
     case 3:
-      args.OVar(0)=((QDisTH*)args.IObj(0))->ProbDensity(args.IVar(0),args.IVar(1),args.IVar(2));
+      args.OVar(0)=((QDisTH*)args.IObj(0))->Eval(args.IVar(0),args.IVar(1),args.IVar(2));
       break;
     default:
       fprintf(stderr,"FillHist: Error: Number of input variables (%i) is invalid\n",args.GetNIVars());
