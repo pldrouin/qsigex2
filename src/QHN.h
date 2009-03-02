@@ -74,6 +74,7 @@ template <typename U> class QHN: public QDis
     const U& Eval(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8) const{return GetBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8));}
     const U& Eval(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8, const Float_t &x9) const{return GetBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8,x9));}
     const U& Eval(Float_t const* const &x) const{return GetBinContent(FindBin(x));}
+    void Fill(Double_t const * const &x, const U &w=1){AddBinContent(FindBin(x));}
     void Fill(Float_t const * const &x, const U &w=1){AddBinContent(FindBin(x));}
     Long64_t FindBin(const Double_t &x0) const;
     Long64_t FindBin(const Double_t &x0, const Double_t &x1) const;
