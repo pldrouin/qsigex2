@@ -16,7 +16,6 @@ void QPHN::Streamer(TBuffer &R__b)
   // Stream an object of class QPHN.
 
   UInt_t R__s, R__c;
-  Int_t i;
 
   if (R__b.IsReading()) {
     Version_t R__v = R__b.ReadVersion(&R__s, &R__c); if (R__v) { }
