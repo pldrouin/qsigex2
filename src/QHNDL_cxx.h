@@ -146,7 +146,6 @@ template <typename U> void QHNDL<U>::ComputeNBins()
 
 template <typename U> void QHNDL<U>::Init()
 {
-  QHNF<U>::Init();
   Long64_t li;
   fFBins=(Long64_t*)malloc(QHN<U>::fNBins*sizeof(Long64_t));
 
