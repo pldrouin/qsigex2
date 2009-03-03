@@ -280,9 +280,8 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
 
 template <typename U> void QHN<U>::Clear(Option_t* option)
 {
-  QDis::Clear(option);
 
-for(Int_t i=fNDims-1; i>=0; --i) {
+  for(Int_t i=fNDims-1; i>=0; --i) {
     if(fAxes[i]) delete fAxes[i];
   }
   delete[] fAxes;
