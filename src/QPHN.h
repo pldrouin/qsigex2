@@ -43,7 +43,7 @@ class QPHN: public QHN_D
     QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN_D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh){Init();}
     QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QHN_D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins){Init();}
 
-    ~QPHN(){Clear();}
+    ~QPHN(){}
     void AddBinContent(const Long64_t &bin, const Double_t &y){QHN_D::fBinContent[bin]+=y; ++(fBinEntries[bin]); ++QHN_D::fEntries;}
     void AddBinContent(const Long64_t &bin, const Double_t &y, const Double_t &w){QHN_D::fBinContent[bin]+=w*y; fBinEntries[bin]+=w; QHN_D::fEntries+=w;}
     void Clear(Option_t* option=""){QHN_D::Clear(); if(fBinEntries) {free(fBinEntries); fBinEntries=NULL;}}

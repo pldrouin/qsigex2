@@ -44,7 +44,7 @@ template <typename U> class QHNF: public QHN<U>
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh,kFALSE), fZero(0){Init();}
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QHN<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins,kFALSE), fZero(0){Init();}
 
-    virtual ~QHNF(){Clear();}
+    virtual ~QHNF(){}
     virtual void AddBinContent(const Long64_t &bin, const U &w=1);
     void AddFBinContent(const Long64_t &fbin, const U &w=1){QHN<U>::fBinContent[fbin]+=w; QHN<U>::fEntries+=w;}
     virtual void Clear(Option_t* option="");
