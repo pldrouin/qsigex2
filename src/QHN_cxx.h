@@ -49,8 +49,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
     fAxes[1]=new QAxis(nbinsy,ylow,yhigh);
     fAxes[2]=new QAxis(nbinsz,zlow,zhigh);
   }
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t *zbins): QDis(name,title), fNDims(0), fAxes(NULL), fBinContent(NULL), fNBins(0)
@@ -60,8 +59,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
   fAxes[0]=new QAxis(nbinsx,xlow,xhigh);
   fAxes[1]=new QAxis(nbinsy,ylow,yhigh);
   fAxes[2]=new QAxis(nbinsz,zbins);
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t &zlow, const Float_t &zhigh): QDis(name,title), fNDims(0), fAxes(NULL), fBinContent(NULL), fNBins(0)
@@ -79,8 +77,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
     fAxes[1]=new QAxis(nbinsy,ybins);
     fAxes[2]=new QAxis(nbinsz,zlow,zhigh);
   }
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t &zlow, const Float_t &zhigh): QDis(name,title), fNDims(0), fAxes(NULL), fBinContent(NULL), fNBins(0)
@@ -103,8 +100,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
     fAxes[1]=new QAxis(nbinsy,ylow,yhigh);
     fAxes[2]=new QAxis(nbinsz,zlow,zhigh);
   }
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t *zbins): QDis(name,title), fNDims(0), fAxes(NULL), fBinContent(NULL), fNBins(0)
@@ -114,8 +110,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
   fAxes[0]=new QAxis(nbinsx,xlow,xhigh);
   fAxes[1]=new QAxis(nbinsy,ybins);
   fAxes[2]=new QAxis(nbinsz,zbins);
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t *zbins): QDis(name,title), fNDims(0), fAxes(NULL), fBinContent(NULL), fNBins(0)
@@ -125,8 +120,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
   fAxes[0]=new QAxis(nbinsx,xbins);
   fAxes[1]=new QAxis(nbinsy,ylow,yhigh);
   fAxes[2]=new QAxis(nbinsz,zbins);
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t &zlow, const Float_t &zhigh): QDis(name,title), fNDims(0), fAxes(NULL), fBinContent(NULL), fNBins(0)
@@ -144,8 +138,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
     fAxes[1]=new QAxis(nbinsy,ybins);
     fAxes[2]=new QAxis(nbinsz,zlow,zhigh);
   }
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t *zbins): QDis(name,title), fNDims(0), fAxes(NULL), fBinContent(NULL), fNBins(0)
@@ -155,8 +148,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
   fAxes[0]=new QAxis(nbinsx,xbins);
   fAxes[1]=new QAxis(nbinsy,ybins);
   fAxes[2]=new QAxis(nbinsz,zbins);
-  ComputeNBins();
-  Reset();
+  Init();
 }
 #endif
 
@@ -180,8 +172,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
     fAxes[1]=new QAxis(nbinsy,ylow,yhigh);
     fAxes[2]=new QAxis(nbinsz,zlow,zhigh);
   }
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 #ifndef __CINT__
@@ -192,8 +183,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
   fAxes[0]=new QAxis(nbinsx,xlow,xhigh);
   fAxes[1]=new QAxis(nbinsy,ylow,yhigh);
   fAxes[2]=new QAxis(nbinsz,zbins);
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t &zlow, const Double_t &zhigh): QDis(name,title), fNDims(0), fAxes(NULL), fBinContent(NULL), fNBins(0)
@@ -211,8 +201,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
     fAxes[1]=new QAxis(nbinsy,ybins);
     fAxes[2]=new QAxis(nbinsz,zlow,zhigh);
   }
-  ComputeNBins();
-  Reset();
+  Init();
 }
 #endif
 
@@ -236,8 +225,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
     fAxes[1]=new QAxis(nbinsy,ylow,yhigh);
     fAxes[2]=new QAxis(nbinsz,zlow,zhigh);
   }
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 #ifndef __CINT__
@@ -248,8 +236,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
   fAxes[0]=new QAxis(nbinsx,xlow,xhigh);
   fAxes[1]=new QAxis(nbinsy,ybins);
   fAxes[2]=new QAxis(nbinsz,zbins);
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t &ylow, const Double_t &yhigh, const Int_t &nbinsz, const Double_t *zbins): QDis(name,title), fNDims(0), fAxes(NULL), fBinContent(NULL), fNBins(0)
@@ -259,8 +246,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
   fAxes[0]=new QAxis(nbinsx,xbins);
   fAxes[1]=new QAxis(nbinsy,ylow,yhigh);
   fAxes[2]=new QAxis(nbinsz,zbins);
-  ComputeNBins();
-  Reset();
+  Init();
 }
 #endif
 
@@ -279,8 +265,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
     fAxes[1]=new QAxis(nbinsy,ybins);
     fAxes[2]=new QAxis(nbinsz,zlow,zhigh);
   }
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QDis(name,title), fNDims(0), fAxes(NULL), fBinContent(NULL), fNBins(0)
@@ -290,8 +275,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
   fAxes[0]=new QAxis(nbinsx,xbins);
   fAxes[1]=new QAxis(nbinsy,ybins);
   fAxes[2]=new QAxis(nbinsz,zbins);
-  ComputeNBins();
-  Reset();
+  Init();
 }
 
 template <typename U> void QHN<U>::Clear(Option_t* option)
@@ -320,6 +304,15 @@ template <typename U> void QHN<U>::ComputeNBins()
 
   if(fBinContent) free(fBinContent);
   fBinContent=(U*)malloc(fNBins*sizeof(U));
+}
+
+template <typename U> void QHN<U>::Init()
+{
+  fNBins=1;
+  for(Int_t i=fNDims-1; i>=0; --i) fNBins*=fAxes[i]->GetNBins()+2;
+  fBinContent=(U*)malloc(fNBins*sizeof(U));
+  memset(fBinContent,0,fNBins*sizeof(U));
+  fEntries=0;
 }
 
 template <typename U> Long64_t QHN<U>::FindBin(const Double_t &x0) const

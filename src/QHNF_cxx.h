@@ -3,7 +3,7 @@
 
 #include "QHNF.h"
 
-template <typename U> QHNF<U>::QHNF(const QHNF &qthn): QHN<U>(), fNFBins(qthn.fNFBins), fBins(NULL), fZero(qthn.fZero)
+template <typename U> QHNF<U>::QHNF(const QHNF &qthn): QHN<U>(), fZero(qthn.fZero), fNFBins(qthn.fNFBins), fBins(NULL)
 {
   SetNameTitle(qthn.GetName(),qthn.GetTitle());
   Int_t i;
@@ -18,7 +18,7 @@ template <typename U> QHNF<U>::QHNF(const QHNF &qthn): QHN<U>(), fNFBins(qthn.fN
   memcpy(QHN<U>::fBinContent,qthn.fBinContent,fNFBins*sizeof(U));
 }
 
-template <typename U> QHNF<U>::QHNF(const QHN<U> &qthn): QHN<U>(), fNFBins(0), fBins(NULL), fZero(0)
+template <typename U> QHNF<U>::QHNF(const QHN<U> &qthn): QHN<U>(), fZero(0), fNFBins(0), fBins(NULL)
 {
   SetNameTitle(qthn.GetName(),qthn.GetTitle());
   QHN<U>::fNDims=qthn.GetNDims();
@@ -81,6 +81,16 @@ template <typename U> void QHNF<U>::ComputeNBins()
 {
   QHN<U>::fNBins=1;
   for(Int_t i=QHN<U>::fNDims-1; i>=0; --i) if(QHN<U>::fAxes[i]) QHN<U>::fNBins*=QHN<U>::fAxes[i]->GetNBins()+2;
+}
+
+template <typename U> void QHNF<U>::Init()
+{
+  QHN<U>::fNBins=1;
+  for(Int_t i=QHN<U>::fNDims-1; i>=0; --i) QHN<U>::fNBins*=QHN<U>::fAxes[i]->GetNBins()+2;
+  QHN<U>::fBinContent=NULL;
+  QHN<U>::fEntries=0;
+  fNFBins=0;
+  fBins=NULL;
 }
 
 template <typename U> Long64_t QHNF<U>::GetFBin(const Int_t *coords) const

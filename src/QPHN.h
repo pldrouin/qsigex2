@@ -16,32 +16,32 @@
 class QPHN: public QHN_D
 {
   public:
-    QPHN(): QHN_D(), fBinEntries(NULL){};
+    QPHN(): QHN_D(){};
     QPHN(const QPHN &qthn): QHN_D(qthn){fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t)); memcpy(fBinEntries,qthn.fBinEntries,fNBins*sizeof(Double_t));}
     QPHN(const Char_t *name, const Char_t *title, Int_t ndims): QHN_D(name,title,ndims), fBinEntries(NULL){}
 #ifndef __CINT__
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy=0, const Float_t &ylow=0, const Float_t &yhigh=0, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh), fBinEntries(NULL){}
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t *zbins): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins), fBinEntries(NULL){}
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh), fBinEntries(NULL){}
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy=0, const Float_t &ylow=0, const Float_t &yhigh=0, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN_D(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh), fBinEntries(NULL){}
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t *zbins): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zbins), fBinEntries(NULL){}
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t *zbins): QHN_D(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zbins), fBinEntries(NULL){}
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN_D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh), fBinEntries(NULL){}
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t *zbins): QHN_D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins), fBinEntries(NULL){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy=0, const Float_t &ylow=0, const Float_t &yhigh=0, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t *zbins): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy=0, const Float_t &ylow=0, const Float_t &yhigh=0, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN_D(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t *zbins): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zbins){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t *zbins): QHN_D(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zbins){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN_D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t *zbins): QHN_D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins){}
 #endif
 
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy=0, const Double_t &ylow=0, const Double_t &yhigh=0, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh), fBinEntries(NULL){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy=0, const Double_t &ylow=0, const Double_t &yhigh=0, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh){}
 #ifndef __CINT__
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t &ylow, const Double_t &yhigh, const Int_t &nbinsz, const Double_t *zbins): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins), fBinEntries(NULL){}
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh), fBinEntries(NULL){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t &ylow, const Double_t &yhigh, const Int_t &nbinsz, const Double_t *zbins): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh){}
 #endif
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy=0, const Double_t &ylow=0, const Double_t &yhigh=0, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN_D(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh), fBinEntries(NULL){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy=0, const Double_t &ylow=0, const Double_t &yhigh=0, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN_D(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh){}
 #ifndef __CINT__
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zbins), fBinEntries(NULL){}
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t &ylow, const Double_t &yhigh, const Int_t &nbinsz, const Double_t *zbins): QHN_D(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zbins), fBinEntries(NULL){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QHN_D(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zbins){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t &ylow, const Double_t &yhigh, const Int_t &nbinsz, const Double_t *zbins): QHN_D(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zbins){}
 #endif
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN_D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh), fBinEntries(NULL){}
-    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QHN_D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins), fBinEntries(NULL){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN_D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh){}
+    QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QHN_D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins){}
 
     ~QPHN(){Clear();}
     void AddBinContent(const Long64_t &bin, const Double_t &y){QHN_D::fBinContent[bin]+=y; ++(fBinEntries[bin]); ++QHN_D::fEntries;}
@@ -79,6 +79,7 @@ class QPHN: public QHN_D
     QHN_D* NewD() const{return New();}
     QHN_D* NewD(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return New(name,title,ndims);}
     void ComputeNBins(){QHN_D::ComputeNBins(); if(fBinEntries) free(fBinEntries); fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t));}
+    inline void Init(){QHN_D::Init(); fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t)); memset(fBinEntries,0,fNBins*sizeof(Double_t));}
   private:
     Double_t *fBinEntries;
     void AddFBinContent(const Long64_t &fbin, const Double_t &w){}

@@ -144,4 +144,13 @@ template <typename U> void QHNDL<U>::ComputeNBins()
   for(li=QHNF<U>::fNFBins-1; li>=0; --li) fFBins[QHNF<U>::fBins[li]]=li;
 }
 
+template <typename U> void QHNDL<U>::Init()
+{
+  QHNF<U>::Init();
+  Long64_t li;
+  fFBins=(Long64_t*)malloc(QHN<U>::fNBins*sizeof(Long64_t));
+
+  for(li=QHN<U>::fNBins-1; li>=0; --li) fFBins[li]=-1;
+}
+
 #include "QHNDL_Dict_cxx.h"

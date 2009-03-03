@@ -181,6 +181,7 @@ template <typename U> class QHN: public QDis
     virtual QHN<Double_t>* NewD() const{return new QHN<Double_t>;}
     virtual QHN<Double_t>* NewD(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHN<Double_t>(name,title,ndims);}
     virtual void ComputeNBins();
+    virtual void Init();
     virtual Bool_t IsFBinIncluded(const Long64_t &bin, const Int_t *mins, const Int_t *maxs) const;
     Int_t fNDims;
     QAxis **fAxes; //!
