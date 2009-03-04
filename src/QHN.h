@@ -165,8 +165,8 @@ template <typename U> class QHN: public QDis
     virtual QHN<U>* New(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHN<U>(name,title,ndims);}
     void Normalize(Double_t* integral=NULL);
     virtual const QHN<U>& operator=(const QHN<U> &qthn);
-    virtual const QHN<U>& operator=(const TH1 &th);
-    virtual const QHN<U>& operator=(const QDisTH &qth);
+    const QHN<U>& operator=(const TH1 &th);
+    const QHN<U>& operator=(const QDisTH &qth);
     QHN<U>* Projection(const char *name="_pd", const Int_t *axes=NULL, const Int_t &naxes=0) const;
     virtual void Reset();
     void Scale(const Double_t &scale){for(Long64_t li=GetNFbins()-1; li>=0; --li) fBinContent[li]*=(U)scale;}
