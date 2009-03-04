@@ -1136,7 +1136,6 @@ template <typename U> const QHN<U>& QHN<U>::operator=(const TH1 &th)
   Clear();
   SetNameTitle(th.GetName(),th.GetTitle());
   fNDims=th.GetDimension();
-  fEntries=th.GetEntries();
   fAxes=new QAxis*[fNDims];
 
   if(fNDims==3) {
@@ -1155,6 +1154,7 @@ template <typename U> const QHN<U>& QHN<U>::operator=(const TH1 &th)
   fAxes[0]->SetTitle(th.GetXaxis()->GetTitle());
   ComputeNBins();
   Reset();
+  fEntries=th.GetEntries();
 
   for(Long64_t li=fNBins-1; li>=0; --li) {
     SetBinContent(li,(U)th.GetBinContent(li));
