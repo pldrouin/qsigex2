@@ -309,8 +309,6 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
 
 template <typename U> void QHN<U>::Clear(Option_t* option)
 {
-  printf("QHN::Clear()\n");
-
   for(Int_t i=fNDims-1; i>=0; --i) {
     if(fAxes[i]) delete fAxes[i];
   }
@@ -344,7 +342,6 @@ template <typename U> void QHN<U>::Init()
 {
   fNBins=1;
   for(Int_t i=fNDims-1; i>=0; --i) fNBins*=fAxes[i]->GetNBins()+2;
-  printf("Number of bins for PDF %iD: %lli\n",fNDims,fNBins);
   fBinContent=(U*)malloc(fNBins*sizeof(U));
   memset(fBinContent,0,fNBins*sizeof(U));
   fEntries=0;
@@ -1159,7 +1156,7 @@ template <typename U> const QHN<U>& QHN<U>::operator=(const TH1 &th)
   ComputeNBins();
   Reset();
 
-  for(Long64_t li=(th.GetNbinsX()+2)*(th.GetNbinsY()+2)*(th.GetNbinsZ()+2)-1; li>=0; --li) {
+  for(Long64_t li=fNBins-1; li>=0; --li) {
     SetBinContent(li,(U)th.GetBinContent(li));
   }
   return *this;
