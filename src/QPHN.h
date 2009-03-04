@@ -16,7 +16,7 @@
 class QPHN: public QHN_D
 {
   public:
-    QPHN(): QHN_D(){};
+    QPHN(): QHN_D(), fBinEntries(NULL){};
     QPHN(const QPHN &qthn): QHN_D(qthn){fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t)); memcpy(fBinEntries,qthn.fBinEntries,fNBins*sizeof(Double_t));}
     QPHN(const Char_t *name, const Char_t *title, Int_t ndims): QHN_D(name,title,ndims), fBinEntries(NULL){}
 #ifndef __CINT__
@@ -44,8 +44,26 @@ class QPHN: public QHN_D
     QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QHN_D(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins){Init();}
 
     virtual ~QPHN(){}
-    void AddBinContent(const Long64_t &bin, const Double_t &y){QHN_D::fBinContent[bin]+=y; ++(fBinEntries[bin]); ++QHN_D::fEntries;}
-    void AddBinContent(const Long64_t &bin, const Double_t &y, const Double_t &w){QHN_D::fBinContent[bin]+=w*y; fBinEntries[bin]+=w; QHN_D::fEntries+=w;}
+    inline void AddBinContent(const Long64_t &bin, const Double_t &y)
+    {
+#ifndef QSFAST
+      if(bin<0 || bin>=fNBins) {
+	fprintf(stderr,"Error: QPHN::AddBinContent: %lli is not a valid bin number\n",bin);
+	throw 1;
+      }
+#endif
+      QHN_D::fBinContent[bin]+=y; ++(fBinEntries[bin]); ++QHN_D::fEntries;
+    }
+    inline void AddBinContent(const Long64_t &bin, const Double_t &y, const Double_t &w)
+    {
+#ifndef QSFAST
+      if(bin<0 || bin>=fNBins) {
+	fprintf(stderr,"Error: QPHN::AddBinContent: %lli is not a valid bin number\n",bin);
+	throw 1;
+      }
+#endif
+      QHN_D::fBinContent[bin]+=w*y; fBinEntries[bin]+=w; QHN_D::fEntries+=w;
+    }
     void Clear(Option_t* option=""){QHN_D::Clear(); if(fBinEntries) {free(fBinEntries); fBinEntries=NULL;}}
     TObject* Clone(const char* newname = NULL) const{QPHN* ret=new QPHN(*this); if(newname) ret->SetName(newname); return ret;}
     void Fill(Double_t const * const &x, const Double_t &y){AddBinContent(FindBin(x),y);}

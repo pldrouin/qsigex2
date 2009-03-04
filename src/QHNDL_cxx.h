@@ -11,6 +11,13 @@ template <typename U> QHNDL<U>::QHNDL(const QHNDL &qthn): QHNF<U>(qthn), fFBins(
 
 template <typename U> void QHNDL<U>::AddBinContent(const Long64_t &bin, const U &w)
 {
+#ifndef QSFAST
+      if(bin<0 || bin>=QHN<U>::fNBins) {
+	fprintf(stderr,"Error: QHNDL::AddBinContent: %lli is not a valid bin number\n",bin);
+	throw 1;
+      }
+#endif
+
   if(fFBins[bin]!=-1) {
     QHN<U>::fBinContent[fFBins[bin]]+=w;
     QHN<U>::fEntries+=w;

@@ -280,13 +280,14 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
 
 template <typename U> void QHN<U>::Clear(Option_t* option)
 {
+  printf("QHN::Clear()\n");
 
   for(Int_t i=fNDims-1; i>=0; --i) {
     if(fAxes[i]) delete fAxes[i];
   }
   delete[] fAxes;
 
-  if(fNBins) {
+  if(fBinContent) {
     free(fBinContent);
   }
   fNDims=0;
@@ -309,6 +310,7 @@ template <typename U> void QHN<U>::Init()
 {
   fNBins=1;
   for(Int_t i=fNDims-1; i>=0; --i) fNBins*=fAxes[i]->GetNBins()+2;
+  printf("Number of bins for PDF %iD: %lli\n",fNDims,fNBins);
   fBinContent=(U*)malloc(fNBins*sizeof(U));
   memset(fBinContent,0,fNBins*sizeof(U));
   fEntries=0;
@@ -1184,6 +1186,12 @@ template <typename U> QHN<U>* QHN<U>::Projection(const char *name, const Int_t *
 
 template <typename U> void QHN<U>::ScaleBinContent(const Long64_t &bin, const Double_t &scale)
 {
+#ifndef QSFAST
+      if(bin<0 || bin>=fNBins) {
+	fprintf(stderr,"Error: QHN::ScaleBinContent: %lli is not a valid bin number\n",bin);
+	throw 1;
+      }
+#endif
   Long64_t fbin=GetFBin(bin);
   if(fbin!=-1) fBinContent[fbin]*=(U)scale;
 }

@@ -43,6 +43,13 @@ template <typename U> QHNF<U>::QHNF(const QHN<U> &qthn): QHN<U>(), fZero(0), fNF
 
 template <typename U> void QHNF<U>::AddBinContent(const Long64_t &bin, const U &w)
 {
+#ifndef QSFAST
+      if(bin<0 || bin>=QHN<U>::fNBins) {
+	fprintf(stderr,"Error: QHNF::AddBinContent: %lli is not a valid bin number\n",bin);
+	throw 1;
+      }
+#endif
+
   Long64_t bidx=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
 
   if(bidx==fNFBins || fBins[bidx]!=bin) {

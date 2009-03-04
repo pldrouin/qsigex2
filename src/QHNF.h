@@ -46,7 +46,16 @@ template <typename U> class QHNF: public QHN<U>
 
     virtual ~QHNF(){}
     virtual void AddBinContent(const Long64_t &bin, const U &w=1);
-    void AddFBinContent(const Long64_t &fbin, const U &w=1){QHN<U>::fBinContent[fbin]+=w; QHN<U>::fEntries+=w;}
+    void AddFBinContent(const Long64_t &fbin, const U &w=1)
+    {
+#ifndef QSFAST
+      if(fbin<0 || fbin>=fNFBins) {
+	fprintf(stderr,"Error: QHNF::AddFBinContent: %lli is not a valid fbin number\n",fbin);
+	throw 1;
+      }
+#endif
+      QHN<U>::fBinContent[fbin]+=w; QHN<U>::fEntries+=w;
+    }
     virtual void Clear(Option_t* option="");
     TObject* Clone(const char* newname = NULL) const{QHNF<U>* ret=new QHNF(*this); if(newname) ret->SetName(newname); return ret;}
     virtual Long64_t GetFBin(const Int_t *coords) const;
