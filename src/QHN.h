@@ -20,7 +20,9 @@ template <typename U> class QHN: public QDis
   public:
     QHN(): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0), fTH(NULL){};
     QHN(const QHN &qthn);
+#ifndef __CINT__
     QHN(const Char_t* filename, const Char_t* objectname);
+#endif
     QHN(const Char_t *name, const Char_t *title, const Int_t &ndims);
 #ifndef __CINT__
     QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy=0, const Float_t &ylow=0, const Float_t &yhigh=0, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0, const Bool_t &init=kTRUE);
