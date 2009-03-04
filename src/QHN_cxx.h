@@ -19,6 +19,35 @@ template <typename U> QHN<U>::QHN(const QHN &qthn): QDis(qthn), fNDims(qthn.fNDi
   }
 }
 
+template <typename U> QHN<U>::QHN(const Char_t* filename, const Char_t* objectname): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0), fTH(NULL)
+{
+  TDirectory *curdir=gDirectory;
+  TFile f(filename,"READ");
+  TObject *obj;
+  obj=f.Get(objectname);
+
+  if(dynamic_cast<QHN<U>*>(obj)) {
+    *this=*dynamic_cast<QHN<U>*>(obj);
+    delete obj;
+
+  } else if(dynamic_cast<TH1*>(obj)) {
+    *this=*dynamic_cast<TH1*>(obj);
+    dynamic_cast<TH1*>(obj)->SetDirectory(NULL);
+    delete obj;
+
+  } else if(dynamic_cast<QDisTH*>(obj)) {
+    *this=*dynamic_cast<QDisTH*>(obj);
+    delete obj;
+
+  } else {
+    cout << "QDisTH::QDisTH: Object '" << objectname << "' in file '" << filename << "' doesn't exist\n"; 
+    throw 1;
+  }
+
+  f.Close();
+  curdir->cd();
+}
+
 template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &ndims): QDis(name,title), fNDims(ndims), fAxes(new QAxis*[ndims]), fBinContent(NULL), fNBins(0), fTH(NULL)
 {
   if(fNDims<=0) {
@@ -1102,6 +1131,41 @@ template <typename U> const QHN<U>& QHN<U>::operator=(const QHN<U> &qthn)
   for(li=nfbins-1; li>=0; --li) {
     fBinContent[qthn.GetFBinCoord(li)]=qthn.GetFBinContent(li);
   }
+  return *this;
+}
+
+template <typename U> const QHN<U>& QHN<U>::operator=(const TH1 &th)
+{
+  Clear();
+  SetNameTitle(th.GetName(),th.GetTitle());
+  fNDims=th.GetDimension();
+  fEntries=th.GetEntries();
+  fAxes=new QAxis*[fNDims];
+
+  if(fNDims==3) {
+    if(th.GetZaxis()->GetXbins()->fN) fAxes[2]=new QAxis(th.GetZaxis()->GetNbins(),th.GetZaxis()->GetXbins()->GetArray());
+    else fAxes[2]=new QAxis(th.GetZaxis()->GetNbins(),th.GetZaxis()->GetXmin(),th.GetZaxis()->GetXmax());
+  } 
+
+  if(fNDims>=2) {
+    if(th.GetYaxis()->GetXbins()->fN) fAxes[1]=new QAxis(th.GetYaxis()->GetNbins(),th.GetYaxis()->GetXbins()->GetArray());
+    else fAxes[1]=new QAxis(th.GetYaxis()->GetNbins(),th.GetYaxis()->GetXmin(),th.GetYaxis()->GetXmax());
+  }
+  if(th.GetXaxis()->GetXbins()->fN) fAxes[0]=new QAxis(th.GetXaxis()->GetNbins(),th.GetXaxis()->GetXbins()->GetArray());
+  else fAxes[0]=new QAxis(th.GetXaxis()->GetNbins(),th.GetXaxis()->GetXmin(),th.GetXaxis()->GetXmax());
+  ComputeNBins();
+  Reset();
+
+  for(Long64_t li=(th.GetNbinsX()+2)*(th.GetNbinsY()+2)*(th.GetNbinsZ()+2)-1; li>=0; --li) {
+    SetBinContent(li,(U)th.GetBinContent(li));
+  }
+  return *this;
+}
+
+template <typename U> const QHN<U>& QHN<U>::operator=(const QDisTH &qth)
+{
+  operator=(*(qth.GetTH()));
+  QDis::operator=(qth);
   return *this;
 }
 

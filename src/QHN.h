@@ -6,12 +6,13 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include "TFile.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3D.h"
 #include "TMath.h"
 #include "TMatrixDSym.h"
-#include "QDis.h"
+#include "QDisTH.h"
 #include "QAxis.h"
 
 template <typename U> class QHN: public QDis
@@ -19,6 +20,7 @@ template <typename U> class QHN: public QDis
   public:
     QHN(): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0), fTH(NULL){};
     QHN(const QHN &qthn);
+    QHN(const Char_t* filename, const Char_t* objectname);
     QHN(const Char_t *name, const Char_t *title, const Int_t &ndims);
 #ifndef __CINT__
     QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy=0, const Float_t &ylow=0, const Float_t &yhigh=0, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0, const Bool_t &init=kTRUE);
@@ -169,6 +171,8 @@ template <typename U> class QHN: public QDis
     virtual QHN<U>* New(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHN<U>(name,title,ndims);}
     void Normalize(Double_t* integral=NULL);
     virtual const QHN<U>& operator=(const QHN<U> &qthn);
+    virtual const QHN<U>& operator=(const TH1 &th);
+    virtual const QHN<U>& operator=(const QDisTH &qth);
     QHN<U>* Projection(const char *name="_pd", const Int_t *axes=NULL, const Int_t &naxes=0) const;
     virtual void Reset();
     void Scale(const Double_t &scale){for(Long64_t li=GetNFbins()-1; li>=0; --li) fBinContent[li]*=(U)scale;}
