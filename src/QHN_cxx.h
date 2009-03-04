@@ -471,7 +471,7 @@ template <typename U> Long64_t QHN<U>::FindBin(Float_t const* const &x) const
   return bin;
 }
 
-template <typename U> const TH1& QHN<U>::GetTH(const char *name)
+template <typename U> const TH1& QHN<U>::GetTH()
 {
   if(fNDims>3) {
     fprintf(stderr,"QHN::GetTH: Error: Cannot generate a ROOT histogram because QHN dimension is too high\n");
@@ -486,8 +486,8 @@ template <typename U> const TH1& QHN<U>::GetTH(const char *name)
 
   switch(fNDims) {
     case 1:
-      if(!fAxes[0]->GetBins()) fTH=new TH1D(name,name,fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax());
-      else fTH=new TH1D(name,name,fAxes[0]->GetNBins(),fAxes[0]->GetBins());
+      if(!fAxes[0]->GetBins()) fTH=new TH1D("qhn2th",GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax());
+      else fTH=new TH1D("qhn2th",GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetBins());
       fTH->SetDirectory(NULL);
       fTH->GetXaxis()->SetTitle(fAxes[0]->GetTitle());
 
@@ -498,7 +498,7 @@ template <typename U> const TH1& QHN<U>::GetTH(const char *name)
       break;
 
     case 2:
-      fTH=new TH2D(name,name,fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax(),fAxes[1]->GetNBins(),fAxes[1]->GetMin(),fAxes[1]->GetMax());
+      fTH=new TH2D("qhn2th",GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax(),fAxes[1]->GetNBins(),fAxes[1]->GetMin(),fAxes[1]->GetMax());
       fTH->SetDirectory(NULL);
       if(fAxes[0]->GetBins()) fTH->GetXaxis()->Set(fAxes[0]->GetNBins(),fAxes[0]->GetBins());
       if(fAxes[1]->GetBins()) fTH->GetYaxis()->Set(fAxes[1]->GetNBins(),fAxes[1]->GetBins());
@@ -512,7 +512,7 @@ template <typename U> const TH1& QHN<U>::GetTH(const char *name)
       break;
 
     case 3:
-      fTH=new TH3D(name,name,fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax(),fAxes[1]->GetNBins(),fAxes[1]->GetMin(),fAxes[1]->GetMax(),fAxes[2]->GetNBins(),fAxes[2]->GetMin(),fAxes[2]->GetMax());
+      fTH=new TH3D("qhn2th",GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax(),fAxes[1]->GetNBins(),fAxes[1]->GetMin(),fAxes[1]->GetMax(),fAxes[2]->GetNBins(),fAxes[2]->GetMin(),fAxes[2]->GetMax());
       fTH->SetDirectory(NULL);
       if(fAxes[0]->GetBins()) fTH->GetXaxis()->Set(fAxes[0]->GetNBins(),fAxes[0]->GetBins());
       if(fAxes[1]->GetBins()) fTH->GetYaxis()->Set(fAxes[1]->GetNBins(),fAxes[1]->GetBins());
@@ -1145,14 +1145,17 @@ template <typename U> const QHN<U>& QHN<U>::operator=(const TH1 &th)
   if(fNDims==3) {
     if(th.GetZaxis()->GetXbins()->fN) fAxes[2]=new QAxis(th.GetZaxis()->GetNbins(),th.GetZaxis()->GetXbins()->GetArray());
     else fAxes[2]=new QAxis(th.GetZaxis()->GetNbins(),th.GetZaxis()->GetXmin(),th.GetZaxis()->GetXmax());
+    fAxes[2]->SetTitle(th.GetZaxis()->GetTitle());
   } 
 
   if(fNDims>=2) {
     if(th.GetYaxis()->GetXbins()->fN) fAxes[1]=new QAxis(th.GetYaxis()->GetNbins(),th.GetYaxis()->GetXbins()->GetArray());
     else fAxes[1]=new QAxis(th.GetYaxis()->GetNbins(),th.GetYaxis()->GetXmin(),th.GetYaxis()->GetXmax());
+    fAxes[1]->SetTitle(th.GetYaxis()->GetTitle());
   }
   if(th.GetXaxis()->GetXbins()->fN) fAxes[0]=new QAxis(th.GetXaxis()->GetNbins(),th.GetXaxis()->GetXbins()->GetArray());
   else fAxes[0]=new QAxis(th.GetXaxis()->GetNbins(),th.GetXaxis()->GetXmin(),th.GetXaxis()->GetXmax());
+  fAxes[0]->SetTitle(th.GetXaxis()->GetTitle());
   ComputeNBins();
   Reset();
 
