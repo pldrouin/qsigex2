@@ -174,7 +174,9 @@ template <typename U> class QHN: public QDis
     void Normalize(Double_t* integral=NULL);
     virtual const QHN<U>& operator=(const QHN<U> &qthn);
     const QHN<U>& operator=(const TH1 &th);
+#ifndef __CINT__
     const QHN<U>& operator=(const QDisTH &qth);
+#endif
     QHN<U>* Projection(const char *name="_pd", const Int_t *axes=NULL, const Int_t &naxes=0) const;
     virtual void Reset();
     void Scale(const Double_t &scale){for(Long64_t li=GetNFbins()-1; li>=0; --li) fBinContent[li]*=(U)scale;}
