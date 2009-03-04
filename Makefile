@@ -1,4 +1,3 @@
-QSLIB		=	libqsigex2.so
 ALLINCS		=	$(addprefix include/,$(notdir $(wildcard src/*.h)))
 
 #QSFAST		=	1
@@ -10,8 +9,8 @@ endif
 all: force $(ALLINCS)
 
 force: 
-	cd ./src; $(MAKE) $(QSLIB)
-	cp ./src/$(QSLIB) ./lib/
+	cd ./src; $(MAKE) libs
+	cp ./src/libqsigex*.so ./lib/
 
 htmldoc: force
 	cd ./src; root -b -n -q -l htmlgen.C; mv htmldoc ../

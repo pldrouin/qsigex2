@@ -20,7 +20,6 @@ template <typename U> class QHNF: public QHN<U>
     QHNF(const QHNF &qthn);
     QHNF(const QHN<U> &qthn);
     QHNF(const Char_t *name, const Char_t *title, Int_t ndims): QHN<U>(name,title,ndims), fZero(0), fNFBins(0), fBins(NULL){}
-#ifndef __CINT__
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy=0, const Float_t &ylow=0, const Float_t &yhigh=0, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh,kFALSE), fZero(0){Init();}
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t *zbins): QHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins,kFALSE), fZero(0){Init();}
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh,kFALSE), fZero(0){Init();}
@@ -29,9 +28,7 @@ template <typename U> class QHNF: public QHN<U>
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t *zbins): QHN<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zbins,kFALSE), fZero(0){Init();}
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh,kFALSE), fZero(0){Init();}
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t *xbins, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz, const Float_t *zbins): QHN<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins,kFALSE), fZero(0){Init();}
-#endif
 
-#ifndef __CINT__
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy=0, const Double_t &ylow=0, const Double_t &yhigh=0, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh,kFALSE), fZero(0){Init();}
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t &ylow, const Double_t &yhigh, const Int_t &nbinsz, const Double_t *zbins): QHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins,kFALSE), fZero(0){Init();}
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t &xlow, const Double_t &xhigh, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh,kFALSE), fZero(0){Init();}
@@ -40,7 +37,6 @@ template <typename U> class QHNF: public QHN<U>
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t &ylow, const Double_t &yhigh, const Int_t &nbinsz, const Double_t *zbins): QHN<U>(name,title,nbinsx,xbins,nbinsy,ylow,yhigh,nbinsz,zbins,kFALSE), fZero(0){Init();}
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0): QHN<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zlow,zhigh,kFALSE), fZero(0){Init();}
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QHN<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins,kFALSE), fZero(0){Init();}
-#endif
 
     virtual ~QHNF(){}
     virtual void AddBinContent(const Long64_t &bin, const U &w=1);
