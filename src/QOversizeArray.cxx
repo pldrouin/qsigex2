@@ -206,10 +206,12 @@ void QOversizeArray::Fill()
       //If fWriteBuffer is full
     } else {
       printstatus("Write buffer is full");
+#ifndef QSFAST
       if(fOpenMode == kRead) {
 	fprintf(stderr,"QOversizeArray::Fill(): Error: File '%s' is opened in read-only mode\n",fFilename.Data());
 	throw 1;
       }
+#endif
 
       static UInt_t nextbufidx;
       nextbufidx=fWriteBuffer->fBufferIdx+1;
@@ -294,11 +296,13 @@ void QOversizeArray::LoadEntry(const Long64_t &entry)
   FuncDef(LoadEntry,1);
   static Int_t uzbidx=-1;
   static Int_t ibuf;
+#ifndef QSFAST
   //If the entry is out of bound
   if(entry<0 || entry>=fNObjects) {
     fprintf(stderr,"QOversizeArray::LoadEntry: Error: Entry index is invalid\n");
     return;
   }
+#endif
 
   //If the entry is located in the write buffer. Do not need a lock since only the main thread access the write buffer
   if(entry>=fWBFirstObjIdx) {
