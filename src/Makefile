@@ -13,9 +13,9 @@ CXXFLAGS        +=      -I$(shell root-config --incdir)
 #CXXFLAGS        +=      -I$(shell root-config --incdir)
 
 ifeq (${CXX},icpc)
-AR      =       "xiar cru"
+AR      =       xiar cru
 else
-AR      =       "ar rcs"
+AR      =       ar rcs
 endif
 
 QSIGEX_QCXX_2	=	QPHN.cxx
