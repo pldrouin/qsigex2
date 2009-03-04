@@ -1,14 +1,16 @@
 ALLINCS		=	$(addprefix include/,$(notdir $(wildcard src/*.h)))
 
-#QSFAST		=	1
-
 ifeq (${QSFAST},1)
 CXXFLAGS	+=	-DQSFAST
 endif
 
-all: force $(ALLINCS)
+all: libso $(ALLINCS)
 
-force: 
+liba: 
+	cd ./src; $(MAKE) liba
+	cp ./src/libqsigex*.a ./lib/
+
+libso: 
 	cd ./src; $(MAKE) libs
 	cp ./src/libqsigex*.so ./lib/
 
