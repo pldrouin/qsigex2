@@ -456,7 +456,7 @@ template <typename U> TH1* QHN<U>::GenTH(const char *name) const
 
       for(li=0; li<nfbins; li++) {
 	GetFBinCoords(li,coords);
-	th->SetBinContent(coords[0],fBinContent[li]);
+	th->SetBinContent(coords[0],GetFBinContent(li));
       }
       break;
 
@@ -469,7 +469,7 @@ template <typename U> TH1* QHN<U>::GenTH(const char *name) const
 
       for(li=0; li<nfbins; li++) {
 	GetFBinCoords(li,coords);
-	th->SetBinContent(coords[0],coords[1],fBinContent[li]);
+	th->SetBinContent(coords[0],coords[1],GetFBinContent(li));
       }
       break;
 
@@ -484,7 +484,7 @@ template <typename U> TH1* QHN<U>::GenTH(const char *name) const
 
       for(li=0; li<nfbins; li++) {
 	GetFBinCoords(li,coords);
-	th->SetBinContent(coords[0],coords[1],coords[2],fBinContent[li]);
+	th->SetBinContent(coords[0],coords[1],coords[2],GetFBinContent(li));
       }
       break;
 
