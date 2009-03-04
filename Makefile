@@ -4,6 +4,12 @@ ifeq (${QSFAST},1)
 CXXFLAGS	+=	-DQSFAST
 endif
 
+ifeq (${CXX},icc)
+AR	=	xiar cru
+else
+AR	=	ar rcs
+endif
+
 all: libso $(ALLINCS)
 
 liba: 

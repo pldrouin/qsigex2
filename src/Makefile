@@ -50,7 +50,7 @@ libs: libqsigex-1.so libqsigex-2.so
 liba: libqsigex.a
 
 libqsigex.a: $(QSIGEX_OBJSS_1) $(QSIGEX_OOBJSS_1) $(QSIGEX_DICTOBJS_1) $(QSIGEX_OBJSS_2) $(QSIGEX_OOBJSS_2) $(QSIGEX_DICTOBJS_2)
-	rm -rf $@ && ar rcs $@ $^
+	rm -rf $@ && $(AR) $@ $^
 
 libqsigex-1.so: $(QSIGEX_OBJS_1) $(QSIGEX_OOBJS_1) $(QSIGEX_DICTOBJ_1)
 #	$(CXX) $(CXXFLAGS) -shared -L$(shell root-config --libdir) $(shell root-config --libs) -lMinuit -o $@ $^
