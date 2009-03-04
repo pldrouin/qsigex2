@@ -3,7 +3,7 @@
 
 #include "QHN.h"
 
-template <typename U> QHN<U>::QHN(const QHN &qthn): QDis(qthn), fNDims(qthn.fNDims), fAxes(NULL), fEntries(qthn.fEntries), fBinContent(NULL), fNBins(qthn.fNBins)
+template <typename U> QHN<U>::QHN(const QHN &qthn): QDis(qthn), fNDims(qthn.fNDims), fAxes(NULL), fEntries(qthn.fEntries), fBinContent(NULL), fNBins(qthn.fNBins), fTH(NULL)
 {
   Int_t i;
   fAxes=new QAxis*[fNDims];
@@ -19,7 +19,7 @@ template <typename U> QHN<U>::QHN(const QHN &qthn): QDis(qthn), fNDims(qthn.fNDi
   }
 }
 
-template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &ndims): QDis(name,title), fNDims(ndims), fAxes(new QAxis*[ndims]), fBinContent(NULL), fNBins(0)
+template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &ndims): QDis(name,title), fNDims(ndims), fAxes(new QAxis*[ndims]), fBinContent(NULL), fNBins(0), fTH(NULL)
 {
   if(fNDims<=0) {
     fprintf(stderr,"QHN::QHN: Error: Number of dimensions is invalid\n");
@@ -295,6 +295,11 @@ template <typename U> void QHN<U>::Clear(Option_t* option)
   fEntries=0;
   fBinContent=NULL;
   fNBins=0;
+
+  if(fTH) {
+    delete fTH;
+    fTH=NULL;
+  }
 }
 
 template <typename U> void QHN<U>::ComputeNBins()
@@ -314,6 +319,7 @@ template <typename U> void QHN<U>::Init()
   fBinContent=(U*)malloc(fNBins*sizeof(U));
   memset(fBinContent,0,fNBins*sizeof(U));
   fEntries=0;
+  fTH=NULL;
 }
 
 template <typename U> Long64_t QHN<U>::FindBin(const Double_t &x0) const
@@ -436,64 +442,69 @@ template <typename U> Long64_t QHN<U>::FindBin(Float_t const* const &x) const
   return bin;
 }
 
-template <typename U> TH1* QHN<U>::GenTH(const char *name) const
+template <typename U> const TH1& QHN<U>::GetTH(const char *name)
 {
   if(fNDims>3) {
-    fprintf(stderr,"QHN::GenTH: Error: Cannot generate a ROOT histogram because QHN dimension is too high\n");
+    fprintf(stderr,"QHN::GetTH: Error: Cannot generate a ROOT histogram because QHN dimension is too high\n");
     throw 1;
   }
 
-  TH1* th;
+  if(fTH) delete fTH;
+
   Long64_t li;
   Int_t coords[3];
   Long64_t nfbins=GetNFbins();
 
   switch(fNDims) {
     case 1:
-      if(!fAxes[0]->GetBins()) th=new TH1D(name,name,fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax());
-      else th=new TH1D(name,name,fAxes[0]->GetNBins(),fAxes[0]->GetBins());
-      th->GetXaxis()->SetTitle(fAxes[0]->GetTitle());
+      if(!fAxes[0]->GetBins()) fTH=new TH1D(name,name,fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax());
+      else fTH=new TH1D(name,name,fAxes[0]->GetNBins(),fAxes[0]->GetBins());
+      fTH->SetDirectory(NULL);
+      fTH->GetXaxis()->SetTitle(fAxes[0]->GetTitle());
 
       for(li=0; li<nfbins; li++) {
 	GetFBinCoords(li,coords);
-	th->SetBinContent(coords[0],GetFBinContent(li));
+	fTH->SetBinContent(coords[0],GetFBinContent(li));
       }
       break;
 
     case 2:
-      th=new TH2D(name,name,fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax(),fAxes[1]->GetNBins(),fAxes[1]->GetMin(),fAxes[1]->GetMax());
-      if(fAxes[0]->GetBins()) th->GetXaxis()->Set(fAxes[0]->GetNBins(),fAxes[0]->GetBins());
-      if(fAxes[1]->GetBins()) th->GetYaxis()->Set(fAxes[1]->GetNBins(),fAxes[1]->GetBins());
-      th->GetXaxis()->SetTitle(fAxes[0]->GetTitle());
-      th->GetYaxis()->SetTitle(fAxes[1]->GetTitle());
+      fTH=new TH2D(name,name,fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax(),fAxes[1]->GetNBins(),fAxes[1]->GetMin(),fAxes[1]->GetMax());
+      fTH->SetDirectory(NULL);
+      if(fAxes[0]->GetBins()) fTH->GetXaxis()->Set(fAxes[0]->GetNBins(),fAxes[0]->GetBins());
+      if(fAxes[1]->GetBins()) fTH->GetYaxis()->Set(fAxes[1]->GetNBins(),fAxes[1]->GetBins());
+      fTH->GetXaxis()->SetTitle(fAxes[0]->GetTitle());
+      fTH->GetYaxis()->SetTitle(fAxes[1]->GetTitle());
 
       for(li=0; li<nfbins; li++) {
 	GetFBinCoords(li,coords);
-	th->SetBinContent(coords[0],coords[1],GetFBinContent(li));
+	fTH->SetBinContent(coords[0],coords[1],GetFBinContent(li));
       }
       break;
 
     case 3:
-      th=new TH3D(name,name,fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax(),fAxes[1]->GetNBins(),fAxes[1]->GetMin(),fAxes[1]->GetMax(),fAxes[2]->GetNBins(),fAxes[2]->GetMin(),fAxes[2]->GetMax());
-      if(fAxes[0]->GetBins()) th->GetXaxis()->Set(fAxes[0]->GetNBins(),fAxes[0]->GetBins());
-      if(fAxes[1]->GetBins()) th->GetYaxis()->Set(fAxes[1]->GetNBins(),fAxes[1]->GetBins());
-      if(fAxes[2]->GetBins()) th->GetZaxis()->Set(fAxes[2]->GetNBins(),fAxes[2]->GetBins());
-      th->GetXaxis()->SetTitle(fAxes[0]->GetTitle());
-      th->GetYaxis()->SetTitle(fAxes[1]->GetTitle());
-      th->GetZaxis()->SetTitle(fAxes[2]->GetTitle());
+      fTH=new TH3D(name,name,fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax(),fAxes[1]->GetNBins(),fAxes[1]->GetMin(),fAxes[1]->GetMax(),fAxes[2]->GetNBins(),fAxes[2]->GetMin(),fAxes[2]->GetMax());
+      fTH->SetDirectory(NULL);
+      if(fAxes[0]->GetBins()) fTH->GetXaxis()->Set(fAxes[0]->GetNBins(),fAxes[0]->GetBins());
+      if(fAxes[1]->GetBins()) fTH->GetYaxis()->Set(fAxes[1]->GetNBins(),fAxes[1]->GetBins());
+      if(fAxes[2]->GetBins()) fTH->GetZaxis()->Set(fAxes[2]->GetNBins(),fAxes[2]->GetBins());
+      fTH->GetXaxis()->SetTitle(fAxes[0]->GetTitle());
+      fTH->GetYaxis()->SetTitle(fAxes[1]->GetTitle());
+      fTH->GetZaxis()->SetTitle(fAxes[2]->GetTitle());
 
       for(li=0; li<nfbins; li++) {
 	GetFBinCoords(li,coords);
-	th->SetBinContent(coords[0],coords[1],coords[2],GetFBinContent(li));
+	fTH->SetBinContent(coords[0],coords[1],coords[2],GetFBinContent(li));
       }
       break;
 
     default:
-      return NULL;
+      fprintf(stderr,"QHN::GetTH: Error: Cannot generate a ROOT histogram with a dimension greater than 3\n");
+      throw 1;
   }
 
-  th->SetEntries(fEntries);
-  return th;
+  fTH->SetEntries(fEntries);
+  return *fTH;
 }
 
 template <typename U> Long64_t QHN<U>::GetBin(const Int_t *coords) const
@@ -1098,6 +1109,11 @@ template <typename U> void QHN<U>::Reset()
 {
   memset(fBinContent,0,fNBins*sizeof(U));
   fEntries=0;
+
+  if(fTH) {
+    delete fTH;
+    fTH=NULL;
+  }
 }
 
 template <typename U> QHN<U>* QHN<U>::Projection(const char *name, const Int_t *axes, const Int_t &naxes) const

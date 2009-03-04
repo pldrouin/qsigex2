@@ -96,6 +96,7 @@ template <typename U> void QHNF<U>::Init()
   for(Int_t i=QHN<U>::fNDims-1; i>=0; --i) QHN<U>::fNBins*=QHN<U>::fAxes[i]->GetNBins()+2;
   QHN<U>::fBinContent=NULL;
   QHN<U>::fEntries=0;
+  QHN<U>::fTH=NULL;
   fNFBins=0;
   fBins=NULL;
 }
@@ -199,6 +200,11 @@ template <typename U> void QHNF<U>::Reset()
     free(fBins); fBins=NULL;
     free(QHN<U>::fBinContent); QHN<U>::fBinContent=NULL;
     fNFBins=0;
+  }
+
+  if(QHN<U>::fTH) {
+    delete QHN<U>::fTH;
+    QHN<U>::fTH=NULL;
   }
   QHN<U>::fEntries=0;
 }

@@ -17,7 +17,7 @@
 template <typename U> class QHN: public QDis
 {
   public:
-    QHN(): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0){};
+    QHN(): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0), fTH(NULL){};
     QHN(const QHN &qthn);
     QHN(const Char_t *name, const Char_t *title, const Int_t &ndims);
 #ifndef __CINT__
@@ -59,7 +59,7 @@ template <typename U> class QHN: public QDis
     virtual void Clear(Option_t* option="");
     virtual TObject* Clone(const char* newname = NULL) const{QHN<U>* ret=new QHN(*this); if(newname) ret->SetName(newname); return ret;}
     QDis* CloneQDis() const{return new QHN<U>(*this);}
-    void Draw(Option_t *option=""){if(fNDims<4) GenTH()->Draw(option);}
+    void Draw(Option_t *option=""){if(fNDims<4) const_cast<TH1&>(GetTH()).Draw(option);}
     const U& Eval(const Double_t &x0) const{return GetBinContent(FindBin(x0));}
     const U& Eval(const Double_t &x0, const Double_t &x1) const{return GetBinContent(FindBin(x0,x1));}
     const U& Eval(const Double_t &x0, const Double_t &x1, const Double_t &x2) const{return GetBinContent(FindBin(x0,x1,x2));}
@@ -126,7 +126,7 @@ template <typename U> class QHN: public QDis
     Long64_t FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8) const;
     Long64_t FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8, const Float_t &x9) const;
     Long64_t FindBin(Float_t const* const &x) const;
-    TH1* GenTH(const char *name="_th") const;
+    const TH1& GetTH(const char *name="_th");
     QAxis* GetAxis(const Int_t &axis) const{return fAxes[axis];}
     Long64_t GetBin(const Int_t *coords) const;
     Long64_t GetBin(const Int_t &coord0, const Int_t &coord1) const;
@@ -212,6 +212,7 @@ template <typename U> class QHN: public QDis
     Double_t fEntries;
     U *fBinContent; //!
     Long64_t fNBins;
+    TH1 *fTH;
 
     ClassDef(QHN,1) //Multidimensional histogram template class optimized for random access
 };
