@@ -54,7 +54,7 @@ template <typename U> void QList<U>::Add(const QList<U>& newqlist, const Int_t &
   Add(newqlist.fUArray,newqlist.fNElements,index);  
 }
 
-template <typename U> void QList<U>::Add(const U& newelement, const Int_t &index)
+template <typename U> inline void QList<U>::Add(const U& newelement, const Int_t &index)
 {
   // This function adds 1 element to the list, given a U element of the same U type.
   // The element is copied using *this[i]=newelement. Consequently, if U is a data
@@ -401,7 +401,7 @@ template <typename U> Int_t QList<U>::FindFirst(const U* us, const Int_t &neleme
   return -1;
 }
 
-template <typename U> U& QList<U>::GetLast() const
+template <typename U> inline U& QList<U>::GetLast() const
 {
   //Returns the last element of the list
 
@@ -482,7 +482,7 @@ template<typename V> Bool_t operator>(const QList<V>& lhs,const QList<V>& rhs)
   return (lhs.Find(rhs,1).Count()>0 && lhs.Count()>rhs.Count());
 }
 
-template <typename U> U& QList<U>::operator[](const Int_t &index) const
+template <typename U> inline U& QList<U>::operator[](const Int_t &index) const
 {
   // This function returns the U reference corresponding to index.
 
