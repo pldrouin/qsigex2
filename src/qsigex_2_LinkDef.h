@@ -3,6 +3,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
+#pragma link C++ class QAxis-;
 #pragma link C++ class QHN<Double_t>-;
 #pragma link C++ class QHN<Float_t>-;
 #pragma link C++ class QHN<Int_t>-;

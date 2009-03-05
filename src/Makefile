@@ -13,12 +13,13 @@ CXXFLAGS        +=      -I$(shell root-config --incdir)
 #CXXFLAGS        +=      -I$(shell root-config --incdir)
 
 ifeq (${CXX},icpc)
-AR      =       xiar cru
+#AR      =       xiar cru
+AR      =       xild -lib cru
 else
 AR      =       ar rcs
 endif
 
-QSIGEX_QCXX_2	=	QPHN.cxx
+QSIGEX_QCXX_2	=	QAxis.cxx QPHN.cxx
 QSIGEX_QCXX_1	=	$(filter-out $(QSIGEX_QCXX_2),$(wildcard Q*.cxx))
 QSIGEX_QCXX	=	$(QSIGEX_QCXX_1) $(QSIGEX_QCXX_2)
 QSIGEX_OBJS_1	=	$(QSIGEX_QCXX_1:.cxx=.o)
@@ -31,14 +32,16 @@ QSIGEX_CLHD_1	=	$(QSIGEX_QCXX_1:.cxx=.h) QList.h QNamedVar.h
 QSIGEX_CLHD_2	=	$(QSIGEX_QCXX_2:.cxx=.h) QList.h QNamedVar.h QHN.h QHNF.h QHNDL.h
 QSIGEX_CLHD	=	$(QSIGEX_CLHD_1) $(QSIGEX_CLHD_2)
 
-QSIGEX_DICTOBJ_1=	qsigex_1_Dict.o
-QSIGEX_DICTOBJS_1=	qsigex_1_Dict.os
-QSIGEX_DICTOBJ_2=	qsigex_2_Dict.o
-QSIGEX_DICTOBJS_2=	qsigex_2_Dict.os
+QSIGEX_DICTCXX_1=	qsigex_1_Dict.cxx
+QSIGEX_DICTOBJ_1=	$(QSIGEX_DICTCXX_1:.cxx=.o)
+QSIGEX_DICTOBJS_1=	$(QSIGEX_DICTCXX_1:.cxx=.os)
+QSIGEX_DICTCXX_2=	qsigex_2_Dict.cxx
+QSIGEX_DICTOBJ_2=	$(QSIGEX_DICTCXX_2:.cxx=.o)
+QSIGEX_DICTOBJS_2=	$(QSIGEX_DICTCXX_2:.cxx=.os)
 QSIGEX_DICTOBJ	=	$(QSIGEX_DICTOBJ_1) $(QSIGEX_DICTOBJ_2)
 QSIGEX_DICTOBJS	=	$(QSIGEX_DICTOBJS_1) $(QSIGEX_DICTOBJS_2)
-QSIGEX_LINKDEF_1=	qsigex_1_LinkDef.h
-QSIGEX_LINKDEF_2=	qsigex_2_LinkDef.h
+QSIGEX_1_LINKDEF=	qsigex_1_LinkDef.h
+QSIGEX_2_LINKDEF=	qsigex_2_LinkDef.h
 
 QSIGEX_OCXX	=	$(filter-out $(QSIGEX_QCXX) $(QSIGEX_DICTOBJ:.o=.cxx),$(wildcard *.cxx))
 QSIGEX_OOBJS_1	=	$(QSIGEX_OCXX_1:.cxx=.o)
@@ -52,26 +55,37 @@ QSIGEX_OBJSDEP	=	$(QSIGEX_OBJS:.o=.d)
 QSIGEX_OOBJSDEP	=	$(QSIGEX_OOBJS:.o=.d)
 QSIGEX_DICTOBJDEP=	$(QSIGEX_DICTOBJ:.o=.d)
 
-libs: libqsigex-1.so libqsigex-2.so
-liba: libqsigex.a
+ifeq ($(CXX),icpc)
+STCOM	=	xiar cru
+ifeq ($(PROFGEN),1)
+STD     =       $(QSIGEX_OBJSS) $(QSIGEX_OOBJSS) $(QSIGEX_DICTOBJS)
+SHD     =       $(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ)
+else
+STD	=	qsigex_1.ipos qsigex_2.ipos
+SHD	=	qsigex_1.ipo qsigex_2.ipo
+endif
+else
+STCOM	=	ar rcs
+STD	=	$(QSIGEX_OBJSS) $(QSIGEX_OOBJSS) $(QSIGEX_DICTOBJS)
+SHD	=	$(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ)
+endif
 
-libqsigex.a: $(QSIGEX_OBJSS_1) $(QSIGEX_OOBJSS_1) $(QSIGEX_DICTOBJS_1) $(QSIGEX_OBJSS_2) $(QSIGEX_OOBJSS_2) $(QSIGEX_DICTOBJS_2)
-	rm -rf $@ && $(AR) $@ $^
+shared: libqsigex2.so
+static: libqsigex2.a
 
-libqsigex-1.so: $(QSIGEX_OBJS_1) $(QSIGEX_OOBJS_1) $(QSIGEX_DICTOBJ_1)
-#	$(CXX) $(CXXFLAGS) -shared -L$(shell root-config --libdir) $(shell root-config --libs) -lMinuit -o $@ $^
-	$(CXX) -fPIC $(CXXFLAGS) -shared -o $@ $^
+libqsigex2.a: $(STD)
+	rm -rf $@ && $(STCOM) $@ $^
 
-libqsigex-2.so: $(QSIGEX_OBJS_2) $(QSIGEX_OOBJS_2) $(QSIGEX_DICTOBJ_2)
-	$(CXX) -fPIC $(CXXFLAGS) -shared -o $@ $^
+libqsigex2.so: $(SHD)
+	$(CXX) $(CXXFLAGS) -shared -o $@ $^
 
 clean:
 	rm -f *.d
-	rm -f *.o
+	rm -f *.o *.os *.ipo *.ipos
 	rm -f *Dict.o
 	rm -f *Dict.h
 	rm -f *Dict.cxx
-	rm -f libqsigex*.so
+	rm -f libqsigex*.so libqsigex*.a
 
 clear: clean
 	rm -f lib*.{so,a}
@@ -85,14 +99,26 @@ $(QSIGEX_OBJSDEP) $(QSIGEX_OOBJSDEP) $(QSIGEX_DICTOBJDEP): %.d: %.cxx %.h
 
 include $(QSIGEX_OBJSDEP) $(QSIGEX_OOBJSDEP) $(QSIGEX_DICTOBJDEP)
 
+qsigex_1.ipos: $(QSIGEX_OBJSS_1) $(QSIGEX_OOBJSS_1) $(QSIGEX_DICTOBJS_1)
+	$(CXX) -ipo_c -o $@ $(CXXFLAGS) $^
+
+qsigex_2.ipos: $(QSIGEX_OBJSS_2) $(QSIGEX_OOBJSS_2) $(QSIGEX_DICTOBJS_2)
+	$(CXX) -ipo_c -o $@ $(CXXFLAGS) $^
+
 $(QSIGEX_OBJSS) $(QSIGEX_OOBJSS) $(QSIGEX_DICTOBJS): %.os: %.cxx
 	$(CXX) -c -o $@ $(CXXFLAGS) $<
+
+qsigex_1.ipo: $(QSIGEX_OBJS_1) $(QSIGEX_OOBJS_1) $(QSIGEX_DICTOBJ_1)
+	$(CXX) -ipo_c -o $@ -fPIC $(CXXFLAGS) $^
+
+qsigex_2.ipo: $(QSIGEX_OBJS_2) $(QSIGEX_OOBJS_2) $(QSIGEX_DICTOBJ_2)
+	$(CXX) -ipo_c -o $@ -fPIC $(CXXFLAGS) $^
 
 $(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ): %.o: %.cxx
 	$(CXX) -c -o $@ -fPIC $(CXXFLAGS) $<
 
-$(QSIGEX_DICTOBJ_1:.o=.cxx): $(QSIGEX_CLHD_1) $(QSIGEX_LINKDEF_1)
+$(QSIGEX_DICTOBJ_1:.o=.cxx): $(QSIGEX_CLHD_1) $(QSIGEX_1_LINKDEF)
 	rm -f $@ $(@:.cxx=.h) && rootcint $@ -c -I./ $^
 
-$(QSIGEX_DICTOBJ_2:.o=.cxx): $(QSIGEX_CLHD_2) $(QSIGEX_LINKDEF_2)
+$(QSIGEX_DICTOBJ_2:.o=.cxx): $(QSIGEX_CLHD_2) $(QSIGEX_2_LINKDEF)
 	rm -f $@ $(@:.cxx=.h) && rootcint $@ -c -I./ $^

@@ -66,7 +66,6 @@
 #pragma link C++ class QProcList;
 
 #pragma link C++ class QProgress;
-#pragma link C++ class QAxis-;
 #pragma link C++ class QDis;
 #pragma link C++ class QDisTF;
 #pragma link C++ class QDisTH-;
