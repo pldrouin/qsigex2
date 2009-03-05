@@ -12,13 +12,6 @@
 CXXFLAGS        +=      -I$(shell root-config --incdir)
 #CXXFLAGS        +=      -I$(shell root-config --incdir)
 
-ifeq (${CXX},icpc)
-#AR      =       xiar cru
-AR      =       xild -lib cru
-else
-AR      =       ar rcs
-endif
-
 QSIGEX_QCXX_2	=	QAxis.cxx QPHN.cxx
 QSIGEX_QCXX_1	=	$(filter-out $(QSIGEX_QCXX_2),$(wildcard Q*.cxx))
 QSIGEX_QCXX	=	$(QSIGEX_QCXX_1) $(QSIGEX_QCXX_2)
