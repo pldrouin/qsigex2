@@ -56,7 +56,7 @@ template <typename U> void QHNDL<U>::Clear(Option_t* option)
   fFBins=NULL;
 }
 
-template <typename U> const U& QHNDL<U>::GetBinContent(const Long64_t &bin) const
+template <typename U> inline const U& QHNDL<U>::GetBinContent(const Long64_t &bin) const
 {
   if(fFBins[bin]!=-1) return QHN<U>::fBinContent[fFBins[bin]];
   else return QHNF<U>::fZero;

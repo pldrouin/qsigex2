@@ -60,38 +60,38 @@ class QPHN: public QHN_D
     }
     void Clear(Option_t* option=""){QHN_D::Clear(); if(fBinEntries) {free(fBinEntries); fBinEntries=NULL;}}
     TObject* Clone(const char* newname = NULL) const{QPHN* ret=new QPHN(*this); if(newname) ret->SetName(newname); return ret;}
-    void Fill(Double_t const * const &x, const Double_t &y){AddBinContent(FindBin(x),y);}
-    void Fill(Double_t const * const &x, const Double_t &y, const Double_t &w){AddBinContent(FindBin(x),y,w);}
-    void Fill(const Double_t &x0, const Double_t &y){AddBinContent(FindBin(x0),y);}
-    void Fill(const Double_t &x0, const Double_t &x1, const Double_t &y){AddBinContent(FindBin(x0,x1),y);}
-    void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &y){AddBinContent(FindBin(x0,x1,x2),y);}
-    void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &y){AddBinContent(FindBin(x0,x1,x2,x3),y);}
-    void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4),y);}
-    void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5),y);}
-    void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6),y);}
-    void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7, const Double_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7),y);}
-    void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7, const Double_t &x8, const Double_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8),y);}
-    void Fill(Float_t const * const &x, const Double_t &y){AddBinContent(FindBin(x),y);}
-    void Fill(Float_t const * const &x, const Double_t &y, const Double_t &w){AddBinContent(FindBin(x),y,w);}
-    void Fill(const Float_t &x0, const Float_t &y){AddBinContent(FindBin(x0),y);}
-    void Fill(const Float_t &x0, const Float_t &x1, const Float_t &y){AddBinContent(FindBin(x0,x1),y);}
-    void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &y){AddBinContent(FindBin(x0,x1,x2),y);}
-    void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3),y);}
-    void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4),y);}
-    void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5),y);}
-    void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6),y);}
-    void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7),y);}
-    void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8),y);}
+    inline void Fill(Double_t const * const &x, const Double_t &y){AddBinContent(FindBin(x),y);}
+    inline void Fill(Double_t const * const &x, const Double_t &y, const Double_t &w){AddBinContent(FindBin(x),y,w);}
+    inline void Fill(const Double_t &x0, const Double_t &y){AddBinContent(FindBin(x0),y);}
+    inline void Fill(const Double_t &x0, const Double_t &x1, const Double_t &y){AddBinContent(FindBin(x0,x1),y);}
+    inline void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &y){AddBinContent(FindBin(x0,x1,x2),y);}
+    inline void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &y){AddBinContent(FindBin(x0,x1,x2,x3),y);}
+    inline void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4),y);}
+    inline void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5),y);}
+    inline void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6),y);}
+    inline void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7, const Double_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7),y);}
+    inline void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7, const Double_t &x8, const Double_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8),y);}
+    inline void Fill(Float_t const * const &x, const Double_t &y){AddBinContent(FindBin(x),y);}
+    inline void Fill(Float_t const * const &x, const Double_t &y, const Double_t &w){AddBinContent(FindBin(x),y,w);}
+    inline void Fill(const Float_t &x0, const Float_t &y){AddBinContent(FindBin(x0),y);}
+    inline void Fill(const Float_t &x0, const Float_t &x1, const Float_t &y){AddBinContent(FindBin(x0,x1),y);}
+    inline void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &y){AddBinContent(FindBin(x0,x1,x2),y);}
+    inline void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3),y);}
+    inline void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4),y);}
+    inline void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5),y);}
+    inline void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6),y);}
+    inline void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7),y);}
+    inline void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8),y);}
     inline const Double_t& GetBinContent(const Long64_t &bin) const{static Double_t ret; return ret=(fBinEntries[bin]?fBinContent[bin]/fBinEntries[bin]:0);}
     QHN_D* New() const{return new QPHN;}
     QHN_D* New(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QPHN(name,title,ndims);}
     const QPHN& operator=(const QPHN &qthn);
-    void Reset(){QHN_D::Reset(); memset(fBinEntries,0,fNBins*sizeof(Double_t));}
+    inline void Reset(){QHN_D::Reset(); memset(fBinEntries,0,fNBins*sizeof(Double_t));}
   protected:
     QHN_D* NewD() const{return New();}
     QHN_D* NewD(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return New(name,title,ndims);}
     void ComputeNBins(){QHN_D::ComputeNBins(); if(fBinEntries) free(fBinEntries); fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t));}
-    inline void Init(){fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t)); memset(fBinEntries,0,fNBins*sizeof(Double_t));}
+    void Init(){fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t)); memset(fBinEntries,0,fNBins*sizeof(Double_t));}
   private:
     Double_t *fBinEntries;
     void AddFBinContent(const Long64_t &fbin, const Double_t &w){}

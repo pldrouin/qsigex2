@@ -101,7 +101,7 @@ template <typename U> void QHNF<U>::Init()
   fBins=NULL;
 }
 
-template <typename U> Long64_t QHNF<U>::GetFBin(const Int_t *coords) const
+template <typename U> inline Long64_t QHNF<U>::GetFBin(const Int_t *coords) const
 {
   Long64_t bin=QHN<U>::GetBin(coords);
   Long64_t bidx=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
@@ -110,7 +110,7 @@ template <typename U> Long64_t QHNF<U>::GetFBin(const Int_t *coords) const
   return bidx;
 }
 
-template <typename U> Long64_t QHNF<U>::GetFBin(const Long64_t &bin) const
+template <typename U> inline Long64_t QHNF<U>::GetFBin(const Long64_t &bin) const
 {
   Long64_t bidx=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
 
@@ -118,7 +118,7 @@ template <typename U> Long64_t QHNF<U>::GetFBin(const Long64_t &bin) const
   return bidx;
 }
 
-template <typename U> const U& QHNF<U>::GetBinContent(const Long64_t &bin) const
+template <typename U> inline const U& QHNF<U>::GetBinContent(const Long64_t &bin) const
 {
   Long64_t li=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
 
@@ -126,7 +126,7 @@ template <typename U> const U& QHNF<U>::GetBinContent(const Long64_t &bin) const
   return QHN<U>::fBinContent[li];
 }
 
-template <typename U> void QHNF<U>::GetFBinCoords(const Long64_t &fbin, Int_t *coords) const
+template <typename U> inline void QHNF<U>::GetFBinCoords(const Long64_t &fbin, Int_t *coords) const
 {
   Long64_t bin=fBins[fbin];
   coords[0]=bin%(QHN<U>::fAxes[0]->GetNBins()+2);
@@ -137,7 +137,7 @@ template <typename U> void QHNF<U>::GetFBinCoords(const Long64_t &fbin, Int_t *c
   }
 }
 
-template <typename U> Bool_t QHNF<U>::IsFBinIncluded(const Long64_t &fbin, const Int_t *mins, const Int_t *maxs) const
+template <typename U> inline Bool_t QHNF<U>::IsFBinIncluded(const Long64_t &fbin, const Int_t *mins, const Int_t *maxs) const
 {
   Long64_t bin=fBins[fbin];
   Int_t coord=bin%(QHN<U>::fAxes[0]->GetNBins()+2);
@@ -194,7 +194,7 @@ template <typename U> const QHNF<U>& QHNF<U>::operator=(const QHN<U> &qthn)
   return *this;
 }
 
-template <typename U> void QHNF<U>::Reset()
+template <typename U> inline void QHNF<U>::Reset()
 {
   if(fNFBins) {
     free(fBins); fBins=NULL;
@@ -209,13 +209,13 @@ template <typename U> void QHNF<U>::Reset()
   QHN<U>::fEntries=0;
 }
 
-template <typename U> void QHNF<U>::ScaleBinContent(const Long64_t &bin, const Double_t &scale)
+template <typename U> inline void QHNF<U>::ScaleBinContent(const Long64_t &bin, const Double_t &scale)
 {
   Long64_t fbin=GetFBin(bin);
   if(fbin!=-1) QHN<U>::fBinContent[fbin]*=(U)scale;
 }
 
-template <typename U> void QHNF<U>::ScaleBinContent(const Int_t *coords, const Double_t &scale)
+template <typename U> inline void QHNF<U>::ScaleBinContent(const Int_t *coords, const Double_t &scale)
 {
   Long64_t fbin=GetFBin(coords);
   if(fbin!=-1) QHN<U>::fBinContent[fbin]*=(U)scale;
@@ -258,7 +258,7 @@ template <typename U> void QHNF<U>::SetBinContent(const Long64_t &bin, const U &
   }
 }
 
-template <typename U> void QHNF<U>::SetBinContent(const Int_t *coords, const U &content)
+template <typename U> inline void QHNF<U>::SetBinContent(const Int_t *coords, const U &content)
 {
   SetBinContent(QHN<U>::GetBin(coords),content);
 }

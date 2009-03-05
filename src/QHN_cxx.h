@@ -342,52 +342,52 @@ template <typename U> void QHN<U>::Init()
   fTH=NULL;
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Double_t &x0) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Double_t &x0) const
 {
   return fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1) const
 {
   return (Long64_t)fAxes[1]->FindBin(x1)*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2) const
 {
   return ((Long64_t)fAxes[2]->FindBin(x2)*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3) const
 {
   return (((Long64_t)fAxes[3]->FindBin(x3)*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4) const
 {
   return ((((Long64_t)fAxes[4]->FindBin(x4)*(fAxes[3]->GetNBins()+2)+fAxes[3]->FindBin(x3))*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5) const
 {
   return (((((Long64_t)fAxes[5]->FindBin(x5)*(fAxes[4]->GetNBins()+2)+fAxes[4]->FindBin(x4))*(fAxes[3]->GetNBins()+2)+fAxes[3]->FindBin(x3))*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6) const
 {
   return ((((((Long64_t)fAxes[6]->FindBin(x6)*(fAxes[5]->GetNBins()+2)+fAxes[5]->FindBin(x5))*(fAxes[4]->GetNBins()+2)+fAxes[4]->FindBin(x4))*(fAxes[3]->GetNBins()+2)+fAxes[3]->FindBin(x3))*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7) const
 {
   return (((((((Long64_t)fAxes[7]->FindBin(x7)*(fAxes[6]->GetNBins()+2)+fAxes[6]->FindBin(x6))*(fAxes[5]->GetNBins()+2)+fAxes[5]->FindBin(x5))*(fAxes[4]->GetNBins()+2)+fAxes[4]->FindBin(x4))*(fAxes[3]->GetNBins()+2)+fAxes[3]->FindBin(x3))*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7, const Double_t &x8) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7, const Double_t &x8) const
 {
   return ((((((((Long64_t)fAxes[8]->FindBin(x8)*(fAxes[7]->GetNBins()+2)+fAxes[7]->FindBin(x7))*(fAxes[6]->GetNBins()+2)+fAxes[6]->FindBin(x6))*(fAxes[5]->GetNBins()+2)+fAxes[5]->FindBin(x5))*(fAxes[4]->GetNBins()+2)+fAxes[4]->FindBin(x4))*(fAxes[3]->GetNBins()+2)+fAxes[3]->FindBin(x3))*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7, const Double_t &x8, const Double_t &x9) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Double_t &x0, const Double_t &x1, const Double_t &x2, const Double_t &x3, const Double_t &x4, const Double_t &x5, const Double_t &x6, const Double_t &x7, const Double_t &x8, const Double_t &x9) const
 {
   return (((((((((Long64_t)fAxes[9]->FindBin(x9)*(fAxes[8]->GetNBins()+2)+fAxes[8]->FindBin(x8))*(fAxes[7]->GetNBins()+2)+fAxes[7]->FindBin(x7))*(fAxes[6]->GetNBins()+2)+fAxes[6]->FindBin(x6))*(fAxes[5]->GetNBins()+2)+fAxes[5]->FindBin(x5))*(fAxes[4]->GetNBins()+2)+fAxes[4]->FindBin(x4))*(fAxes[3]->GetNBins()+2)+fAxes[3]->FindBin(x3))*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
@@ -402,52 +402,52 @@ template <typename U> Long64_t QHN<U>::FindBin(Double_t const* const &x) const
   return bin;
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Float_t &x0) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Float_t &x0) const
 {
   return fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1) const
 {
   return (Long64_t)fAxes[1]->FindBin(x1)*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2) const
 {
   return ((Long64_t)fAxes[2]->FindBin(x2)*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3) const
 {
   return (((Long64_t)fAxes[3]->FindBin(x3)*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4) const
 {
   return ((((Long64_t)fAxes[4]->FindBin(x4)*(fAxes[3]->GetNBins()+2)+fAxes[3]->FindBin(x3))*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5) const
 {
   return (((((Long64_t)fAxes[5]->FindBin(x5)*(fAxes[4]->GetNBins()+2)+fAxes[4]->FindBin(x4))*(fAxes[3]->GetNBins()+2)+fAxes[3]->FindBin(x3))*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6) const
 {
   return ((((((Long64_t)fAxes[6]->FindBin(x6)*(fAxes[5]->GetNBins()+2)+fAxes[5]->FindBin(x5))*(fAxes[4]->GetNBins()+2)+fAxes[4]->FindBin(x4))*(fAxes[3]->GetNBins()+2)+fAxes[3]->FindBin(x3))*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7) const
 {
   return (((((((Long64_t)fAxes[7]->FindBin(x7)*(fAxes[6]->GetNBins()+2)+fAxes[6]->FindBin(x6))*(fAxes[5]->GetNBins()+2)+fAxes[5]->FindBin(x5))*(fAxes[4]->GetNBins()+2)+fAxes[4]->FindBin(x4))*(fAxes[3]->GetNBins()+2)+fAxes[3]->FindBin(x3))*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8) const
 {
   return ((((((((Long64_t)fAxes[8]->FindBin(x8)*(fAxes[7]->GetNBins()+2)+fAxes[7]->FindBin(x7))*(fAxes[6]->GetNBins()+2)+fAxes[6]->FindBin(x6))*(fAxes[5]->GetNBins()+2)+fAxes[5]->FindBin(x5))*(fAxes[4]->GetNBins()+2)+fAxes[4]->FindBin(x4))*(fAxes[3]->GetNBins()+2)+fAxes[3]->FindBin(x3))*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
 
-template <typename U> Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8, const Float_t &x9) const
+template <typename U> inline Long64_t QHN<U>::FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8, const Float_t &x9) const
 {
   return (((((((((Long64_t)fAxes[9]->FindBin(x9)*(fAxes[8]->GetNBins()+2)+fAxes[8]->FindBin(x8))*(fAxes[7]->GetNBins()+2)+fAxes[7]->FindBin(x7))*(fAxes[6]->GetNBins()+2)+fAxes[6]->FindBin(x6))*(fAxes[5]->GetNBins()+2)+fAxes[5]->FindBin(x5))*(fAxes[4]->GetNBins()+2)+fAxes[4]->FindBin(x4))*(fAxes[3]->GetNBins()+2)+fAxes[3]->FindBin(x3))*(fAxes[2]->GetNBins()+2)+fAxes[2]->FindBin(x2))*(fAxes[1]->GetNBins()+2)+fAxes[1]->FindBin(x1))*(fAxes[0]->GetNBins()+2)+fAxes[0]->FindBin(x0);
 }
@@ -537,47 +537,47 @@ template <typename U> Long64_t QHN<U>::GetBin(const Int_t *coords) const
   return bin;
 }
 
-template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1) const
+template <typename U> inline Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1) const
 {
     return (Long64_t)coord1*(fAxes[0]->GetNBins()+2)+coord0;
 }
 
-template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2) const
+template <typename U> inline Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2) const
 {
     return ((Long64_t)coord2*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
 }
 
-template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3) const
+template <typename U> inline Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3) const
 {
     return (((Long64_t)coord3*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
 }
 
-template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4) const
+template <typename U> inline Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4) const
 {
     return ((((Long64_t)coord4*(fAxes[3]->GetNBins()+2)+coord3)*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
 }
 
-template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5) const
+template <typename U> inline Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5) const
 {
     return (((((Long64_t)coord5*(fAxes[4]->GetNBins()+2)+coord4)*(fAxes[3]->GetNBins()+2)+coord3)*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
 }
 
-template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6) const
+template <typename U> inline Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6) const
 {
     return ((((((Long64_t)coord6*(fAxes[5]->GetNBins()+2)+coord5)*(fAxes[4]->GetNBins()+2)+coord4)*(fAxes[3]->GetNBins()+2)+coord3)*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
 }
 
-template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7) const
+template <typename U> inline Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7) const
 {
     return (((((((Long64_t)coord7*(fAxes[6]->GetNBins()+2)+coord6)*(fAxes[5]->GetNBins()+2)+coord5)*(fAxes[4]->GetNBins()+2)+coord4)*(fAxes[3]->GetNBins()+2)+coord3)*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
 }
 
-template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7, const Int_t &coord8) const
+template <typename U> inline Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7, const Int_t &coord8) const
 {
     return ((((((((Long64_t)coord8*(fAxes[7]->GetNBins()+2)+coord7)*(fAxes[6]->GetNBins()+2)+coord6)*(fAxes[5]->GetNBins()+2)+coord5)*(fAxes[4]->GetNBins()+2)+coord4)*(fAxes[3]->GetNBins()+2)+coord3)*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
 }
 
-template <typename U> Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7, const Int_t &coord8, const Int_t &coord9) const
+template <typename U> inline Long64_t QHN<U>::GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2, const Int_t &coord3, const Int_t &coord4, const Int_t &coord5, const Int_t &coord6, const Int_t &coord7, const Int_t &coord8, const Int_t &coord9) const
 {
     return (((((((((Long64_t)coord9*(fAxes[8]->GetNBins()+2)+coord8)*(fAxes[7]->GetNBins()+2)+coord7)*(fAxes[6]->GetNBins()+2)+coord6)*(fAxes[5]->GetNBins()+2)+coord5)*(fAxes[4]->GetNBins()+2)+coord4)*(fAxes[3]->GetNBins()+2)+coord3)*(fAxes[2]->GetNBins()+2)+coord2)*(fAxes[1]->GetNBins()+2)+coord1)*(fAxes[0]->GetNBins()+2)+coord0;
 }
@@ -854,7 +854,7 @@ template <typename U> Double_t QHN<U>::Integral(Int_t const* const* binranges, c
   return integral;
 }
 
-template <typename U> Bool_t QHN<U>::IsFBinIncluded(const Long64_t &fbin, const Int_t *mins, const Int_t *maxs) const
+template <typename U> inline Bool_t QHN<U>::IsFBinIncluded(const Long64_t &fbin, const Int_t *mins, const Int_t *maxs) const
 {
   Long64_t bin=fbin;
   Int_t coord=bin%(fAxes[0]->GetNBins()+2);
@@ -1163,7 +1163,7 @@ template <typename U> const QHN<U>& QHN<U>::operator=(const QDisTH &qth)
   return *this;
 }
 
-template <typename U> void QHN<U>::Reset()
+template <typename U> inline void QHN<U>::Reset()
 {
   memset(fBinContent,0,fNBins*sizeof(U));
   fEntries=0;
@@ -1258,7 +1258,7 @@ template <typename U> QHN<U>* QHN<U>::Projection(const char *name, const Int_t *
   return th;
 }
 
-template <typename U> void QHN<U>::ScaleBinContent(const Long64_t &bin, const Double_t &scale)
+template <typename U> inline void QHN<U>::ScaleBinContent(const Long64_t &bin, const Double_t &scale)
 {
 #ifndef QSFAST
       if(bin<0 || bin>=fNBins) {
@@ -1270,7 +1270,7 @@ template <typename U> void QHN<U>::ScaleBinContent(const Long64_t &bin, const Do
   if(fbin!=-1) fBinContent[fbin]*=(U)scale;
 }
 
-template <typename U> void QHN<U>::ScaleBinContent(const Int_t *coords, const Double_t &scale)
+template <typename U> inline void QHN<U>::ScaleBinContent(const Int_t *coords, const Double_t &scale)
 {
   Long64_t fbin=GetFBin(coords);
   if(fbin!=-1) fBinContent[fbin]*=(U)scale;

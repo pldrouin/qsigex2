@@ -40,7 +40,7 @@ template <typename U> class QHNF: public QHN<U>
 
     virtual ~QHNF(){}
     virtual void AddBinContent(const Long64_t &bin, const U &w=1);
-    void AddFBinContent(const Long64_t &fbin, const U &w=1)
+    inline void AddFBinContent(const Long64_t &fbin, const U &w=1)
     {
 #ifndef QSFAST
       if(fbin<0 || fbin>=fNFBins) {
@@ -54,10 +54,10 @@ template <typename U> class QHNF: public QHN<U>
     TObject* Clone(const char* newname = NULL) const{QHNF<U>* ret=new QHNF(*this); if(newname) ret->SetName(newname); return ret;}
     virtual Long64_t GetFBin(const Int_t *coords) const;
     virtual Long64_t GetFBin(const Long64_t &bin) const;
-    const Long64_t& GetNFbins() const {return fNFBins;}
+    inline const Long64_t& GetNFbins() const {return fNFBins;}
     virtual const U& GetBinContent(const Long64_t &bin) const;
-    const U& GetFBinContent(const Long64_t &fbin) const{return QHN<U>::fBinContent[fbin];}
-    const Long64_t& GetFBinCoord(const Long64_t &fbin) const{return fBins[fbin];}
+    inline const U& GetFBinContent(const Long64_t &fbin) const{return QHN<U>::fBinContent[fbin];}
+    inline const Long64_t& GetFBinCoord(const Long64_t &fbin) const{return fBins[fbin];}
     void GetFBinCoords(const Long64_t &fbin, Int_t *coords) const;
     virtual QHN<U>* New() const{return new QHNF<U>;}
     virtual QHN<U>* New(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHNF<U>(name,title,ndims);}

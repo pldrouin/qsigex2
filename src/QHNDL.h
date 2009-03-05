@@ -38,8 +38,8 @@ template <typename U> class QHNDL: public QHNF<U>
     void AddBinContent(const Long64_t &bin, const U &w=1);
     void Clear(Option_t* option="");
     TObject* Clone(const char* newname = NULL) const{QHNDL<U>* ret=new QHNDL(*this); if(newname) ret->SetName(newname); return ret;}
-    Long64_t GetFBin(const Int_t *coords) const{return fFBins[QHN<U>::GetBin(coords)];}
-    Long64_t GetFBin(const Long64_t &bin) const{return fFBins[bin];}
+    inline Long64_t GetFBin(const Int_t *coords) const{return fFBins[QHN<U>::GetBin(coords)];}
+    inline Long64_t GetFBin(const Long64_t &bin) const{return fFBins[bin];}
     const U& GetBinContent(const Long64_t &bin) const;
     QHN<U>* New() const{return new QHNDL<U>;}
     QHN<U>* New(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHNDL<U>(name,title,ndims);}
