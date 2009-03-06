@@ -50,7 +50,7 @@ QSIGEX_DICTOBJDEP=	$(QSIGEX_DICTOBJ:.o=.d)
 
 ifeq ($(CXX),icpc)
 STCOM	=	xiar cru
-ifeq ($(PROFGEN),1)
+ifdef PROFGEN
 STD     =       $(QSIGEX_OBJSS) $(QSIGEX_OOBJSS) $(QSIGEX_DICTOBJS)
 SHD     =       $(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ)
 else

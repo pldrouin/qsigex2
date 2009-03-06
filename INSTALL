@@ -20,6 +20,15 @@ INSTALLATION:
 
  gmake
 
+ This will generate both shared and static libraries. Individual libraries can be
+ generated using the "shared" and "static" targets.
+
+ To disable some checks that affect performance, the make variable QSFAST can be
+ defined.
+
+ Variables PROFGEN and PROFUSE can be defined to use the profiling features of the
+ Intel compiler.
+
 6-If you want to generate HTML documentation for QSigEx, type:
 
  gmake htmldoc

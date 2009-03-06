@@ -1,13 +1,13 @@
 ALLINCS		=	$(addprefix include/,$(notdir $(wildcard src/*.h)))
 
-ifeq ($(QSFAST),1)
+ifdef QSFAST
 CXXFLAGS	+=	-DQSFAST
 endif
 
-ifeq ($(PROFGEN),1)
+ifdef PROFGEN
 CXXFLAGS	+=	-prof-gen
 else
-ifeq ($(PROFUSE),1)
+ifdef PROFUSE
 CXXFLAGS	+=	-prof-use
 endif
 endif
