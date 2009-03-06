@@ -22,7 +22,7 @@ shared: $(ALLINCS)
 	cd ./src; $(MAKE) shared
 	cp ./src/libqsigex*.so ./lib/
 
-htmldoc: force
+htmldoc: shared
 	cd ./src; root -b -n -q -l htmlgen.C; mv htmldoc ../
 clean:
 	cd ./src; $(MAKE) clean
