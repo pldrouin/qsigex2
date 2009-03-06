@@ -87,7 +87,7 @@ $(QSIGEX_OBJSDEP) $(QSIGEX_OOBJSDEP) $(QSIGEX_DICTOBJDEP): %.d: %.cxx %.h
 	@echo "Generating dependency file $@"
 	@set -e; rm -f $@
 	@$(CXX) -M $(CXXFLAGS) $< > $@.tmp
-	@sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.tmp > $@
+	@sed 's,\($*\)\.o[ :]*,\1.o \1.os $@ : ,g' < $@.tmp > $@
 	@rm -f $@.tmp
 
 include $(QSIGEX_OBJSDEP) $(QSIGEX_OOBJSDEP) $(QSIGEX_DICTOBJDEP)

@@ -161,6 +161,9 @@ template <typename U> class QHN: public QDis
     inline void InitProcObj(){Reset();}
     Double_t Integral(Int_t const* const* binranges=NULL, const Bool_t *widths=NULL) const;
     QHN<Double_t>* MarginalPDF(const char *name="_md", const Int_t *axes=NULL, const Int_t &naxes=0) const;
+    QHN<Double_t>* MarginalPDF(const char *name, const Int_t &axis0) const{return MarginalPDF(name,&axis0,1);}
+    QHN<Double_t>* MarginalPDF(const char *name, const Int_t &axis0, const Int_t &axis1) const;
+    QHN<Double_t>* MarginalPDF(const char *name, const Int_t &axis0, const Int_t &axis1, const Int_t &axis2) const;
     virtual QHN<U>* New() const{return new QHN<U>;}
     virtual QHN<U>* New(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHN<U>(name,title,ndims);}
     void Normalize(Double_t* integral=NULL);
@@ -168,6 +171,9 @@ template <typename U> class QHN: public QDis
     const QHN<U>& operator=(const TH1 &th);
     const QHN<U>& operator=(const QDisTH &qth);
     QHN<U>* Projection(const char *name="_pd", const Int_t *axes=NULL, const Int_t &naxes=0) const;
+    QHN<U>* Projection(const char *name, const Int_t &axis0) const{return Projection(name,&axis0,1);}
+    QHN<U>* Projection(const char *name, const Int_t &axis0, const Int_t &axis1) const;
+    QHN<U>* Projection(const char *name, const Int_t &axis0, const Int_t &axis1, const Int_t &axis2) const;
     virtual void Reset();
     inline void Scale(const Double_t &scale){for(Long64_t li=GetNFbins()-1; li>=0; --li) fBinContent[li]*=(U)scale;}
     virtual void ScaleBinContent(const Long64_t &bin, const Double_t &scale);

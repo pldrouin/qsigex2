@@ -474,11 +474,12 @@ template <typename U> const TH1& QHN<U>::GetTH()
   Long64_t li;
   Int_t coords[3];
   Long64_t nfbins=GetNFbins();
+  TString thname=GetName();
 
   switch(fNDims) {
     case 1:
-      if(!fAxes[0]->GetBins()) fTH=new TH1D("qhn2th",GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax());
-      else fTH=new TH1D("qhn2th",GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetBins());
+      if(!fAxes[0]->GetBins()) fTH=new TH1D(GetName(),GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax());
+      else fTH=new TH1D(GetName(),GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetBins());
       fTH->SetDirectory(NULL);
       fTH->GetXaxis()->SetTitle(fAxes[0]->GetTitle());
 
@@ -940,6 +941,18 @@ template <typename U> QHN<Double_t>* QHN<U>::MarginalPDF(const char *name, const
   return th;
 }
 
+template <typename U> QHN<Double_t>* QHN<U>::MarginalPDF(const char *name, const Int_t &axis0, const Int_t &axis1) const
+{
+  const Int_t axes[]={axis0,axis1};
+  return MarginalPDF(name,axes,2);
+}
+
+template <typename U> QHN<Double_t>* QHN<U>::MarginalPDF(const char *name, const Int_t &axis0, const Int_t &axis1, const Int_t &axis2) const
+{
+  const Int_t axes[]={axis0,axis1,axis2};
+  return MarginalPDF(name,axes,3);
+}
+
 template <typename U> void QHN<U>::Normalize(Double_t* integral)
 {
   //This function normalizes the PDF according to the normalization
@@ -1256,6 +1269,18 @@ template <typename U> QHN<U>* QHN<U>::Projection(const char *name, const Int_t *
 
   th->fEntries=fEntries;
   return th;
+}
+
+template <typename U> QHN<U>* QHN<U>::Projection(const char *name, const Int_t &axis0, const Int_t &axis1) const
+{
+  const Int_t axes[]={axis0,axis1};
+  return Projection(name,axes,2);
+}
+
+template <typename U> QHN<U>* QHN<U>::Projection(const char *name, const Int_t &axis0, const Int_t &axis1, const Int_t &axis2) const
+{
+  const Int_t axes[]={axis0,axis1,axis2};
+  return Projection(name,axes,3);
 }
 
 template <typename U> inline void QHN<U>::ScaleBinContent(const Long64_t &bin, const Double_t &scale)
