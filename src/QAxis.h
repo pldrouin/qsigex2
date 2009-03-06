@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include "TNamed.h"
+#include "TAxis.h"
 
 class QAxis: public TNamed
 {
@@ -22,29 +23,30 @@ class QAxis: public TNamed
     void Clear(Option_t* option = ""){if(fBins) {delete[] fBins; fBins=NULL;}}
     TObject* Clone(const char* newname = NULL) const{QAxis *ret=new QAxis(*this); if(newname) ret->SetName(newname); return ret;}
 
-    template <typename U> Int_t FindBin(const U& x) const{
+    inline Int_t FindBin(const Double_t &x) const{
+
       if(x<fMin) return 0;
 
       else if(x>=fMax) return fNBins+1;
 
       else if(fBins) {
-	return std::upper_bound(fBins, fBins+fNBins+1, (Double_t)x)-fBins;
+	return std::upper_bound(fBins, fBins+fNBins+1, x)-fBins;
 
       } else {
 	return 1+int((x-fMin)/fBWidth);
       }
     }
 
-    Double_t GetBinCenter(const Int_t &bin) const{
+    inline Double_t GetBinCenter(const Int_t &bin) const{
       if(!fBins || bin<1 || bin>fNBins) {
 	return fMin+(bin-0.5)*fBWidth;
 
       } else {
-	return (fBins[bin-1]+fBins[bin])/2;
+	return (fBins[bin-1]+fBins[bin])*0.5;
       }
     }
 
-    Double_t GetBinLowEdge(const Int_t &bin) const{
+    inline Double_t GetBinLowEdge(const Int_t &bin) const{
       if(!fBins || bin<1 || bin>fNBins) {
 	return fMin+(bin-1)*fBWidth;
 
@@ -53,7 +55,7 @@ class QAxis: public TNamed
       }
     }
 
-    Double_t GetBinUpEdge(const Int_t &bin) const{
+    inline Double_t GetBinUpEdge(const Int_t &bin) const{
       if(!fBins || bin<1 || bin>fNBins) {
 	return fMin+bin*fBWidth;
 
@@ -62,7 +64,7 @@ class QAxis: public TNamed
       }
     }
 
-    Double_t GetBinWidth(const Int_t &bin) const{
+    inline Double_t GetBinWidth(const Int_t &bin) const{
       if(!fBins || bin<1 || bin>fNBins) {
 	return fBWidth;
 
@@ -71,10 +73,10 @@ class QAxis: public TNamed
       }
     }
 
-    const Double_t& GetMin() const{return fMin;}
-    const Double_t& GetMax() const{return fMax;}
-    const Double_t* GetBins() const{return fBins;}
-    const Int_t& GetNBins() const{return fNBins;}
+    inline const Double_t& GetMin() const{return fMin;}
+    inline const Double_t& GetMax() const{return fMax;}
+    inline const Double_t* GetBins() const{return fBins;}
+    inline const Int_t& GetNBins() const{return fNBins;}
     const QAxis& operator=(const QAxis &rhs){TNamed::operator=(rhs); Clear(); fNBins=rhs.fNBins; fMin=rhs.fMin; fMax=rhs.fMax; fBWidth=rhs.fBWidth; if(rhs.fBins) {fBins=new Double_t[fNBins+1]; memcpy(fBins,rhs.fBins,(fNBins+1)*sizeof(Double_t));} return *this;}
     void Set(const Int_t &nbins, const Double_t& min, const Double_t& max){Clear(); fNBins=nbins; fMin=min; fMax=max; fBWidth=(fMax-fMin)/nbins;}
     template <typename U> void Set(const Int_t &nbins, const U* bins){if(IsConstantBW(nbins,bins)) Set(nbins,bins[0],bins[nbins]); else {Clear(); fNBins=nbins; fMin=bins[0]; fMax=bins[nbins]; fBWidth=(fMax-fMin)/fNBins; fBins=new Double_t[nbins+1]; for(Int_t i=0; i<=nbins; i++) fBins[i]=bins[i];}}
@@ -93,9 +95,6 @@ class QAxis: public TNamed
     ClassDef(QAxis, 1)
 };
 
-template Int_t QAxis::FindBin(const Double_t& x) const;
-template Int_t QAxis::FindBin(const Float_t& x) const;
-template Int_t QAxis::FindBin(const Int_t& x) const;
 template void QAxis::Set(const Int_t &nbins, const Float_t* bins);
 template void QAxis::Set(const Int_t &nbins, const Int_t* bins);
 template Bool_t QAxis::IsConstantBW(const Int_t &nbins, const Double_t *bins) const;
