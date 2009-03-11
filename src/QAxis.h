@@ -92,7 +92,7 @@ class QAxis: public TNamed
     Double_t fBWidth;
     Double_t *fBins;
 
-    ClassDef(QAxis, 1)
+    ClassDef(QAxis, 1) //Optimized axis class
 };
 
 template void QAxis::Set(const Int_t &nbins, const Float_t* bins);

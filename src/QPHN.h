@@ -103,7 +103,7 @@ class QPHN: public QHN_D
     void SetBinContent(const Long64_t &bin, const Double_t &content){}
     void SetBinContent(const Int_t *coords, const Double_t &content){}
 
-    ClassDef(QPHN,1) //Multidimensional profile histogram class optimized for memory and iteration over filled bins
+    ClassDef(QPHN,1) //Multidimensional profile histogram class optimized for random access
 };
 
 #endif
