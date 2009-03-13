@@ -233,7 +233,7 @@ template <typename U> Int_t QList<U>::Del(const U* delus, const Int_t &nelements
 
   while(pos<=fNElements-nelements && pos+counter<fNElements){
     if(fUArray[pos+counter]==delus[counter]){
-      --counter;
+      ++counter;
       if(counter==nelements){
 	RedimList(fNElements-nelements,pos);
 	++matches;
@@ -592,6 +592,8 @@ template <typename U> Int_t QList<U>::RedimList(const Int_t &newdim, Int_t index
       return index;
       
     } else {
+      if(index==-1) index=fNElements;
+      if(index<0 || index>fNElements) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed (" << index << ")\n"; throw 4000;}
       return index;
     }
   }catch(Int_t e){
