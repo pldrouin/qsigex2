@@ -147,7 +147,7 @@ void QOversizeArray::CleanUZBuffers()
   FuncDef(CleanUZBuffers,1);
   printstatus("QOversizeArray::CleanUZBuffers()");
   //****** Make sure fBuffersMutex is locked and that fCurBLRBIdx!=-2 when calling this function!
-  static Int_t i,j;
+  Int_t i,j;
 
   pthread_mutex_lock(&fUZBMutex);
   j=0;
@@ -675,7 +675,7 @@ void QOversizeArray::ReadBuffer(QOABuffer **buf, const UInt_t &bufferidx)
 {
   FuncDef(ReadBuffer,1);
   //printf("Read buffer %u at %u\n",buf->fBufferIdx,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte);
-  static Int_t buffersize;
+  Int_t buffersize;
 
   pthread_mutex_lock(&fFileMutex);
   if(lseek(fFDesc,bufferidx*fMaxBHBDataSize+fFirstDataByte,SEEK_SET)==-1){
