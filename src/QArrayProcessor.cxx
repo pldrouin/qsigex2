@@ -571,6 +571,7 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     static Long64_t neaealast;           //Number of entries for the previous input array that should contain all events
     static Long64_t nesea;               //Number of entries for arrays that should contain only selected events
     static Long64_t nesealast;           //Number of entries for the previous input array that should contain only selected events
+    static Long64_t li;
     static Bool_t eventselected;
 
     iaarrays.Clear();
@@ -697,13 +698,13 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     if(neaealast==-1) {
 
       //Loop over the selected events
-      for(i=0; i<nesealast; ++i) {
-	//printf("Entry %i/%i\n",i,nesealast);
+      for(li=0; li<nesealast; ++li) {
+	//printf("Entry %lli/%lli\n",li,nesealast);
 
 	//Load all triggered input arrays
 	for(j=isarrays.Count()-1; j>=0; --j) {
 	  //printf("\tInput array %i/%i\n",j,isarrays.Count());
-	  isarrays.GetArray()[j]->LoadEntry(i);
+	  isarrays.GetArray()[j]->LoadEntry(li);
 	}
 
 	//Loop over all triggered processes
@@ -722,13 +723,13 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     } else if(nesealast==-1) {
 
       //Loop over all events
-      for(i=0; i<neaealast; ++i) {
-	//printf("Entry %i/%i\n",i,neaealast);
+      for(li=0; li<neaealast; ++li) {
+	//printf("Entry %lli/%lli\n",li,neaealast);
 
 	//Load all triggered input arrays
 	for(j=iaarrays.Count()-1; j>=0; --j) {
 	  //printf("\tInput array %i/%i\n",j,iaarrays.Count());
-	  iaarrays.GetArray()[j]->LoadEntry(i);
+	  iaarrays.GetArray()[j]->LoadEntry(li);
 	}
 	eventselected=kTRUE;
 
@@ -759,13 +760,13 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
     } else {
 
       //Loop over selected events
-      for(i=0; i<nesealast; ++i) {
-	//printf("Entry %i/%i\n",i,nesealast);
+      for(li=0; li<nesealast; ++li) {
+	//printf("Entry %lli/%lli\n",li,nesealast);
 
 	//Load all triggered input selected events arrays
 	for(j=isarrays.Count()-1; j>=0; --j) {
 	  //printf("\tInput array %i/%i\n",j,isarrays.Count());
-	  isarrays.GetArray()[j]->LoadEntry(i);
+	  isarrays.GetArray()[j]->LoadEntry(li);
 	}
 
 	//Loop over all triggered non-post-selection events processes
@@ -790,13 +791,13 @@ void QArrayProcessor::Exec(const Bool_t &forceall) const
       }
 
       //Loop over all events
-      for(i=0; i<neaealast; ++i) {
-	//printf("Entry %i/%i\n",i,neaealast);
+      for(li=0; li<neaealast; ++li) {
+	//printf("Entry %lli/%lli\n",li,neaealast);
 
 	//Load all triggered input all events arrays
 	for(j=iaarrays.Count()-1; j>=0; --j) {
 	  //printf("\tInput array %i/%i\n",j,iaarrays.Count());
-	  iaarrays.GetArray()[j]->LoadEntry(i);
+	  iaarrays.GetArray()[j]->LoadEntry(li);
 	}
 
 	//Loop over all triggered non-post-selection events processes
