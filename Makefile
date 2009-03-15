@@ -16,11 +16,11 @@ all: shared static
 
 static: $(ALLINCS)
 	cd ./src; $(MAKE) static
-	cp ./src/libqsigex*.a ./lib/
+	cp -p ./src/libqsigex*.a ./lib/
 
 shared: $(ALLINCS)
 	cd ./src; $(MAKE) shared
-	cp ./src/libqsigex*.so ./lib/
+	cp -p ./src/libqsigex*.so ./lib/
 
 htmldoc: shared
 	cd ./src; root -b -n -q -l htmlgen.C; mv htmldoc ../
@@ -32,4 +32,4 @@ clear:
 	rm -f lib/* include/*
 
 $(ALLINCS): include/%: src/%
-	cp $^ $@
+	cp -p $^ $@
