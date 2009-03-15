@@ -83,7 +83,7 @@ clean:
 clear: clean
 	rm -f lib*.{so,a}
 
-$(QSIGEX_OBJSDEP) $(QSIGEX_OOBJSDEP) $(QSIGEX_DICTOBJDEP): %.d: %.cxx %.h
+$(QSIGEX_OBJSDEP) $(QSIGEX_OOBJSDEP) $(QSIGEX_DICTOBJDEP): %.d: %.h
 	@echo "Generating dependency file $@"
 	@set -e; rm -f $@
 	@$(CXX) -M $(CXXFLAGS) $< > $@.tmp
@@ -110,8 +110,8 @@ qsigex_2.ipo: $(QSIGEX_OBJS_2) $(QSIGEX_OOBJS_2) $(QSIGEX_DICTOBJ_2)
 $(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ): %.o: %.cxx
 	$(CXX) -c -o $@ -fPIC $(CXXFLAGS) $<
 
-$(QSIGEX_DICTOBJ_1:.o=.cxx): $(QSIGEX_CLHD_1) $(QSIGEX_1_LINKDEF)
-	rm -f $@ $(@:.cxx=.h) && rootcint $@ -c -I./ $^
+$(QSIGEX_DICTOBJ_1:.o=.h): $(QSIGEX_CLHD_1) $(QSIGEX_1_LINKDEF)
+	rm -f $(@:.h=.cxx) $@ && rootcint $(@:.h=.cxx) -c -I./ $^
 
-$(QSIGEX_DICTOBJ_2:.o=.cxx): $(QSIGEX_CLHD_2) $(QSIGEX_2_LINKDEF)
-	rm -f $@ $(@:.cxx=.h) && rootcint $@ -c -I./ $^
+$(QSIGEX_DICTOBJ_2:.o=.h): $(QSIGEX_CLHD_2) $(QSIGEX_2_LINKDEF)
+	rm -f $(@:.h=.cxx) $@ && rootcint $(@:.h=.cxx) -c -I./ $^

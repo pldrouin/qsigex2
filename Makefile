@@ -12,7 +12,9 @@ CXXFLAGS	+=	-prof-use
 endif
 endif
 
-all: shared static
+all: $(ALLINCS)
+	cd ./src; $(MAKE) shared static
+	cp ./src/libqsigex*.a ./lib/
 
 static: $(ALLINCS)
 	cd ./src; $(MAKE) static
