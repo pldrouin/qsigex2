@@ -643,7 +643,7 @@ void QOversizeArray::ReadHeader()
   }
 
   if(fNOPerBuffer != 0 && fNOPerBuffer != uibuf) {
-    fprintf(stderr,"QOveriszeArray::ReadHeader: Error: Number of objects per buffer saved in file '%s' does not match provided value\n",fFilename.Data());
+    fprintf(stderr,"QOveriszeArray::ReadHeader: Error: Number of objects per buffer saved in file '%s' (%u) does not match provided value (%u)\n",fFilename.Data(),uibuf,fNOPerBuffer);
     throw 1;
   }
   fNOPerBuffer=uibuf;
