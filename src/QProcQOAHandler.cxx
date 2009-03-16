@@ -6,9 +6,9 @@ QList<TString> QProcQOAHandler::fFiles;
 QList<TObject*> QProcQOAHandler::fQOAObjs;
 QList<Int_t> QProcQOAHandler::fNObjReqQOA;
 Bool_t QProcQOAHandler::fSaveOutputs=kTRUE;
-UInt_t QProcQOAHandler::fDefNOPerBuffer=131072;
+UInt_t QProcQOAHandler::fDefQOABufferSize=1024*1024;
 Int_t QProcQOAHandler::fDefNPCBuffers=3;
-UInt_t QProcQOAHandler::fDefNOAllocBlock=13108;
+UInt_t QProcQOAHandler::fDefAllocBlockSize=104857;
 
 QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arrayname, Bool_t isoutput, Bool_t incrdeps)
 {
@@ -23,7 +23,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
       if((i=fFiles.FindFirst(pathname)) != -1) {
 
 	//If the array is opened in read mode
-	if(dynamic_cast<QOversizeArray*>(fQOAObjs[i])->GetOpenMode()==QOversizeArray::kRead) {
+	if(dynamic_cast<QProcQOA*>(fQOAObjs[i])->GetQOA()->GetOpenMode()==QOversizeArray::kRead) {
 	  fprintf(stderr,"QProcQOAHandler::LoadQOA: Error: Array '%s' located in file '%s' is not writable\n",arrayname,pathname.Data());
 	}
 
@@ -36,7 +36,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
 	fFiles.Add(pathname);
 	if(incrdeps) fNObjReqQOA.Add(1);
 	else fNObjReqQOA.Add(0);
-	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRecreate,sizeof(Double_t),fDefNOPerBuffer,fDefNPCBuffers,fDefNOAllocBlock));
+	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRecreate,fDefQOABufferSize,fDefNPCBuffers,fDefAllocBlockSize));
 
 	return (QProcQOA*)fQOAObjs.GetLast();
       }
@@ -55,7 +55,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
 	fFiles.Add(pathname);
 	if(incrdeps) fNObjReqQOA.Add(1);
 	else fNObjReqQOA.Add(0);
-	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRead,sizeof(Double_t),0,fDefNPCBuffers,fDefNOAllocBlock));
+	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRead,0,fDefNPCBuffers,fDefAllocBlockSize));
 
 	return (QProcQOA*)fQOAObjs.GetLast();
       }
@@ -66,11 +66,11 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
   }
 }
 
-void QProcQOAHandler::SetDefArrayParams(const UInt_t &nentriesperdiskbuffer, const Int_t &nprecachedbuffers, const UInt_t &nentriessperallocblock)
+void QProcQOAHandler::SetDefArrayParams(const UInt_t &diskbuffersize, const Int_t &nprecachedbuffers, const UInt_t &allocblocksize)
 {
-  fDefNOPerBuffer=nentriesperdiskbuffer;
+  fDefQOABufferSize=diskbuffersize;
   fDefNPCBuffers=nprecachedbuffers;
-  fDefNOAllocBlock=nentriessperallocblock;
+  fDefAllocBlockSize=allocblocksize;
 }
 
 void QProcQOAHandler::UnloadQOA(QProcQOA *array)
@@ -86,7 +86,7 @@ void QProcQOAHandler::UnloadQOA(QProcQOA *array)
     //If no object requires this array anymore
     if(!fNObjReqQOA[i]) {
 
-      if(dynamic_cast<QOversizeArray*>(array)->GetOpenMode()!=QOversizeArray::kRead && fSaveOutputs) dynamic_cast<QOversizeArray*>(array)->Save();
+      if(array->GetQOA()->GetOpenMode()!=QOversizeArray::kRead && fSaveOutputs) array->GetQOA()->Save();
       delete array;
       fFiles.Del(i);
       fQOAObjs.Del(i);

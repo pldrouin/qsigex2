@@ -181,10 +181,6 @@ void QOversizeArray::Init()
 void QOversizeArray::Fill()
 {
   FuncDef(Fill,1);
-  //Copy the content of the object buffer in fWriteBuffer
-  //It is fine to access fWBFirstObjIdx from the main thread without locking fBuffersMutex, since its value can only be modified from that thread
-  memcpy(fWriteBuffer->fBuffer+(fNObjects-fWBFirstObjIdx)*fObjectSize,fBuffer,fObjectSize);
-  ++fNObjects;
 
   //If fWriteBuffer contains the maximum number of objects allowed by the currently allocated memory
   if(fNObjects-fWBFirstObjIdx == fWBNAllocObjs) {
@@ -288,6 +284,10 @@ void QOversizeArray::Fill()
       //printf("Next write buffer index is %i\n",nextbufidx);
     }
   }
+  //Copy the content of the object buffer in fWriteBuffer
+  //It is fine to access fWBFirstObjIdx from the main thread without locking fBuffersMutex, since its value can only be modified from that thread
+  memcpy(fWriteBuffer->fBuffer+(fNObjects-fWBFirstObjIdx)*fObjectSize,fBuffer,fObjectSize);
+  ++fNObjects;
 }
 
 void QOversizeArray::LoadEntry(const Long64_t &entry)
@@ -737,7 +737,6 @@ void QOversizeArray::ReadWriteBuffer()
   size_t numobjs=fNObjects%fNOPerBuffer;
   UInt_t bufferidx=fNObjects/fNOPerBuffer;
   Int_t buffersize;
-  UInt_t nallocobjs;
   UInt_t allocsize;
 
   if(numobjs) {
@@ -751,10 +750,8 @@ void QOversizeArray::ReadWriteBuffer()
       throw 1;
     }
 
-    nallocobjs=(UInt_t)ceil((Double_t)buffersize/(fObjectSize*fNOAllocBlock))*fNOAllocBlock;
-
     if(!fWriteBuffer) {
-      fWBNAllocObjs=nallocobjs;
+      fWBNAllocObjs=numobjs;
       allocsize=fWBNAllocObjs*fObjectSize;
       fWriteBuffer=new QOABuffer(0, allocsize);
       pthread_mutex_lock(&fMSizeMutex);
@@ -763,9 +760,9 @@ void QOversizeArray::ReadWriteBuffer()
       pthread_mutex_unlock(&fMSizeMutex);
       CheckMemory();
 
-    } else if(fWBNAllocObjs<nallocobjs) {
+    } else if(fWBNAllocObjs<numobjs) {
       free(fWriteBuffer->fBuffer);
-      fWBNAllocObjs=nallocobjs;
+      fWBNAllocObjs=numobjs;
       allocsize=fWBNAllocObjs*fObjectSize;
       fWriteBuffer->fBuffer=(char*)malloc(allocsize);
       pthread_mutex_lock(&fMSizeMutex);

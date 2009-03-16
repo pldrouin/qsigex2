@@ -2,11 +2,25 @@
 
 ClassImp(QProcQOA)
 
-QProcQOA::QProcQOA(const char *filename, const char* name, QOversizeArray::omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer, const Int_t &npcbuffers, const UInt_t &nobjectsallocblock): QProcArray(), QOversizeArray(filename,name,openmode,objectsize,nobjectsperbuffer,npcbuffers,nobjectsallocblock), fBuffer(NULL)
+QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omode openmode, const UInt_t &qoabuffersize, const Int_t &npcbuffers, const UInt_t &allocblocksize): QProcArray()
 {
-  //printf("QProcQOA::QProcQOA()\t%p\n",this);
-  fBuffer=new Char_t[objectsize];
-  QOversizeArray::SetBuffer(fBuffer);
+  TString sbuf;
+  fTypeID=GetNameTypeID(adesc,&sbuf);
+  UInt_t ui;
+
+  if(fTypeID==-1 && openmode==QOversizeArray::kRecreate) fTypeID=kDouble;
+
+  if(fTypeID==-1) {
+    fArray=new QOversizeArray(filename,sbuf,openmode,0,0,npcbuffers,1);
+    ui=fArray->GetObjSize();
+    fArray->SetNOAllocBlock(allocblocksize/ui);
+
+  } else {
+    ui=GetTypeIDSize(fTypeID);
+    fArray=new QOversizeArray(filename,sbuf,openmode,ui,qoabuffersize/ui,npcbuffers,allocblocksize/ui);
+  }
+  fBuffer=new Char_t[ui];
+  fArray->SetBuffer(fBuffer);
 }
 
 void QProcQOA::Streamer(TBuffer &){}

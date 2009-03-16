@@ -43,6 +43,8 @@ class QOversizeArray
     void* GetBuffer() const{return fBuffer;}
     Long64_t GetEntries() const{return fNObjects;}
 
+    const UInt_t& GetObjSize() const{return fObjectSize;}
+
     void LoadEntry(const Long64_t &entry = 0);
 
     const omode& GetOpenMode(){return fOpenMode;}
@@ -63,6 +65,8 @@ class QOversizeArray
     void SetBuffer(void *buffer){fBuffer=buffer;}
 
     static void SetMemConstraints(const Long64_t &critmemsize=0, const Long64_t &level1memsize=0, const Long64_t &level2memsize=0, const Long64_t &cthreshmemsize=-1);
+
+    void SetNOAllocBlock(const UInt_t &noallocblock){fNOAllocBlock=noallocblock;}
 
     void UpdateTimeStamp(){fTStamp.Set();}
 
