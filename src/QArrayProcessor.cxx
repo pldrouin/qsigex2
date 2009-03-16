@@ -933,7 +933,7 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
   fBuffers->RedimList(fBuNames->Count());
 
   for(i=fBuNames->Count()-1; i>=0; --i) {
-    (*fBuffers)[i]=CreateType((*fBuTypes)[i]);
+    (*fBuffers)[i]=AllocType((*fBuTypes)[i]);
   }
 
   QStdProcessor::InitProcess(allocateparammem);
@@ -1171,7 +1171,7 @@ void QArrayProcessor::TerminateProcess()
 
   for(i=fIArrays->Count()-1; i>=0; --i) (*fIArrays)[i]->UnloadArray();
   for(i=fOArrays->Count()-1; i>=0; --i) (*fOArrays)[i]->UnloadArray();
-  for(i=fBuffers->Count()-1; i>=0; --i) delete (*fBuffers)[i];
+  for(i=fBuffers->Count()-1; i>=0; --i) free((*fBuffers)[i]);
 }
 
 void QArrayProcessor::Browse(TBrowser *b)

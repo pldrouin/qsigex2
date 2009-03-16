@@ -1,37 +1,5 @@
 #include "QTypes.h"
 
-void* QTypes::CreateType(const Int_t &type)
-{
-  switch(type) {
-    case kDouble:
-      return new Double_t;
-    case kFloat:
-      return new Float_t;
-    case kInt:
-      return new Int_t;
-    case kUInt:
-      return new UInt_t;
-    case kBool:
-      return new Bool_t;
-    case kLong64:
-      return new Long64_t;
-    case kULong64:
-      return new ULong64_t;
-    case kChar:
-      return new Char_t;
-    case kUChar:
-      return new UChar_t;
-    case kShort:
-      return new Short_t;
-    case kUShort:
-      return new UShort_t;
-    default:
-      fprintf(stderr,"QTypes::GetTypeIDSize: Error: type %i is unknown\n",type);
-      throw 1;
-  }
-  return NULL;
-}
-
 Int_t QTypes::GetNameTypeID(const TString adesc, TString *name)
 {
   Int_t type=-1;
