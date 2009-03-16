@@ -15,9 +15,9 @@ class QProcedure
     virtual ~QProcedure(){}
     virtual const QProcedure& operator=(const QProcedure &rhs){fArgs=rhs.fArgs; return *this;}
 
-    virtual void AddIVar(const Int_t &index=-1, Double_t* const buf=NULL){fArgs.AddIVar(index,buf);}
+    virtual void AddIVar(const Int_t &index=-1, void* const buf=NULL){fArgs.AddIVar(index,buf);}
     virtual void AddIObj(const Int_t &index=-1, QProcObj* const obj=NULL){fArgs.AddIObj(index,obj);}
-    virtual void AddOVar(const Int_t &index=-1, Double_t* const buf=NULL){fArgs.AddOVar(index,buf);}
+    virtual void AddOVar(const Int_t &index=-1, void* const buf=NULL){fArgs.AddOVar(index,buf);}
     virtual void AddOObj(const Int_t &index=-1, QProcObj* const obj=NULL){fArgs.AddOObj(index,obj);}
     virtual void AddParam(const Int_t &index=-1, Double_t* const buf=NULL){fArgs.AddParam(index,buf);}
 
@@ -41,15 +41,13 @@ class QProcedure
     const Int_t& GetNOObjs() const{return fArgs.GetNOObjs();}
     const Int_t& GetNParams() const{return fArgs.GetNParams();}
 
-    const Double_t& IVar(const Int_t &i) const{return fArgs.IVar(i);}
     const QProcObj* IObj(const Int_t &i) const{return fArgs.IObj(i);}
-    Double_t& OVar(const Int_t &i) const{return fArgs.OVar(i);}
     QProcObj* OObj(const Int_t &i) const{return fArgs.OObj(i);}
     const Double_t& Param(const Int_t &i) const{return fArgs.Param(i);}
 
-    void SetIVarPtr(const Int_t &index, Double_t* const buf){fArgs.SetIVarPtr(index,buf);}
+    void SetIVarPtr(const Int_t &index, void* const buf, const Int_t &type=-1){fArgs.SetIVarPtr(index,buf,type);}
     void SetIObjPtr(const Int_t &index, QProcObj* const obj){fArgs.SetIObjPtr(index,obj);}
-    void SetOVarPtr(const Int_t &index, Double_t* const buf){fArgs.SetOVarPtr(index,buf);}
+    void SetOVarPtr(const Int_t &index, void* const buf, const Int_t &type=-1){fArgs.SetOVarPtr(index,buf,type);}
     void SetOObjPtr(const Int_t &index, QProcObj* const obj){fArgs.SetOObjPtr(index,obj);}
     void SetParamPtr(const Int_t &index, Double_t* const buf){fArgs.SetParamPtr(index,buf);}
 

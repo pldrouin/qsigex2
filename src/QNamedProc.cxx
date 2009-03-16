@@ -7,7 +7,7 @@
 
 ClassImp(QNamedProc)
 
-void QNamedProc::AddIVar(const char *name, const char *title, const Int_t &index, Double_t* const buf)
+void QNamedProc::AddIVar(const char *name, const char *title, const Int_t &index, void* const buf)
 {
   QNamedVar<TString> var(name,title);
   fIVarsNames->Add(var,index);
@@ -19,7 +19,7 @@ void QNamedProc::AddIObj(QProcObj* const obj, const Int_t &index)
   fProcedure->AddIObj(index,obj);
 }
 
-void QNamedProc::AddOVar(const char *name, const char *title, const Int_t &index, Double_t* const buf)
+void QNamedProc::AddOVar(const char *name, const char *title, const Int_t &index, void* const buf)
 {
   QNamedVar<TString> var(name,title);
   fOVarsNames->Add(var,index); 

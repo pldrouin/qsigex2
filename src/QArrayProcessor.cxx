@@ -20,6 +20,8 @@ QArrayProcessor::~QArrayProcessor()
   fOANames=NULL;
   delete fBuNames;
   fBuNames=NULL;
+  delete fBuTypes;
+  fBuTypes=NULL;
   delete fIAIndices;
   fIAIndices=NULL;
   delete fIOIndices;
@@ -151,6 +153,8 @@ void QArrayProcessor::Analyze()
 
   fIANames->Clear();
   fOANames->Clear();
+  fBuNames->Clear();
+  fBuTypes->Clear();
   fAPDepends->Clear();
   fObjsPDepends->Clear();
   fIAIndices->Clear();
@@ -241,7 +245,8 @@ void QArrayProcessor::Analyze()
 	//Else if the input is from a buffer in memory
       } else {
 	//printf("Input from a memory buffer\n");
-	iidx=fBuNames->FindFirst(qlsbuf[0]);
+	GetNameTypeID(qlsbuf[0],&sbuf);
+	iidx=fBuNames->FindFirst(sbuf);
 
 	//If the buffer has not been listed as an output for a previous process
 	if(iidx == -1) {
@@ -330,10 +335,14 @@ void QArrayProcessor::Analyze()
       } else {
 	//printf("Output to a memory buffer\n");
 	//Ensure the output memory buffer is in the list
-	oidx=fBuNames->AddUnique(proc->GetOVarNameTitle(j).GetName());
+	k=GetNameTypeID(proc->GetOVarNameTitle(j).GetName(),&sbuf);
+
+	if(k==-1) k=kDouble;
+	oidx=fBuNames->AddUnique(sbuf);
 
 	//If the buffer was not already listed
 	if(oidx == -1) {
+	  fBuTypes->Add(k);
 	  blastproc.Add(i);
 
 	  //Else if the buffer was already in the list
@@ -853,13 +862,11 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
   TerminateProcess();
   TDirectory *curdir=gDirectory;
   TDirectory *dbuf;
-  Int_t i,j;
+  Int_t i,j,k;
   TString proto;
 
   fIArrays->Clear();
   fOArrays->Clear();
-
-  fBuffers->RedimList(fBuNames->Count());
 
   //Loop over the output arrays
   for(i=0; i<fOANames->Count(); i++) {
@@ -925,6 +932,10 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
   //Create output buffers
   fBuffers->RedimList(fBuNames->Count());
 
+  for(i=fBuNames->Count()-1; i>=0; --i) {
+    (*fBuffers)[i]=CreateType((*fBuTypes)[i]);
+  }
+
   QStdProcessor::InitProcess(allocateparammem);
 
   Int_t nprocs=fProcs->Count();
@@ -949,12 +960,14 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
       //If the input is not a memory buffer
       if(qlsbuf.Count() == 2) {
 	//Set the address for the QNamedProc input buffer using the buffer address of the array object
-	proc->SetIVarPtr(j,(Double_t*)(*fIArrays)[fIANames->FindFirst(qlsbuf)]->GetBuffer());
+	k=fIANames->FindFirst(qlsbuf);
+	proc->SetIVarPtr(j,(*fIArrays)[k]->GetBuffer(),(*fIArrays)[k]->GetBTypeID());
 
 	//Else if the input is a memory buffer
       } else {
 	//Get the buffer address from the memory buffers list
-	proc->SetIVarPtr(j,&((*fBuffers)[fBuNames->FindFirst(proc->GetIVarNameTitle(j).GetName())]));
+	k=fBuNames->FindFirst(proc->GetIVarNameTitle(j).GetName());
+	proc->SetIVarPtr(j,(*fBuffers)[k],(*fBuTypes)[k]);
       }
     }
 
@@ -970,12 +983,14 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
       //If the output is not a memory buffer
       if(qlsbuf.Count() == 2) {
 	//Set the address for the QNamedProc input buffer using the buffer address of the array object
-	proc->SetOVarPtr(j,(Double_t*)(*fOArrays)[fOANames->FindFirst(qlsbuf)]->GetBuffer());
+	k=fOANames->FindFirst(qlsbuf);
+	proc->SetOVarPtr(j,(*fOArrays)[k]->GetBuffer(),(*fOArrays)[k]->GetBTypeID());
 
 	//Else if the output is a memory buffer
       } else {
 	//Get the buffer address from the memory buffers list
-	proc->SetOVarPtr(j,&((*fBuffers)[fBuNames->FindFirst(proc->GetOVarNameTitle(j).GetName())]));
+	k=fBuNames->FindFirst(proc->GetOVarNameTitle(j).GetName());
+	proc->SetOVarPtr(j,(*fBuffers)[k],(*fBuTypes)[k]);
       }
     }
   }
@@ -998,6 +1013,7 @@ const QArrayProcessor& QArrayProcessor::operator=(const QArrayProcessor &rhs)
   *fIANames=*rhs.fIANames;
   *fOANames=*rhs.fOANames;
   *fBuNames=*rhs.fBuNames;
+  *fBuTypes=*rhs.fBuTypes;
   *fIAIndices=*rhs.fIAIndices;
   *fIOIndices=*rhs.fIOIndices;
   *fOAIndices=*rhs.fOAIndices;
@@ -1153,8 +1169,9 @@ void QArrayProcessor::TerminateProcess()
 {
   Int_t i;
 
-  for(i=0; i<fIArrays->Count(); i++) (*fIArrays)[i]->UnloadArray();
-  for(i=0; i<fOArrays->Count(); i++) (*fOArrays)[i]->UnloadArray();
+  for(i=fIArrays->Count()-1; i>=0; --i) (*fIArrays)[i]->UnloadArray();
+  for(i=fOArrays->Count()-1; i>=0; --i) (*fOArrays)[i]->UnloadArray();
+  for(i=fBuffers->Count()-1; i>=0; --i) delete (*fBuffers)[i];
 }
 
 void QArrayProcessor::Browse(TBrowser *b)
