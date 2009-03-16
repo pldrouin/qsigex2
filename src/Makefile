@@ -9,8 +9,7 @@
 # LOG
 # Version 1.00  13/08/2002 PL
 
-CXXFLAGS        +=      -I$(shell root-config --incdir)
-#CXXFLAGS        +=      -I$(shell root-config --incdir)
+INCLUDES	=	-I$(shell root-config --incdir)
 
 QSIGEX_QCXX_2	=	QAxis.cxx QPHN.cxx
 QSIGEX_QCXX_1	=	$(filter-out $(QSIGEX_QCXX_2),$(wildcard Q*.cxx))
@@ -86,7 +85,7 @@ clear: clean
 $(QSIGEX_OBJSDEP) $(QSIGEX_OOBJSDEP) $(QSIGEX_DICTOBJDEP): %.d: %.h
 	@echo "Generating dependency file $@"
 	@set -e; rm -f $@
-	@$(CXX) -M $(CXXFLAGS) $< > $@.tmp
+	@$(CXX) -M $(INCLUDES) $< > $@.tmp
 	@sed 's,\($*\)\.o[ :]*,\1.o \1.os $@ : ,g' < $@.tmp > $@
 	@rm -f $@.tmp
 
@@ -99,7 +98,7 @@ qsigex_2.ipos: $(QSIGEX_OBJSS_2) $(QSIGEX_OOBJSS_2) $(QSIGEX_DICTOBJS_2)
 	$(CXX) -ipo_c -o $@ $(CXXFLAGS) $^
 
 $(QSIGEX_OBJSS) $(QSIGEX_OOBJSS) $(QSIGEX_DICTOBJS): %.os: %.cxx
-	$(CXX) -c -o $@ $(CXXFLAGS) $<
+	$(CXX) -c -o $@ $(CXXFLAGS) $(INCLUDES) $<
 
 qsigex_1.ipo: $(QSIGEX_OBJS_1) $(QSIGEX_OOBJS_1) $(QSIGEX_DICTOBJ_1)
 	$(CXX) -ipo_c -o $@ -fPIC $(CXXFLAGS) $^
@@ -108,7 +107,7 @@ qsigex_2.ipo: $(QSIGEX_OBJS_2) $(QSIGEX_OOBJS_2) $(QSIGEX_DICTOBJ_2)
 	$(CXX) -ipo_c -o $@ -fPIC $(CXXFLAGS) $^
 
 $(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ): %.o: %.cxx
-	$(CXX) -c -o $@ -fPIC $(CXXFLAGS) $<
+	$(CXX) -c -o $@ -fPIC $(CXXFLAGS) $(INCLUDES) $<
 
 $(QSIGEX_DICTOBJ_1:.o=.h): $(QSIGEX_CLHD_1) $(QSIGEX_1_LINKDEF)
 	rm -f $(@:.h=.cxx) $@ && rootcint $(@:.h=.cxx) -c -I./ $^

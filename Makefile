@@ -5,7 +5,7 @@ CXXFLAGS	+=	-DQSFAST
 endif
 
 ifdef PROFGEN
-CXXFLAGS	+=	-prof-gen
+CXXFLAGS	:=	$(filter-out -ipo -ip,$(CXXFLAGS)) -prof-gen
 else
 ifdef PROFUSE
 CXXFLAGS	+=	-prof-use
