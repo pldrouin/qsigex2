@@ -2,7 +2,7 @@
 
 ClassImp(QProcTBranchWrapper)
 
-const Int_t QProcBranch::cBType=8;
+const Int_t QProcTBranchWrapper::cBType=8;
 
 QProcTBranchWrapper::~QProcTBranchWrapper()
 {
