@@ -12,7 +12,7 @@ QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omod
   sbuf=sbuf+"/"+GetTypeName(type);
   fBTypeID=type;
 
-  ui=GetTypeIDSize(type);
+  ui=GetTypeSize(type);
   fArray=new QOversizeArray(filename,sbuf,openmode,ui,qoabuffersize/ui,npcbuffers,allocblocksize/ui);
   fBuffer=new Char_t[ui];
   fArray->SetBuffer(fBuffer);

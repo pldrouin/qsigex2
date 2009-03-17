@@ -61,7 +61,7 @@ Int_t QTypes::GetTypeID(const Char_t *atype)
   return type;
 }
 
-UInt_t QTypes::GetTypeIDSize(const Int_t &type)
+UInt_t QTypes::GetTypeSize(const Int_t &type)
 {
   switch(type) {
     case kDouble:
@@ -87,7 +87,7 @@ UInt_t QTypes::GetTypeIDSize(const Int_t &type)
     case kUShort:
       return sizeof(UShort_t);
     default:
-      fprintf(stderr,"QTypes::GetTypeIDSize: Error: type %i is unknown\n",type);
+      fprintf(stderr,"QTypes::GetTypeSize: Error: type %i is unknown\n",type);
       throw 1;
   }
   return 0;
