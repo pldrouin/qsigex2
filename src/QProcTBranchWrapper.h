@@ -11,14 +11,14 @@
 class QProcTBranchWrapper: public QProcArray
 {
   public:
-    QProcTBranchWrapper(TBranch *branch): QProcArray(), fBranch(branch), fBuffer(NULL), fOwnsBuffer(kFALSE), fOwnsCBuffer(kFALSE), fCBType(0), fCBuffer(NULL) {SetBuffer();}
-    virtual ~QProcTBranchWrapper();
+    QProcTBranchWrapper(TBranch *branch): QProcArray(), fBranch(branch), fBuffer(NULL), fOwnsBuffer(kFALSE) {SetBuffer();}
+    virtual ~QProcTBranchWrapper(){ClearBuffer();}
     void ClearBuffer();
-    Int_t Fill();
+    Int_t Fill(){return fBranch->Fill();}
     TBranch* GetBranch(){return fBranch;}
     void* GetBuffer() const{return fBuffer;}
     Long64_t GetEntries() const{return fBranch->GetEntries();}
-    void LoadEntry(const Long64_t &entry = 0);
+    void LoadEntry(const Long64_t &entry = 0){fBranch->GetEntry(entry);}
     void InitProcObj(){ResetArray();}
     Bool_t NewerThan(const TTimeStamp &) const{return kFALSE;}
     void UpdateModTime(){}
@@ -29,22 +29,9 @@ class QProcTBranchWrapper: public QProcArray
 
   protected:
     TBranch *fBranch; //!
-    Double_t *fBuffer; //!
+    void *fBuffer; //!
     Bool_t fOwnsBuffer; //!
-    Bool_t fOwnsCBuffer; //!
-    Char_t fCBType; //!
-    void *fCBuffer; //!
-    enum {
-      kDouble_t,
-      kFloat_t,
-      kUInt_t,
-      kInt_t,
-      kUShort_t,
-      kShort_t,
-      kUChar_t,
-      kChar_t,
-      kBool_t
-    };
+
   private:
     QProcTBranchWrapper() {}
     QProcTBranchWrapper(const QProcTBranchWrapper &): QProcArray(){}

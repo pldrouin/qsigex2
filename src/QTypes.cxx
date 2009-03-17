@@ -55,7 +55,7 @@ Int_t QTypes::GetTypeID(const Char_t *atype)
     type=kUShort;
 
   } else {
-    fprintf(stderr,"QTypes::GetNameTypeID: Error: Data type '%s' is unknown\n",atype);
+    fprintf(stderr,"QTypes::GetTypeID: Error: Data type '%s' is unknown\n",atype);
     throw 1;
   }
   return type;

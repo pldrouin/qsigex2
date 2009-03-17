@@ -43,9 +43,8 @@ class QOversizeArray
     void* GetBuffer() const{return fBuffer;}
     Long64_t GetEntries() const{return fNObjects;}
 
-    const UInt_t& GetObjSize() const{return fObjectSize;}
-
     const Char_t* GetArrayName() const{return fArrayName;}
+    const UInt_t& GetObjSize() const{return fObjectSize;}
     const Char_t* GetObjTypeName() const{return fObjectTypeName.Data();}
 
     void LoadEntry(const Long64_t &entry = 0);

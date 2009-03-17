@@ -12,14 +12,14 @@
 class QProcBranch: public QProcArray, public TBranch
 {
   public:
-    QProcBranch(): QProcArray(), TBranch(), fBuffer(NULL), fOwnsBuffer(kFALSE), fOwnsCBuffer(kFALSE), fCBType(0), fCBuffer(NULL) {}
-    QProcBranch(TTree* tree, const char* name, void* address, const char* leaflist, Int_t basketsize = 32000, Int_t compress = -1);
-    virtual ~QProcBranch();
+    QProcBranch(): QProcArray(), TBranch(), fBuffer(NULL), fOwnsBuffer(kFALSE) {}
+    QProcBranch(TTree* tree, const char* name, void* address, const char* leaflist, Int_t basketsize = 32000, Int_t compress = -1): QProcArray(), TBranch(tree,name,address,leaflist,basketsize,compress), fBuffer(NULL), fOwnsBuffer(kFALSE){SetBuffer();}
+    virtual ~QProcBranch(){ClearBuffer();}
     void ClearBuffer();
-    Int_t Fill();
+    Int_t Fill(){return TBranch::Fill();}
     void* GetBuffer() const{return fBuffer;}
     Long64_t GetEntries() const{return TBranch::GetEntries();}
-    void LoadEntry(const Long64_t &entry = 0);
+    void LoadEntry(const Long64_t &entry = 0){TBranch::GetEntry(entry);}
     Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0){LoadEntry(entry); return 0;}
     void InitProcObj(){ResetArray();}
     void ResetArray(){DeleteBaskets("all");}
@@ -28,22 +28,9 @@ class QProcBranch: public QProcArray, public TBranch
     void UnloadArray();
 
   protected:
-    Double_t *fBuffer; //!
+    void* fBuffer; //!
     Bool_t fOwnsBuffer; //!
-    Bool_t fOwnsCBuffer; //!
-    Char_t fCBType; //!
-    void *fCBuffer; //!
-    enum {
-      kDouble_t,
-      kFloat_t,
-      kUInt_t,
-      kInt_t,
-      kUShort_t,
-      kShort_t,
-      kUChar_t,
-      kChar_t,
-      kBool_t
-    };
+
   private:
     QProcBranch(const QProcBranch &): QProcArray(), TBranch(){}
     const QProcBranch& operator=(const QProcBranch&){return *this;}

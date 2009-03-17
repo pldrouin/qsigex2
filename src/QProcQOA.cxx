@@ -5,20 +5,29 @@ ClassImp(QProcQOA)
 QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omode openmode, const UInt_t &qoabuffersize, const Int_t &npcbuffers, const UInt_t &allocblocksize): QProcArray()
 {
   TString sbuf;
-  Int_t type=GetNameTypeID(adesc,&sbuf);
+  fBTypeID=GetNameTypeID(adesc,&sbuf);
   UInt_t ui;
 
-  if(type==-1 && openmode==QOversizeArray::kRecreate) type=kDouble;
+  if(fBTypeID==-1 && openmode==QOversizeArray::kRecreate) fBTypeID=kDouble;
 
-  if(type!=-1) {
-    sbuf=sbuf+"/"+GetTypeName(type);
-    fBTypeID=type;
-    ui=GetTypeSize(type);
+  if(fBTypeID!=-1) {
+    sbuf=sbuf+"/"+GetTypeName(fBTypeID);
+    ui=GetTypeSize(fBTypeID);
     fArray=new QOversizeArray(filename,sbuf,openmode,ui,qoabuffersize/ui,npcbuffers,allocblocksize/ui);
 
   } else {
     fArray=new QOversizeArray(filename,sbuf,openmode,0,0,npcbuffers,0);
-    fBTypeID=GetTypeID(fArray->GetObjTypeName());
+
+    if(strlen(fArray->GetObjTypeName())) {
+      fBTypeID=GetTypeID(fArray->GetObjTypeName());
+
+    } else if(fArray->GetObjSize()!=sizeof(Double_t)) {
+      fprintf(stderr,"QProcQOA::QProcQOA: Error: Array saved in file '%s' contains an unknown type which size does not corresponds to a Double_t\n");
+      throw 1;
+
+    } else {
+      fBTypeID=kDouble;
+    }
     ui=GetTypeSize(fBTypeID);
     fArray->SetNOAllocBlock(allocblocksize/ui);
   }

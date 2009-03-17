@@ -13,7 +13,6 @@ Bool_t QProcBranchHandler::fSaveOutputs=kTRUE;
 
 QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char *adesc, Bool_t isoutput, Bool_t incrdeps)
 {
-
   TDirectory *dbuf;
   QList<TString> donbuf=QFileUtils::DecodeObjName(treelocation);
   QList<TString> dpn;
@@ -22,6 +21,7 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
   Int_t i;
   TTree *tbuf;
   TBranch *bbuf;
+  QProcArray *qabuf;
 
   if(!donbuf.Count()) {
     fprintf(stderr,"QProcBranchHandler::LoadBranch: Error: Invalid tree location: '%s'\n",treelocation);
@@ -30,6 +30,8 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 
   switch (isoutput) {
     case kTRUE:
+
+      if(btype==-1) btype=kDouble;
 
       //If the tree is located in a file
       if(donbuf.Count() == 2) {
@@ -90,27 +92,30 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
       //If the branch already exists
       if((bbuf=tbuf->GetBranch(bname))) {
 
-	//If the branch is a QProcBranch
-	if(dynamic_cast<QProcBranch*>(bbuf)) {
-	  return dynamic_cast<QProcBranch*>(bbuf);
+	//If the branch is a not QProcBranch
+	if(!(qabuf=dynamic_cast<QProcBranch*>(bbuf))) {
 
-	//Else if the branch is a TBranch
-	} else {
 	  //If there is no wrapper that have been created for that branch, create one
 	  if((i=fTBObjs.FindFirst(bbuf)) == -1) {
 	    fTBObjs.Add(bbuf);
-	    fQPTBWObjs.Add((TObject*)new QProcTBranchWrapper(bbuf));
+	    qabuf=new QProcTBranchWrapper(bbuf);
+	    fQPTBWObjs.Add((TObject*)qabuf);
 	    fNObjReqTB.Add(0);
 	    i=fQPTBWObjs.Count()-1;
 	  }
 	  //Return a pointer to the wrapper
 	  fNObjReqTB[i]++;
-	  return (QProcTBranchWrapper*)fQPTBWObjs[i];
 	}
+
+	if(qabuf->GetBTypeID()!=btype) {
+	  fprintf(stderr,"QProcBranchHandler::LoadBranch(): Error: Existing branch '%s' in tree '%s:%s' has type '%s' instead of '%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data(),GetTypeName(qabuf->GetBTypeID()),GetTypeName(btype));
+	  throw 1;
+	}
+	return qabuf;
       }
 
       //Create the branch
-      return dynamic_cast<QProcBranch*>(tbuf->Branch(bname,NULL,bname+"/D"));
+      return dynamic_cast<QProcBranch*>(tbuf->Branch(bname,NULL,bname+"/"+GetTypeSName(btype)));
       break;
 
     case kFALSE:
@@ -170,26 +175,31 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 
       //Get a pointer to the branch
       if(!(bbuf=tbuf->GetBranch(bname))) {
-	fprintf(stderr,"QProcBranchHandler::InitProcess(): Error: Branch '%s' does not exist in tree '%s:%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data());
+	fprintf(stderr,"QProcBranchHandler::LoadBranch(): Error: Branch '%s' does not exist in tree '%s:%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data());
 	throw 1;
       }
 
       //If the branch is not a QProcBranch
-      if(!dynamic_cast<QProcBranch*>(bbuf)) {
+      if(!(qabuf=dynamic_cast<QProcBranch*>(bbuf))) {
 
 	//If there is no wrapper that have been created for that branch, create one
 	if((i=fTBObjs.FindFirst(bbuf)) == -1) {
 	  fTBObjs.Add(bbuf);
-	  fQPTBWObjs.Add((TObject*)new QProcTBranchWrapper(bbuf));
+	  qabuf=new QProcTBranchWrapper(bbuf);
+	  fQPTBWObjs.Add((TObject*)qabuf);
 	  fNObjReqTB.Add(0);
 	  i=fQPTBWObjs.Count()-1;
 	}
 	//Return a pointer to the wrapper
 	fNObjReqTB[i]++;
-	return (QProcTBranchWrapper*)fQPTBWObjs[i];
       }
 
-      return dynamic_cast<QProcBranch*>(bbuf);
+      if(btype!=-1 && qabuf->GetBTypeID()!=btype) {
+	fprintf(stderr,"QProcBranchHandler::LoadBranch(): Error: Existing branch '%s' in tree '%s:%s' has type '%s' instead of '%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data(),GetTypeName(qabuf->GetBTypeID()),GetTypeName(btype));
+	throw 1;
+      }
+
+      return qabuf;
       break;
 
     default:
