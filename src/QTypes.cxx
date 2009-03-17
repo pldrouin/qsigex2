@@ -3,7 +3,7 @@
 Int_t QTypes::GetNameTypeID(const TString &adesc, TString *name)
 {
   Int_t k;
-  Int_t type;
+  Int_t type=-1;
 
   k=adesc.Last('/');
 
