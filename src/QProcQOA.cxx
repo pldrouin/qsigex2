@@ -8,12 +8,20 @@ QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omod
   Int_t type=GetNameTypeID(adesc,&sbuf);
   UInt_t ui;
 
-  if(type==-1) type=kDouble;
-  sbuf=sbuf+"/"+GetTypeName(type);
-  fBTypeID=type;
+  if(type==-1 && openmode==QOversizeArray::kRecreate) type=kDouble;
 
-  ui=GetTypeSize(type);
-  fArray=new QOversizeArray(filename,sbuf,openmode,ui,qoabuffersize/ui,npcbuffers,allocblocksize/ui);
+  if(type!=-1) {
+    sbuf=sbuf+"/"+GetTypeName(type);
+    fBTypeID=type;
+    ui=GetTypeSize(type);
+    fArray=new QOversizeArray(filename,sbuf,openmode,ui,qoabuffersize/ui,npcbuffers,allocblocksize/ui);
+
+  } else {
+    fArray=new QOversizeArray(filename,sbuf,openmode,0,0,npcbuffers,0);
+    fBTypeID=GetTypeID(fArray->GetObjTypeName());
+    ui=GetTypeSize(fBTypeID);
+    fArray->SetNOAllocBlock(allocblocksize/ui);
+  }
   fBuffer=new Char_t[ui];
   fArray->SetBuffer(fBuffer);
 }

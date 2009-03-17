@@ -634,7 +634,7 @@ void QOversizeArray::ReadHeader()
   uibuf2=strlen(strbuf)+1;
 
   if(fObjectTypeName.Length() && uibuf>uibuf2 && strcmp(fObjectTypeName,strbuf+uibuf2)) {
-    fprintf(stderr,"QOversizeArray::ReadHeader: Error: Array type '%s' save in file '%s' does not match the provided array type ('%s')\n",strbuf+uibuf2,fFilename.Data(),fObjectTypeName.Data());
+    fprintf(stderr,"QOversizeArray::ReadHeader: Error: Array type '%s' saved in file '%s' does not match the provided array type ('%s')\n",strbuf+uibuf2,fFilename.Data(),fObjectTypeName.Data());
     throw 1;
   }
 

@@ -13,7 +13,7 @@ class QProcQOAHandler
   public:
     QProcQOAHandler(){}
     virtual ~QProcQOAHandler(){}
-    static QProcArray* LoadQOA(const char *arraylocation, const char *arrayname, Bool_t isoutput, Bool_t incrdeps=kTRUE);
+    static QProcArray* LoadQOA(const char *arraylocation, const char *adesc, Bool_t isoutput, Bool_t incrdeps=kTRUE);
     static void SaveOutputs(Bool_t saveoutputs=kTRUE){fSaveOutputs=saveoutputs;}
     static void SetDefArrayParams(const UInt_t &nentriesperdiskbuffer=131072, const Int_t &nprecachedbuffers=1, const UInt_t &nentriesperallocblock=13108);
     friend class QProcQOA;

@@ -46,7 +46,7 @@ class QOversizeArray
     const UInt_t& GetObjSize() const{return fObjectSize;}
 
     const Char_t* GetArrayName() const{return fArrayName;}
-    const Char_t* GetObjectTypeName() const{return fObjectTypeName.Data();}
+    const Char_t* GetObjTypeName() const{return fObjectTypeName.Data();}
 
     void LoadEntry(const Long64_t &entry = 0);
 

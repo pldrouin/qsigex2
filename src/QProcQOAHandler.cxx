@@ -10,7 +10,7 @@ UInt_t QProcQOAHandler::fDefQOABufferSize=1024*1024;
 Int_t QProcQOAHandler::fDefNPCBuffers=3;
 UInt_t QProcQOAHandler::fDefAllocBlockSize=104857;
 
-QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arrayname, Bool_t isoutput, Bool_t incrdeps)
+QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *adesc, Bool_t isoutput, Bool_t incrdeps)
 {
 
   TString pathname=QFileUtils::SimplifyPathName(gSystem->ExpandPathName(arraylocation));
@@ -24,7 +24,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
 
 	//If the array is opened in read mode
 	if(dynamic_cast<QProcQOA*>(fQOAObjs[i])->GetQOA()->GetOpenMode()==QOversizeArray::kRead) {
-	  fprintf(stderr,"QProcQOAHandler::LoadQOA: Error: Array '%s' located in file '%s' is not writable\n",arrayname,pathname.Data());
+	  fprintf(stderr,"QProcQOAHandler::LoadQOA: Error: Array '%s' located in file '%s' is not writable\n",adesc,pathname.Data());
 	}
 
 	//Increment the number of output branches that require that file
@@ -36,7 +36,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
 	fFiles.Add(pathname);
 	if(incrdeps) fNObjReqQOA.Add(1);
 	else fNObjReqQOA.Add(0);
-	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRecreate,fDefQOABufferSize,fDefNPCBuffers,fDefAllocBlockSize));
+	fQOAObjs.Add((TObject*)new QProcQOA(pathname,adesc,QOversizeArray::kRecreate,fDefQOABufferSize,fDefNPCBuffers,fDefAllocBlockSize));
 
 	return (QProcQOA*)fQOAObjs.GetLast();
       }
@@ -55,7 +55,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *arra
 	fFiles.Add(pathname);
 	if(incrdeps) fNObjReqQOA.Add(1);
 	else fNObjReqQOA.Add(0);
-	fQOAObjs.Add((TObject*)new QProcQOA(pathname,arrayname,QOversizeArray::kRead,0,fDefNPCBuffers,fDefAllocBlockSize));
+	fQOAObjs.Add((TObject*)new QProcQOA(pathname,adesc,QOversizeArray::kRead,0,fDefNPCBuffers,fDefAllocBlockSize));
 
 	return (QProcQOA*)fQOAObjs.GetLast();
       }

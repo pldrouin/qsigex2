@@ -11,13 +11,14 @@ QList<TObject*> QProcBranchHandler::fQPTBWObjs;
 QList<Int_t> QProcBranchHandler::fNObjReqTB;
 Bool_t QProcBranchHandler::fSaveOutputs=kTRUE;
 
-QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char *branchname, Bool_t isoutput, Bool_t incrdeps)
+QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char *adesc, Bool_t isoutput, Bool_t incrdeps)
 {
 
   TDirectory *dbuf;
   QList<TString> donbuf=QFileUtils::DecodeObjName(treelocation);
   QList<TString> dpn;
-  TString bname=branchname;
+  TString bname;
+  Int_t btype=GetNameTypeID(adesc,&bname);
   Int_t i;
   TTree *tbuf;
   TBranch *bbuf;
