@@ -13,7 +13,9 @@ QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omod
   if(fBTypeID!=-1) {
     sbuf=sbuf+"/"+GetTypeName(fBTypeID);
     ui=GetTypeSize(fBTypeID);
-    fArray=new QOversizeArray(filename,sbuf,openmode,ui,qoabuffersize/ui,npcbuffers,allocblocksize/ui);
+
+    if(openmode==QOversizeArray::kRecreate) fArray=new QOversizeArray(filename,sbuf,openmode,ui,qoabuffersize/ui,npcbuffers,allocblocksize/ui);
+    else fArray=new QOversizeArray(filename,sbuf,openmode,ui,0,npcbuffers,allocblocksize/ui);
 
   } else {
     fArray=new QOversizeArray(filename,sbuf,openmode,0,0,npcbuffers,0);
