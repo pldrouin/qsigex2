@@ -15,6 +15,7 @@ class QProcQOA: public QProcArray
     virtual ~QProcQOA(){if(fArray) delete fArray; delete[] fBuffer;}
     Int_t Fill(){fArray->Fill(); return 1;}
     void* GetBuffer() const{return fBuffer;}
+    const Int_t& GetBTypeID() const{return fArray->GetObjectTypeID();}
     Long64_t GetEntries() const{return fArray->GetEntries();}
     QOversizeArray* GetQOA(){return fArray;}
     void LoadEntry(const Long64_t &entry = 0){fArray->LoadEntry(entry);}

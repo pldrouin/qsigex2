@@ -5,12 +5,13 @@ ClassImp(QProcQOA)
 QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omode openmode, const UInt_t &qoabuffersize, const Int_t &npcbuffers, const UInt_t &allocblocksize): QProcArray()
 {
   TString sbuf;
-  fBTypeID=GetNameTypeID(adesc,&sbuf);
+  Int_t type=GetNameTypeID(adesc,&sbuf);
   UInt_t ui;
 
-  if(fBTypeID==-1) fBTypeID=kDouble;
+  if(type==-1) type=kDouble;
+  sbuf=sbuf+"/"+GetTypeName(type);
 
-  ui=GetTypeIDSize(fBTypeID);
+  ui=GetTypeIDSize(type);
   fArray=new QOversizeArray(filename,sbuf,openmode,ui,qoabuffersize/ui,npcbuffers,allocblocksize/ui);
   fBuffer=new Char_t[ui];
   fArray->SetBuffer(fBuffer);

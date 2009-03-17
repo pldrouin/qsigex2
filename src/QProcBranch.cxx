@@ -107,7 +107,6 @@ void QProcBranch::LoadEntry(const Long64_t &entry)
 void QProcBranch::SetBuffer(void *buffer)
 {
   ClearBuffer();
-  fBTypeID=kDouble;
 
   TLeaf *lbuf;
   const char *cabuf;

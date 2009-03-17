@@ -46,6 +46,9 @@ class QOversizeArray
 
     const UInt_t& GetObjSize() const{return fObjectSize;}
 
+    const Char_t* GetArrayName() const{return fArrayName;}
+    const Int_t& GetObjectTypeID() const{return fObjectTypeID;}
+
     void LoadEntry(const Long64_t &entry = 0);
 
     const omode& GetOpenMode(){return fOpenMode;}
@@ -90,13 +93,13 @@ class QOversizeArray
 
     TString fFilename;
     TString fArrayName;
-    Int_t fArrayType;
     TTimeStamp fTStamp;          // Timestamp associated with the array
     int fFDesc;                  //!
     const UInt_t fFirstDataByte; // Size of file header
     const Int_t fBufferHeaderSize; // Size of buffer header
     omode fOpenMode;             // Array opening mode
     UInt_t fObjectSize;          // Size of a single stored object
+    Int_t fObjectTypeID;
     void *fBuffer;               //! Pointer to the current object
     UInt_t fNOPerBuffer;         // Maximum number of objects per buffer
     UInt_t fNOAllocBlock;        // Number of objects for which memory is allocated at once in the write buffer
