@@ -77,4 +77,6 @@
 #pragma link C++ class QSigExFitMinuit;
 #pragma link C++ class QSigExFitMCMC;
 
+#pragma link C++ namespace QTypes;
+
 #endif

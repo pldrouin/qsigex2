@@ -25,6 +25,7 @@ struct pthread_cond_t;
 #include "TTimeStamp.h"
 #include "QOABuffer.h"
 #include "QList.h"
+#include "QTypes.h"
 
 extern "C" void R__zip (Int_t cxlevel, Int_t *nin, char *bufin, Int_t *lout, char *bufout, Int_t *nout);
 extern "C" void R__unzip(Int_t *nin, UChar_t *bufin, Int_t *lout, char *bufout, Int_t *nout);
@@ -33,7 +34,7 @@ class QOversizeArray
 {
   public:
     enum omode{kRead, kRW, kRecreate};
-    QOversizeArray(const char *filename, const char *arrayname, omode openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=0, const Int_t &npcbuffers=1, const UInt_t &nobjectsallocblock=0);
+    QOversizeArray(const char *filename, const char *arraydescr, omode openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=0, const Int_t &npcbuffers=1, const UInt_t &nobjectsallocblock=0);
     virtual ~QOversizeArray();
 
     void CloseFile();
@@ -89,6 +90,7 @@ class QOversizeArray
 
     TString fFilename;
     TString fArrayName;
+    Int_t fArrayType;
     TTimeStamp fTStamp;          // Timestamp associated with the array
     int fFDesc;                  //!
     const UInt_t fFirstDataByte; // Size of file header

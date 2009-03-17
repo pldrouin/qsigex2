@@ -30,7 +30,7 @@ class QProcArgs
   const Int_t& GetNOVars() const{return fOBuffers.Count();}
   const Int_t& GetNOObjs() const{return fOObjects.Count();}
   const Int_t& GetNParams() const{return fPBuffers.Count();}
-  const Double_t& IVar(const Int_t &i) const{return *(Double_t*)fIBuffers[i];}
+  const Double_t& IVar(const Int_t &i) const{CHECKIBTYPE(i,kDouble); return *(Double_t*)fIBuffers[i];}
   const Bool_t& IVarB(const Int_t &i) const{CHECKIBTYPE(i,kBool); return *(Bool_t*)fIBuffers[i];}
   const Char_t& IVarC(const Int_t &i) const{CHECKIBTYPE(i,kChar); return *(Char_t*)fIBuffers[i];}
   const Double_t& IVarD(const Int_t &i) const{CHECKIBTYPE(i,kDouble); return *(Double_t*)fIBuffers[i];}
@@ -43,7 +43,7 @@ class QProcArgs
   const ULong64_t& IVarUL(const Int_t &i) const{CHECKIBTYPE(i,kULong64); return *(ULong64_t*)fIBuffers[i];}
   const UShort_t& IVarUS(const Int_t &i) const{CHECKIBTYPE(i,kUShort); return *(UShort_t*)fIBuffers[i];}
   const QProcObj* IObj(const Int_t &i) const{return fIObjects[i];}
-  Double_t& OVar(const Int_t &i) const{return *(Double_t*)fOBuffers[i];}
+  Double_t& OVar(const Int_t &i) const{CHECKOBTYPE(i,kDouble); return *(Double_t*)fOBuffers[i];}
   Bool_t& OVarB(const Int_t &i) const{CHECKOBTYPE(i,kBool); return *(Bool_t*)fIBuffers[i];}
   Char_t& OVarC(const Int_t &i) const{CHECKOBTYPE(i,kChar); return *(Char_t*)fIBuffers[i];}
   Double_t& OVarD(const Int_t &i) const{CHECKOBTYPE(i,kDouble); return *(Double_t*)fIBuffers[i];}
@@ -88,13 +88,13 @@ class QProcArgs
 #ifndef QSFAST
   void CheckIBType(const Int_t &index, const Int_t &type) const{
     if(fIBTypes[index]!=type) {
-      fprintf(stderr,"QProcArgs::CheckIBType: Error: Input variable %i does not have the type ID '%s'\n",index,GetTypeName(type));
+      fprintf(stderr,"QProcArgs::CheckIBType: Error: Input variable %i has type ID '%s' instead of '%s'\n",index,GetTypeName(fIBTypes[index]),GetTypeName(type));
       throw 1;
     }
   }
   void CheckOBType(const Int_t &index, const Int_t &type) const{
     if(fOBTypes[index]!=type) {
-      fprintf(stderr,"QProcArgs::CheckIBType: Error: Input variable %i does not have the type ID '%s'\n",index,GetTypeName(type));
+      fprintf(stderr,"QProcArgs::CheckOBType: Error: Output variable %i has type ID '%s' instead of '%s'\n",index,GetTypeName(fOBTypes[index]),GetTypeName(type));
       throw 1;
     }
   }
