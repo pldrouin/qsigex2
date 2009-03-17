@@ -35,7 +35,7 @@ class QProcTBranchWrapper: public QProcArray
     Bool_t fOwnsCBuffer; //!
     Char_t fCBType; //!
     void *fCBuffer; //!
-    static const Int_t cBType=8; //!
+    static const Int_t cBType; //!
     enum {
       kDouble_t,
       kFloat_t,

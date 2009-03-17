@@ -2,6 +2,8 @@
 
 ClassImp(QProcTBranchWrapper)
 
+const Int_t QProcBranch::cBType=8;
+
 QProcTBranchWrapper::~QProcTBranchWrapper()
 {
   ClearBuffer();
