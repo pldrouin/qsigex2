@@ -24,7 +24,7 @@ class QProcArray: public QProcObj
   virtual void UnloadArray()=0;
 
   protected:
-  Int_t fBTypeID;
+  Int_t fBTypeID; //!
 
   private:
   ClassDef(QProcArray,1) //Pure abstract base class for QArrayProcessor arrays
