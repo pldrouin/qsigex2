@@ -2,8 +2,6 @@
 
 ClassImp(QProcTBranchWrapper)
 
-const Int_t QProcTBranchWrapper::cBType=8;
-
 QProcTBranchWrapper::~QProcTBranchWrapper()
 {
   ClearBuffer();
@@ -104,6 +102,7 @@ void QProcTBranchWrapper::LoadEntry(const Long64_t &entry)
 void QProcTBranchWrapper::SetBuffer(void *buffer)
 {
   ClearBuffer();
+  fBTypeID=kDouble;
 
   TLeaf *lbuf;
   const char *cabuf;

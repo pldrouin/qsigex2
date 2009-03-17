@@ -37,17 +37,17 @@ pthread_mutex_t QOversizeArray::fPriorityMutex=PTHREAD_MUTEX_INITIALIZER;
 
 void printstatus(const char*){}
 
-QOversizeArray::QOversizeArray(const char *filename, const char *arraydescr, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer, const Int_t &npcbuffers, const UInt_t &nobjectsallocblock): fFilename(filename), fArrayName(), fTStamp(), fFDesc(0), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)+sizeof(time_t)+sizeof(Int_t)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fObjectTypeID(-1), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fNOAllocBlock(nobjectsallocblock),fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fCRBData(NULL), fWBFirstObjIdx(0), fWBNAllocObjs(0), fCurRBIdx(-1), fCurBLRBIdx(-2), fNReadBuffers(0), fPTNRBObjects(-1), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(npcbuffers>0?npcbuffers:0), fArrayMemSize(0), fArrayIO(0), fAPriority(0), fFileMutex(), fBuffersMutex(), fPBuffersMutex(), fRBDIMutex(), fMWThread(), fMWMutex(), fMWCond(), fMWCMutex(), fMWPCond(), fMWCCond(), fMWAction(kFALSE), fMWBuffer(NULL), fMWWBuffer(NULL), fBLThread(), fBLMutex(), fBLCond(), fBLCMutex(), fBLCCond(), fBLWCond(), fBLAction(kFALSE), fUZQOAB(NULL), fUZBuffers(NULL), fUZBMutex()
+QOversizeArray::QOversizeArray(const char *filename, const char *arraydescr, omode openmode, const UInt_t &objectsize, const UInt_t &nobjectsperbuffer, const Int_t &npcbuffers, const UInt_t &nobjectsallocblock): fFilename(filename), fArrayName(), fTStamp(), fFDesc(0), fFirstDataByte(sizeof(UInt_t)+256+sizeof(fObjectSize)+sizeof(fNOPerBuffer)+sizeof(fNObjects)+sizeof(time_t)+sizeof(Int_t)), fBufferHeaderSize(sizeof(UInt_t)), fOpenMode(openmode), fObjectSize(objectsize), fObjectTypeName(), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fNOAllocBlock(nobjectsallocblock),fMaxBDataSize(objectsize*nobjectsperbuffer), fMaxBHBDataSize(fBufferHeaderSize+fMaxBDataSize), fNObjects(0), fCurReadBuffer(NULL), fFirstReadBuffer(NULL), fLastReadBuffer(NULL), fWriteBuffer(NULL), fCRBData(NULL), fWBFirstObjIdx(0), fWBNAllocObjs(0), fCurRBIdx(-1), fCurBLRBIdx(-2), fNReadBuffers(0), fPTNRBObjects(-1), fUMBuffers(NULL), fNUMBuffers(0), fFirstParkedBuffer(NULL), fNPCBuffers(npcbuffers>0?npcbuffers:0), fArrayMemSize(0), fArrayIO(0), fAPriority(0), fFileMutex(), fBuffersMutex(), fPBuffersMutex(), fRBDIMutex(), fMWThread(), fMWMutex(), fMWCond(), fMWCMutex(), fMWPCond(), fMWCCond(), fMWAction(kFALSE), fMWBuffer(NULL), fMWWBuffer(NULL), fBLThread(), fBLMutex(), fBLCond(), fBLCMutex(), fBLCCond(), fBLWCond(), fBLAction(kFALSE), fUZQOAB(NULL), fUZBuffers(NULL), fUZBMutex()
 {
   FuncDef(QOversizeArray,1);
-  fObjectTypeID=QTypes::GetNameTypeID(arraydescr, &fArrayName);
+  TString sbuf=arraydescr;
+  Int_t k=sbuf.Last('/');
 
-  if(objectsize && fObjectTypeID!=-1 && objectsize!=GetTypeIDSize(fObjectTypeID)) {
-    fprintf(stderr,"QOversizeArray::QOversizeArray: Error: Declared objectsize (%u) does not match the size for declared array type '%s' (%i)\n",objectsize,GetTypeName(fObjectTypeID),GetTypeIDSize(fObjectTypeID));
-    throw 1;
+  if(k==-1) fArrayName=sbuf;
+  else {
+    fArrayName=sbuf(0,k);
+    fObjectTypeName=sbuf(k+1,sbuf.Length()-k-1);
   }
-
-  if(fObjectTypeID!=-1 && !objectsize) fObjectSize=GetTypeIDSize(fObjectTypeID);
 
   pthread_mutex_init(&fFileMutex,NULL);
   pthread_mutex_init(&fBuffersMutex,NULL);
@@ -490,7 +490,7 @@ void QOversizeArray::OpenFile()
 void QOversizeArray::PrintInfo() const
 {
   printf("Array name: %s\n",fArrayName.Data());
-  if(fObjectTypeID!=-1) printf("Array type name: %s\n",QTypes::GetTypeName(fObjectTypeID));
+  if(fObjectTypeName.Length()) printf("Array type name: %s\n",fObjectTypeName.Data());
   printf("Objects size: %i\n",fObjectSize);
   printf("Number of objects per buffer: %u\n",fNOPerBuffer);
   printf("Number of pre-cached buffers: %i\n",fNPCBuffers);
@@ -602,12 +602,10 @@ void QOversizeArray::ReadHeader()
 {
   FuncDef(ReadHeader,1);
   printstatus("void QOversizeArray::ReadHeader()");
-  UInt_t uibuf;
+  UInt_t uibuf,uibuf2;
   char *strbuf;
   time_t sec;
   Int_t nsec;
-  Int_t ibuf;
-  TString sbuf;
 
   pthread_mutex_lock(&fFileMutex);
 
@@ -628,19 +626,19 @@ void QOversizeArray::ReadHeader()
   }
   strbuf[uibuf]=0;
 
-  ibuf=QTypes::GetNameTypeID(strbuf,&sbuf);
-
   if(strcmp(strbuf,fArrayName)) {
     fprintf(stderr,"QOversizeArray::ReadHeader: Error: Array name saved in file '%s' does not match provided array name\n",fFilename.Data());
     throw 1;
   }
 
-  if(ibuf!=-1 && fObjectTypeID!=-1 && ibuf!=fObjectTypeID) {
-    fprintf(stderr,"QOversizeArray::ReadHeader: Error: Array type '%s' save in file '%s' does not match the provided array type ('%s')\n",QTypes::GetTypeName(ibuf),fFilename.Data(),QTypes::GetTypeName(fObjectTypeID));
+  uibuf2=strlen(strbuf)+1;
+
+  if(fObjectTypeName.Length() && uibuf>uibuf2 && strcmp(fObjectTypeName,strbuf+uibuf2)) {
+    fprintf(stderr,"QOversizeArray::ReadHeader: Error: Array type '%s' save in file '%s' does not match the provided array type ('%s')\n",strbuf+uibuf2,fFilename.Data(),fObjectTypeName.Data());
     throw 1;
   }
 
-  if(fObjectTypeID==-1 && ibuf!=-1) fObjectTypeID=ibuf;
+  if(!fObjectTypeName.Length() && uibuf>uibuf2) fObjectTypeName=strbuf+uibuf2;
   free(strbuf);
 
   if(lseek(fFDesc,sizeof(uibuf)+256,SEEK_SET)==-1) {
@@ -965,11 +963,26 @@ void QOversizeArray::WriteHeader() const
 {
   FuncDef(WriteHeader,1);
   printstatus("QOversizeArray::WriteHeader()");
-  TString sbuf=fArrayName;
+  UInt_t uibuf;
+  Char_t* sbuf;
 
-  if(fObjectTypeID!=-1) sbuf=sbuf+"/"+QTypes::GetTypeName(fObjectTypeID);
-  UInt_t uibuf=sbuf.Length();
-  uibuf=(uibuf>256 ? 256 : uibuf);
+  if(fObjectTypeName.Length()) {
+    uibuf=fArrayName.Length()+fObjectTypeName.Length()+2;
+    sbuf=new Char_t[uibuf];
+    strcpy(sbuf,fArrayName);
+    strcpy(sbuf+fArrayName.Length()+1,fObjectTypeName);
+
+  } else {
+    uibuf=fArrayName.Length()+1;
+    sbuf=new Char_t[uibuf];
+    strcpy(sbuf,fArrayName);
+  }
+
+  if(uibuf>256) {
+    fprintf(stderr,"QOversizeArray::WriteHeader: Error: Array description must not exceed 256 characters\n");
+    throw 1;
+  }
+
   time_t sec=fTStamp.GetSec();
   Int_t nsec=fTStamp.GetNanoSec();
 
@@ -978,10 +991,11 @@ void QOversizeArray::WriteHeader() const
     perror("QOversizeArray::WriteHeader: Error: ");
     throw 1;
   }
-  if((UInt_t)write(fFDesc, &uibuf, sizeof(uibuf))!=sizeof(uibuf) || (UInt_t)write(fFDesc, sbuf.Data(), uibuf)!=uibuf) {
+  if((UInt_t)write(fFDesc, &uibuf, sizeof(uibuf))!=sizeof(uibuf) || (UInt_t)write(fFDesc, sbuf, uibuf)!=uibuf) {
     perror("QOversizeArray::WriteHeader: Error: ");
     throw 1;
   }
+  delete[] sbuf;
   if(lseek(fFDesc,sizeof(uibuf)+256,SEEK_SET)==-1) {
     perror("QOversizeArray::WriteHeader: Error: ");
     throw 1;

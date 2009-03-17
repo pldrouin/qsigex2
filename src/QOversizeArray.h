@@ -25,7 +25,6 @@ struct pthread_cond_t;
 #include "TTimeStamp.h"
 #include "QOABuffer.h"
 #include "QList.h"
-#include "QTypes.h"
 
 extern "C" void R__zip (Int_t cxlevel, Int_t *nin, char *bufin, Int_t *lout, char *bufout, Int_t *nout);
 extern "C" void R__unzip(Int_t *nin, UChar_t *bufin, Int_t *lout, char *bufout, Int_t *nout);
@@ -47,7 +46,7 @@ class QOversizeArray
     const UInt_t& GetObjSize() const{return fObjectSize;}
 
     const Char_t* GetArrayName() const{return fArrayName;}
-    const Int_t& GetObjectTypeID() const{return fObjectTypeID;}
+    const Char_t* GetObjectTypeName() const{return fObjectTypeName.Data();}
 
     void LoadEntry(const Long64_t &entry = 0);
 
@@ -99,7 +98,7 @@ class QOversizeArray
     const Int_t fBufferHeaderSize; // Size of buffer header
     omode fOpenMode;             // Array opening mode
     UInt_t fObjectSize;          // Size of a single stored object
-    Int_t fObjectTypeID;
+    TString fObjectTypeName;
     void *fBuffer;               //! Pointer to the current object
     UInt_t fNOPerBuffer;         // Maximum number of objects per buffer
     UInt_t fNOAllocBlock;        // Number of objects for which memory is allocated at once in the write buffer

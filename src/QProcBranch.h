@@ -18,7 +18,6 @@ class QProcBranch: public QProcArray, public TBranch
     void ClearBuffer();
     Int_t Fill();
     void* GetBuffer() const{return fBuffer;}
-    const Int_t& GetBTypeID() const{return cBType;}
     Long64_t GetEntries() const{return TBranch::GetEntries();}
     void LoadEntry(const Long64_t &entry = 0);
     Int_t GetEntry(Long64_t entry = 0, Int_t dummy=0){LoadEntry(entry); return 0;}
@@ -34,7 +33,6 @@ class QProcBranch: public QProcArray, public TBranch
     Bool_t fOwnsCBuffer; //!
     Char_t fCBType; //!
     void *fCBuffer; //!
-    static const Int_t cBType; //!
     enum {
       kDouble_t,
       kFloat_t,

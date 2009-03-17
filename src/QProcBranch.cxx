@@ -2,8 +2,6 @@
 
 ClassImp(QProcBranch)
 
-const Int_t QProcBranch::cBType=8;
-
 QProcBranch::QProcBranch(TTree* tree, const char* name, void* address, const char* leaflist, Int_t basketsize, Int_t compress): QProcArray(), TBranch(tree,name,address,leaflist,basketsize,compress), fBuffer(NULL), fOwnsBuffer(kFALSE), fOwnsCBuffer(kFALSE), fCBType(0), fCBuffer(NULL)
 {
   SetBuffer();
@@ -109,6 +107,7 @@ void QProcBranch::LoadEntry(const Long64_t &entry)
 void QProcBranch::SetBuffer(void *buffer)
 {
   ClearBuffer();
+  fBTypeID=kDouble;
 
   TLeaf *lbuf;
   const char *cabuf;

@@ -10,6 +10,7 @@ QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omod
 
   if(type==-1) type=kDouble;
   sbuf=sbuf+"/"+GetTypeName(type);
+  fBTypeID=type;
 
   ui=GetTypeIDSize(type);
   fArray=new QOversizeArray(filename,sbuf,openmode,ui,qoabuffersize/ui,npcbuffers,allocblocksize/ui);

@@ -1,57 +1,62 @@
 #include "QTypes.h"
 
-Int_t QTypes::GetNameTypeID(const TString adesc, TString *name)
+Int_t QTypes::GetNameTypeID(const TString &adesc, TString *name)
 {
-  Int_t type=-1;
   Int_t k;
-  TString atype;
+  Int_t type;
 
   k=adesc.Last('/');
 
   if(k!=-1) {
     if(name) *name=adesc(0,k);
-    atype=adesc(k+1,adesc.Length()-k-1);
-
-    if(!strcmp(atype,"D") || !strcmp(atype,"Double_t")) {
-      type=kDouble;
-
-    } else if(!strcmp(atype,"F") || !strcmp(atype,"Float_t")) {
-      type=kFloat;
-
-    } else if(!strcmp(atype,"I") || !strcmp(atype,"Int_t")) {
-      type=kInt;
-
-    } else if(!strcmp(atype,"i") || !strcmp(atype,"UInt_t")) {
-      type=kUInt;
-
-    } else if(!strcmp(atype,"0") || !strcmp(atype,"Bool_t")) {
-      type=kBool;
-
-    } else if(!strcmp(atype,"L") || !strcmp(atype,"Long64_t")) {
-      type=kLong64;
-
-    } else if(!strcmp(atype,"l") || !strcmp(atype,"ULong64_t")) {
-      type=kULong64;
-
-    } else if(!strcmp(atype,"B") || !strcmp(atype,"Char_t")) {
-      type=kChar;
-
-    } else if(!strcmp(atype,"b") || !strcmp(atype,"UChar_t")) {
-      type=kUChar;
-
-    } else if(!strcmp(atype,"S") || !strcmp(atype,"Short_t")) {
-      type=kShort;
-
-    } else if(!strcmp(atype,"s") || !strcmp(atype,"UShort_t")) {
-      type=kUShort;
-
-    } else {
-      fprintf(stderr,"QTypes::GetNameTypeID: Error: Data type '%s' is unknown\n",atype.Data());
-      throw 1;
-    }
+    type=GetTypeID((TString)adesc(k+1,adesc.Length()-k-1));
 
   } else {
     if(name) *name=adesc;
+  }
+  return type;
+}
+
+Int_t QTypes::GetTypeID(const Char_t *atype)
+{
+  Int_t type=-1;
+
+  if(!strcmp(atype,"D") || !strcmp(atype,"Double_t")) {
+    type=kDouble;
+
+  } else if(!strcmp(atype,"F") || !strcmp(atype,"Float_t")) {
+    type=kFloat;
+
+  } else if(!strcmp(atype,"I") || !strcmp(atype,"Int_t")) {
+    type=kInt;
+
+  } else if(!strcmp(atype,"i") || !strcmp(atype,"UInt_t")) {
+    type=kUInt;
+
+  } else if(!strcmp(atype,"0") || !strcmp(atype,"Bool_t")) {
+    type=kBool;
+
+  } else if(!strcmp(atype,"L") || !strcmp(atype,"Long64_t")) {
+    type=kLong64;
+
+  } else if(!strcmp(atype,"l") || !strcmp(atype,"ULong64_t")) {
+    type=kULong64;
+
+  } else if(!strcmp(atype,"B") || !strcmp(atype,"Char_t")) {
+    type=kChar;
+
+  } else if(!strcmp(atype,"b") || !strcmp(atype,"UChar_t")) {
+    type=kUChar;
+
+  } else if(!strcmp(atype,"S") || !strcmp(atype,"Short_t")) {
+    type=kShort;
+
+  } else if(!strcmp(atype,"s") || !strcmp(atype,"UShort_t")) {
+    type=kUShort;
+
+  } else {
+    fprintf(stderr,"QTypes::GetNameTypeID: Error: Data type '%s' is unknown\n",atype);
+    throw 1;
   }
   return type;
 }
