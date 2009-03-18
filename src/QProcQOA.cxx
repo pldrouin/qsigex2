@@ -2,7 +2,7 @@
 
 ClassImp(QProcQOA)
 
-QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omode openmode, const UInt_t &qoabuffersize, const Int_t &npcbuffers, const UInt_t &allocblocksize): QProcArray()
+QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omode openmode, const UInt_t &nobjectsperbuffer, const Int_t &npcbuffers, const UInt_t &nobjectsallocblock): QProcArray()
 {
   TString sbuf;
   fBTypeID=GetNameTypeID(adesc,&sbuf);
@@ -14,11 +14,11 @@ QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omod
     sbuf=sbuf+"/"+GetTypeName(fBTypeID);
     ui=GetTypeSize(fBTypeID);
 
-    if(openmode==QOversizeArray::kRecreate) fArray=new QOversizeArray(filename,sbuf,openmode,ui,qoabuffersize/ui,npcbuffers,allocblocksize/ui);
-    else fArray=new QOversizeArray(filename,sbuf,openmode,ui,0,npcbuffers,allocblocksize/ui);
+    if(openmode==QOversizeArray::kRecreate) fArray=new QOversizeArray(filename,sbuf,openmode,ui,nobjectsperbuffer,npcbuffers,nobjectsallocblock);
+    else fArray=new QOversizeArray(filename,sbuf,openmode,ui,0,npcbuffers,nobjectsallocblock);
 
   } else {
-    fArray=new QOversizeArray(filename,sbuf,openmode,0,0,npcbuffers,0);
+    fArray=new QOversizeArray(filename,sbuf,openmode,0,0,npcbuffers,nobjectsallocblock);
 
     if(strlen(fArray->GetObjTypeName())) {
       fBTypeID=GetTypeID(fArray->GetObjTypeName());
@@ -31,7 +31,6 @@ QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omod
       fBTypeID=kDouble;
     }
     ui=GetTypeSize(fBTypeID);
-    fArray->SetNOAllocBlock(allocblocksize/ui);
   }
   fBuffer=new Char_t[ui];
   fArray->SetBuffer(fBuffer);

@@ -11,7 +11,7 @@ class QProcQOA: public QProcArray
 {
   public:
     QProcQOA(): QProcArray(), fArray(NULL), fBuffer(NULL) {}  
-    QProcQOA(const char *filename, const char* adesc, QOversizeArray::omode openmode=QOversizeArray::kRead, const UInt_t &qoabuffersize=0, const Int_t &npcbuffers=1, const UInt_t &allocblocksize=0);
+    QProcQOA(const char *filename, const char* adesc, QOversizeArray::omode openmode=QOversizeArray::kRead, const UInt_t &nobjectsperbuffer=0, const Int_t &npcbuffers=1, const UInt_t &nobjectsallocblock=0);
     virtual ~QProcQOA(){if(fArray) delete fArray; delete[] fBuffer;}
     Int_t Fill(){fArray->Fill(); return 1;}
     void* GetBuffer() const{return fBuffer;}

@@ -22,9 +22,9 @@ class QProcQOAHandler
     static QList<TObject*> fQOAObjs;     //QOA objects required by this class
     static QList<Int_t> fNObjReqQOA;     //Number of objects requiring the QOA objects
     static Bool_t fSaveOutputs;          //Save output arrays loaded by this class before closing the files
-    static UInt_t fDefQOABufferSize;    //Default number of objects per disk buffer
+    static UInt_t fDefNOPerBuffer;   //Default number of objects per disk buffer
     static Int_t fDefNPCBuffers;     //Default number of pre-cached disk buffers
-    static UInt_t fDefAllocBlockSize;  //Default number of objects per memory allocation block
+    static UInt_t fDefNOAllocBlock;  //Default number of objects per memory allocation block
   private:
     static void UnloadQOA(QProcQOA *array);
     const QProcQOAHandler& operator=(const QProcQOAHandler &){return *this;}

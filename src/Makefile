@@ -53,7 +53,7 @@ ifdef PROFGEN
 STD     =       $(QSIGEX_OBJSS) $(QSIGEX_OOBJSS) $(QSIGEX_DICTOBJS)
 SHD     =       $(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ)
 else
-ifeq ($(filter -ipo,$CXXFLAGS),-ipo)
+ifeq ($(findstring -ipo,$(CXXFLAGS)),-ipo)
 STD	=	qsigex_1.ipos qsigex_2.ipos
 SHD	=	qsigex_1.ipo qsigex_2.ipo
 else

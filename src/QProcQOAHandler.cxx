@@ -6,9 +6,9 @@ QList<TString> QProcQOAHandler::fFiles;
 QList<TObject*> QProcQOAHandler::fQOAObjs;
 QList<Int_t> QProcQOAHandler::fNObjReqQOA;
 Bool_t QProcQOAHandler::fSaveOutputs=kTRUE;
-UInt_t QProcQOAHandler::fDefQOABufferSize=1024*1024;
+UInt_t QProcQOAHandler::fDefNOPerBuffer=131072;
 Int_t QProcQOAHandler::fDefNPCBuffers=3;
-UInt_t QProcQOAHandler::fDefAllocBlockSize=104857;
+UInt_t QProcQOAHandler::fDefNOAllocBlock=13108;
 
 QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *adesc, Bool_t isoutput, Bool_t incrdeps)
 {
@@ -36,7 +36,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *ades
 	fFiles.Add(pathname);
 	if(incrdeps) fNObjReqQOA.Add(1);
 	else fNObjReqQOA.Add(0);
-	fQOAObjs.Add((TObject*)new QProcQOA(pathname,adesc,QOversizeArray::kRecreate,fDefQOABufferSize,fDefNPCBuffers,fDefAllocBlockSize));
+	fQOAObjs.Add((TObject*)new QProcQOA(pathname,adesc,QOversizeArray::kRecreate,fDefNOPerBuffer,fDefNPCBuffers,fDefNOAllocBlock));
 
 	return (QProcQOA*)fQOAObjs.GetLast();
       }
@@ -55,7 +55,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *ades
 	fFiles.Add(pathname);
 	if(incrdeps) fNObjReqQOA.Add(1);
 	else fNObjReqQOA.Add(0);
-	fQOAObjs.Add((TObject*)new QProcQOA(pathname,adesc,QOversizeArray::kRead,0,fDefNPCBuffers,fDefAllocBlockSize));
+	fQOAObjs.Add((TObject*)new QProcQOA(pathname,adesc,QOversizeArray::kRead,0,fDefNPCBuffers,fDefNOAllocBlock));
 
 	return (QProcQOA*)fQOAObjs.GetLast();
       }
@@ -66,11 +66,11 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *ades
   }
 }
 
-void QProcQOAHandler::SetDefArrayParams(const UInt_t &diskbuffersize, const Int_t &nprecachedbuffers, const UInt_t &allocblocksize)
+void QProcQOAHandler::SetDefArrayParams(const UInt_t &nentriesperdiskbuffer, const Int_t &nprecachedbuffers, const UInt_t &nentriessperallocblock)
 {
-  fDefQOABufferSize=diskbuffersize;
+  fDefNOPerBuffer=nentriesperdiskbuffer;
   fDefNPCBuffers=nprecachedbuffers;
-  fDefAllocBlockSize=allocblocksize;
+  fDefNOAllocBlock=nentriessperallocblock;
 }
 
 void QProcQOAHandler::UnloadQOA(QProcQOA *array)
