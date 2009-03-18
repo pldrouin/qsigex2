@@ -6,21 +6,40 @@
 #include "QProcObj.h"
 #include "QTypes.h"
 
+#ifndef __CINT__
 #ifndef QSFAST
-#define CHECKIBTYPE(i,t) CheckIBType(i,t)
-#define CHECKOBTYPE(i,t) CheckOBType(i,t)
+#define QPATRY try{
+#define QPACATCH } catch(Int_t e) {fprintf(stderr,"Error catched by QNamedProc '%s'\n",GetProcName()); throw e;}
+#define CHECKIBTYPE(index,type) QPATRY CheckIBType(index,type)
+#define CHECKOBTYPE(index,type) QPATRY CheckOBType(index,type)
+#define QPACATCHRETI(type) QPACATCH return *(type*)fIBuffers[i];
+#define QPACATCHRETO(type) QPACATCH return *(type*)fOBuffers[i];
 #else
-#define CHECKIBTYPE(i,t)
-#define CHECKOBTYPE(i,t)
+#define QPATRY
+#define QPACATCH
+#define CHECKIBTYPE(index,type)
+#define CHECKOBTYPE(index,type)
+#define QPACATCHRETI(type)
+#define QPACATCHRETO(type)
+#endif
+#else
+#define QPATRY
+#define QPACATCH
+#define CHECKIBTYPE(index,type)
+#define CHECKOBTYPE(index,type)
+#define QPACATCHRETI(type)
+#define QPACATCHRETO(type)
 #endif
 
 using namespace QTypes;
 
+class QNamedProc;
+
 class QProcArgs
 {
   public:
-  QProcArgs():fIBuffers(), fIObjects(), fOBuffers(), fOObjects(), fPBuffers(){}
-  QProcArgs(const QProcArgs& qprocargs):fIBuffers(qprocargs.fIBuffers), fIObjects(qprocargs.fIObjects), fOBuffers(qprocargs.fOBuffers), fOObjects(qprocargs.fOObjects), fPBuffers(qprocargs.fPBuffers){}
+  QProcArgs():fIBuffers(), fIObjects(), fOBuffers(), fOObjects(), fPBuffers(), fNamedProc(NULL){}
+  QProcArgs(const QProcArgs& qprocargs):fIBuffers(qprocargs.fIBuffers), fIObjects(qprocargs.fIObjects), fOBuffers(qprocargs.fOBuffers), fOObjects(qprocargs.fOObjects), fPBuffers(qprocargs.fPBuffers), fNamedProc(qprocargs.fNamedProc){}
   virtual ~QProcArgs(){}
   virtual const QProcArgs& operator=(const QProcArgs& rhs);
   const QList<QProcObj*>& GetListOfIObjs() const{return fIObjects;}
@@ -30,31 +49,33 @@ class QProcArgs
   const Int_t& GetNOVars() const{return fOBuffers.Count();}
   const Int_t& GetNOObjs() const{return fOObjects.Count();}
   const Int_t& GetNParams() const{return fPBuffers.Count();}
-  const Double_t& IVar(const Int_t &i) const{CHECKIBTYPE(i,kDouble); return *(Double_t*)fIBuffers[i];}
-  const Bool_t& IVarB(const Int_t &i) const{CHECKIBTYPE(i,kBool); return *(Bool_t*)fIBuffers[i];}
-  const Char_t& IVarC(const Int_t &i) const{CHECKIBTYPE(i,kChar); return *(Char_t*)fIBuffers[i];}
-  const Double_t& IVarD(const Int_t &i) const{CHECKIBTYPE(i,kDouble); return *(Double_t*)fIBuffers[i];}
-  const Float_t& IVarF(const Int_t &i) const{CHECKIBTYPE(i,kFloat); return *(Float_t*)fIBuffers[i];}
-  const Int_t& IVarI(const Int_t &i) const{CHECKIBTYPE(i,kInt); return *(Int_t*)fIBuffers[i];}
-  const Long64_t& IVarL(const Int_t &i) const{CHECKIBTYPE(i,kLong64); return *(Long64_t*)fIBuffers[i];}
-  const Short_t& IVarS(const Int_t &i) const{CHECKIBTYPE(i,kShort); return *(Short_t*)fIBuffers[i];}
-  const UChar_t& IVarUC(const Int_t &i) const{CHECKIBTYPE(i,kUChar); return *(UChar_t*)fIBuffers[i];}
-  const UInt_t& IVarUI(const Int_t &i) const{CHECKIBTYPE(i,kUInt); return *(UInt_t*)fIBuffers[i];}
-  const ULong64_t& IVarUL(const Int_t &i) const{CHECKIBTYPE(i,kULong64); return *(ULong64_t*)fIBuffers[i];}
-  const UShort_t& IVarUS(const Int_t &i) const{CHECKIBTYPE(i,kUShort); return *(UShort_t*)fIBuffers[i];}
+  const QNamedProc& GetProc() const{return *fNamedProc;}
+  const Char_t* GetProcName() const;
+  const Double_t& IVar(const Int_t &i) const{CHECKIBTYPE(i,kDouble); return *(Double_t*)fIBuffers[i]; QPACATCHRETI(Double_t)}
+  const Bool_t& IVarB(const Int_t &i) const{CHECKIBTYPE(i,kBool); return *(Bool_t*)fIBuffers[i]; QPACATCHRETI(Bool_t)}
+  const Char_t& IVarC(const Int_t &i) const{CHECKIBTYPE(i,kChar); return *(Char_t*)fIBuffers[i]; QPACATCHRETI(Char_t)}
+  const Double_t& IVarD(const Int_t &i) const{CHECKIBTYPE(i,kDouble); return *(Double_t*)fIBuffers[i]; QPACATCHRETI(Double_t)}
+  const Float_t& IVarF(const Int_t &i) const{CHECKIBTYPE(i,kFloat); return *(Float_t*)fIBuffers[i]; QPACATCHRETI(Float_t)}
+  const Int_t& IVarI(const Int_t &i) const{CHECKIBTYPE(i,kInt); return *(Int_t*)fIBuffers[i]; QPACATCHRETI(Int_t)}
+  const Long64_t& IVarL(const Int_t &i) const{CHECKIBTYPE(i,kLong64); return *(Long64_t*)fIBuffers[i]; QPACATCHRETI(Long64_t)}
+  const Short_t& IVarS(const Int_t &i) const{CHECKIBTYPE(i,kShort); return *(Short_t*)fIBuffers[i]; QPACATCHRETI(Short_t)}
+  const UChar_t& IVarUC(const Int_t &i) const{CHECKIBTYPE(i,kUChar); return *(UChar_t*)fIBuffers[i]; QPACATCHRETI(UChar_t)}
+  const UInt_t& IVarUI(const Int_t &i) const{CHECKIBTYPE(i,kUInt); return *(UInt_t*)fIBuffers[i]; QPACATCHRETI(UInt_t)}
+  const ULong64_t& IVarUL(const Int_t &i) const{CHECKIBTYPE(i,kULong64); return *(ULong64_t*)fIBuffers[i]; QPACATCHRETI(ULong64_t)}
+  const UShort_t& IVarUS(const Int_t &i) const{CHECKIBTYPE(i,kUShort); return *(UShort_t*)fIBuffers[i]; QPACATCHRETI(UShort_t)}
   const QProcObj* IObj(const Int_t &i) const{return fIObjects[i];}
-  Double_t& OVar(const Int_t &i) const{CHECKOBTYPE(i,kDouble); return *(Double_t*)fOBuffers[i];}
-  Bool_t& OVarB(const Int_t &i) const{CHECKOBTYPE(i,kBool); return *(Bool_t*)fIBuffers[i];}
-  Char_t& OVarC(const Int_t &i) const{CHECKOBTYPE(i,kChar); return *(Char_t*)fIBuffers[i];}
-  Double_t& OVarD(const Int_t &i) const{CHECKOBTYPE(i,kDouble); return *(Double_t*)fIBuffers[i];}
-  Float_t& OVarF(const Int_t &i) const{CHECKOBTYPE(i,kFloat); return *(Float_t*)fIBuffers[i];}
-  Int_t& OVarI(const Int_t &i) const{CHECKOBTYPE(i,kInt); return *(Int_t*)fIBuffers[i];}
-  Long64_t& OVarL(const Int_t &i) const{CHECKOBTYPE(i,kLong64); return *(Long64_t*)fIBuffers[i];}
-  Short_t& OVarS(const Int_t &i) const{CHECKOBTYPE(i,kShort); return *(Short_t*)fIBuffers[i];}
-  UChar_t& OVarUC(const Int_t &i) const{CHECKOBTYPE(i,kUChar); return *(UChar_t*)fIBuffers[i];}
-  UInt_t& OVarUI(const Int_t &i) const{CHECKOBTYPE(i,kUInt); return *(UInt_t*)fIBuffers[i];}
-  ULong64_t& OVarUL(const Int_t &i) const{CHECKOBTYPE(i,kULong64); return *(ULong64_t*)fIBuffers[i];}
-  UShort_t& OVarUS(const Int_t &i) const{CHECKOBTYPE(i,kShort); return *(UShort_t*)fIBuffers[i];}
+  Double_t& OVar(const Int_t &i) const{CHECKOBTYPE(i,kDouble); return *(Double_t*)fOBuffers[i]; QPACATCHRETO(Double_t)}
+  Bool_t& OVarB(const Int_t &i) const{CHECKOBTYPE(i,kBool); return *(Bool_t*)fOBuffers[i]; QPACATCHRETO(Bool_t)}
+  Char_t& OVarC(const Int_t &i) const{CHECKOBTYPE(i,kChar); return *(Char_t*)fOBuffers[i]; QPACATCHRETO(Char_t)}
+  Double_t& OVarD(const Int_t &i) const{CHECKOBTYPE(i,kDouble); return *(Double_t*)fOBuffers[i]; QPACATCHRETO(Double_t)}
+  Float_t& OVarF(const Int_t &i) const{CHECKOBTYPE(i,kFloat); return *(Float_t*)fOBuffers[i]; QPACATCHRETO(Float_t)}
+  Int_t& OVarI(const Int_t &i) const{CHECKOBTYPE(i,kInt); return *(Int_t*)fOBuffers[i]; QPACATCHRETO(Int_t)}
+  Long64_t& OVarL(const Int_t &i) const{CHECKOBTYPE(i,kLong64); return *(Long64_t*)fOBuffers[i]; QPACATCHRETO(Long64_t)}
+  Short_t& OVarS(const Int_t &i) const{CHECKOBTYPE(i,kShort); return *(Short_t*)fOBuffers[i]; QPACATCHRETO(Short_t)}
+  UChar_t& OVarUC(const Int_t &i) const{CHECKOBTYPE(i,kUChar); return *(UChar_t*)fOBuffers[i]; QPACATCHRETO(UChar_t)}
+  UInt_t& OVarUI(const Int_t &i) const{CHECKOBTYPE(i,kUInt); return *(UInt_t*)fOBuffers[i]; QPACATCHRETO(UInt_t)}
+  ULong64_t& OVarUL(const Int_t &i) const{CHECKOBTYPE(i,kULong64); return *(ULong64_t*)fOBuffers[i]; QPACATCHRETO(ULong64_t)}
+  UShort_t& OVarUS(const Int_t &i) const{CHECKOBTYPE(i,kShort); return *(UShort_t*)fOBuffers[i]; QPACATCHRETO(UShort_t)}
   QProcObj* OObj(const Int_t &i) const{return fOObjects[i];}
   const Double_t& Param(const Int_t &i) const{return *fPBuffers[i];}
 #ifdef __CINT__
@@ -153,6 +174,7 @@ class QProcArgs
   }
   void SetNOObjs(const Int_t &n){fOObjects.RedimList(n,-1,NULL);}
   void SetNParams(const Int_t &n){fPBuffers.RedimList(n,-1,NULL);}
+  void SetNamedProcAddr(const QNamedProc *namedproc){fNamedProc=namedproc;}
 
   friend class QProcedure;
   friend Bool_t operator==(const QProcArgs &lhs, const QProcArgs &rhs);
@@ -163,10 +185,11 @@ class QProcArgs
   QList<void*> fOBuffers;
   QList<QProcObj*> fOObjects;
   QList<Double_t*> fPBuffers;
+  const QNamedProc *fNamedProc;
 #ifndef __CINT__
 #ifndef QSFAST
-  QList<Int_t> fIBTypes; //!
-  QList<Int_t> fOBTypes; //!
+  QList<Int_t> fIBTypes;
+  QList<Int_t> fOBTypes;
 #endif
 #endif
 

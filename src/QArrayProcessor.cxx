@@ -947,6 +947,7 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
   //Loop over the processes
   for(i=0; i<nprocs; i++) {
     proc=&((*fProcs)[i]);
+    proc->TellAddress();
 
     //Loop over the inputs for the current process
     for(j=0; j<proc->GetNIVars(); j++) {

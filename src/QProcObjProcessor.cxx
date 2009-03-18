@@ -324,6 +324,12 @@ void QProcObjProcessor::InitProcess(Bool_t allocateparammem)
 {
   TerminateProcess();
   QStdProcessor::InitProcess(allocateparammem);
+  Int_t nprocs=fProcs->Count();
+
+  //Loop over the processes
+  for(Int_t i=0; i<nprocs; i++) {
+    (*fProcs)[i].TellAddress();
+  }
 
   //Erase last parameters
   fLastParams->Clear();

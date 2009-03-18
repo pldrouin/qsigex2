@@ -7,6 +7,8 @@
 
 #include "debugger.h"
 
+class QNamedProc;
+
 class QProcedure
 {
   public:
@@ -56,6 +58,8 @@ class QProcedure
     void SetNOVars(const Int_t &n){fArgs.SetNOVars(n);}
     void SetNOObjs(const Int_t &n){fArgs.SetNOObjs(n);}
     void SetNParams(const Int_t &n){fArgs.SetNParams(n);}
+
+    void SetNamedProcAddr(const QNamedProc *namedproc){fArgs.SetNamedProcAddr(namedproc);}
 
     virtual Bool_t Exec()=0;
 
