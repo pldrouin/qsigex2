@@ -9,7 +9,7 @@
 #ifndef __CINT__
 #ifndef QSFAST
 #define QPATRY try{
-#define QPACATCH } catch(Int_t e) {fprintf(stderr,"Error catched by QNamedProc '%s'\n",GetProcName()); throw e;}
+#define QPACATCH } catch(Int_t e) {fprintf(stderr,"Error caught by QNamedProc '%s'\n",GetProcName()); throw e;}
 #define CHECKIBTYPE(index,type) QPATRY CheckIBType(index,type)
 #define CHECKOBTYPE(index,type) QPATRY CheckOBType(index,type)
 #define QPACATCHRETI(type) QPACATCH return *(type*)fIBuffers[i];
