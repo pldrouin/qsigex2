@@ -967,7 +967,8 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
 	//Else if the input is a memory buffer
       } else {
 	//Get the buffer address from the memory buffers list
-	k=fBuNames->FindFirst(proc->GetIVarNameTitle(j).GetName());
+	GetNameTypeID(proc->GetIVarNameTitle(j).GetName(),&sbuf);
+	k=fBuNames->FindFirst(sbuf);
 	proc->SetIVarPtr(j,(*fBuffers)[k],(*fBuTypes)[k]);
       }
     }
@@ -990,7 +991,8 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
 	//Else if the output is a memory buffer
       } else {
 	//Get the buffer address from the memory buffers list
-	k=fBuNames->FindFirst(proc->GetOVarNameTitle(j).GetName());
+	GetNameTypeID(proc->GetOVarNameTitle(j).GetName(),&sbuf);
+	k=fBuNames->FindFirst(sbuf);
 	proc->SetOVarPtr(j,(*fBuffers)[k],(*fBuTypes)[k]);
       }
     }

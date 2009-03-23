@@ -62,7 +62,7 @@ class QOversizeArray
 
     static void ResetPriorities();
 
-    void Save();
+    void Save(const Float_t &compfrac=0);
 
     void SetBuffer(void *buffer){fBuffer=buffer;}
 
@@ -135,6 +135,7 @@ class QOversizeArray
     Char_t          fMWAction;     // Flag to control the action of the memory writing thread (0: Normal 1: Pause 2: Stop)
     QOABuffer      *fMWBuffer;     // QOABuffer to be freed by fMWThread
     QOABuffer      *fMWWBuffer;    // QOABuffer being written by fMWThread
+    Bool_t	   fSigMMThread;   // Send signal to memory management thread
     pthread_t fBLThread;           // Buffer loading thread
     pthread_mutex_t fBLMutex;      // Buffer loading thread mutex
     pthread_cond_t fBLCond;        // Buffer loading thread condition
@@ -161,7 +162,20 @@ class QOversizeArray
     static pthread_cond_t fMMCond;   //Memory management condition
     static pthread_mutex_t fILMutex; //Instance list mutex. Locks the existence of a QOversizeArray instance.
     static pthread_mutex_t fPriorityMutex; //Mutex for instance priorities
+    static pthread_mutex_t fMWCCMutex;    // Memory writing/compression thread condition mutex
+    static pthread_cond_t fMWCCCond;      // Memory writubg/compression thread confirmation condition
+    static pthread_t fMCThread;           // Memory compression thread
+    static pthread_mutex_t fMCMutex;      // Memory compression thread mutex
+    static pthread_cond_t fMCCond;        // Memory compression thread condition
+    static pthread_mutex_t fMCCMutex;     // Memory compression thread condition mutex
+    static pthread_cond_t fMCPCond;       // Memory compression thread pausing condition
+    static pthread_cond_t fMCCCond;       // Memory compression thread confirmation condition
+    static Char_t         fMCAction;      // Flag to control the action of the memory compression thread (0: Normal 1: Pause 2: Stop)
+    static QOversizeArray *fMCQOA;        // QOversizeArray to be compressed by fMCThread
+    static QOABuffer      *fMCBuffer;     // QOABuffer to be compressed by fMCThread
+    static QOABuffer      *fMCCBuffer;    // QOABuffer being compressed by fMCThread
 
+    static void* QOAMCThread(void *array);
     static void* QOAMWThread(void *array);
     static void* QOABLThread(void *array);
     static void* QOAMMThread(void *);

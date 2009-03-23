@@ -6,6 +6,7 @@ QList<TString> QProcQOAHandler::fFiles;
 QList<TObject*> QProcQOAHandler::fQOAObjs;
 QList<Int_t> QProcQOAHandler::fNObjReqQOA;
 Bool_t QProcQOAHandler::fSaveOutputs=kTRUE;
+Float_t QProcQOAHandler::fSaveCompFrac=0;
 UInt_t QProcQOAHandler::fDefNOPerBuffer=131072;
 Int_t QProcQOAHandler::fDefNPCBuffers=3;
 UInt_t QProcQOAHandler::fDefNOAllocBlock=13108;
@@ -86,7 +87,7 @@ void QProcQOAHandler::UnloadQOA(QProcQOA *array)
     //If no object requires this array anymore
     if(!fNObjReqQOA[i]) {
 
-      if(array->GetQOA()->GetOpenMode()!=QOversizeArray::kRead && fSaveOutputs) array->GetQOA()->Save();
+      if(array->GetQOA()->GetOpenMode()!=QOversizeArray::kRead && fSaveOutputs) array->GetQOA()->Save(fSaveCompFrac);
       delete array;
       fFiles.Del(i);
       fQOAObjs.Del(i);
