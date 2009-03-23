@@ -1077,7 +1077,7 @@ void QOversizeArray::Terminate()
     nextbuf=buf->fNextOAB;
     fTotalMemSize-=buf->fBufferSize+sizeof(QOABuffer);
     fArrayMemSize-=buf->fBufferSize+sizeof(QOABuffer);
-    //delete buf;
+    delete buf;
     buf=nextbuf;
   }
   printf("allo2\n");
