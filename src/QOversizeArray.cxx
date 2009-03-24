@@ -118,9 +118,9 @@ void QOversizeArray::CloseFile()
     pthread_mutex_lock(&fMWCMutex);
     pthread_cond_signal(&fMWCond);
     pthread_mutex_unlock(&fMWCMutex);
-    printf("Waiting for MW thread %p to terminate...\n",this);
+    //printf("Waiting for MW thread %p to terminate...\n",this);
     pthread_join(fMWThread,NULL);
-    printf("MW thread %p has terminated\n",this);
+    //printf("MW thread %p has terminated\n",this);
 
     //If no instances are left, wait for QOAMCThread to stop
     if(!fInstances.Count()) {
@@ -131,17 +131,17 @@ void QOversizeArray::CloseFile()
       pthread_mutex_lock(&fMCCMutex);
       pthread_cond_signal(&fMCCond);
       pthread_mutex_unlock(&fMCCMutex);
-      printf("Waiting for MC thread %p to terminate...\n",this);
+      //printf("Waiting for MC thread %p to terminate...\n",this);
       pthread_join(fMCThread,NULL);
-      printf("MC thread %p has terminated\n",this);
+      //printf("MC thread %p has terminated\n",this);
 
     //else if there are still some instances, wait for the current job to finish
     } else {
-      printf("Waiting for MC thread %p to finish compressing...\n",this);
+      //printf("Waiting for MC thread %p to finish compressing...\n",this);
       pthread_mutex_lock(&fMWCCMutex);
       if(fMCCBuffer) pthread_cond_wait(&fMWCCCond, &fMWCCMutex);
       pthread_mutex_unlock(&fMWCCMutex);
-      printf("MC thread %p is done compressing\n",this);
+      //printf("MC thread %p is done compressing\n",this);
     }
 
     //Send a signal to fBLThread to terminate and wait for termination
@@ -151,9 +151,9 @@ void QOversizeArray::CloseFile()
     pthread_mutex_lock(&fBLCMutex);
     pthread_cond_signal(&fBLCond);
     pthread_mutex_unlock(&fBLCMutex);
-    printf("Waiting for BL %p thread to terminate...\n",this);
+    //printf("Waiting for BL %p thread to terminate...\n",this);
     pthread_join(fBLThread,NULL);
-    printf("BL thread %p has terminated\n",this);
+    //printf("BL thread %p has terminated\n",this);
 
     if(close(fFDesc)) {
       perror("QOversizeArray::~QOversizeArray(): Error: ");
@@ -1063,7 +1063,6 @@ void QOversizeArray::Terminate()
 
   //printf("FirstReadBuffer index: %i\tLastReadBuffer index: %i\n",fFirstReadBuffer?fFirstReadBuffer->fBufferIdx:-1,fLastReadBuffer?fLastReadBuffer->fBufferIdx:-1);
 
-  printf("allo0\n");
   if(fNUMBuffers) {
     free(fUMBuffers);
     fUMBuffers=NULL;
@@ -1071,7 +1070,6 @@ void QOversizeArray::Terminate()
   }
 
   buf=fFirstReadBuffer;
-  printf("allo1 %p\n",this);
 
   while(buf) {
     nextbuf=buf->fNextOAB;
@@ -1080,7 +1078,6 @@ void QOversizeArray::Terminate()
     delete buf;
     buf=nextbuf;
   }
-  printf("allo2\n");
 
   pthread_mutex_lock(&fPBuffersMutex);
   buf=fFirstParkedBuffer;
@@ -1094,7 +1091,6 @@ void QOversizeArray::Terminate()
   }
   fFirstParkedBuffer=NULL;
   pthread_mutex_unlock(&fPBuffersMutex);
-  printf("allo3\n");
 
   if(fWriteBuffer) {
     fTotalMemSize-=fWriteBuffer->fBufferSize+sizeof(QOABuffer);
@@ -1102,11 +1098,9 @@ void QOversizeArray::Terminate()
     delete fWriteBuffer;
     fWriteBuffer=NULL;
   }
-  printf("allo4\n");
 
   free(fUZQOAB); fUZQOAB=NULL;
   free(fUZBuffers); fUZBuffers=NULL;
-  printf("allo5\n");
 
   fFirstReadBuffer=NULL;
   fLastReadBuffer=NULL;
@@ -1121,7 +1115,6 @@ void QOversizeArray::Terminate()
   pthread_mutex_unlock(&fMSizeMutex);
   pthread_mutex_unlock(&fRBDIMutex);
   pthread_mutex_unlock(&fBuffersMutex);
-  printf("allo6\n");
 }
 
 void QOversizeArray::WriteHeader() const
@@ -1236,7 +1229,7 @@ void* QOversizeArray::QOAMWThread(void *array)
       } else {
 	//Stop
 	printstatus("Memory writing thread is stopping");
-	printf("Memory writing thread for array %p is stopping\n",qoa);
+	//printf("Memory writing thread for array %p is stopping\n",qoa);
 	qoa->fMWAction=0;
 	qoa->fMWBuffer=NULL;
 	pthread_mutex_unlock(&qoa->fMWMutex);
@@ -1346,7 +1339,7 @@ void* QOversizeArray::QOABLThread(void *array)
 
       //Stop
       printstatus("Buffer loading thread is stopping");
-      printf("Buffer loading thread for array %p is stopping\n",qoa);
+      //printf("Buffer loading thread for array %p is stopping\n",qoa);
       qoa->fBLAction=0;
       pthread_mutex_unlock(&qoa->fBLMutex);
       return NULL;
@@ -1663,8 +1656,8 @@ void* QOversizeArray::QOAMMThread(void *)
 
 	pthread_mutex_lock(&abuf->fBuffersMutex);
 	//printf("Number of unmodified buffers: %i\tNumber of read buffers: %i\n",abuf->fNUMBuffers,abuf->fNReadBuffers);
-	//If the array is in write mode
-	if(abuf->fCurRBIdx==-1 || abuf->fCurBLRBIdx==-2) {
+	//If the array is in write mode. Cannot use the condition on fCurRBIdx==-1 here because we want to make sure that CleanUZBuffers has been called before deleting an unmodified buffer
+	if(abuf->fCurBLRBIdx==-2) {
 	  printstatus("Trying to select a buffer to delete in write mode");
 
 	  //If there are some unmodified buffers
@@ -1813,7 +1806,7 @@ void* QOversizeArray::QOAMMThread(void *)
 	    pthread_mutex_lock(&fMSizeMutex);
 
 	    //If the buffer is not compressed and the total memory size is >= compression memory size threshold, compress the buffer
-	    if(!bbuf->fIsCompressed && fTotalMemSize>=fCThreshMemSize) {
+	    if(0 && !bbuf->fIsCompressed && fTotalMemSize>=fCThreshMemSize) {
 	      printstatus("Memory management thread will compress of write a modified buffer");
 	      pthread_mutex_unlock(&fMSizeMutex);
 	      //fMCMutex and abuf->fMWMutex need to be locked along with fBuffersMutex to check the buffer pointers
