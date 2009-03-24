@@ -125,7 +125,6 @@ class QOversizeArray
     mutable pthread_mutex_t fFileMutex; // Mutex on file reading & writing operations
     pthread_mutex_t fBuffersMutex; // Lock on all buffer linked list structure, excluding parked buffers (all "read" QOABuffer pointers + counters, fWBFirstObjIdx, fCurRBIdx, QOABuffer::fIsModified, QOABuffer::fIsCompressed)
     pthread_mutex_t fPBuffersMutex; //Lock on all parked buffer linked list structure
-    pthread_mutex_t fRBDIMutex;    // Lock on read buffer data integrity (QOABuffer::fBuffer and QOABuffer::fBufferSize), for buffers IN THE LINKED LIST
     pthread_t fMWThread;           // Memory writing thread
     pthread_mutex_t fMWMutex;      // Memory writing thread mutex
     pthread_cond_t fMWCond;        // Memory writing thread condition
@@ -162,14 +161,16 @@ class QOversizeArray
     static pthread_cond_t fMMCond;   //Memory management condition
     static pthread_mutex_t fILMutex; //Instance list mutex. Locks the existence of a QOversizeArray instance.
     static pthread_mutex_t fPriorityMutex; //Mutex for instance priorities
-    static pthread_mutex_t fMWCCMutex;    // Memory writing/compression thread condition mutex
-    static pthread_cond_t fMWCCCond;      // Memory writubg/compression thread confirmation condition
+    static pthread_mutex_t fMWCDMutex;    // Memory writing/compression thread done condition mutex
+    static pthread_cond_t fMWCDCond;      // Memory writing/compression thread done confirmation condition
     static pthread_t fMCThread;           // Memory compression thread
     static pthread_mutex_t fMCMutex;      // Memory compression thread mutex
     static pthread_cond_t fMCCond;        // Memory compression thread condition
     static pthread_mutex_t fMCCMutex;     // Memory compression thread condition mutex
     static pthread_cond_t fMCPCond;       // Memory compression thread pausing condition
     static pthread_cond_t fMCCCond;       // Memory compression thread confirmation condition
+    static pthread_mutex_t fMCDMutex;    // Memory compression thread done condition mutex
+    static pthread_cond_t fMCDCond;      // Memory compression thread done confirmation condition
     static Char_t         fMCAction;      // Flag to control the action of the memory compression thread (0: Normal 1: Pause 2: Stop)
     static QOversizeArray *fMCQOA;        // QOversizeArray to be compressed by fMCThread
     static QOABuffer      *fMCBuffer;     // QOABuffer to be compressed by fMCThread
