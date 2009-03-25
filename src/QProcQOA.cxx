@@ -24,7 +24,7 @@ QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omod
       fBTypeID=GetTypeID(fArray->GetObjTypeName());
 
     } else if(fArray->GetObjSize()!=sizeof(Double_t)) {
-      fprintf(stderr,"QProcQOA::QProcQOA: Error: Array saved in file '%s' contains an unknown type which size does not corresponds to a Double_t\n");
+      fprintf(stderr,"QProcQOA::QProcQOA: Error: Array saved in file '%s' contains an unknown type which size does not corresponds to a Double_t\n",filename);
       throw 1;
 
     } else {
