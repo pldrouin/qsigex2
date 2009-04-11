@@ -16,9 +16,9 @@ class QProcDouble: public QProcObj
     const QProcDouble& operator=(const QProcDouble &rhs){fDouble=rhs.fDouble; return *this;}
     const QProcDouble& operator=(const Double_t& rhs){fDouble=rhs; return *this;}
     const QProcDouble& operator+=(const Double_t& rhs){fDouble+=rhs; return *this;}
-    const QProcDouble& operator-=(const Double_t& rhs){fDouble+=rhs; return *this;}
-    const QProcDouble& operator*=(const Double_t& rhs){fDouble+=rhs; return *this;}
-    const QProcDouble& operator/=(const Double_t& rhs){fDouble+=rhs; return *this;}
+    const QProcDouble& operator-=(const Double_t& rhs){fDouble-=rhs; return *this;}
+    const QProcDouble& operator*=(const Double_t& rhs){fDouble*=rhs; return *this;}
+    const QProcDouble& operator/=(const Double_t& rhs){fDouble/=rhs; return *this;}
   protected:
     Double_t fDouble;
     ClassDef(QProcDouble,1) //Double_t with QProcObj properties
