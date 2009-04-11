@@ -102,8 +102,11 @@ qsigex_1.ipos: $(QSIGEX_OBJSS_1) $(QSIGEX_OOBJSS_1) $(QSIGEX_DICTOBJS_1)
 qsigex_2.ipos: $(QSIGEX_OBJSS_2) $(QSIGEX_OOBJSS_2) $(QSIGEX_DICTOBJS_2)
 	$(CXX) -ipo_c -o $@ $(CXXFLAGS) $^
 
-$(QSIGEX_OBJSS) $(QSIGEX_OOBJSS) $(QSIGEX_DICTOBJS): %.os: %.cxx
+$(QSIGEX_OBJSS) $(QSIGEX_OOBJSS): %.os: %.cxx
 	$(CXX) -c -o $@ $(CXXFLAGS) $(INCLUDES) $<
+
+$(QSIGEX_DICTOBJS): %.os: %.cxx
+	$(CXX) -c -o $@ $(CXXFLAGS) $(INCLUDES) $< >& /dev/null
 
 qsigex_1.ipo: $(QSIGEX_OBJS_1) $(QSIGEX_OOBJS_1) $(QSIGEX_DICTOBJ_1)
 	$(CXX) -ipo_c -o $@ -fPIC $(CXXFLAGS) $^
@@ -111,8 +114,11 @@ qsigex_1.ipo: $(QSIGEX_OBJS_1) $(QSIGEX_OOBJS_1) $(QSIGEX_DICTOBJ_1)
 qsigex_2.ipo: $(QSIGEX_OBJS_2) $(QSIGEX_OOBJS_2) $(QSIGEX_DICTOBJ_2)
 	$(CXX) -ipo_c -o $@ -fPIC $(CXXFLAGS) $^
 
-$(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ): %.o: %.cxx
+$(QSIGEX_OBJS) $(QSIGEX_OOBJS): %.o: %.cxx
 	$(CXX) -c -o $@ -fPIC $(CXXFLAGS) $(INCLUDES) $<
+
+$(QSIGEX_DICTOBJ): %.o: %.cxx
+	$(CXX) -c -o $@ -fPIC $(CXXFLAGS) $(INCLUDES) $< >& /dev/null
 
 $(QSIGEX_DICTOBJ_1:.o=.h): $(QSIGEX_DICTOBJ_1:.o=.cxx)
 $(QSIGEX_DICTOBJ_1:.o=.cxx): $(QSIGEX_CLHD_1) $(QSIGEX_1_LINKDEF)

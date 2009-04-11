@@ -14,6 +14,7 @@
 #define CHECKOBTYPE(index,type) QPATRY CheckOBType(index,type)
 #define QPACATCHRETI(type) QPACATCH return *(type*)fIBuffers[i];
 #define QPACATCHRETO(type) QPACATCH return *(type*)fOBuffers[i];
+#define QPACATCHRETP QPACATCH return *fPBuffers[i];
 #else
 #define QPATRY
 #define QPACATCH
@@ -21,6 +22,7 @@
 #define CHECKOBTYPE(index,type)
 #define QPACATCHRETI(type)
 #define QPACATCHRETO(type)
+#define QPACATCHRETP
 #endif
 #else
 #define QPATRY
@@ -29,6 +31,7 @@
 #define CHECKOBTYPE(index,type)
 #define QPACATCHRETI(type)
 #define QPACATCHRETO(type)
+#define QPACATCHRETP
 #endif
 
 using namespace QTypes;
@@ -77,7 +80,7 @@ class QProcArgs
   ULong64_t& OVarUL(const Int_t &i) const{CHECKOBTYPE(i,kULong64); return *(ULong64_t*)fOBuffers[i]; QPACATCHRETO(ULong64_t)}
   UShort_t& OVarUS(const Int_t &i) const{CHECKOBTYPE(i,kShort); return *(UShort_t*)fOBuffers[i]; QPACATCHRETO(UShort_t)}
   QProcObj* OObj(const Int_t &i) const{return fOObjects[i];}
-  const Double_t& Param(const Int_t &i) const{return *fPBuffers[i];}
+  const Double_t& Param(const Int_t &i) const{QPATRY return *fPBuffers[i]; QPACATCHRETP}
 #ifdef __CINT__
   Double_t ** Params() const{return fPBuffers.GetArray();}
 #else
