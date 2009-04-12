@@ -16,7 +16,6 @@ template <typename U> void QHNF<U>::Streamer(TBuffer &R__b)
     for(i=0; i<QHN<U>::fNDims; i++) {
       R__b >> QHN<U>::fAxes[i]; 
     }
-    ComputeNBins();
     R__b >> QHN<U>::fEntries;
     R__b >> fNFBins;
 
@@ -29,6 +28,7 @@ template <typename U> void QHNF<U>::Streamer(TBuffer &R__b)
 
     R__b.ReadFastArray(fBins,fNFBins);
     R__b.ReadFastArray(QHN<U>::fBinContent,fNFBins);
+    ComputeNBins();
 
     R__b.CheckByteCount(R__s, R__c, QHN<U>::IsA());
   } else {
