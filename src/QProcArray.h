@@ -11,9 +11,9 @@ class QProcArray: public QProcObj
 {
   public:
   QProcArray(): QProcObj(), fBTypeID(-1) {}
-  QProcArray(const QProcArray &rhs): QProcObj(rhs), fBTypeID(-1) {}
+  QProcArray(const QProcArray &rhs): QProcObj(rhs), fBTypeID(rhs.fBTypeID) {}
   virtual ~QProcArray(){}
-  const QProcArray& operator=(const QProcArray &rhs){QProcObj::operator=(rhs); return *this;}
+  const QProcArray& operator=(const QProcArray &rhs){QProcObj::operator=(rhs); fBTypeID=rhs.fBTypeID; return *this;}
   virtual Int_t Fill()=0;
   virtual void* GetBuffer() const=0;
   virtual Long64_t GetEntries() const=0;

@@ -102,7 +102,8 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 	    fQPTBWObjs.Add((TObject*)qabuf);
 	    fNObjReqTB.Add(0);
 	    i=fQPTBWObjs.Count()-1;
-	  }
+
+	  } else qabuf=(QProcTBranchWrapper*)fQPTBWObjs[i];
 	  //Return a pointer to the wrapper
 	  fNObjReqTB[i]++;
 	}
@@ -111,6 +112,7 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 	  fprintf(stderr,"QProcBranchHandler::LoadBranch(): Error: Existing branch '%s' in tree '%s:%s' has type '%s' instead of '%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data(),GetTypeName(qabuf->GetBTypeID()),GetTypeName(btype));
 	  throw 1;
 	}
+
 	return qabuf;
       }
 
@@ -189,7 +191,7 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 	  fQPTBWObjs.Add((TObject*)qabuf);
 	  fNObjReqTB.Add(0);
 	  i=fQPTBWObjs.Count()-1;
-	}
+	} else qabuf=(QProcTBranchWrapper*)fQPTBWObjs[i];
 	//Return a pointer to the wrapper
 	fNObjReqTB[i]++;
       }
@@ -209,18 +211,18 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 
 void QProcBranchHandler::UnloadBranch(TBranch *branch)
 {
-//  printf("void QProcBranchHandler::UnloadBranch(TBranch *branch<'%s'>)\n",branch->GetName());
+  //printf("void QProcBranchHandler::UnloadBranch(TBranch *branch<'%s'>)\n",branch->GetName());
   //Get a pointer to the file were is stored the tree associated to the branch
   TFile *fbuf=branch->GetTree()->GetCurrentFile();
   Int_t i;
 
   //If the branch is a TBranch with a wrapper object
   if((i=fTBObjs.FindFirst((TObject*)branch)) != -1){
-//    printf("The branch is a TBranch with a wrapper object\n");
+    //printf("The branch is a TBranch with a wrapper object\n");
     fNObjReqTB[i]--;
 
     if(!fNObjReqTB[i]) {
-//      printf("Deleting the wrapper object...\t");
+      //printf("Deleting the wrapper object...\t");
       delete (QProcTBranchWrapper*)fQPTBWObjs[i];
       fTBObjs.Del(i);
       fQPTBWObjs.Del(i);
