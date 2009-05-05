@@ -1350,6 +1350,7 @@ void* QOversizeArray::QOABLThread(void *array)
     } else if(qoa->fCurRBIdx==-1) {
       if(qoa->fCurBLRBIdx!=-2) {
 	qoa->fCurBLRBIdx=-2;
+        lastbidx=-3;
 	qoa->CleanUZBuffers();
       }
       printstatus("Buffer loading thread is waiting for a new buffer to load");
