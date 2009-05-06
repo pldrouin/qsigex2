@@ -115,8 +115,9 @@ void QOversizeArray::CloseFile()
     //Send a signal to fMWThread to terminate and wait for termination
     pthread_mutex_lock(&fMWMutex);
     fMWAction=2;
-    pthread_mutex_unlock(&fMWMutex);
+    //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
     pthread_mutex_lock(&fMWCMutex);
+    pthread_mutex_unlock(&fMWMutex);
     pthread_cond_signal(&fMWCond);
     pthread_mutex_unlock(&fMWCMutex);
     //printf("Waiting for MW thread %p to terminate...\n",this);
@@ -128,8 +129,9 @@ void QOversizeArray::CloseFile()
       //Send a signal to fMCThread to terminate and wait for termination
       pthread_mutex_lock(&fMCMutex);
       fMCAction=2;
-      pthread_mutex_unlock(&fMCMutex);
+      //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
       pthread_mutex_lock(&fMCCMutex);
+      pthread_mutex_unlock(&fMCMutex);
       pthread_cond_signal(&fMCCond);
       pthread_mutex_unlock(&fMCCMutex);
       //printf("Waiting for MC thread %p to terminate...\n",this);
@@ -148,8 +150,9 @@ void QOversizeArray::CloseFile()
     //Send a signal to fBLThread to terminate and wait for termination
     pthread_mutex_lock(&fBLMutex);
     fBLAction=2;
-    pthread_mutex_unlock(&fBLMutex);
     pthread_mutex_lock(&fBLCMutex);
+    //It is important to unlock fBuffersMutex or fBLMutex after locking fBLCMutex in the main thread to ensure getting the right condition from QOABLThread
+    pthread_mutex_unlock(&fBLMutex);
     pthread_cond_signal(&fBLCond);
     pthread_mutex_unlock(&fBLCMutex);
     //printf("Waiting for BL %p thread to terminate...\n",this);
@@ -269,10 +272,10 @@ void QOversizeArray::Fill()
 	fCurReadBuffer=NULL;
 	fCurRBIdx=-1;
 
-	pthread_mutex_unlock(&fBuffersMutex);
-
 	//Request the buffer loading thread to go in waiting condition
 	pthread_mutex_lock(&fBLCMutex);
+	//It is important to unlock fBuffersMutex or fBLMutex after locking fBLCMutex in the main thread to ensure getting the right condition from QOABLThread
+	pthread_mutex_unlock(&fBuffersMutex);
 	pthread_cond_signal(&fBLCond);
 	//Wait for confirmation
 	pthread_cond_wait(&fBLWCond,&fBLCMutex);
@@ -401,8 +404,9 @@ void QOversizeArray::LoadEntry(const Long64_t &entry)
       //printf("LoadEntry is waiting for buffer %i to load\n",fCurRBIdx);
       //printf("Buffer address is %p\n",bbuf);
       pthread_mutex_lock(&fBLCMutex);
-      pthread_cond_signal(&fBLCond);
+      //It is important to unlock fBuffersMutex or fBLMutex after locking fBLCMutex in the main thread to ensure getting the right condition from QOABLThread
       pthread_mutex_unlock(&fBLMutex);
+      pthread_cond_signal(&fBLCond);
       printstatus("LoadEntry is waiting for a confirmation");
       pthread_cond_wait(&fBLCCond, &fBLCMutex);
       pthread_mutex_unlock(&fBLCMutex);
@@ -421,8 +425,9 @@ void QOversizeArray::LoadEntry(const Long64_t &entry)
       pthread_mutex_lock(&fBLMutex);
       //printf("LoadEntry is waiting for buffer %i to unzip\n",fCurRBIdx);
       pthread_mutex_lock(&fBLCMutex);
-      pthread_cond_signal(&fBLCond);
+      //It is important to unlock fBuffersMutex or fBLMutex after locking fBLCMutex in the main thread to ensure getting the right condition from QOABLThread
       pthread_mutex_unlock(&fBLMutex);
+      pthread_cond_signal(&fBLCond);
       printstatus("LoadEntry is waiting for a confirmation");
       pthread_cond_wait(&fBLCCond, &fBLCMutex);
       pthread_mutex_unlock(&fBLCMutex);
@@ -430,6 +435,7 @@ void QOversizeArray::LoadEntry(const Long64_t &entry)
 
     } else {
       pthread_mutex_unlock(&fBuffersMutex);
+      //Here we don't wait for QOABLThread to improve speed. The signal will be caught later if not this time
       pthread_mutex_lock(&fBLCMutex);
       pthread_cond_signal(&fBLCond);
       pthread_mutex_unlock(&fBLCMutex);
@@ -577,11 +583,12 @@ void QOversizeArray::ResetArray()
   pthread_mutex_lock(&fBuffersMutex);
   fCurReadBuffer=NULL;
   fCurRBIdx=-1;
-  pthread_mutex_unlock(&fBuffersMutex);
 
   //Wait for the buffer loading thread to finish the current operation
   //Request the buffer loading thread to go in waiting condition
   pthread_mutex_lock(&fBLCMutex);
+  //It is important to unlock fBuffersMutex or fBLMutex after locking fBLCMutex in the main thread to ensure getting the right condition from QOABLThread
+  pthread_mutex_unlock(&fBuffersMutex);
   pthread_cond_signal(&fBLCond);
   //Wait for confirmation
   pthread_cond_wait(&fBLWCond,&fBLCMutex);
@@ -590,8 +597,9 @@ void QOversizeArray::ResetArray()
   pthread_mutex_lock(&fMWMutex);
   //Request a pause from memory writing thread
   fMWAction=1;
-  pthread_mutex_unlock(&fMWMutex);
+  //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
   pthread_mutex_lock(&fMWCMutex);
+  pthread_mutex_unlock(&fMWMutex);
   pthread_cond_signal(&fMWCond);
   //Wait for pause confirmation
   pthread_cond_wait(&fMWPCond,&fMWCMutex);
@@ -601,8 +609,9 @@ void QOversizeArray::ResetArray()
   pthread_mutex_lock(&fMCMutex);
   //Request a pause from memory compression thread
   fMCAction=1;
-  pthread_mutex_unlock(&fMCMutex);
+  //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
   pthread_mutex_lock(&fMCCMutex);
+  pthread_mutex_unlock(&fMCMutex);
   pthread_cond_signal(&fMCCond);
   //Wait for pause confirmation
   pthread_cond_wait(&fMCPCond,&fMCCMutex);
@@ -637,8 +646,9 @@ void QOversizeArray::ResetArray()
   //Remove pause condition on memory compression thread
   pthread_mutex_lock(&fMCMutex);
   fMCAction=0;
-  pthread_mutex_unlock(&fMCMutex);
+  //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
   pthread_mutex_lock(&fMCCMutex);
+  pthread_mutex_unlock(&fMCMutex);
   printstatus("QOversizeArray::ResetArray: Removing pausing condition from memory compression thread");
   pthread_cond_signal(&fMCCond);
   pthread_mutex_unlock(&fMCCMutex);
@@ -646,8 +656,9 @@ void QOversizeArray::ResetArray()
   //Remove pause condition on memory writing thread
   pthread_mutex_lock(&fMWMutex);
   fMWAction=0;
-  pthread_mutex_unlock(&fMWMutex);
+  //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
   pthread_mutex_lock(&fMWCMutex);
+  pthread_mutex_unlock(&fMWMutex);
   printstatus("QOversizeArray::ResetArray: Removing pausing condition from memory writing thread");
   pthread_cond_signal(&fMWCond);
   pthread_mutex_unlock(&fMWCMutex);
@@ -910,8 +921,9 @@ void QOversizeArray::Save(const Float_t &compfrac)
   pthread_mutex_lock(&fMWMutex);
   //Request a pause from memory writing thread
   fMWAction=1;
-  pthread_mutex_unlock(&fMWMutex);
+  //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
   pthread_mutex_lock(&fMWCMutex);
+  pthread_mutex_unlock(&fMWMutex);
   pthread_cond_signal(&fMWCond);
   //Wait for pause confirmation
   pthread_cond_wait(&fMWPCond,&fMWCMutex);
@@ -921,8 +933,9 @@ void QOversizeArray::Save(const Float_t &compfrac)
   pthread_mutex_lock(&fMCMutex);
   //Request a pause from memory compression thread
   fMCAction=1;
-  pthread_mutex_unlock(&fMCMutex);
+  //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
   pthread_mutex_lock(&fMCCMutex);
+  pthread_mutex_unlock(&fMCMutex);
   pthread_cond_signal(&fMCCond);
   //Wait for pause confirmation
   pthread_cond_wait(&fMCPCond,&fMCCMutex);
@@ -1009,8 +1022,9 @@ void QOversizeArray::Save(const Float_t &compfrac)
   //Remove pause condition on memory compression thread
   pthread_mutex_lock(&fMCMutex);
   fMCAction=0;
-  pthread_mutex_unlock(&fMCMutex);
+  //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
   pthread_mutex_lock(&fMCCMutex);
+  pthread_mutex_unlock(&fMCMutex);
   printstatus("QOversizeArray::Save: Removing pausing condition from memory compression thread");
   pthread_cond_signal(&fMCCond);
   pthread_mutex_unlock(&fMCCMutex);
@@ -1018,8 +1032,9 @@ void QOversizeArray::Save(const Float_t &compfrac)
   //Remove pause condition on memory writing thread
   pthread_mutex_lock(&fMWMutex);
   fMWAction=0;
-  pthread_mutex_unlock(&fMWMutex);
+  //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
   pthread_mutex_lock(&fMWCMutex);
+  pthread_mutex_unlock(&fMWMutex);
   printstatus("QOversizeArray::Save: Removing pausing condition from memory writing thread");
   pthread_cond_signal(&fMWCond);
   pthread_mutex_unlock(&fMWCMutex);
@@ -1201,14 +1216,10 @@ void* QOversizeArray::QOAMWThread(void *array)
 
       if(qoa->fMWAction == 1) {
 	//Pause
-	pthread_mutex_lock(&qoa->fMWCMutex);
-	pthread_cond_signal(&qoa->fMWPCond);
-	pthread_mutex_unlock(&qoa->fMWCMutex);
-	//printf("Memory writing thread %p is pausing\n",qoa);
-
 	//Important to lock fMWCMutex before unlocking fMWMutex to avoid a deadlock with threads that are waiting for a signal from QOAMWThread
 	pthread_mutex_lock(&qoa->fMWCMutex);
 	pthread_mutex_unlock(&qoa->fMWMutex);
+	pthread_cond_signal(&qoa->fMWPCond);
 	pthread_cond_wait(&qoa->fMWCond, &qoa->fMWCMutex);
 	printstatus("Memory writing thread got a signal in pausing condition");
 	pthread_mutex_unlock(&qoa->fMWCMutex);
@@ -1484,14 +1495,14 @@ void* QOversizeArray::QOABLThread(void *array)
 	    // else if buf has a smaller buffer index (this can be the case when buf==fCurReadBuffer!=NULL)
 	  } else {
 	    //printf("Buffer index of buf: %i\n",buf->fBufferIdx);
-	    if(buf->fNextOAB) {
+	    //if(buf->fNextOAB) {
 	      //printf("buf idx: %i\tbuf->fNextOAB idx: %i\n",buf->fBufferIdx,buf->fNextOAB->fBufferIdx);
 	      ASSERT(buf->fNextOAB->fBufferIdx>buf->fBufferIdx);
-	    }
-	    if(buf->fPreviousOAB) {
+	    //}
+	    //if(buf->fPreviousOAB) {
 	      //printf("buf idx: %i\tbuf->fPreviousOAB idx: %i\n",buf->fBufferIdx,buf->fPreviousOAB->fBufferIdx);
 	      ASSERT(buf->fPreviousOAB->fBufferIdx<buf->fBufferIdx);
-	    }
+	    //}
 	    buf2->fNextOAB=buf->fNextOAB;
 	    if(buf->fNextOAB) buf->fNextOAB->fPreviousOAB=buf2;
 	    buf2->fPreviousOAB=buf;
@@ -1852,9 +1863,10 @@ void* QOversizeArray::QOAMMThread(void *)
 		pthread_mutex_unlock(&abuf->fBuffersMutex);
 		//printf("Buffer address is %p\n",bbuf);
 		abuf->fMWBuffer=bbuf;
+                //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
 		pthread_mutex_lock(&abuf->fMWCMutex);
-		pthread_cond_signal(&abuf->fMWCond);
 		pthread_mutex_unlock(&abuf->fMWMutex);
+		pthread_cond_signal(&abuf->fMWCond);
 		printstatus("Memory management thread is waiting for a confirmation");
 		pthread_cond_wait(&abuf->fMWCCond, &abuf->fMWCMutex);
 		pthread_mutex_unlock(&abuf->fMWCMutex);
@@ -1871,9 +1883,10 @@ void* QOversizeArray::QOAMMThread(void *)
 		fMCBuffer=bbuf;
                 bbuf->fIsCompressed=2;
 		pthread_mutex_unlock(&abuf->fBuffersMutex);
+                //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
 		pthread_mutex_lock(&fMCCMutex);
-		pthread_cond_signal(&fMCCond);
 		pthread_mutex_unlock(&fMCMutex);
+		pthread_cond_signal(&fMCCond);
 		printstatus("Memory management thread is waiting for a confirmation");
 		pthread_cond_wait(&fMCCCond, &fMCCMutex);
 		pthread_mutex_unlock(&fMCCMutex);
@@ -1890,9 +1903,10 @@ void* QOversizeArray::QOAMMThread(void *)
 	      pthread_mutex_unlock(&abuf->fBuffersMutex);
 	      //printf("Buffer address is %p\n",bbuf);
 	      abuf->fMWBuffer=bbuf;
+              //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
 	      pthread_mutex_lock(&abuf->fMWCMutex);
-	      pthread_cond_signal(&abuf->fMWCond);
 	      pthread_mutex_unlock(&abuf->fMWMutex);
+	      pthread_cond_signal(&abuf->fMWCond);
 	      printstatus("Memory management thread is waiting for a confirmation");
 	      pthread_cond_wait(&abuf->fMWCCond, &abuf->fMWCMutex);
 	      pthread_mutex_unlock(&abuf->fMWCMutex);
@@ -1943,14 +1957,10 @@ void* QOversizeArray::QOAMCThread(void *array)
 
       if(fMCAction == 1) {
 	//Pause
-	pthread_mutex_lock(&fMCCMutex);
-	pthread_cond_signal(&fMCPCond);
-	pthread_mutex_unlock(&fMCCMutex);
-	printstatus("Memory compression thread is pausing");
-
 	//Important to lock fMCCMutex before unlocking fMCMutex to avoid a deadlock with threads that are waiting for a signal from QOAMCThread
 	pthread_mutex_lock(&fMCCMutex);
 	pthread_mutex_unlock(&fMCMutex);
+	pthread_cond_signal(&fMCPCond);
 	pthread_cond_wait(&fMCCond, &fMCCMutex);
 	printstatus("Memory compression thread got a signal in pausing condition");
 	pthread_mutex_unlock(&fMCCMutex);
