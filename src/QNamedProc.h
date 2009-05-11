@@ -52,7 +52,7 @@ class QNamedProc: public TNamed
 
     const QProcObj* IObj(const Int_t &i) const{return fProcedure->IObj(i);}
     QProcObj* OObj(const Int_t &i) const{return fProcedure->OObj(i);}
-    const Double_t& Param(const Int_t &i) const{return fProcedure->Param(i);}
+    Double_t& Param(const Int_t &i) const{return fProcedure->Param(i);}
 
     const QNamedProc& operator=(const QNamedProc& rhs);
     void SetIVarPtr(const Int_t &index, void* const buf, const Int_t &type=-1){fProcedure->SetIVarPtr(index,buf,type);}

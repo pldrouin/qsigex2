@@ -80,11 +80,11 @@ class QProcArgs
   ULong64_t& OVarUL(const Int_t &i) const{CHECKOBTYPE(i,kULong64); return *(ULong64_t*)fOBuffers[i]; QPACATCHRETO(ULong64_t)}
   UShort_t& OVarUS(const Int_t &i) const{CHECKOBTYPE(i,kShort); return *(UShort_t*)fOBuffers[i]; QPACATCHRETO(UShort_t)}
   QProcObj* OObj(const Int_t &i) const{return fOObjects[i];}
-  const Double_t& Param(const Int_t &i) const{QPATRY return *fPBuffers[i]; QPACATCHRETP}
+  Double_t& Param(const Int_t &i) const{QPATRY return *fPBuffers[i]; QPACATCHRETP}
 #ifdef __CINT__
   Double_t ** Params() const{return fPBuffers.GetArray();}
 #else
-  Double_t const* const* Params() const{return fPBuffers.GetArray();}
+  Double_t* const* Params() const{return fPBuffers.GetArray();}
 #endif
 
   protected:
