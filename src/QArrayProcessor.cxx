@@ -1258,6 +1258,8 @@ Int_t QArrayProcessor::AddUniqueArray(QList<QList<TString> > *arraylist, const Q
   id=QTypes::GetNameTypeID(arraydesc[0],&name);
   
   if(id!=-1) arraylist->GetLast()[0]=name+"/"+QTypes::GetTypeName(id);
+  
+  else if(deftype!=-1) arraylist->GetLast()[0]=name+"/"+QTypes::GetTypeName(deftype);
   return -1;
 }
 
@@ -1311,6 +1313,8 @@ Int_t QArrayProcessor::AddUniqueBuffer(QList<TString> *buflist, const Char_t *bu
   id=QTypes::GetNameTypeID(bufdesc,&name);
 
   if(id!=-1) buflist->GetLast()=name+"/"+QTypes::GetTypeName(id);
+  
+  else if(deftype!=-1) buflist->GetLast()=name+"/"+QTypes::GetTypeName(deftype);
   return -1;
 }
 
