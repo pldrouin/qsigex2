@@ -204,6 +204,10 @@ template <typename U> class QHN: public QDis
     inline void SetEntries(Double_t n){fEntries=n;}
     void SetNDims(const Int_t &ndims){Clear(); fAxes=new QAxis*[ndims]; fNDims=ndims;}
     inline virtual void SetFBinContent(const Long64_t &fbin, const U &content){SetBinContent(fbin, content);}
+    QHN<U>* SubHist(const char *name="_pd", const Int_t *axes=NULL, const Int_t *firstbins=NULL, const Int_t *lastbins=NULL, const Int_t &naxes=0) const;
+    QHN<U>* SubHist(const char *name, const Int_t &axis0, const Int_t &firstbin0, const Int_t &lastbin0) const{return SubHist(name,&axis0,&firstbin0,&lastbin0,1);}
+    QHN<U>* SubHist(const char *name, const Int_t &axis0, const Int_t &firstbin0, const Int_t &lastbin0, const Int_t &axis1, const Int_t &firstbin1, const Int_t &lastbin1) const;
+    QHN<U>* SubHist(const char *name, const Int_t &axis0, const Int_t &firstbin0, const Int_t &lastbin0, const Int_t &axis1, const Int_t &firstbin1, const Int_t &lastbin1, const Int_t &axis2, const Int_t &firstbin2, const Int_t &lastbin2) const;
     inline void TerminateProcObj(){Normalize();}
   protected:
     virtual QHN<Double_t>* NewD() const{return new QHN<Double_t>;}

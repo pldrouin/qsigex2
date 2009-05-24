@@ -1351,4 +1351,79 @@ template <typename U> void QHN<U>::SetAxis(const Int_t &axis, const QAxis *anaxi
   Reset();
 }
 
+template <typename U> QHN<U>* QHN<U>::SubHist(const char *name, const Int_t *axes, const Int_t *firstbins, const Int_t *lastbins, const Int_t &naxes) const
+{
+  if(naxes<0 || !axes || !firstbins || !lastbins || naxes>fNDims) return NULL;
+
+  Int_t i;
+
+  for(i=naxes-1; i>=0; --i) {
+    if(axes[i]<0 || axes[i]>=fNDims) {
+      fprintf(stderr,"QHN<U>::SubHist: Error: Invalid axis index: %i\n",axes[i]);
+      throw 1;
+    }
+
+    if(firstbins[i]<0 || firstbins[i]>fAxes[axes[i]]->GetNBins()+1) {
+      fprintf(stderr,"QHN<U>::SubHist: Error: %i is an invalid first bin index for axis %i\n",firstbins[i],axes[i]);
+      throw 1;
+    }
+
+    if(lastbins[i]<0 || lastbins[i]>fAxes[axes[i]]->GetNBins()+1) {
+      fprintf(stderr,"QHN<U>::SubHist: Error: %i is an invalid last bin index for axis %i\n",lastbins[i],axes[i]);
+      throw 1;
+    }
+
+    if(lastbins[i]<firstbins[i]) {
+      fprintf(stderr,"QHN<U>::SubHist: Error: Last bin index is smaller than first bin index for axis %i\n",axes[i]);
+      throw 1;
+    }
+  }
+
+  QHN<U> *th=New(name,name,fNDims);
+  Int_t *coords=new Int_t[fNDims];
+  Long64_t li;
+
+  for(i=fNDims-1; i>=0; --i) {
+    th->SetAxis(i,fAxes[i]);
+  }
+
+  for(i=naxes-1; i>=0; --i) {
+
+    if(fAxes[axes[i]]->GetBins()) {
+      th->SetAxis(axes[i],lastbins[i]-firstbins[i]+1,fAxes[axes[i]]->GetBins()+firstbins[i]);
+
+    } else {
+      th->SetAxis(axes[i],lastbins[i]-firstbins[i]+1,fAxes[axes[i]]->GetBinLowEdge(firstbins[i]),fAxes[axes[i]]->GetBinUpEdge(lastbins[i]));
+    }
+  }
+
+  for(li=GetNFbins()-1; li>=0; --li) {
+    GetFBinCoords(li,coords);
+
+    for(i=naxes-1; i>=0; --i) if(coords[axes[i]]<firstbins[i] || coords[axes[i]]>lastbins[i]) goto nextfbin; else coords[axes[i]]-=firstbins[i]-1;
+    th->SetBinContent(coords,fBinContent[li]);
+nextfbin:
+  }
+
+  delete[] coords;
+  return th;
+}
+
+template <typename U> QHN<U>* QHN<U>::SubHist(const char *name, const Int_t &axis0, const Int_t &firstbin0, const Int_t &lastbin0, const Int_t &axis1, const Int_t &firstbin1, const Int_t &lastbin1) const
+{
+  const Int_t axes[]={axis0,axis1};
+  const Int_t firstbins[]={firstbin0,firstbin1};
+  const Int_t lastbins[]={lastbin0,lastbin1};
+  return SubHist(name,axes,firstbins,lastbins,2);
+}
+
+template <typename U> QHN<U>* QHN<U>::SubHist(const char *name, const Int_t &axis0, const Int_t &firstbin0, const Int_t &lastbin0, const Int_t &axis1, const Int_t &firstbin1, const Int_t &lastbin1, const Int_t &axis2, const Int_t &firstbin2, const Int_t &lastbin2) const
+{
+  const Int_t axes[]={axis0,axis1,axis2};
+  const Int_t firstbins[]={firstbin0,firstbin1,firstbin2};
+  const Int_t lastbins[]={lastbin0,lastbin1,lastbin2};
+  return SubHist(name,axes,firstbins,lastbins,3);
+}
+
+
 #include "QHN_Dict_cxx.h"
