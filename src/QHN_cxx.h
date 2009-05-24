@@ -1402,6 +1402,7 @@ template <typename U> QHN<U>* QHN<U>::SubHist(const char *name, const Int_t *axe
 
     for(i=naxes-1; i>=0; --i) if(coords[axes[i]]<firstbins[i] || coords[axes[i]]>lastbins[i]) goto nextfbin; else coords[axes[i]]-=firstbins[i]-1;
     th->SetBinContent(coords,fBinContent[li]);
+    th->AddEntries(fBinContent[li]);
 nextfbin:;
   }
 
