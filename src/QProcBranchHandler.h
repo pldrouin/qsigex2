@@ -15,7 +15,7 @@ class QProcBranchHandler
   public:
     QProcBranchHandler(){}
     virtual ~QProcBranchHandler(){}
-    static QProcArray* LoadBranch(const char *treelocation, const char *adesc, Bool_t isoutput, Bool_t incrdeps=kTRUE);
+    static QProcArray* LoadBranch(const char *treelocation, const char *adesc, Bool_t isoutput, Bool_t incrdeps=kTRUE, Bool_t ttreeoutput=kFALSE);
     static void SaveOutputs(Bool_t saveoutputs=kTRUE){fSaveOutputs=saveoutputs;}
     friend class QProcBranch;
     friend class QProcTBranchWrapper;

@@ -909,6 +909,10 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
       //Create the output array and store the pointer
       (*fOArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fOANames)[i][1](j+3,(*fOANames)[i][1].Length()-j-3),(*fOANames)[i][0], kTRUE));
 
+    } else if(!strcmp(proto,"ttree")) {
+      //Create the output array and store the pointer
+      (*fOArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fOANames)[i][1](j+3,(*fOANames)[i][1].Length()-j-3),(*fOANames)[i][0], kTRUE, kTRUE, kTRUE));
+
     } else if(!strcmp(proto,"qoa")) {
       //Create the output array and store the pointer
       (*fOArrays).Add(QProcQOAHandler::LoadQOA((TString)(*fOANames)[i][1](j+3,(*fOANames)[i][1].Length()-j-3),(*fOANames)[i][0], kTRUE));
@@ -936,7 +940,7 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
     }
     proto=(*fIANames)[i][1](0,j);
 
-    if(!strcmp(proto,"tree")) {
+    if(!strcmp(proto,"tree") || !strcmp(proto,"ttree")) {
       //Create the input array and store the pointer
       (*fIArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fIANames)[i][1](j+3,(*fIANames)[i][1].Length()-j-3),(*fIANames)[i][0], kFALSE));
 
