@@ -794,7 +794,7 @@ template <typename U> Double_t QHN<U>::Integral(Int_t const* const* binranges, c
   }
 
   Double_t integral=0;
-  Double_t binvol;
+  Double_t binvol=0;
 
   //If bin width is constant in all directions or if not using bin width
   if(cbw || !bwi) {
