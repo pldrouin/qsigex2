@@ -3,7 +3,7 @@
 
 #include "QHN.h"
 
-template <typename U> QHN<U>::QHN(const QHN &qthn): QDis(qthn), fNDims(qthn.fNDims), fAxes(NULL), fEntries(qthn.fEntries), fBinContent(NULL), fNBins(qthn.fNBins), fTH(NULL)
+template <typename U> QHN<U>::QHN(const QHN &qthn): QDis(qthn), fNDims(qthn.fNDims), fAxes(NULL), fEntries(qthn.fEntries), fBinContent(NULL), fNBins(qthn.fNBins), fIntUseFBinLoop(kFALSE), fTH(NULL)
 {
   Int_t i;
   fAxes=new QAxis*[fNDims];
@@ -19,7 +19,7 @@ template <typename U> QHN<U>::QHN(const QHN &qthn): QDis(qthn), fNDims(qthn.fNDi
   }
 }
 
-template <typename U> QHN<U>::QHN(const Char_t* filename, const Char_t* objectname): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0), fTH(NULL)
+template <typename U> QHN<U>::QHN(const Char_t* filename, const Char_t* objectname): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0), fIntUseFBinLoop(kFALSE), fTH(NULL)
 {
   TDirectory *curdir=gDirectory;
   TFile f(filename,"READ");
@@ -48,7 +48,7 @@ template <typename U> QHN<U>::QHN(const Char_t* filename, const Char_t* objectna
   curdir->cd();
 }
 
-template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &ndims): QDis(name,title), fNDims(ndims), fAxes(new QAxis*[ndims]), fBinContent(NULL), fNBins(0), fTH(NULL)
+template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &ndims): QDis(name,title), fNDims(ndims), fAxes(new QAxis*[ndims]), fBinContent(NULL), fNBins(0), fIntUseFBinLoop(kFALSE), fTH(NULL)
 {
   if(fNDims<=0) {
     fprintf(stderr,"QHN::QHN: Error: Number of dimensions is invalid\n");
@@ -339,6 +339,7 @@ template <typename U> void QHN<U>::Init()
   fBinContent=(U*)malloc(fNBins*sizeof(U));
   memset(fBinContent,0,fNBins*sizeof(U));
   fEntries=0;
+  fIntUseFBinLoop=kFALSE;
   fTH=NULL;
 }
 
@@ -771,6 +772,7 @@ template <typename U> Double_t QHN<U>::Integral(Int_t const* const* binranges, c
   Int_t mins[fNDims], maxs[fNDims];
   Int_t i, j[fNDims];
   Long64_t li;
+  Bool_t ubr=kFALSE; //Using bin ranges
   Bool_t cbw=kTRUE; //Constant bin width in all directions
   Bool_t bwi=kFALSE;//Integration using bin width for at least some direction
   Long64_t nfbins=GetNFbins();
@@ -780,6 +782,8 @@ template <typename U> Double_t QHN<U>::Integral(Int_t const* const* binranges, c
     if(binranges && binranges[i]){
       mins[i]=(*(binranges[i])>1)?*(binranges[i]):1;
       maxs[i]=(*(binranges[i]+1)<fAxes[i]->GetNBins())?*(binranges[i]+1):fAxes[i]->GetNBins(); 
+      ubr=kTRUE;
+
     } else {
       mins[i]=1;
       maxs[i]=fAxes[i]->GetNBins();
@@ -792,66 +796,220 @@ template <typename U> Double_t QHN<U>::Integral(Int_t const* const* binranges, c
   Double_t integral=0;
   Double_t binvol;
 
-  //If bin width is constant in all directions
-  if(cbw) {
+  //If bin width is constant in all directions or if not using bin width
+  if(cbw || !bwi) {
 
-    //If integrating using bin width for all axes
-    if(!widths) {
-      binvol=fAxes[fNDims-1]->GetBinWidth(1);
-      for(i=fNDims-2; i>=0; --i) binvol*=fAxes[i]->GetBinWidth(1);
+    //If using bin widths
+    if(bwi) {
 
-      //Else if using bin width for only some axes
-    } else {
-      binvol=1;
-      for(i=fNDims-1; i>=0; --i) if(widths[i]) binvol*=fAxes[i]->GetBinWidth(1);
+      //If integrating using bin width for all axes
+      if(!widths) {
+	binvol=fAxes[fNDims-1]->GetBinWidth(1);
+	for(i=fNDims-2; i>=0; --i) binvol*=fAxes[i]->GetBinWidth(1);
+
+	//Else if using bin width for only some axes
+      } else {
+	binvol=1;
+	for(i=fNDims-1; i>=0; --i) if(widths[i]) binvol*=fAxes[i]->GetBinWidth(1);
+      }
     }
 
-    for(li=nfbins-1; li>=0; --li) {
-      if(IsFBinIncluded(li,mins,maxs)) integral+=fBinContent[li];
-    }
-    integral*=binvol;
+    if(ubr) {
 
-  //Else if bin width is not constant for some direction
+      if(fIntUseFBinLoop) for(li=nfbins-1; li>=0; --li) {
+	if(IsFBinIncluded(li,mins,maxs)) integral+=fBinContent[li]; 
+
+      } else {
+	Int_t naxes=0;
+	Int_t *axes=new Int_t[fNDims];
+	Int_t **biniter=new Int_t*[fNDims];
+	Int_t *amins=new Int_t[fNDims];
+	Int_t *amaxs=new Int_t[fNDims];
+
+	for(i=fNDims-1; i>=0; --i) {
+	  if(mins[i]!=maxs[i]) axes[naxes++]=i;
+	  j[i]=mins[i];
+	}
+
+	for(i=naxes-1; i>=0; --i) {
+	  biniter[i]=j+axes[i];
+	  amins[i]=mins[axes[i]];
+	  amaxs[i]=maxs[axes[i]];
+	}
+
+	do{
+	  integral+=GetBinContent(j);
+	  ++*(biniter[0]);
+
+	  i=0;
+	  while(*(biniter[i])>amaxs[i]){
+	    *(biniter[i])=amins[i];
+	    ++i;
+
+	    if(i>=naxes) break;
+	    ++*(biniter[i]);
+	  }
+	} while(i<naxes);
+
+        delete[] axes;
+	delete[] biniter;
+	delete[] amins;
+	delete[] amaxs;
+      }
+
+    } else for(li=nfbins-1; li>=0; --li) integral+=fBinContent[li];
+
+    if(bwi) integral*=binvol;
+
+  //Else if bin width is not constant for some direction and bin width is used
   } else {
 
     //If integrating using bin width for all axes
     if(!widths) {
 
-      for(li=nfbins-1; li>=0; --li) {
-	GetFBinCoords(li,j);
+      if(ubr) {
 
-	for(i=fNDims-1; i>=0; --i) if(j[i]<mins[i] || j[i]>maxs[i]) break; 
+	if(fIntUseFBinLoop) {
 
-	if(i==-1) {
-	  binvol=fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]);
-	  for(i=fNDims-2; i>=0; --i) binvol*=fAxes[i]->GetBinWidth(j[i]);
-	  integral+=fBinContent[li]*binvol;
+	  for(li=nfbins-1; li>=0; --li) {
+	    GetFBinCoords(li,j);
+
+	    for(i=fNDims-1; i>=0; --i) if(j[i]<mins[i] || j[i]>maxs[i]) break; 
+
+	    if(i==-1) {
+	      binvol=fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]);
+	      for(i=fNDims-2; i>=0; --i) binvol*=fAxes[i]->GetBinWidth(j[i]);
+	      integral+=fBinContent[li]*binvol;
+	    }
+	  }
+
+	} else {
+	  Int_t naxes=0;
+	  Int_t *axes=new Int_t[fNDims];
+	  Int_t **biniter=new Int_t*[fNDims];
+	  Int_t *amins=new Int_t[fNDims];
+	  Int_t *amaxs=new Int_t[fNDims];
+
+	  for(i=fNDims-1; i>=0; --i) {
+	    if(mins[i]!=maxs[i]) axes[naxes++]=i;
+	    j[i]=mins[i];
+	  }
+
+	  for(i=naxes-1; i>=0; --i) {
+	    biniter[i]=j+axes[i];
+	    amins[i]=mins[axes[i]];
+	    amaxs[i]=maxs[axes[i]];
+	  }
+
+	  do{
+	    binvol=fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]);
+	    for(i=fNDims-2; i>=0; --i) binvol*=fAxes[i]->GetBinWidth(j[i]);
+	    integral+=GetBinContent(j)*binvol;
+	    ++*(biniter[0]);
+
+	    i=0;
+	    while(*(biniter[i])>amaxs[i]){
+	      *(biniter[i])=amins[i];
+	      ++i;
+
+	      if(i>=naxes) break;
+	      ++*(biniter[i]);
+	    }
+	  } while(i<naxes);
+
+	  delete[] axes;
+	  delete[] biniter;
+	  delete[] amins;
+	  delete[] amaxs;
 	}
-      }
 
-      //Else if integrating without using bin width at all
-    } else if(!bwi) {
+      } else {
 
-      for(li=nfbins-1; li>=0; --li) {
-	if(IsFBinIncluded(li,mins,maxs)) integral+=fBinContent[li];
+	for(li=nfbins-1; li>=0; --li) {
+	  GetFBinCoords(li,j);
+
+	  if(i==-1) {
+	    binvol=fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]);
+	    for(i=fNDims-2; i>=0; --i) binvol*=fAxes[i]->GetBinWidth(j[i]);
+	    integral+=fBinContent[li]*binvol;
+	  }
+	}
       }
 
       //Else if integrating using bin width for some of the directions only
     } else {
 
-      for(li=nfbins-1; li>=0; --li) {
-	GetFBinCoords(li,j);
+      if(ubr) {
 
-	for(i=fNDims-1; i>=0; --i) if(j[i]<mins[i] || j[i]>maxs[i]) break; 
+	if(fIntUseFBinLoop) {
 
-	if(i==-1) {
-	  binvol=(widths[0]?fAxes[0]->GetBinWidth(j[0]):1);
-	  for(i=1; i<fNDims; i++) binvol*=(widths[i]?fAxes[i]->GetBinWidth(j[i]):1);
-	  integral+=fBinContent[li]*binvol;
+	  for(li=nfbins-1; li>=0; --li) {
+	    GetFBinCoords(li,j);
+
+	    for(i=fNDims-1; i>=0; --i) if(j[i]<mins[i] || j[i]>maxs[i]) break; 
+
+	    if(i==-1) {
+	      binvol=(widths[fNDims-1]?fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]):1);
+	      for(i=fNDims-2; i>=0; --i) binvol*=(widths[i]?fAxes[i]->GetBinWidth(j[i]):1);
+	      integral+=fBinContent[li]*binvol;
+	    }
+	  }
+
+	} else {
+	  Int_t naxes=0;
+	  Int_t *axes=new Int_t[fNDims];
+	  Int_t **biniter=new Int_t*[fNDims];
+	  Int_t *amins=new Int_t[fNDims];
+	  Int_t *amaxs=new Int_t[fNDims];
+
+	  for(i=fNDims-1; i>=0; --i) {
+	    if(mins[i]!=maxs[i]) axes[naxes++]=i;
+	    j[i]=mins[i];
+	  }
+
+	  for(i=naxes-1; i>=0; --i) {
+	    biniter[i]=j+axes[i];
+	    amins[i]=mins[axes[i]];
+	    amaxs[i]=maxs[axes[i]];
+	  }
+
+	  do{
+	    binvol=(widths[fNDims-1]?fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]):1);
+	    for(i=fNDims-2; i>=0; --i) binvol*=(widths[i]?fAxes[i]->GetBinWidth(j[i]):1);
+	    integral+=GetBinContent(j)*binvol;
+	    ++*(biniter[0]);
+
+	    i=0;
+	    while(*(biniter[i])>amaxs[i]){
+	      *(biniter[i])=amins[i];
+	      ++i;
+
+	      if(i>=naxes) break;
+	      ++*(biniter[i]);
+	    }
+	  } while(i<naxes);
+
+	  delete[] axes;
+	  delete[] biniter;
+	  delete[] amins;
+	  delete[] amaxs;
+	}
+
+      } else {
+
+	for(li=nfbins-1; li>=0; --li) {
+	  GetFBinCoords(li,j);
+
+	  if(i==-1) {
+	    binvol=(widths[fNDims-1]?fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]):1);
+	    for(i=fNDims-2; i>=0; --i) binvol*=(widths[i]?fAxes[i]->GetBinWidth(j[i]):1);
+	    integral+=fBinContent[li]*binvol;
+	  }
 	}
       }
     }
   }
+
   return integral;
 }
 

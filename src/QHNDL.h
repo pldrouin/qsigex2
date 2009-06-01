@@ -11,11 +11,11 @@
 template <typename U> class QHNDL: public QHNF<U>
 {
   public:
-    QHNDL(): QHNF<U>(), fFBins(NULL){};
+    QHNDL(): QHNF<U>(), fFBins(NULL){QHN<U>::fIntUseFBinLoop=kFALSE;};
     QHNDL(const QHNDL &qthn);
-    QHNDL(const QHNF<U> &qthn): QHNF<U>(qthn), fFBins(NULL){ComputeNBins();}
-    QHNDL(const QHN<U> &qthn): QHNF<U>(qthn), fFBins(NULL){ComputeNBins();}
-    QHNDL(const Char_t *name, const Char_t *title, Int_t ndims): QHNF<U>(name,title,ndims), fFBins(NULL){}
+    QHNDL(const QHNF<U> &qthn): QHNF<U>(qthn), fFBins(NULL){QHN<U>::fIntUseFBinLoop=kFALSE; ComputeNBins();}
+    QHNDL(const QHN<U> &qthn): QHNF<U>(qthn), fFBins(NULL){QHN<U>::fIntUseFBinLoop=kFALSE; ComputeNBins();}
+    QHNDL(const Char_t *name, const Char_t *title, Int_t ndims): QHNF<U>(name,title,ndims), fFBins(NULL){QHN<U>::fIntUseFBinLoop=kFALSE;}
     QHNDL(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy=0, const Float_t &ylow=0, const Float_t &yhigh=0, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHNF<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh){Init();}
     QHNDL(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t *zbins): QHNF<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins){Init();}
     QHNDL(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHNF<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh){Init();}

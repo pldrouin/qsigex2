@@ -6,7 +6,7 @@ template <typename U> void QHN<U>::Streamer(TBuffer &R__b)
   Int_t i;
 
   if (R__b.IsReading()) {
-    Version_t R__v = R__b.ReadVersion(&R__s, &R__c); if (R__v) { }
+    Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
     QDis::Streamer(R__b);
     R__b >> fNDims;
 
@@ -19,6 +19,7 @@ template <typename U> void QHN<U>::Streamer(TBuffer &R__b)
     ComputeNBins();
     R__b >> fEntries;
     R__b.ReadFastArray(fBinContent,fNBins);
+    if(R__v>1) R__b >> fIntUseFBinLoop;
 
     R__b.CheckByteCount(R__s, R__c, QHN<U>::IsA());
 
@@ -41,6 +42,7 @@ template <typename U> void QHN<U>::Streamer(TBuffer &R__b)
     }
     R__b << fEntries;
     R__b.WriteFastArray(fBinContent,fNBins);
+    R__b << fIntUseFBinLoop;
 
     R__b.SetByteCount(R__c, kTRUE);
   }

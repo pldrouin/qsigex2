@@ -18,7 +18,7 @@
 template <typename U> class QHN: public QDis
 {
   public:
-    QHN(): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0), fTH(NULL){};
+    QHN(): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0), fIntUseFBinLoop(kFALSE), fTH(NULL){};
     QHN(const QHN &qthn);
     QHN(const Char_t* filename, const Char_t* objectname);
     QHN(const Char_t *name, const Char_t *title, const Int_t &ndims);
@@ -158,6 +158,7 @@ template <typename U> class QHN: public QDis
     void GetBinCoords(Long64_t bin, Int_t *coords) const;
     inline virtual const Long64_t& GetFBinCoord(const Long64_t &fbin) const{return fbin;}
     inline virtual void GetFBinCoords(const Long64_t &fbin, Int_t *coords) const{return GetBinCoords(fbin,coords);}
+    const Bool_t& GetIntUseFBinLoop() const {return fIntUseFBinLoop;}
     void GetMeans(Double_t means[], Bool_t width=kTRUE) const;
     inline void InitProcObj(){Reset();}
     Double_t Integral(Int_t const* const* binranges=NULL, const Bool_t *widths=NULL) const;
@@ -209,6 +210,7 @@ template <typename U> class QHN: public QDis
     QHN<U>* SubHist(const char *name, const Int_t &axis0, const Int_t &firstbin0, const Int_t &lastbin0) const{return SubHist(name,&axis0,&firstbin0,&lastbin0,1);}
     QHN<U>* SubHist(const char *name, const Int_t &axis0, const Int_t &firstbin0, const Int_t &lastbin0, const Int_t &axis1, const Int_t &firstbin1, const Int_t &lastbin1) const;
     QHN<U>* SubHist(const char *name, const Int_t &axis0, const Int_t &firstbin0, const Int_t &lastbin0, const Int_t &axis1, const Int_t &firstbin1, const Int_t &lastbin1, const Int_t &axis2, const Int_t &firstbin2, const Int_t &lastbin2) const;
+    void SetIntUseFBinLoop(const Bool_t &intusefbinloop){fIntUseFBinLoop=intusefbinloop;}
     inline void TerminateProcObj(){Normalize();}
   protected:
     virtual QHN<Double_t>* NewD() const{return new QHN<Double_t>;}
@@ -221,9 +223,10 @@ template <typename U> class QHN: public QDis
     Double_t fEntries;
     U *fBinContent; //!
     Long64_t fNBins;
+    Bool_t fIntUseFBinLoop;
     TH1 *fTH;
 
-    ClassDef(QHN,1) //Multidimensional histogram template class optimized for random access
+    ClassDef(QHN,2) //Multidimensional histogram template class optimized for random access
 };
 
 typedef QHN<Double_t> QHN_D;

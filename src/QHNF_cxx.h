@@ -16,6 +16,7 @@ template <typename U> QHNF<U>::QHNF(const QHNF &qthn): QHN<U>(), fZero(qthn.fZer
   memcpy(fBins,qthn.fBins,fNFBins*sizeof(Long64_t));
   QHN<U>::fBinContent=(U*)malloc(fNFBins*sizeof(U));
   memcpy(QHN<U>::fBinContent,qthn.fBinContent,fNFBins*sizeof(U));
+  QHN<U>::fIntUseFBinLoop=kTRUE;
 }
 
 template <typename U> QHNF<U>::QHNF(const QHN<U> &qthn): QHN<U>(), fZero(0), fNFBins(0), fBins(NULL)
@@ -39,6 +40,7 @@ template <typename U> QHNF<U>::QHNF(const QHN<U> &qthn): QHN<U>(), fZero(0), fNF
   }
   fBins=(Long64_t*)realloc(fBins,fNFBins*sizeof(Long64_t));
   QHN<U>::fBinContent=(U*)realloc(QHN<U>::fBinContent,fNFBins*sizeof(U));
+  QHN<U>::fIntUseFBinLoop=kTRUE;
 }
 
 template <typename U> void QHNF<U>::AddBinContent(const Long64_t &bin, const U &w)
@@ -96,6 +98,7 @@ template <typename U> void QHNF<U>::Init()
   for(Int_t i=QHN<U>::fNDims-1; i>=0; --i) QHN<U>::fNBins*=QHN<U>::fAxes[i]->GetNBins()+2;
   QHN<U>::fBinContent=NULL;
   QHN<U>::fEntries=0;
+  QHN<U>::fIntUseFBinLoop=kTRUE;
   QHN<U>::fTH=NULL;
   fNFBins=0;
   fBins=NULL;

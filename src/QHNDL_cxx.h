@@ -7,6 +7,7 @@ template <typename U> QHNDL<U>::QHNDL(const QHNDL &qthn): QHNF<U>(qthn), fFBins(
 {
   fFBins=(Long64_t*)malloc(QHN<U>::fNBins*sizeof(Long64_t));
   memcpy(fFBins,qthn.fFBins,QHN<U>::fNBins*sizeof(Long64_t));
+  QHN<U>::fIntUseFBinLoop=kFALSE;
 }
 
 template <typename U> void QHNDL<U>::AddBinContent(const Long64_t &bin, const U &w)
@@ -157,6 +158,7 @@ template <typename U> void QHNDL<U>::Init()
   fFBins=(Long64_t*)malloc(QHN<U>::fNBins*sizeof(Long64_t));
 
   for(li=QHN<U>::fNBins-1; li>=0; --li) fFBins[li]=-1;
+  QHN<U>::fIntUseFBinLoop=kFALSE;
 }
 
 #include "QHNDL_Dict_cxx.h"

@@ -16,10 +16,10 @@
 template <typename U> class QHNF: public QHN<U>
 {
   public:
-    QHNF(): QHN<U>(), fZero(0), fNFBins(0), fBins(NULL){};
+    QHNF(): QHN<U>(), fZero(0), fNFBins(0), fBins(NULL){QHN<U>::fIntUseFBinLoop=kTRUE;};
     QHNF(const QHNF &qthn);
     QHNF(const QHN<U> &qthn);
-    QHNF(const Char_t *name, const Char_t *title, Int_t ndims): QHN<U>(name,title,ndims), fZero(0), fNFBins(0), fBins(NULL){}
+    QHNF(const Char_t *name, const Char_t *title, Int_t ndims): QHN<U>(name,title,ndims), fZero(0), fNFBins(0), fBins(NULL){QHN<U>::fIntUseFBinLoop=kTRUE;}
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy=0, const Float_t &ylow=0, const Float_t &yhigh=0, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zlow,zhigh,kFALSE), fZero(0){Init();}
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t &ylow, const Float_t &yhigh, const Int_t &nbinsz, const Float_t *zbins): QHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh,nbinsz,zbins,kFALSE), fZero(0){Init();}
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Float_t &xlow, const Float_t &xhigh, const Int_t &nbinsy, const Float_t *ybins, const Int_t &nbinsz=0, const Float_t &zlow=0, const Float_t &zhigh=0): QHN<U>(name,title,nbinsx,xlow,xhigh,nbinsy,ybins,nbinsz,zlow,zhigh,kFALSE), fZero(0){Init();}
@@ -79,7 +79,7 @@ template <typename U> class QHNF: public QHN<U>
     Long64_t fNFBins;
     Long64_t *fBins; //!
 
-    ClassDef(QHNF,1) //Multidimensional histogram template class optimized for memory and iteration over filled bins
+    ClassDef(QHNF,2) //Multidimensional histogram template class optimized for memory and iteration over filled bins
 };
 
 typedef QHNF<Double_t> QHNF_D;
