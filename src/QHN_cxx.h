@@ -588,7 +588,7 @@ template <typename U> void QHN<U>::GetBinCoords(Long64_t bin, Int_t *coords) con
 {
   coords[0]=bin%(fAxes[0]->GetNBins()+2);
 
-  for(Int_t i=1; i<fNDims; i++) {
+  for(Int_t i=1; i<fNDims; ++i) {
     bin=(bin-coords[i-1])/(fAxes[i-1]->GetNBins()+2);
     coords[i]=bin%(fAxes[i]->GetNBins()+2);
   }
@@ -600,15 +600,15 @@ template <typename U> void QHN<U>::GetCorrelationMatrix(TMatrixDSym* covmat, Boo
 
   GetCovarianceMatrix(covmat,width);
 
-  for(i=0; i<fNDims; i++) {
+  for(i=0; i<fNDims; ++i) {
 
-    for(j=i+1; j<fNDims; j++) {
+    for(j=i+1; j<fNDims; ++j) {
       (*covmat)[i][j]=(*covmat)[j][i]=(*covmat)[i][j]/TMath::Sqrt((*covmat)[i][i]*(*covmat)[j][j]);
     }
   }
 
   if(!varianceondiag) {
-    for(i=0; i<fNDims; i++) (*covmat)[i][i]=1;
+    for(i=0; i<fNDims; ++i) (*covmat)[i][i]=1;
   }
 }
 
@@ -630,13 +630,13 @@ template <typename U> void QHN<U>::GetCovarianceMatrix(TMatrixDSym* covmat, Bool
   if(width) {
     memset(vbsaxis,0,fNDims*sizeof(QAxis*)); //Initialize axis pointers to NULL
 
-    for(i=0; i<fNDims; i++) {
+    for(i=0; i<fNDims; ++i) {
       //Add QAxis pointers to vbsaxis for axis having variable bin width
 
       if(fAxes[i]->GetNBins()>1 && fAxes[i]->GetBins()) {
 	vbsaxis[nvbaxes]=fAxes[i];
 	vbaindex[nvbaxes]=i;
-	nvbaxes++;
+	++nvbaxes;
       }
     }
   }
@@ -644,18 +644,18 @@ template <typename U> void QHN<U>::GetCovarianceMatrix(TMatrixDSym* covmat, Bool
   if(width && nvbaxes) {
     Double_t binvol;
 
-    for(li=0; li<nfbins; li++) {
+    for(li=0; li<nfbins; ++li) {
       GetFBinCoords(li,coords);
       binvol=vbsaxis[0]->GetBinWidth(coords[vbaindex[0]]);
 
-      for(i=1; i<nvbaxes; i++) binvol*=vbsaxis[i]->GetBinWidth(coords[vbaindex[i]]);
+      for(i=1; i<nvbaxes; ++i) binvol*=vbsaxis[i]->GetBinWidth(coords[vbaindex[i]]);
       binvol*=fBinContent[li];
       integral+=binvol;
 
-      for(i=0; i<fNDims; i++) {
+      for(i=0; i<fNDims; ++i) {
 	means[i]+=fAxes[i]->GetBinCenter(coords[i])*binvol;
 
-	for(j=i; j<fNDims; j++) {
+	for(j=i; j<fNDims; ++j) {
 	  covs[(2*fNDims-1-i)*i/2+j]+=fAxes[i]->GetBinCenter(coords[i])*fAxes[j]->GetBinCenter(coords[j])*binvol;
 	}
       }
@@ -663,14 +663,14 @@ template <typename U> void QHN<U>::GetCovarianceMatrix(TMatrixDSym* covmat, Bool
 
   } else {
 
-    for(li=0; li<nfbins; li++) {
+    for(li=0; li<nfbins; ++li) {
       GetFBinCoords(li,coords);
       integral+=fBinContent[li];
 
-      for(i=0; i<fNDims; i++) {
+      for(i=0; i<fNDims; ++i) {
 	means[i]+=fAxes[i]->GetBinCenter(coords[i])*fBinContent[li];
 
-	for(j=i; j<fNDims; j++) {
+	for(j=i; j<fNDims; ++j) {
 	  covs[(2*fNDims-1-i)*i/2+j]+=fAxes[i]->GetBinCenter(coords[i])*fAxes[j]->GetBinCenter(coords[j])*fBinContent[li];
 	}
       }
@@ -682,13 +682,13 @@ template <typename U> void QHN<U>::GetCovarianceMatrix(TMatrixDSym* covmat, Bool
 
   if(integral) {
 
-    for(i=0; i<fNDims; i++) {
+    for(i=0; i<fNDims; ++i) {
       means[i]/=integral;
     }
 
-    for(i=0; i<fNDims; i++) {
+    for(i=0; i<fNDims; ++i) {
 
-      for(j=i; j<fNDims; j++) {
+      for(j=i; j<fNDims; ++j) {
 	(*covmat)[i][j]=(*covmat)[j][i]=covs[(2*fNDims-1-i)*i/2+j]/integral-means[i]*means[j];
       }
     }
@@ -716,13 +716,13 @@ template <typename U> void QHN<U>::GetMeans(Double_t means[], Bool_t width) cons
   if(width) {
     memset(vbsaxis,0,fNDims*sizeof(QAxis*)); //Initialize axis pointers to NULL
 
-    for(i=0; i<fNDims; i++) {
+    for(i=0; i<fNDims; ++i) {
       //Add QAxis pointers to vbsaxis for axis having variable bin width
 
       if(fAxes[i]->GetNBins()>1 && fAxes[i]->GetBins()) {
 	vbsaxis[nvbaxes]=fAxes[i];
 	vbaindex[nvbaxes]=i;
-	nvbaxes++;
+	++nvbaxes;
       }
     }
   }
@@ -730,26 +730,26 @@ template <typename U> void QHN<U>::GetMeans(Double_t means[], Bool_t width) cons
   if(width && nvbaxes) {
     Double_t binvol;
 
-    for(li=0; li<nfbins; li++) {
+    for(li=0; li<nfbins; ++li) {
       GetFBinCoords(li,coords);
       binvol=vbsaxis[0]->GetBinWidth(coords[vbaindex[0]]);
 
-      for(i=1; i<nvbaxes; i++) binvol*=vbsaxis[i]->GetBinWidth(coords[vbaindex[i]]);
+      for(i=1; i<nvbaxes; ++i) binvol*=vbsaxis[i]->GetBinWidth(coords[vbaindex[i]]);
       binvol*=fBinContent[li];
       integral+=binvol;
 
-      for(i=0; i<fNDims; i++) {
+      for(i=0; i<fNDims; ++i) {
 	means[i]+=fAxes[i]->GetBinCenter(coords[i])*binvol;
       }
     }
 
   } else {
 
-    for(li=0; li<nfbins; li++) {
+    for(li=0; li<nfbins; ++li) {
       GetFBinCoords(li,coords);
       integral+=fBinContent[li];
 
-      for(i=0; i<fNDims; i++) {
+      for(i=0; i<fNDims; ++i) {
 	means[i]+=fAxes[i]->GetBinCenter(coords[i])*fBinContent[li];
       }
     }
@@ -757,7 +757,7 @@ template <typename U> void QHN<U>::GetMeans(Double_t means[], Bool_t width) cons
 
   if(integral) {
 
-    for(i=0; i<fNDims; i++) {
+    for(i=0; i<fNDims; ++i) {
       means[i]/=integral;
     }
   }
@@ -1040,7 +1040,7 @@ template <typename U> inline Bool_t QHN<U>::IsFBinIncluded(const Long64_t &fbin,
   Int_t coord=bin%(fAxes[0]->GetNBins()+2);
   if(coord<mins[0] || coord>maxs[0]) return kFALSE;
 
-  for(Int_t i=1; i<fNDims; i++) {
+  for(Int_t i=1; i<fNDims; ++i) {
     bin=(bin-coord)/(fAxes[i-1]->GetNBins()+2);
     coord=bin%(fAxes[i]->GetNBins()+2);
     if(coord<mins[i] || coord>maxs[i]) return kFALSE;
@@ -1056,7 +1056,7 @@ template <typename U> QHN<Double_t>* QHN<U>::MarginalPDF(const char *name, const
 
   Int_t i;
 
-  for(i=0; i<naxes; i++) {
+  for(i=0; i<naxes; ++i) {
     if(axes[i]<0 || axes[i]>=fNDims-nfix) {
       fprintf(stderr,"QHN<U>::MarginalPDF: Error: Invalid axis index: %i\n",axes[i]);
       throw 1;
@@ -1067,7 +1067,7 @@ template <typename U> QHN<Double_t>* QHN<U>::MarginalPDF(const char *name, const
   Int_t *aaxes=new Int_t[naaxes];
   memcpy(aaxes,axes,naxes*sizeof(Int_t));
 
-  for(i=0; i<nfix; i++) {
+  for(i=0; i<nfix; ++i) {
     aaxes[naxes+i]=i+fNDims-nfix;
   }
 
@@ -1082,9 +1082,9 @@ template <typename U> QHN<Double_t>* QHN<U>::MarginalPDF(const char *name, const
   //Initialize binranges pointers to NULL
   memset(binranges,0,fNDims*sizeof(Int_t*));
 
-  for(i=0; i<fNDims; i++) widths[i]=kTRUE;
+  for(i=0; i<fNDims; ++i) widths[i]=kTRUE;
 
-  for(i=0; i<naaxes; i++) {
+  for(i=0; i<naaxes; ++i) {
     th->SetAxis(i,fAxes[aaxes[i]]);
     binranges[aaxes[i]]=new Int_t[2];
     widths[aaxes[i]]=kFALSE;
@@ -1094,7 +1094,7 @@ template <typename U> QHN<Double_t>* QHN<U>::MarginalPDF(const char *name, const
   //Loop over bin indices of projection axes
   for(;;) {
 
-    for(i=0; i<naaxes; i++) binranges[aaxes[i]][0]=binranges[aaxes[i]][1]=biniter[i];
+    for(i=0; i<naaxes; ++i) binranges[aaxes[i]][0]=binranges[aaxes[i]][1]=biniter[i];
     //Scale the bin value
     th->SetBinContent(biniter,Integral(binranges,widths));
 
@@ -1119,7 +1119,7 @@ doneloop:
 
   delete[] widths;
 
-  for(i=0; i<naaxes; i++) delete[] binranges[aaxes[i]];
+  for(i=0; i<naaxes; ++i) delete[] binranges[aaxes[i]];
   delete[] binranges;
   delete[] biniter;
   delete[] aaxes;
@@ -1274,7 +1274,7 @@ doneloop:;
 
 	while(*(binranges[fcoord])>nbins[fcoord]){
 	  *(binranges[fcoord]+1)=*(binranges[fcoord])=1;
-	  fcoord++;
+	  ++fcoord;
 
 	  if(fcoord>=fNDims) break;
 	  *(binranges[fcoord]+1)=++*(binranges[fcoord]);
@@ -1388,7 +1388,7 @@ template <typename U> QHN<U>* QHN<U>::Projection(const char *name, const Int_t *
 
   Int_t i,j,l,m;
 
-  for(i=0; i<naxes; i++) {
+  for(i=0; i<naxes; ++i) {
     if(axes[i]<0 || axes[i]>=fNDims) {
       fprintf(stderr,"QHN<U>::Projection: Error: Invalid axis index: %i\n",axes[i]);
       throw 1;
@@ -1397,7 +1397,7 @@ template <typename U> QHN<U>* QHN<U>::Projection(const char *name, const Int_t *
 
   QHN<U> *th=New(name,name,naxes);
 
-  for(i=0; i<naxes; i++) {
+  for(i=0; i<naxes; ++i) {
     th->SetAxis(i,fAxes[axes[i]]);
   }
 
@@ -1407,23 +1407,23 @@ template <typename U> QHN<U>* QHN<U>::Projection(const char *name, const Int_t *
   U dbuf;
   l=0;
 
-  for(i=0; i<fNDims; i++) {
+  for(i=0; i<fNDims; ++i) {
 
     m=0;
-    for(j=0; j<naxes; j++) if(axes[j]==i) m++;
+    for(j=0; j<naxes; ++j) if(axes[j]==i) m++;
     if(!m) {
       indices[l]=i;
-      l++;
+      ++l;
     }
   }
 
-  for(i=0; i<naxes; i++) biniter[axes[i]]=1;
+  for(i=0; i<naxes; ++i) biniter[axes[i]]=1;
 
   //Loop over bin indices of projection axes
   for(;;) {
     dbuf=0;
 
-    for(i=0; i<nsdims; i++) biniter[indices[i]]=1;
+    for(i=0; i<nsdims; ++i) biniter[indices[i]]=1;
 
     for(;;) {
       dbuf+=GetBinContent(GetBin(biniter));
@@ -1446,7 +1446,7 @@ template <typename U> QHN<U>* QHN<U>::Projection(const char *name, const Int_t *
     }
 doneloop1:
 
-    for(i=0; i<naxes; i++) pbiniter[i]=biniter[axes[i]];
+    for(i=0; i<naxes; ++i) pbiniter[i]=biniter[axes[i]];
     th->SetBinContent(pbiniter,dbuf);
 
     if(biniter[axes[0]]<fAxes[axes[0]]->GetNBins()) ++(biniter[axes[0]]);

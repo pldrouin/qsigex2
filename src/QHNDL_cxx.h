@@ -29,7 +29,7 @@ template <typename U> void QHNDL<U>::AddBinContent(const Long64_t &bin, const U 
     if(bidx==QHNF<U>::fNFBins || QHNF<U>::fBins[bidx]!=bin) {
 
       if(w) {
-	QHNF<U>::fNFBins++;
+	++QHNF<U>::fNFBins;
 	QHNF<U>::fBins=(Long64_t*)realloc(QHNF<U>::fBins,QHNF<U>::fNFBins*sizeof(Long64_t));
 	QHN<U>::fBinContent=(U*)realloc(QHN<U>::fBinContent,QHNF<U>::fNFBins*sizeof(U));
 
@@ -104,7 +104,7 @@ template <typename U> void QHNDL<U>::SetBinContent(const Long64_t &bin, const U 
     Long64_t bidx=std::lower_bound(QHNF<U>::fBins, QHNF<U>::fBins+QHNF<U>::fNFBins, bin)-QHNF<U>::fBins;
 
     if(content) {
-      QHNF<U>::fNFBins++;
+      ++QHNF<U>::fNFBins;
       QHNF<U>::fBins=(Long64_t*)realloc(QHNF<U>::fBins,QHNF<U>::fNFBins*sizeof(Long64_t));
       QHN<U>::fBinContent=(U*)realloc(QHN<U>::fBinContent,QHNF<U>::fNFBins*sizeof(U));
 

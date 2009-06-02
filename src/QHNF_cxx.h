@@ -35,7 +35,7 @@ template <typename U> QHNF<U>::QHNF(const QHN<U> &qthn): QHN<U>(), fZero(0), fNF
     if(qthn.GetBinContent(li)) {
       fBins[fNFBins]=li;
       QHN<U>::fBinContent[fNFBins]=qthn.GetBinContent(li);
-      fNFBins++;
+      ++fNFBins;
     }
   }
   fBins=(Long64_t*)realloc(fBins,fNFBins*sizeof(Long64_t));
@@ -57,7 +57,7 @@ template <typename U> void QHNF<U>::AddBinContent(const Long64_t &bin, const U &
   if(bidx==fNFBins || fBins[bidx]!=bin) {
 
     if(w) {
-      fNFBins++;
+      ++fNFBins;
       fBins=(Long64_t*)realloc(fBins,fNFBins*sizeof(Long64_t));
       QHN<U>::fBinContent=(U*)realloc(QHN<U>::fBinContent,fNFBins*sizeof(U));
 
@@ -134,7 +134,7 @@ template <typename U> inline void QHNF<U>::GetFBinCoords(const Long64_t &fbin, I
   Long64_t bin=fBins[fbin];
   coords[0]=bin%(QHN<U>::fAxes[0]->GetNBins()+2);
 
-  for(Int_t i=1; i<QHN<U>::fNDims; i++) {
+  for(Int_t i=1; i<QHN<U>::fNDims; ++i) {
     bin=(bin-coords[i-1])/(QHN<U>::fAxes[i-1]->GetNBins()+2);
     coords[i]=bin%(QHN<U>::fAxes[i]->GetNBins()+2);
   }
@@ -146,7 +146,7 @@ template <typename U> inline Bool_t QHNF<U>::IsFBinIncluded(const Long64_t &fbin
   Int_t coord=bin%(QHN<U>::fAxes[0]->GetNBins()+2);
   if(coord<mins[0] || coord>maxs[0]) return kFALSE;
 
-  for(Int_t i=1; i<QHN<U>::fNDims; i++) {
+  for(Int_t i=1; i<QHN<U>::fNDims; ++i) {
     bin=(bin-coord)/(QHN<U>::fAxes[i-1]->GetNBins()+2);
     coord=bin%(QHN<U>::fAxes[i]->GetNBins()+2);
     if(coord<mins[i] || coord>maxs[i]) return kFALSE;
@@ -188,7 +188,7 @@ template <typename U> const QHNF<U>& QHNF<U>::operator=(const QHN<U> &qthn)
     if(qthn.GetBinContent(li)) {
       fBins[fNFBins]=li;
       QHN<U>::fBinContent[fNFBins]=qthn.GetBinContent(li);
-      fNFBins++;
+      ++fNFBins;
     }
   }
   fBins=(Long64_t*)realloc(fBins,fNFBins*sizeof(Long64_t));
@@ -231,7 +231,7 @@ template <typename U> void QHNF<U>::SetBinContent(const Long64_t &bin, const U &
   if(bidx==fNFBins || fBins[bidx]!=bin) {
 
     if(content) {
-      fNFBins++;
+      ++fNFBins;
       fBins=(Long64_t*)realloc(fBins,fNFBins*sizeof(Long64_t));
       QHN<U>::fBinContent=(U*)realloc(QHN<U>::fBinContent,fNFBins*sizeof(U));
 
