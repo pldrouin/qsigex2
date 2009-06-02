@@ -837,19 +837,26 @@ template <typename U> Double_t QHN<U>::Integral(Int_t const* const* binranges, c
 	  amaxs[i]=maxs[axes[i]];
 	}
 
-	do{
+	for(;;) {
 	  integral+=GetBinContent(j);
-	  ++*(biniter[0]);
 
-	  i=0;
-	  while(*(biniter[i])>amaxs[i]){
-	    *(biniter[i])=amins[i];
-	    ++i;
+	  if(*(biniter[0])<amaxs[0]) ++*(biniter[0]);
+	  else {
 
-	    if(i>=naxes) break;
-	    ++*(biniter[i]);
+	    for(i=0;;) {
+	      *(biniter[i])=amins[i];
+	      ++i;
+
+	      if(i>=naxes) goto doneloop0;
+
+	      if(*(biniter[i])<amaxs[i]) {
+		++*(biniter[i]);
+		break;
+	      }
+	    }
 	  }
-	} while(i<naxes);
+	}
+doneloop0:
 
         delete[] axes;
 	delete[] biniter;
@@ -901,21 +908,28 @@ template <typename U> Double_t QHN<U>::Integral(Int_t const* const* binranges, c
 	    amaxs[i]=maxs[axes[i]];
 	  }
 
-	  do{
+	  for(;;) {
 	    binvol=fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]);
 	    for(i=fNDims-2; i>=0; --i) binvol*=fAxes[i]->GetBinWidth(j[i]);
 	    integral+=GetBinContent(j)*binvol;
-	    ++*(biniter[0]);
 
-	    i=0;
-	    while(*(biniter[i])>amaxs[i]){
-	      *(biniter[i])=amins[i];
-	      ++i;
+	    if(*(biniter[0])<amaxs[0]) ++*(biniter[0]);
+	    else {
 
-	      if(i>=naxes) break;
-	      ++*(biniter[i]);
+	      for(i=0;;) {
+		*(biniter[i])=amins[i];
+		++i;
+
+		if(i>=naxes) goto doneloop1;
+
+		if(*(biniter[i])<amaxs[i]) {
+		  ++*(biniter[i]);
+		  break;
+		}
+	      }
 	    }
-	  } while(i<naxes);
+	  }
+doneloop1:
 
 	  delete[] axes;
 	  delete[] biniter;
@@ -973,21 +987,28 @@ template <typename U> Double_t QHN<U>::Integral(Int_t const* const* binranges, c
 	    amaxs[i]=maxs[axes[i]];
 	  }
 
-	  do{
+	  for(;;) {
 	    binvol=(widths[fNDims-1]?fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]):1);
 	    for(i=fNDims-2; i>=0; --i) binvol*=(widths[i]?fAxes[i]->GetBinWidth(j[i]):1);
 	    integral+=GetBinContent(j)*binvol;
-	    ++*(biniter[0]);
 
-	    i=0;
-	    while(*(biniter[i])>amaxs[i]){
-	      *(biniter[i])=amins[i];
-	      ++i;
+	    if(*(biniter[0])<amaxs[0]) ++*(biniter[0]);
+	    else {
 
-	      if(i>=naxes) break;
-	      ++*(biniter[i]);
+	      for(i=0;;) {
+		*(biniter[i])=amins[i];
+		++i;
+
+		if(i>=naxes) goto doneloop2;
+
+		if(*(biniter[i])<amaxs[i]) {
+		  ++*(biniter[i]);
+		  break;
+		}
+	      }
 	    }
-	  } while(i<naxes);
+	  }
+doneloop2:
 
 	  delete[] axes;
 	  delete[] biniter;
@@ -1071,22 +1092,29 @@ template <typename U> QHN<Double_t>* QHN<U>::MarginalPDF(const char *name, const
   }
 
   //Loop over bin indices of projection axes
-  do{
+  for(;;) {
 
     for(i=0; i<naaxes; i++) binranges[aaxes[i]][0]=binranges[aaxes[i]][1]=biniter[i];
     //Scale the bin value
     th->SetBinContent(biniter,Integral(binranges,widths));
-    biniter[0]++;
 
-    i=0;
-    while(biniter[i]>fAxes[aaxes[i]]->GetNBins()){
-      biniter[i]=1;
-      i++;
+    if(biniter[0]<fAxes[aaxes[0]]->GetNBins()) ++(biniter[0]);
+    else {
 
-      if(i>=naaxes) break;
-      biniter[i]++;
+      for(i=0;;) {
+	biniter[i]=1;
+	++i;
+
+	if(i>=naaxes) goto doneloop;
+
+	if(biniter[i]<fAxes[aaxes[i]]->GetNBins()) {
+	  ++(biniter[i]);
+	  break;
+	}
+      }
     }
-  } while(i<naaxes);
+  }
+doneloop:
   th->fEntries=fEntries;
 
   delete[] widths;
@@ -1218,20 +1246,27 @@ template <typename U> void QHN<U>::Normalize(Double_t* integral)
 	  }
 
 	  //Loop over bin indices of non-fixed dimensions
-	  do{
+	  for(;;) {
 	    //Scale the bin value
 	    ScaleBinContent(biniter, 1./scutintbuf);
-	    biniter[0]++;
 
-	    coord=0;
-	    while(biniter[coord]>nbins[coord]){
-	      biniter[coord]=1;
-	      coord++;
+	    if(biniter[0]<nbins[0]) ++(biniter[0]);
+	    else {
 
-	      if(coord>=fNDims-nfix) break;
-	      biniter[coord]++;
+	      for(coord=0;;) {
+		biniter[coord]=1;
+		++coord;
+
+		if(i>=fNDims-nfix) goto doneloop;
+
+		if(biniter[coord]<nbins[coord]) {
+		  ++(biniter[coord]);
+		  break;
+		}
+	      }
 	    }
-	  } while(coord<fNDims-nfix);
+	  }
+doneloop:;
 	}
 	//Set fcoord to the index of the first fixed dimension
 	fcoord=fNDims-nfix;
@@ -1385,41 +1420,52 @@ template <typename U> QHN<U>* QHN<U>::Projection(const char *name, const Int_t *
   for(i=0; i<naxes; i++) biniter[axes[i]]=1;
 
   //Loop over bin indices of projection axes
-  do{
+  for(;;) {
     dbuf=0;
 
     for(i=0; i<nsdims; i++) biniter[indices[i]]=1;
 
-    do{
+    for(;;) {
       dbuf+=GetBinContent(GetBin(biniter));
-      biniter[indices[0]]++;
-      
-      i=0;
-      while(biniter[indices[i]]>fAxes[indices[i]]->GetNBins()){
-	biniter[indices[i]]=1;
-	i++;
 
-	if(i>=nsdims) break;
-	biniter[indices[i]]++;
+      if(biniter[indices[0]]<fAxes[indices[0]]->GetNBins()) ++(biniter[indices[0]]);
+      else {
+
+	for(i=0;;) {
+	  biniter[indices[i]]=1;
+	  ++i;
+
+	  if(i>=nsdims) goto doneloop1;
+
+	  if(biniter[indices[i]]<fAxes[indices[i]]->GetNBins()) {
+	    ++(biniter[indices[i]]);
+	    break;
+	  }
+	}
       }
-
-    } while(i<nsdims);
+    }
+doneloop1:
 
     for(i=0; i<naxes; i++) pbiniter[i]=biniter[axes[i]];
     th->SetBinContent(pbiniter,dbuf);
 
-    biniter[axes[0]]++;
+    if(biniter[axes[0]]<fAxes[axes[0]]->GetNBins()) ++(biniter[axes[0]]);
+    else {
 
-    i=0;
-    while(biniter[axes[i]]>fAxes[axes[i]]->GetNBins()){
-      biniter[axes[i]]=1;
-      i++;
+      for(i=0;;) {
+	biniter[axes[i]]=1;
+	++i;
 
-      if(i>=naxes) break;
-      biniter[axes[i]]++;
+	if(i>=naxes) goto doneloop0;
+
+	if(biniter[axes[i]]<fAxes[axes[i]]->GetNBins()) {
+	  ++(biniter[axes[i]]);
+	  break;
+	}
+      }
     }
-
-  } while(i<naxes);
+  }
+doneloop0:
 
   delete[] indices;
   delete[] biniter;

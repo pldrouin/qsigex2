@@ -33,7 +33,7 @@ Int_t QTypes::GetTypeID(const Char_t *atype)
   } else if(!strcmp(atype,"i") || !strcmp(atype,"UInt_t")) {
     type=kUInt;
 
-  } else if(!strcmp(atype,"0") || !strcmp(atype,"Bool_t")) {
+  } else if(!strcmp(atype,"O") || !strcmp(atype,"Bool_t")) {
     type=kBool;
 
   } else if(!strcmp(atype,"L") || !strcmp(atype,"Long64_t")) {
@@ -137,7 +137,7 @@ const Char_t* QTypes::GetTypeSName(const Int_t &type)
     case kUInt:
       return "i";
     case kBool:
-      return "0";
+      return "O";
     case kLong64:
       return "L";
     case kULong64:
