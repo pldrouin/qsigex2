@@ -16,7 +16,7 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
   TDirectory *dbuf;
   QList<TString> donbuf=QFileUtils::DecodeObjName(treelocation);
   QList<TString> dpn;
-  TString bname;
+  TString bname, namecycle;
   Int_t btype=GetNameTypeID(adesc,&bname);
   Int_t i;
   TTree *tbuf;
@@ -87,6 +87,22 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 	//Create the output tree
 	if(ttreeoutput) tbuf=new TTree(dpn.GetLast(),dpn.GetLast());
 	else tbuf=new QProcTree(dpn.GetLast(),dpn.GetLast());
+
+      } else {
+	//If the tree already existed, look for other cycles and delete them
+	TKey *key;
+	TIter nextkey(gDirectory->GetListOfKeys());
+
+	while ((key =(TKey*)nextkey())) {
+
+	  if(!strcmp(key->GetName(),dpn.GetLast())) {
+	    namecycle=key->GetName();
+	    namecycle=namecycle+";";
+	    namecycle+=key->GetCycle();
+	    gDirectory->Delete(namecycle);
+	  }
+	}
+
       }
       dpn.Clear();
 
