@@ -325,7 +325,7 @@ template <typename U> QList<Int_t> QList<U>::Find(const U* us, const Int_t &nele
   PRINTF10(this,"\tInt_t QList<",typeid(U).name(),">::Find(const U* us, Int_t nelements<",nelements,">,Int_t maxmatches<",maxmatches,">, const Int_t &fromindex<",fromindex,">) const\n")
 
   Int_t counter=0;
-  Int_t pos=fromindex;
+  Int_t pos=(fromindex<0?0:fromindex);
   Int_t matches=0;
   QList<Int_t> qlistindexes;
 
@@ -386,7 +386,7 @@ template <typename U> Int_t QList<U>::FindFirst(const U* us, const Int_t &neleme
   PRINTF8(this,"\tInt_t QList<",typeid(U).name(),">::Find(const U* us, Int_t nelements<",nelements,">, const Int_t &fromindex<",fromindex,">) const\n")
 
   Int_t counter=0;
-  Int_t pos=fromindex;
+  Int_t pos=(fromindex<0?0:fromindex);
   while(pos<=fNElements-nelements && pos+counter<fNElements){
     if(fUArray[pos+counter]==us[counter]){
       ++counter;
