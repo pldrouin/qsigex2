@@ -291,29 +291,29 @@ template <typename U> U* QList<U>::CloneArray() const
   return newuarray;
 }
 
-template <typename U> QList<Int_t> QList<U>::Find(const QList<U>& qlist, const Int_t &maxmatches) const
+template <typename U> QList<Int_t> QList<U>::Find(const QList<U>& qlist, const Int_t &maxmatches, const Int_t &fromindex) const
 {
   // This function browses the QList<U> U list in a similar manner to the Del member function with
   // the same arguments. However, instead of deleting list parts and returning the number of
   // deletions, it returns a QList<Int_t> containing the matching indexes.
 
-  PRINTF6(this,"\tInt_t QList<",typeid(U).name(),">::Find(const QList<U>& qlist,Int_t maxmatches<",maxmatches,">) const\n")
+  PRINTF8(this,"\tInt_t QList<",typeid(U).name(),">::Find(const QList<U>& qlist,Int_t maxmatches<",maxmatches,">, const Int_t &fromindex<",fromindex,">) const\n")
 
-  return Find(qlist.fUArray,qlist.fNElements,maxmatches);
+  return Find(qlist.fUArray,qlist.fNElements,maxmatches,fromindex);
 }
 
-template <typename U> QList<Int_t> QList<U>::Find(const U& u, const Int_t &maxmatches) const
+template <typename U> QList<Int_t> QList<U>::Find(const U& u, const Int_t &maxmatches, const Int_t &fromindex) const
 {
   // This function browses the QList<U> U list in a similar manner to the Del member function with
   // the same arguments. However, instead of deleting list parts and returning the number of
   // deletions, it returns a QList<Int_t> containing the matching indexes.
 
-  PRINTF6(this,"\tInt_t QList<",typeid(U).name(),">::Find(const U& u,Int_t maxmatches<",maxmatches,">) const\n")
+  PRINTF8(this,"\tInt_t QList<",typeid(U).name(),">::Find(const U& u,Int_t maxmatches<",maxmatches,">, const Int_t &fromindex<",fromindex,">) const\n")
 
-  return Find(&u,1,maxmatches);
+  return Find(&u,1,maxmatches,fromindex);
 }
 
-template <typename U> QList<Int_t> QList<U>::Find(const U* us, const Int_t &nelements, const Int_t &maxmatches) const
+template <typename U> QList<Int_t> QList<U>::Find(const U* us, const Int_t &nelements, const Int_t &maxmatches, const Int_t &fromindex) const
 {
   // This function browses the QList<U> U list in a similar manner to the Del member function with
   // the same arguments. However, instead of deleting list parts and returning the number of
@@ -322,10 +322,10 @@ template <typename U> QList<Int_t> QList<U>::Find(const U* us, const Int_t &nele
   // The implementation of this function is similar to the one of the corresponding Del funcion,
   // but this code has been chosen for an optimisation reason.
 
-  PRINTF8(this,"\tInt_t QList<",typeid(U).name(),">::Find(const U* us, Int_t nelements<",nelements,">,Int_t maxmatches<",maxmatches,">) const\n")
+  PRINTF10(this,"\tInt_t QList<",typeid(U).name(),">::Find(const U* us, Int_t nelements<",nelements,">,Int_t maxmatches<",maxmatches,">, const Int_t &fromindex<",fromindex,">) const\n")
 
   Int_t counter=0;
-  Int_t pos=0;
+  Int_t pos=fromindex;
   Int_t matches=0;
   QList<Int_t> qlistindexes;
 
@@ -349,31 +349,31 @@ template <typename U> QList<Int_t> QList<U>::Find(const U* us, const Int_t &nele
   return qlistindexes;
 }
 
-template <typename U> Int_t QList<U>::FindFirst(const QList<U>& qlist) const
+template <typename U> Int_t QList<U>::FindFirst(const QList<U>& qlist, const Int_t &fromindex) const
 {
   // This function browses the QList<U> U list in a similar manner to the Del member function with
   // the same arguments. However, instead of deleting list parts and returning the number of
   // deletions, it returns an Int_t containing the first matching index. -1 is returned if no match
   // is found.
 
-  PRINTF4(this,"\tInt_t QList<",typeid(U).name(),">::Find(const QList<U>& qlist) const\n")
+  PRINTF6(this,"\tInt_t QList<",typeid(U).name(),">::Find(const QList<U>& qlist, const Int_t &fromindex<",fromindex,">) const\n")
 
-  return FindFirst(qlist.fUArray,qlist.fNElements);
+  return FindFirst(qlist.fUArray,qlist.fNElements,fromindex);
 }
 
-template <typename U> Int_t QList<U>::FindFirst(const U& u) const
+template <typename U> Int_t QList<U>::FindFirst(const U& u, const Int_t &fromindex) const
 {
   // This function browses the QList<U> U list in a similar manner to the Del member function with
   // the same arguments. However, instead of deleting list parts and returning the number of
   // deletions, it returns an Int_t containing the firsdt matching index. -1 is returned if no match
   // is found.
 
-  PRINTF4(this,"\tInt_t QList<",typeid(U).name(),">::Find(const U& u) const\n")
+  PRINTF6(this,"\tInt_t QList<",typeid(U).name(),">::Find(const U& u, const Int_t &fromindex<",fromindex,">) const\n")
 
-  return FindFirst(&u,1);
+  return FindFirst(&u,1,fromindex);
 }
 
-template <typename U> Int_t QList<U>::FindFirst(const U* us, const Int_t &nelements) const
+template <typename U> Int_t QList<U>::FindFirst(const U* us, const Int_t &nelements, const Int_t &fromindex) const
 {
   // This function browses the QList<U> U list in a similar manner to the Del member function with
   // the same arguments. However, instead of deleting list parts and returning the number of
@@ -383,10 +383,10 @@ template <typename U> Int_t QList<U>::FindFirst(const U* us, const Int_t &neleme
   // The implementation of this function is similar to the one of the corresponding Del funcion,
   // but this code has been chosen for an optimisation reason.
 
-  PRINTF6(this,"\tInt_t QList<",typeid(U).name(),">::Find(const U* us, Int_t nelements<",nelements,">) const\n")
+  PRINTF8(this,"\tInt_t QList<",typeid(U).name(),">::Find(const U* us, Int_t nelements<",nelements,">, const Int_t &fromindex<",fromindex,">) const\n")
 
   Int_t counter=0;
-  Int_t pos=0;
+  Int_t pos=fromindex;
   while(pos<=fNElements-nelements && pos+counter<fNElements){
     if(fUArray[pos+counter]==us[counter]){
       ++counter;

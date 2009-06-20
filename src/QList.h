@@ -90,12 +90,12 @@ template <typename U> class QList: public TObject
   U* GetArray() const{return fUArray;}
   U& GetLast() const;
   
-  QList<Int_t> Find(const QList<U>& qlist, const Int_t &maxmatches=0) const;
-  QList<Int_t> Find(const U& u, const Int_t &maxmatches=0) const;
-  QList<Int_t> Find(const U* us, const Int_t &nelements, const Int_t &maxmatches=0) const;
-  Int_t FindFirst(const QList<U>& qlist) const;
-  Int_t FindFirst(const U& u) const;
-  Int_t FindFirst(const U* us, const Int_t &nelements) const;
+  QList<Int_t> Find(const QList<U>& qlist, const Int_t &maxmatches=0, const Int_t &fromindex=0) const;
+  QList<Int_t> Find(const U& u, const Int_t &maxmatches=0, const Int_t &fromindex=0) const;
+  QList<Int_t> Find(const U* us, const Int_t &nelements, const Int_t &maxmatches=0, const Int_t &fromindex=0) const;
+  Int_t FindFirst(const QList<U>& qlist, const Int_t &fromindex=0) const;
+  Int_t FindFirst(const U& u, const Int_t &fromindex=0) const;
+  Int_t FindFirst(const U* us, const Int_t &nelements, const Int_t &fromindex=0) const;
 
   template<typename V> friend Bool_t operator==(const QList<V>& lhs,const QList<V>& rhs);
   template<typename V> friend Bool_t operator!=(const QList<V>& lhs,const QList<V>& rhs);
