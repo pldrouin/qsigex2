@@ -301,7 +301,7 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
   if(init) Init();
 }
 
-template <typename U> void QHN<U>::Add(const QHN<U> *qhn, const Double_t &c)
+template <typename U> void QHN<U>::Add(const QHN<U> *qhn, const U &c)
 {
   if(qhn->GetNBins()!=GetNBins()) {
     fprintf(stderr,"QHN::Add: Error: The number of bins in the added histogram does not match the number of bins in the current histogram\n");

@@ -41,6 +41,7 @@ template <typename U> class QHN: public QDis
     QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins, const Bool_t &init=kTRUE);
 
     virtual ~QHN(){Clear();}
+    void Add(const QHN<U> *qhn, const U &c=1);
     inline virtual void AddBinContent(const Long64_t &bin, const U &w=1){
 #ifndef QSFAST
       if(bin<0 || bin>=fNBins) {
@@ -50,7 +51,6 @@ template <typename U> class QHN: public QDis
 #endif
       fBinContent[bin]+=w; fEntries+=w;
     }
-    void Add(const QHN<U> *qhn, const Double_t &c=1);
     inline void AddBinContent(const Int_t *coords, const U &w=1){AddBinContent(GetBin(coords),w);}
     const Double_t& AddEntries(const Double_t &nentries=1){return (fEntries+=nentries);}
     inline virtual void AddFBinContent(const Long64_t &fbin, const U &w=1){AddBinContent(fbin,w);}
