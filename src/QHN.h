@@ -50,12 +50,14 @@ template <typename U> class QHN: public QDis
 #endif
       fBinContent[bin]+=w; fEntries+=w;
     }
+    void Add(const QHN<U> *qhn, const Double_t &c=1);
     inline void AddBinContent(const Int_t *coords, const U &w=1){AddBinContent(GetBin(coords),w);}
     const Double_t& AddEntries(const Double_t &nentries=1){return (fEntries+=nentries);}
     inline virtual void AddFBinContent(const Long64_t &fbin, const U &w=1){AddBinContent(fbin,w);}
     virtual void Clear(Option_t* option="");
     virtual TObject* Clone(const char* newname = NULL) const{QHN<U>* ret=new QHN(*this); if(newname) ret->SetName(newname); return ret;}
     QDis* CloneQDis() const{return new QHN<U>(*this);}
+    void Divide(const QHN<U> *qhn);
     void Draw(Option_t *option=""){if(fNDims<4) const_cast<TH1&>(GetTH()).Draw(option);}
     inline const U& Eval(const Double_t &x0) const{return GetBinContent(FindBin(x0));}
     inline const U& Eval(const Double_t &x0, const Double_t &x1) const{return GetBinContent(FindBin(x0,x1));}
@@ -166,6 +168,7 @@ template <typename U> class QHN: public QDis
     QHN<Double_t>* MarginalPDF(const char *name, const Int_t &axis0) const{return MarginalPDF(name,&axis0,1);}
     QHN<Double_t>* MarginalPDF(const char *name, const Int_t &axis0, const Int_t &axis1) const;
     QHN<Double_t>* MarginalPDF(const char *name, const Int_t &axis0, const Int_t &axis1, const Int_t &axis2) const;
+    void Multiply(const QHN<U> *qhn);
     virtual QHN<U>* New() const{return new QHN<U>;}
     virtual QHN<U>* New(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHN<U>(name,title,ndims);}
     void Normalize(Double_t* integral=NULL);

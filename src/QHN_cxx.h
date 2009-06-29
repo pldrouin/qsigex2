@@ -301,6 +301,20 @@ template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const
   if(init) Init();
 }
 
+template <typename U> void QHN<U>::Add(const QHN<U> *qhn, const Double_t &c)
+{
+  if(qhn->GetNBins()!=GetNBins()) {
+    fprintf(stderr,"QHN::Add: Error: The number of bins in the added histogram does not match the number of bins in the current histogram\n");
+    throw 1;
+  }
+
+  Long64_t li;
+
+  for(li=qhn->GetNFbins()-1; li>=0; --li) {
+    AddBinContent(GetFBinCoord(li),qhn->GetFBinContent(li)*c);
+  }
+}
+
 template <typename U> void QHN<U>::Clear(Option_t* option)
 {
   for(Int_t i=fNDims-1; i>=0; --i) {
@@ -330,6 +344,20 @@ template <typename U> void QHN<U>::ComputeNBins()
 
   if(fBinContent) free(fBinContent);
   fBinContent=(U*)malloc(fNBins*sizeof(U));
+}
+
+template <typename U> void QHN<U>::Divide(const QHN<U> *qhn)
+{
+  if(qhn->GetNBins()!=GetNBins()) {
+    fprintf(stderr,"QHN::Divide: Error: The number of bins in the added histogram does not match the number of bins in the current histogram\n");
+    throw 1;
+  }
+
+  Long64_t li;
+
+  for(li=qhn->GetNFbins()-1; li>=0; --li) {
+    ScaleBinContent(GetFBinCoord(li),qhn->GetFBinContent(li)?1/qhn->GetFBinContent(li):0);
+  }
 }
 
 template <typename U> void QHN<U>::Init()
@@ -1137,6 +1165,20 @@ template <typename U> QHN<Double_t>* QHN<U>::MarginalPDF(const char *name, const
 {
   const Int_t axes[]={axis0,axis1,axis2};
   return MarginalPDF(name,axes,3);
+}
+
+template <typename U> void QHN<U>::Multiply(const QHN<U> *qhn)
+{
+  if(qhn->GetNBins()!=GetNBins()) {
+    fprintf(stderr,"QHN::Multiply: Error: The number of bins in the added histogram does not match the number of bins in the current histogram\n");
+    throw 1;
+  }
+
+  Long64_t li;
+
+  for(li=qhn->GetNFbins()-1; li>=0; --li) {
+    ScaleBinContent(GetFBinCoord(li),1*qhn->GetFBinContent(li));
+  }
 }
 
 template <typename U> void QHN<U>::Normalize(Double_t* integral)
