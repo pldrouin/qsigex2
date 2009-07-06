@@ -109,13 +109,13 @@ void QProcList::PrintAnalysisResults() const
   }
 }
 
-void QProcList::PrintProcesses(const UInt_t &level) const
+void QProcList::PrintProcesses(const UInt_t &level, const Bool_t &printdeps) const
 {
   Int_t i;
 
   for(i=0; i<fQPL->Count(); i++) {
     printf("%*s%03i QProcessor '%s'\n",level*3,"",i,((QProcessor*)(*fQPL)[i])->GetName());
-    ((QProcessor*)(*fQPL)[i])->PrintProcesses(level+1);
+    ((QProcessor*)(*fQPL)[i])->PrintProcesses(level+1,printdeps);
   }
 }
 

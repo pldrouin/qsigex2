@@ -42,7 +42,7 @@ class QArrayProcessor: public QStdProcessor
     const QArrayProcessor& operator=(const QArrayProcessor &rhs);
 
     void PrintAnalysisResults() const;
-    void PrintProcesses(const UInt_t &level=0) const;
+    void PrintProcesses(const UInt_t &level=0, const Bool_t &printdeps=kTRUE) const;
 
     void TerminateProcess();
 

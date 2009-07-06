@@ -407,15 +407,42 @@ void QProcObjProcessor::PrintAnalysisResults() const
   }
 }
 
-void QProcObjProcessor::PrintProcesses(const UInt_t &level) const
+void QProcObjProcessor::PrintProcesses(const UInt_t &level, const Bool_t &printdeps) const
 {
-  Int_t i;
+  Int_t i,j;
   Int_t nprocs=fProcs->Count();
   QNamedProc *proc;
+  QMask mask;
+
+  if(printdeps) {
+
+    printf("\n%*sParameters:\n",level*3,"");
+    for(j=0; j<GetNParams(); j++) {
+      printf("%*s%3i:\t%s\n",level*3,"",j,GetParamName(j));
+    }
+
+    printf("\n%*sInput Objects:\n",level*3,"");
+    for(j=0; j<fIObjects->Count(); j++) {
+      printf("%*s%3i ",level*3,"",j);
+      if(dynamic_cast<TObject*>((*fIObjects)[j])) printf("%s (%p)\n",dynamic_cast<TObject*>((*fIObjects)[j])->GetName(),(*fIObjects)[j]);
+      else printf("%p\n",(*fIObjects)[j]);
+    }
+  }
+  printf("\n");
 
   for(i=0; i<nprocs; i++) {
     proc=&((*fProcs)[i]);
     printf("%*s%03i Object process '%s'\n",level*3,"",i,proc->GetName());
+
+    if(printdeps) {
+      printf("%*sP: ",level*3+4,"");
+      (*fProcsParDepends)[i].Print();
+
+      mask.Clear();
+      for(j=0; j<fIObjects->Count(); j++) if((*fObjsPDepends)[j].GetBit(i)) mask.SetBit(j,kTRUE);
+      printf("%*sIO: ",level*3+4,"");
+      mask.Print();
+    }
   }
 }
 

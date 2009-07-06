@@ -26,7 +26,7 @@ class QProcList: public QProcessor
     void InitProcess(Bool_t allocateparammem=kTRUE);
 
     void PrintAnalysisResults() const;
-    void PrintProcesses(const UInt_t &level=0) const;
+    void PrintProcesses(const UInt_t &level=0, const Bool_t &printdeps=kTRUE) const;
 
     const QProcList& operator=(const QProcList &rhs);
     QProcessor& operator[](const Int_t &index) const{return *((QProcessor*)(*fQPL)[index]);}

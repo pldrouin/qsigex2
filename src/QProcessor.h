@@ -46,7 +46,7 @@ class QProcessor: public TNamed
     const QProcessor& operator=(const QProcessor &rhs);
 
     virtual void PrintAnalysisResults() const=0;
-    virtual void PrintProcesses(const UInt_t &level=0) const=0;
+    virtual void PrintProcesses(const UInt_t &level=0, const Bool_t &printdeps=kTRUE) const=0;
 
     static void SetDefVerbosity(const UInt_t &verbosity=0){fDefVerbosity=verbosity;}
 
