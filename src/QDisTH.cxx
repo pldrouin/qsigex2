@@ -627,7 +627,7 @@ QDisTH* QDisTH::MarginalPDF(const char *name, const Int_t xaxis, const Int_t yax
   return th;
 }
 
-void QDisTH::Normalize(Double_t* integral)
+void QDisTH::Normalize(Double_t* integral, Bool_t reverse)
 {
   //This function normalizes the PDF according to the normalization
   //flags sets by SetNormFlags. This
@@ -636,7 +636,7 @@ void QDisTH::Normalize(Double_t* integral)
 
   PRINTF4(this,"\tvoid QDisTH::Normalize(Double_t* integral<",integral,">)\n")
 
-  if(!(fNormFlags&kNoNorm)) {
+  if(!fNormFlags!=kNoNorm) {
     Double_t cutintbuf;         //Buffer for integral value(s)
     Int_t nfix=fNFixedCoords;   //Number of fixed coordinates for a conditional PDF
     Double_t nentries=fTH->GetEntries();
@@ -653,7 +653,7 @@ void QDisTH::Normalize(Double_t* integral)
     Int_t biniter[3];                //Integers used as indices for iteration
     Int_t bin;                       //bin index buffer
     Int_t i;
-    Double_t scale=fTH->GetEntries(); //scaling factor used for normalization of histograms filled with number of events
+    Double_t scale=(fNormFlags==kBinWidthNormOnly?1:fTH->GetEntries()); //scaling factor used for normalization of histograms filled with number of events
 
     //Get the number of bins for each dimension
     nbins[0]=fTH->GetNbinsX();
@@ -661,7 +661,7 @@ void QDisTH::Normalize(Double_t* integral)
     nbins[2]=(dim>2 ? fTH->GetNbinsZ() : 1);
 
     //Normalization of histograms with variable size for which the bin content corresponds to a number of events
-    if(fNormFlags&(kEventsFilled|kVarBinSizeEventsFilled)){
+    if(fNormFlags&(kEventsFilled|kVarBinSizeEventsFilled|kBinWidthNormOnly)){
       TAxis *vbsaxis[3];                  //array of axis using variable bin width
       Double_t binvol, binwidth2;         //buffer for variable bin width/area/volume
       memset(vbsaxis,0,3*sizeof(TAxis*)); //Initialize axis pointers to NULL
@@ -677,18 +677,39 @@ void QDisTH::Normalize(Double_t* integral)
 
       if((vbsaxis[0] || vbsaxis[1] || vbsaxis[2]) && !(fNormFlags&kNoBinWidthNorm)) {
 
-	//Loop over all bins
-	for(biniter[2]=1;biniter[2]<=nbins[2];biniter[2]++){
-	  binwidth2=(vbsaxis[2]?vbsaxis[2]->GetBinWidth(biniter[2]):1);
+	if(!reverse) {
 
-	  for(biniter[1]=1;biniter[1]<=nbins[1];biniter[1]++){
-	    binvol=(vbsaxis[1]?binwidth2*vbsaxis[1]->GetBinWidth(biniter[1]):binwidth2);
+	  //Loop over all bins
+	  for(biniter[2]=1;biniter[2]<=nbins[2];biniter[2]++){
+	    binwidth2=(vbsaxis[2]?vbsaxis[2]->GetBinWidth(biniter[2]):1);
 
-	    for(biniter[0]=1;biniter[0]<=nbins[0];biniter[0]++){
-	      //Get the bin index
-	      bin=fTH->GetBin(biniter[0],biniter[1],biniter[2]);
-	      //Scale the bin value
-	      fTH->SetBinContent(bin,fTH->GetBinContent(bin)/(vbsaxis[0]?binvol*vbsaxis[0]->GetBinWidth(biniter[0]):binvol));
+	    for(biniter[1]=1;biniter[1]<=nbins[1];biniter[1]++){
+	      binvol=(vbsaxis[1]?binwidth2*vbsaxis[1]->GetBinWidth(biniter[1]):binwidth2);
+
+	      for(biniter[0]=1;biniter[0]<=nbins[0];biniter[0]++){
+		//Get the bin index
+		bin=fTH->GetBin(biniter[0],biniter[1],biniter[2]);
+		//Scale the bin value
+		fTH->SetBinContent(bin,fTH->GetBinContent(bin)/(vbsaxis[0]?binvol*vbsaxis[0]->GetBinWidth(biniter[0]):binvol));
+	      }
+	    }
+	  }
+
+	} else {
+
+	  //Loop over all bins
+	  for(biniter[2]=1;biniter[2]<=nbins[2];biniter[2]++){
+	    binwidth2=(vbsaxis[2]?vbsaxis[2]->GetBinWidth(biniter[2]):1);
+
+	    for(biniter[1]=1;biniter[1]<=nbins[1];biniter[1]++){
+	      binvol=(vbsaxis[1]?binwidth2*vbsaxis[1]->GetBinWidth(biniter[1]):binwidth2);
+
+	      for(biniter[0]=1;biniter[0]<=nbins[0];biniter[0]++){
+		//Get the bin index
+		bin=fTH->GetBin(biniter[0],biniter[1],biniter[2]);
+		//Scale the bin value
+		fTH->SetBinContent(bin,fTH->GetBinContent(bin)*(vbsaxis[0]?binvol*vbsaxis[0]->GetBinWidth(biniter[0]):binvol));
+	      }
 	    }
 	  }
 	}
@@ -745,23 +766,46 @@ void QDisTH::Normalize(Double_t* integral)
 	    biniter[coord]=*(binranges[coord]);
 	  }
 
-	  //Loop over bin indices of non-fixed dimensions
-	  do{
-	    //Get the bin index
-	    bin=fTH->GetBin(biniter[0],biniter[1],biniter[2]);
-	    //Scale the bin value
-	    fTH->SetBinContent(bin,fTH->GetBinContent(bin)/scutintbuf);
-	    biniter[0]++;
+	  if(!reverse) {
 
-	    coord=0;
-	    while(biniter[coord]>nbins[coord]){
-	      biniter[coord]=1;
-	      coord++;
+	    //Loop over bin indices of non-fixed dimensions
+	    do{
+	      //Get the bin index
+	      bin=fTH->GetBin(biniter[0],biniter[1],biniter[2]);
+	      //Scale the bin value
+	      fTH->SetBinContent(bin,fTH->GetBinContent(bin)/scutintbuf);
+	      biniter[0]++;
 
-	      if(coord>=dim-nfix) break;
-	      biniter[coord]++;
-	    }
-	  } while(coord<dim-nfix);
+	      coord=0;
+	      while(biniter[coord]>nbins[coord]){
+		biniter[coord]=1;
+		coord++;
+
+		if(coord>=dim-nfix) break;
+		biniter[coord]++;
+	      }
+	    } while(coord<dim-nfix);
+
+	  } else {
+
+	    //Loop over bin indices of non-fixed dimensions
+	    do{
+	      //Get the bin index
+	      bin=fTH->GetBin(biniter[0],biniter[1],biniter[2]);
+	      //Scale the bin value
+	      fTH->SetBinContent(bin,fTH->GetBinContent(bin)*scutintbuf);
+	      biniter[0]++;
+
+	      coord=0;
+	      while(biniter[coord]>nbins[coord]){
+		biniter[coord]=1;
+		coord++;
+
+		if(coord>=dim-nfix) break;
+		biniter[coord]++;
+	      }
+	    } while(coord<dim-nfix);
+	  }
 	}
 	//Set fcoord to the index of the first fixed dimension
 	fcoord=dim-nfix;
@@ -785,7 +829,7 @@ void QDisTH::Normalize(Double_t* integral)
       //If histogram has not to be normalized as a conditional PDF
     } else {
 
-      if(fNormFlags&kEventsFilled) {
+      if(fNormFlags&(kEventsFilled|kBinWidthNormOnly)) {
 	cutintbuf=scale;
 
       } else {
@@ -794,7 +838,10 @@ void QDisTH::Normalize(Double_t* integral)
       }
 
       //If the integral value is not 0, normalize the PDF
-      if (cutintbuf) fTH->Scale(1/cutintbuf);
+      if (cutintbuf) {
+	if(!reverse) fTH->Scale(1/cutintbuf);
+	else fTH->Scale(cutintbuf);
+      }
     }
     fTH->SetEntries(nentries);
 

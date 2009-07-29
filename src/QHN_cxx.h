@@ -1181,14 +1181,14 @@ template <typename U> void QHN<U>::Multiply(const QHN<U> *qhn)
   }
 }
 
-template <typename U> void QHN<U>::Normalize(Double_t* integral)
+template <typename U> void QHN<U>::Normalize(Double_t* integral, Bool_t reverse)
 {
   //This function normalizes the PDF according to the normalization
   //flags sets by SetNormFlags. This
   //string is a standard ROOT selection expression that contains x
   //and/or y and/or z variables.
 
-  if(!(fNormFlags&kNoNorm)) {
+  if(fNormFlags!=kNoNorm) {
     Double_t cutintbuf;         //Buffer for integral value(s)
     Int_t nfix=fNFixedCoords;   //Number of fixed coordinates for a conditional PDF
     Bool_t *widths=NULL;
@@ -1202,13 +1202,13 @@ template <typename U> void QHN<U>::Normalize(Double_t* integral)
     Int_t *nbins=new Int_t[fNDims];     //Number of bins for each dimension
     Int_t *biniter=new Int_t[fNDims];   //Integers used as indices for iteration
     Int_t i;
-    Double_t scale=fEntries; //scaling factor used for normalization of histograms filled with number of events
+    Double_t scale=(fNormFlags==kBinWidthNormOnly?1:fEntries); //scaling factor used for normalization of histograms filled with number of events
 
     //Get the number of bins for each dimension
     for(i=fNDims-1; i>=0; --i) nbins[i]=fAxes[i]->GetNBins();
 
     //Normalization of histograms with variable size for which the bin content corresponds to a number of events
-    if(fNormFlags&(kEventsFilled|kVarBinSizeEventsFilled)){
+    if(fNormFlags&(kEventsFilled|kVarBinSizeEventsFilled|kBinWidthNormOnly)){
       QAxis **vbsaxis=new QAxis*[fNDims];      //array of axis using variable bin width
       Double_t binvol;                      //buffer for variable bin width/area/volume
       memset(vbsaxis,0,fNDims*sizeof(QAxis*)); //Initialize axis pointers to NULL
@@ -1226,11 +1226,21 @@ template <typename U> void QHN<U>::Normalize(Double_t* integral)
       if(hasvbaxes && !(fNormFlags&kNoBinWidthNorm)) {
 	Long64_t li;
 
-	for(li=GetNFbins()-1; li>=0; --li) {
-	  GetFBinCoords(li,biniter);
-	  binvol=(vbsaxis[0]?vbsaxis[0]->GetBinWidth(biniter[0]):1);
-	  for(i=1; i<fNDims; ++i) if(vbsaxis[i]) binvol*=vbsaxis[i]->GetBinWidth(biniter[i]);
-	  ScaleFBinContent(li,1/binvol);
+	if(!reverse) {
+	  for(li=GetNFbins()-1; li>=0; --li) {
+	    GetFBinCoords(li,biniter);
+	    binvol=(vbsaxis[0]?vbsaxis[0]->GetBinWidth(biniter[0]):1);
+	    for(i=1; i<fNDims; ++i) if(vbsaxis[i]) binvol*=vbsaxis[i]->GetBinWidth(biniter[i]);
+	    ScaleFBinContent(li,1/binvol);
+	  }
+
+	} else {
+	  for(li=GetNFbins()-1; li>=0; --li) {
+	    GetFBinCoords(li,biniter);
+	    binvol=(vbsaxis[0]?vbsaxis[0]->GetBinWidth(biniter[0]):1);
+	    for(i=1; i<fNDims; ++i) if(vbsaxis[i]) binvol*=vbsaxis[i]->GetBinWidth(biniter[i]);
+	    ScaleFBinContent(li,binvol);
+	  }
 	}
       }
       delete[] vbsaxis;
@@ -1287,23 +1297,50 @@ template <typename U> void QHN<U>::Normalize(Double_t* integral)
 	    biniter[coord]=*(binranges[coord]);
 	  }
 
-	  //Loop over bin indices of non-fixed dimensions
-	  for(;;) {
-	    //Scale the bin value
-	    ScaleBinContent(biniter, 1./scutintbuf);
+	  if(!reverse) {
 
-	    if(biniter[0]<nbins[0]) ++(biniter[0]);
-	    else {
+	    //Loop over bin indices of non-fixed dimensions
+	    for(;;) {
+	      //Scale the bin value
+	      ScaleBinContent(biniter, 1./scutintbuf);
 
-	      for(coord=0;;) {
-		biniter[coord]=1;
-		++coord;
+	      if(biniter[0]<nbins[0]) ++(biniter[0]);
+	      else {
 
-		if(i>=fNDims-nfix) goto doneloop;
+		for(coord=0;;) {
+		  biniter[coord]=1;
+		  ++coord;
 
-		if(biniter[coord]<nbins[coord]) {
-		  ++(biniter[coord]);
-		  break;
+		  if(i>=fNDims-nfix) goto doneloop;
+
+		  if(biniter[coord]<nbins[coord]) {
+		    ++(biniter[coord]);
+		    break;
+		  }
+		}
+	      }
+	    }
+
+	  } else {
+
+	    //Loop over bin indices of non-fixed dimensions
+	    for(;;) {
+	      //Scale the bin value
+	      ScaleBinContent(biniter, scutintbuf);
+
+	      if(biniter[0]<nbins[0]) ++(biniter[0]);
+	      else {
+
+		for(coord=0;;) {
+		  biniter[coord]=1;
+		  ++coord;
+
+		  if(i>=fNDims-nfix) goto doneloop;
+
+		  if(biniter[coord]<nbins[coord]) {
+		    ++(biniter[coord]);
+		    break;
+		  }
 		}
 	      }
 	    }
@@ -1333,7 +1370,7 @@ doneloop:;
       //If histogram has not to be normalized as a conditional PDF
     } else {
 
-      if(fNormFlags&kEventsFilled) {
+      if(fNormFlags&(kEventsFilled|kBinWidthNormOnly)) {
 	cutintbuf=scale;
 
       } else {
@@ -1342,7 +1379,10 @@ doneloop:;
       }
 
       //If the integral value is not 0, normalize the PDF
-      if (cutintbuf) Scale(1/cutintbuf);
+      if (cutintbuf) {
+	if(!reverse) Scale(1/cutintbuf);
+	else Scale(cutintbuf);
+      }
     }
 
     if(integral) *integral=cutintbuf;

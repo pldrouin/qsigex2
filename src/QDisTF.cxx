@@ -117,7 +117,7 @@ Double_t QDisTF::Integral(Option_t* domain) const
   return integral;
 }
 
-void QDisTF::Normalize(Double_t* integral)
+void QDisTF::Normalize(Double_t* integral, Bool_t reverse)
 {
   //This function normalizes the p.d.f. according to the cuts defined via
   //SetCutExpr. This string is a standard ROOT selection expression that
@@ -142,7 +142,8 @@ void QDisTF::Normalize(Double_t* integral)
       TString newformula;
       newformula="(";
       newformula+=objformula;
-      newformula+=")/";
+      if(!reverse) newformula+=")/";
+      else newformula+=")*";
       newformula+=cutintbuf;
       fTF->SetTitle(newformula);
       fTF->Compile();

@@ -51,7 +51,7 @@ class QDis: public TNamed, public QProcObj
 
   virtual QDis* CloneQDis() const=0;
 
-  virtual void Normalize(Double_t* integral=NULL)=0;
+  virtual void Normalize(Double_t* integral=NULL, Bool_t reverse=kFALSE)=0;
 
   const QDis& operator=(const QDis &rhs){
     TNamed::operator=(rhs);
@@ -96,11 +96,13 @@ class QDis: public TNamed, public QProcObj
     //                         Has no effect for histograms having constant bin width in all directions or if
     //                         using kNoBinWidthNorm.
     //kNoBinWidthNorm: Do not use bin widths for PDF normalization
-    //kNoNorm: No normalization
+    //kNoNorm: No normalization. Should not be combined with other flags. Not compatible with conditional PDFs.
+    //kBinWidthNormOnly: Only use bin width for scaling, not the actual bin content. Should not be combined with
+    //                   other flags. Not compatible with conditional PDFs.
     //Flags can be combined using a bitwise "OR" operator (|).
     fNormFlags=normflags;
   }
-  enum eNormFlags {kRegularNorm=0, kEventsFilled=1, kVarBinSizeEventsFilled=2, kNoBinWidthNorm=4, kNoNorm=8};
+  enum eNormFlags {kRegularNorm=0, kEventsFilled=1, kVarBinSizeEventsFilled=2, kNoBinWidthNorm=4, kNoNorm=8, kBinWidthNormOnly=16};
 
  protected:
   TString fCutExpr;

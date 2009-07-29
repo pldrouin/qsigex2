@@ -139,7 +139,7 @@ class QDisTH: public QDis
 
   Double_t Integral(Int_t** binranges=NULL, Bool_t *widths=NULL) const;
 
-  void Normalize(Double_t* integral=NULL);
+  void Normalize(Double_t* integral=NULL, Bool_t reverse=kFALSE);
 
   QDisTH* MarginalPDF(const char *name="_md", const Int_t xaxis=0, const Int_t yaxis=-1) const;
   //QDisTH* MarginalPDF2D(const char *name="_m1d", Int_t xaxis=0, Int_t yaxis=1) const;
