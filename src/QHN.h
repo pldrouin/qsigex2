@@ -171,7 +171,7 @@ template <typename U> class QHN: public QDis
     void Multiply(const QHN<U> *qhn);
     virtual QHN<U>* New() const{return new QHN<U>;}
     virtual QHN<U>* New(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHN<U>(name,title,ndims);}
-    void Normalize(Double_t* integral=NULL);
+    void Normalize(Double_t* integral=NULL, Bool_t reverse=kFALSE);
     virtual const QHN<U>& operator=(const QHN<U> &qthn);
     const QHN<U>& operator=(const TH1 &th);
     const QHN<U>& operator=(const QDisTH &qth);
