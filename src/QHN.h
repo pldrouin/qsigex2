@@ -126,7 +126,7 @@ template <typename U> class QHN: public QDis
     Long64_t FindBin(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8, const Float_t &x9) const;
     Long64_t FindBin(Float_t const* const &x) const;
     const TH1& GetTH();
-    QAxis* GetAxis(const Int_t &axis) const{return fAxes[axis];}
+    QAxis* const& GetAxis(const Int_t &axis) const{return fAxes[axis];}
     Long64_t GetBin(const Int_t *coords) const;
     Long64_t GetBin(const Int_t &coord0, const Int_t &coord1) const;
     Long64_t GetBin(const Int_t &coord0, const Int_t &coord1, const Int_t &coord2) const;
