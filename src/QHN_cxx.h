@@ -818,7 +818,7 @@ template <typename U> Double_t QHN<U>::Integral(Int_t const* const* binranges, c
     }
     if(fAxes[i]->GetBins()) cbw=kFALSE;
     if(!widths || widths[i]) bwi=kTRUE;
-    //cout << mins[i] << "\t" << maxs[i] << "\n";
+    cout << mins[i] << "\t" << maxs[i] << "\n";
   }
 
   Double_t integral=0;
@@ -865,25 +865,29 @@ template <typename U> Double_t QHN<U>::Integral(Int_t const* const* binranges, c
 	  amaxs[i]=maxs[axes[i]];
 	}
 
-	for(;;) {
-	  integral+=GetBinContent(j);
+	if(naxes) {
 
-	  if(*(biniter[0])<amaxs[0]) ++*(biniter[0]);
-	  else {
+	  for(;;) {
+	    integral+=GetBinContent(j);
 
-	    for(i=0;;) {
-	      *(biniter[i])=amins[i];
-	      ++i;
+	    if(*(biniter[0])<amaxs[0]) ++*(biniter[0]);
+	    else {
 
-	      if(i>=naxes) goto doneloop0;
+	      for(i=0;;) {
+		*(biniter[i])=amins[i];
+		++i;
 
-	      if(*(biniter[i])<amaxs[i]) {
-		++*(biniter[i]);
-		break;
+		if(i>=naxes) goto doneloop0;
+
+		if(*(biniter[i])<amaxs[i]) {
+		  ++*(biniter[i]);
+		  break;
+		}
 	      }
 	    }
 	  }
-	}
+
+	} else integral=GetBinContent(j);
 doneloop0:
 
         delete[] axes;
@@ -936,26 +940,34 @@ doneloop0:
 	    amaxs[i]=maxs[axes[i]];
 	  }
 
-	  for(;;) {
-	    binvol=fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]);
-	    for(i=fNDims-2; i>=0; --i) binvol*=fAxes[i]->GetBinWidth(j[i]);
-	    integral+=GetBinContent(j)*binvol;
+	  if(naxes) {
 
-	    if(*(biniter[0])<amaxs[0]) ++*(biniter[0]);
-	    else {
+	    for(;;) {
+	      binvol=fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]);
+	      for(i=fNDims-2; i>=0; --i) binvol*=fAxes[i]->GetBinWidth(j[i]);
+	      integral+=GetBinContent(j)*binvol;
 
-	      for(i=0;;) {
-		*(biniter[i])=amins[i];
-		++i;
+	      if(*(biniter[0])<amaxs[0]) ++*(biniter[0]);
+	      else {
 
-		if(i>=naxes) goto doneloop1;
+		for(i=0;;) {
+		  *(biniter[i])=amins[i];
+		  ++i;
 
-		if(*(biniter[i])<amaxs[i]) {
-		  ++*(biniter[i]);
-		  break;
+		  if(i>=naxes) goto doneloop1;
+
+		  if(*(biniter[i])<amaxs[i]) {
+		    ++*(biniter[i]);
+		    break;
+		  }
 		}
 	      }
 	    }
+
+	  } else {
+	      binvol=fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]);
+	      for(i=fNDims-2; i>=0; --i) binvol*=fAxes[i]->GetBinWidth(j[i]);
+	      integral=GetBinContent(j)*binvol;
 	  }
 doneloop1:
 
@@ -1015,26 +1027,34 @@ doneloop1:
 	    amaxs[i]=maxs[axes[i]];
 	  }
 
-	  for(;;) {
-	    binvol=(widths[fNDims-1]?fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]):1);
-	    for(i=fNDims-2; i>=0; --i) binvol*=(widths[i]?fAxes[i]->GetBinWidth(j[i]):1);
-	    integral+=GetBinContent(j)*binvol;
+	  if(naxes) {
 
-	    if(*(biniter[0])<amaxs[0]) ++*(biniter[0]);
-	    else {
+	    for(;;) {
+	      binvol=(widths[fNDims-1]?fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]):1);
+	      for(i=fNDims-2; i>=0; --i) binvol*=(widths[i]?fAxes[i]->GetBinWidth(j[i]):1);
+	      integral+=GetBinContent(j)*binvol;
 
-	      for(i=0;;) {
-		*(biniter[i])=amins[i];
-		++i;
+	      if(*(biniter[0])<amaxs[0]) ++*(biniter[0]);
+	      else {
 
-		if(i>=naxes) goto doneloop2;
+		for(i=0;;) {
+		  *(biniter[i])=amins[i];
+		  ++i;
 
-		if(*(biniter[i])<amaxs[i]) {
-		  ++*(biniter[i]);
-		  break;
+		  if(i>=naxes) goto doneloop2;
+
+		  if(*(biniter[i])<amaxs[i]) {
+		    ++*(biniter[i]);
+		    break;
+		  }
 		}
 	      }
 	    }
+
+	  } else {
+	    binvol=(widths[fNDims-1]?fAxes[fNDims-1]->GetBinWidth(j[fNDims-1]):1);
+	    for(i=fNDims-2; i>=0; --i) binvol*=(widths[i]?fAxes[i]->GetBinWidth(j[i]):1);
+	    integral=GetBinContent(j)*binvol;
 	  }
 doneloop2:
 
