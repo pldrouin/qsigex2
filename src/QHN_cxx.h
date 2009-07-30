@@ -1311,7 +1311,7 @@ template <typename U> void QHN<U>::Normalize(Double_t* integral, Bool_t reverse)
 		  biniter[coord]=1;
 		  ++coord;
 
-		  if(i>=fNDims-nfix) goto doneloop;
+		  if(coord>=fNDims-nfix) goto doneloop;
 
 		  if(biniter[coord]<nbins[coord]) {
 		    ++(biniter[coord]);
@@ -1335,7 +1335,7 @@ template <typename U> void QHN<U>::Normalize(Double_t* integral, Bool_t reverse)
 		  biniter[coord]=1;
 		  ++coord;
 
-		  if(i>=fNDims-nfix) goto doneloop;
+		  if(coord>=fNDims-nfix) goto doneloop;
 
 		  if(biniter[coord]<nbins[coord]) {
 		    ++(biniter[coord]);
