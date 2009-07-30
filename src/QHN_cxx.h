@@ -818,7 +818,7 @@ template <typename U> Double_t QHN<U>::Integral(Int_t const* const* binranges, c
     }
     if(fAxes[i]->GetBins()) cbw=kFALSE;
     if(!widths || widths[i]) bwi=kTRUE;
-    cout << mins[i] << "\t" << maxs[i] << "\n";
+    //cout << mins[i] << "\t" << maxs[i] << "\n";
   }
 
   Double_t integral=0;
