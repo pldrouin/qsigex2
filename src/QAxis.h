@@ -10,14 +10,14 @@ class QAxis: public TNamed
   public:
     QAxis(): TNamed(), fNBins(1), fMin(0), fMax(1), fBWidth(1), fBins(NULL){}
     QAxis(const Int_t &nbins, const Double_t& min, const Double_t& max): TNamed(), fNBins(nbins), fMin(min), fMax(max), fBWidth((max-min)/nbins), fBins(NULL){}
-    QAxis(const Int_t &nbins, const Double_t* bins): TNamed(), fNBins(nbins), fMin(bins[0]), fMax(bins[nbins]), fBWidth((fMax-fMin)/fNBins){fBins=new Double_t[fNBins+1]; memcpy(fBins,bins,(nbins+1)*sizeof(Double_t));}
-    QAxis(const Int_t &nbins, const Float_t* bins): TNamed(), fNBins(nbins), fMin(bins[0]), fMax(bins[nbins]), fBWidth((fMax-fMin)/fNBins){fBins=new Double_t[fNBins+1]; for(Int_t i=0; i<=nbins; i++) fBins[i]=bins[i];}
-    QAxis(const Int_t &nbins, const Int_t* bins): TNamed(), fNBins(nbins), fMin(bins[0]), fMax(bins[nbins]), fBWidth((fMax-fMin)/fNBins){fBins=new Double_t[fNBins+1]; for(Int_t i=0; i<=nbins; i++) fBins[i]=bins[i];}
+    QAxis(const Int_t &nbins, const Double_t* bins): TNamed(), fNBins(0), fMin(0), fMax(0), fBWidth(0), fBins(NULL){Set(nbins,bins);}
+    QAxis(const Int_t &nbins, const Float_t* bins): TNamed(), fNBins(0), fMin(0), fMax(0), fBWidth(0), fBins(NULL){Set(nbins,bins);}
+    QAxis(const Int_t &nbins, const Int_t* bins): TNamed(), fNBins(0), fMin(0), fMax(0), fBWidth(0), fBins(NULL){Set(nbins,bins);}
     QAxis(const Char_t *name, const Char_t *title): TNamed(name,title), fNBins(1), fMin(0), fMax(1), fBWidth(1), fBins(NULL){}
     QAxis(const Char_t *name, const Char_t *title, const Int_t &nbins, const Double_t& min, const Double_t& max): TNamed(name,title), fNBins(nbins), fMin(min), fMax(max), fBWidth((max-min)/nbins), fBins(NULL){}
-    QAxis(const Char_t *name, const Char_t *title, const Int_t &nbins, const Double_t* bins): TNamed(name,title), fNBins(nbins), fMin(bins[0]), fMax(bins[nbins]), fBWidth((fMax-fMin)/fNBins){fBins=new Double_t[fNBins+1]; memcpy(fBins,bins,(nbins+1)*sizeof(Double_t));}
-    QAxis(const Char_t *name, const Char_t *title, const Int_t &nbins, const Float_t* bins): TNamed(name,title), fNBins(nbins), fMin(bins[0]), fMax(bins[nbins]), fBWidth((fMax-fMin)/fNBins){fBins=new Double_t[fNBins+1]; for(Int_t i=0; i<=nbins; i++) fBins[i]=bins[i];}
-    QAxis(const Char_t *name, const Char_t *title, const Int_t &nbins, const Int_t* bins): TNamed(name,title), fNBins(nbins), fMin(bins[0]), fMax(bins[nbins]), fBWidth((fMax-fMin)/fNBins){fBins=new Double_t[fNBins+1]; for(Int_t i=0; i<=nbins; i++) fBins[i]=bins[i];}
+    QAxis(const Char_t *name, const Char_t *title, const Int_t &nbins, const Double_t* bins): TNamed(name,title), fNBins(0), fMin(0), fMax(0), fBWidth(0), fBins(NULL){Set(nbins,bins);}
+    QAxis(const Char_t *name, const Char_t *title, const Int_t &nbins, const Float_t* bins): TNamed(name,title), fNBins(0), fMin(0), fMax(0), fBWidth(0), fBins(NULL){Set(nbins,bins);}
+    QAxis(const Char_t *name, const Char_t *title, const Int_t &nbins, const Int_t* bins): TNamed(name,title), fNBins(0), fMin(0), fMax(0), fBWidth(0), fBins(NULL){Set(nbins,bins);}
     QAxis(const QAxis &rhs): TNamed(rhs), fNBins(rhs.fNBins), fMin(rhs.fMin), fMax(rhs.fMax), fBWidth(rhs.fBWidth), fBins(NULL){if(rhs.fBins) {fBins=new Double_t[fNBins+1]; memcpy(fBins,rhs.fBins,(fNBins+1)*sizeof(Double_t));}}
     virtual ~QAxis(){Clear();}
     void Clear(Option_t* option = ""){if(fBins) {delete[] fBins; fBins=NULL;}}
