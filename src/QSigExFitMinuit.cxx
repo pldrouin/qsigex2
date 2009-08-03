@@ -80,6 +80,9 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
       }
     }
 
+    dbuf1=fMinuitStrategy;
+    fMinuit->mnexcm("SET STR",&dbuf1,1,ierflg);
+
     //**** Call the minimizer ****
     fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
 
@@ -300,5 +303,7 @@ void QSigExFitMinuit::Browse(TBrowser *b)
   b->Add(&fFCNError);
   b->Add(&fMinimName);
   b->Add(fMinimArgs,"Minimizer Arguments");
+  b->Add(&fMinosMaxCalls);
+  b->Add(&fMinuitStrategy);
   b->Add(&fMinuitStatus);
 }

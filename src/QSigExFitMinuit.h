@@ -9,8 +9,8 @@
 class QSigExFitMinuit: public QSigExFit
 {
   public:
-    QSigExFitMinuit(): QSigExFit(), fMinuit(NULL), fCompiledFunc(NULL), fInterpretedFunc(NULL), fMinimName("Minimizer Name","MIGrad"), fMinimArgs(new QList<QNamedVar<Double_t> >), fMinosMaxCalls("Minos Max Calls",-1), fMinuitStatus("Minuit Status","") {}
-    QSigExFitMinuit(const QSigExFitMinuit &rhs): QSigExFit(rhs), fMinuit(NULL), fCompiledFunc(rhs.fCompiledFunc), fInterpretedFunc(rhs.fInterpretedFunc), fMinimName(rhs.fMinimName), fMinimArgs(new QList<QNamedVar<Double_t> >(*rhs.fMinimArgs)), fMinosMaxCalls(rhs.fMinosMaxCalls), fMinuitStatus(rhs.fMinuitStatus) {};
+    QSigExFitMinuit(): QSigExFit(), fMinuit(NULL), fCompiledFunc(NULL), fInterpretedFunc(NULL), fMinimName("Minimizer Name","MIGrad"), fMinimArgs(new QList<QNamedVar<Double_t> >), fMinosMaxCalls("Minos Max Calls",-1), fMinuitStrategy("Minuit Strategy",1), fMinuitStatus("Minuit Status","") {}
+    QSigExFitMinuit(const QSigExFitMinuit &rhs): QSigExFit(rhs), fMinuit(NULL), fCompiledFunc(rhs.fCompiledFunc), fInterpretedFunc(rhs.fInterpretedFunc), fMinimName(rhs.fMinimName), fMinimArgs(new QList<QNamedVar<Double_t> >(*rhs.fMinimArgs)), fMinosMaxCalls(rhs.fMinosMaxCalls), fMinuitStrategy("Minuit Strategy",rhs.fMinuitStrategy), fMinuitStatus(rhs.fMinuitStatus) {};
     virtual ~QSigExFitMinuit();
 
     Double_t EvalFCN() const;
@@ -40,6 +40,8 @@ class QSigExFitMinuit: public QSigExFit
     void SetMinosMaxCalls(Int_t ncalls){fMinosMaxCalls=ncalls;}
     void SetNMinimArgs(Int_t n){fMinimArgs->RedimList(n);}
 
+    void SetStrategy(const Int_t &strat=1){fMinuitStrategy=strat;}
+
     const QSigExFitMinuit& operator=(const QSigExFitMinuit &rhs){QSigExFit::operator=(rhs); return *this;}
 
     void Browse(TBrowser *b);
@@ -51,6 +53,7 @@ class QSigExFitMinuit: public QSigExFit
     QNamedVar<TString> fMinimName; //Minimizer name
     QList<QNamedVar<Double_t> > *fMinimArgs; //->Minimizer arguments
     QNamedVar<Int_t> fMinosMaxCalls;  //Maximum number of calls of MINOS
+    QNamedVar<Int_t> fMinuitStrategy; //Minuit strategy
     QNamedVar<TString> fMinuitStatus; //TMinuit Status
   private:
     ClassDef(QSigExFitMinuit,1) //QSigExFit using TMinuit minimizer
