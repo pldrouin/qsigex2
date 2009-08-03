@@ -9,7 +9,7 @@
 class QSigExFitMinuit: public QSigExFit
 {
   public:
-    QSigExFitMinuit(): QSigExFit(), fMinuit(NULL), fCompiledFunc(NULL), fInterpretedFunc(NULL), fMinimName("Minimizer Name","MIGrad"), fMinimArgs(new QList<QNamedVar<Double_t> >), fMinosMaxCalls("Minos Max Calls",-1), fMinuitStrategy("Minuit Strategy",1), fMinuitStatus("Minuit Status","") {}
+    QSigExFitMinuit(): QSigExFit(), fMinuit(NULL), fCompiledFunc(NULL), fInterpretedFunc(NULL), fMinimName("Minimizer Name","MIGrad"), fMinimArgs(new QList<QNamedVar<Double_t> >), fMinosMaxCalls("Minos Max Calls",-1), fMinuitStrategy("Minuit Strategy",0), fMinuitStatus("Minuit Status","") {}
     QSigExFitMinuit(const QSigExFitMinuit &rhs): QSigExFit(rhs), fMinuit(NULL), fCompiledFunc(rhs.fCompiledFunc), fInterpretedFunc(rhs.fInterpretedFunc), fMinimName(rhs.fMinimName), fMinimArgs(new QList<QNamedVar<Double_t> >(*rhs.fMinimArgs)), fMinosMaxCalls(rhs.fMinosMaxCalls), fMinuitStrategy("Minuit Strategy",rhs.fMinuitStrategy), fMinuitStatus(rhs.fMinuitStatus) {};
     virtual ~QSigExFitMinuit();
 
