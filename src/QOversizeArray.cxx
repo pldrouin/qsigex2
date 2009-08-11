@@ -138,17 +138,19 @@ void QOversizeArray::CloseFile()
 
     //If no instances are left, wait for QOAMCThread to stop
     if(!fInstances.Count()) {
-      //Send a signal to fMCThread to terminate and wait for termination
-      pthread_mutex_lock(&fMCMutex);
-      fMCAction=2;
-      //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
-      pthread_mutex_lock(&fMCCMutex);
-      pthread_mutex_unlock(&fMCMutex);
-      pthread_cond_signal(&fMCCond);
-      pthread_mutex_unlock(&fMCCMutex);
-      //printf("Waiting for MC thread %p to terminate...\n",this);
-      pthread_join(fMCThread,NULL);
-      //printf("MC thread %p has terminated\n",this);
+      if(fCThreshMemSize<=fCritMemSize) {
+	//Send a signal to fMCThread to terminate and wait for termination
+	pthread_mutex_lock(&fMCMutex);
+	fMCAction=2;
+	//It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
+	pthread_mutex_lock(&fMCCMutex);
+	pthread_mutex_unlock(&fMCMutex);
+	pthread_cond_signal(&fMCCond);
+	pthread_mutex_unlock(&fMCCMutex);
+	//printf("Waiting for MC thread %p to terminate...\n",this);
+	pthread_join(fMCThread,NULL);
+	//printf("MC thread %p has terminated\n",this);
+      }
 
     //else if there are still some instances, wait for the current job to finish
     } else {
@@ -545,7 +547,7 @@ void QOversizeArray::OpenFile()
   if(fInstances.Count() == 1) {
     pthread_mutex_unlock(&fILMutex);
     pthread_create(&fMMThread, NULL, QOAMMThread, NULL);
-    pthread_create(&fMCThread, NULL, QOAMCThread, NULL);
+    if(fCThreshMemSize<=fCritMemSize) pthread_create(&fMCThread, NULL, QOAMCThread, NULL);
 
   } else {
     pthread_mutex_unlock(&fILMutex);
@@ -614,23 +616,25 @@ void QOversizeArray::ResetArray()
   pthread_mutex_unlock(&fMWCMutex);
   printstatus("Memory writing thread confirmed to be in pausing condition");
 
-  //A Giant lock is used here to avoid conflicts when ResetArray for different QOA instances are called at the same time (for a multi-threaded application).
-  pthread_mutex_lock(&fMCGMutex);
-  pthread_mutex_lock(&fMCMutex);
-  printstatus("fMCMutex is locked");
-  //Request a pause from memory compression thread
-  fMCAction=1;
-  //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
-  pthread_mutex_lock(&fMCCMutex);
-  printstatus("fMCCMutex is locked");
-  pthread_mutex_unlock(&fMCMutex);
-  pthread_cond_signal(&fMCCond);
-  //Wait for pause confirmation
-  printstatus("Waiting signal from QOAMCThread");
-  pthread_cond_wait(&fMCPCond,&fMCCMutex);
-  printstatus("Signal received");
-  pthread_mutex_unlock(&fMCCMutex);
-  printstatus("Memory compression thread confirmed to be in pausing condition");
+  if(fCThreshMemSize<=fCritMemSize) {
+    //A Giant lock is used here to avoid conflicts when ResetArray for different QOA instances are called at the same time (for a multi-threaded application).
+    pthread_mutex_lock(&fMCGMutex);
+    pthread_mutex_lock(&fMCMutex);
+    printstatus("fMCMutex is locked");
+    //Request a pause from memory compression thread
+    fMCAction=1;
+    //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
+    pthread_mutex_lock(&fMCCMutex);
+    printstatus("fMCCMutex is locked");
+    pthread_mutex_unlock(&fMCMutex);
+    pthread_cond_signal(&fMCCond);
+    //Wait for pause confirmation
+    printstatus("Waiting signal from QOAMCThread");
+    pthread_cond_wait(&fMCPCond,&fMCCMutex);
+    printstatus("Signal received");
+    pthread_mutex_unlock(&fMCCMutex);
+    printstatus("Memory compression thread confirmed to be in pausing condition");
+  }
 
   //Lock buffer structure.
   pthread_mutex_lock(&fBuffersMutex);
@@ -657,16 +661,18 @@ void QOversizeArray::ResetArray()
   if(fWriteBuffer) fWriteBuffer->fBufferIdx=0;
   fNObjects=0;
 
-  //Remove pause condition on memory compression thread
-  pthread_mutex_lock(&fMCMutex);
-  fMCAction=0;
-  //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
-  pthread_mutex_lock(&fMCCMutex);
-  pthread_mutex_unlock(&fMCMutex);
-  printstatus("QOversizeArray::ResetArray: Removing pausing condition from memory compression thread");
-  pthread_cond_signal(&fMCCond);
-  pthread_mutex_unlock(&fMCCMutex);
-  pthread_mutex_unlock(&fMCGMutex);
+  if(fCThreshMemSize<=fCritMemSize) {
+    //Remove pause condition on memory compression thread
+    pthread_mutex_lock(&fMCMutex);
+    fMCAction=0;
+    //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
+    pthread_mutex_lock(&fMCCMutex);
+    pthread_mutex_unlock(&fMCMutex);
+    printstatus("QOversizeArray::ResetArray: Removing pausing condition from memory compression thread");
+    pthread_cond_signal(&fMCCond);
+    pthread_mutex_unlock(&fMCCMutex);
+    pthread_mutex_unlock(&fMCGMutex);
+  }
 
   //Remove pause condition on memory writing thread
   pthread_mutex_lock(&fMWMutex);
@@ -946,18 +952,20 @@ void QOversizeArray::Save(const Float_t &compfrac)
   pthread_mutex_unlock(&fMWCMutex);
   printstatus("Memory writing thread confirmed to be in pausing condition");
 
-  pthread_mutex_lock(&fMCGMutex);
-  pthread_mutex_lock(&fMCMutex);
-  //Request a pause from memory compression thread
-  fMCAction=1;
-  //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
-  pthread_mutex_lock(&fMCCMutex);
-  pthread_mutex_unlock(&fMCMutex);
-  pthread_cond_signal(&fMCCond);
-  //Wait for pause confirmation
-  pthread_cond_wait(&fMCPCond,&fMCCMutex);
-  pthread_mutex_unlock(&fMCCMutex);
-  printstatus("Memory compression thread confirmed to be in pausing condition");
+  if(fCThreshMemSize<=fCritMemSize) {
+    pthread_mutex_lock(&fMCGMutex);
+    pthread_mutex_lock(&fMCMutex);
+    //Request a pause from memory compression thread
+    fMCAction=1;
+    //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
+    pthread_mutex_lock(&fMCCMutex);
+    pthread_mutex_unlock(&fMCMutex);
+    pthread_cond_signal(&fMCCond);
+    //Wait for pause confirmation
+    pthread_cond_wait(&fMCPCond,&fMCCMutex);
+    pthread_mutex_unlock(&fMCCMutex);
+    printstatus("Memory compression thread confirmed to be in pausing condition");
+  }
 
   //Lock buffer structure.
   pthread_mutex_lock(&fBuffersMutex);
@@ -1036,16 +1044,18 @@ void QOversizeArray::Save(const Float_t &compfrac)
 
   WriteWriteBuffer();
 
-  //Remove pause condition on memory compression thread
-  pthread_mutex_lock(&fMCMutex);
-  fMCAction=0;
-  //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
-  pthread_mutex_lock(&fMCCMutex);
-  pthread_mutex_unlock(&fMCMutex);
-  printstatus("QOversizeArray::Save: Removing pausing condition from memory compression thread");
-  pthread_cond_signal(&fMCCond);
-  pthread_mutex_unlock(&fMCCMutex);
-  pthread_mutex_lock(&fMCGMutex);
+  if(fCThreshMemSize<=fCritMemSize) {
+    //Remove pause condition on memory compression thread
+    pthread_mutex_lock(&fMCMutex);
+    fMCAction=0;
+    //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
+    pthread_mutex_lock(&fMCCMutex);
+    pthread_mutex_unlock(&fMCMutex);
+    printstatus("QOversizeArray::Save: Removing pausing condition from memory compression thread");
+    pthread_cond_signal(&fMCCond);
+    pthread_mutex_unlock(&fMCCMutex);
+    pthread_mutex_lock(&fMCGMutex);
+  }
 
   //Remove pause condition on memory writing thread
   pthread_mutex_lock(&fMWMutex);
@@ -1062,14 +1072,36 @@ void QOversizeArray::Save(const Float_t &compfrac)
   WriteHeader();
 }
 
-void QOversizeArray::SetMemConstraints(const Long64_t &critmemsize,const Long64_t &level1memsize,const Long64_t &level2memsize,const Long64_t &cthreshmemsize)
+void QOversizeArray::SetMemConstraints(const Long64_t &critmemsize,const Long64_t &level1memsize,const Long64_t &level2memsize,Long64_t cthreshmemsize)
 {
   FuncDef(SetMemConstraints,1);
+  cthreshmemsize=(cthreshmemsize>=0?cthreshmemsize:critmemsize+1);
+
+  pthread_mutex_lock(&fILMutex);
+  if(fInstances.Count()>0) {
+    pthread_mutex_unlock(&fILMutex);
+    if(cthreshmemsize<=critmemsize && fCThreshMemSize>fCritMemSize) pthread_create(&fMCThread, NULL, QOAMCThread, NULL);
+    else if(cthreshmemsize>critmemsize && fCThreshMemSize<=fCritMemSize) {
+      //Send a signal to fMCThread to terminate and wait for termination
+      pthread_mutex_lock(&fMCMutex);
+      fMCAction=2;
+      //It is important to unlock fMCMutex after locking fMCCMutex to ensure getting the right condition from QOAMCThread
+      pthread_mutex_lock(&fMCCMutex);
+      pthread_mutex_unlock(&fMCMutex);
+      pthread_cond_signal(&fMCCond);
+      pthread_mutex_unlock(&fMCCMutex);
+      //printf("Waiting for MC thread %p to terminate...\n",this);
+      pthread_join(fMCThread,NULL);
+      //printf("MC thread %p has terminated\n",this);
+    }
+
+  } else pthread_mutex_unlock(&fILMutex);
+
   pthread_mutex_lock(&fMSizeMutex);
   fCritMemSize=critmemsize;
   fLevel1MemSize=level1memsize;
   fLevel2MemSize=level2memsize;
-  fCThreshMemSize=cthreshmemsize>=0?cthreshmemsize:critmemsize;
+  fCThreshMemSize=cthreshmemsize;
 
   if(fCritMemSize) {
     if(!fLevel2MemSize) fLevel2MemSize=(UInt_t)(0.95*fCritMemSize);

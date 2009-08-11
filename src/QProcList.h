@@ -7,9 +7,9 @@
 class QProcList: public QProcessor
 {
   public:
-    QProcList(): QProcessor(), fQPL(new QList<TObject*>), fPProcessor(fDefPProcessor), fThreads(NULL), fNThreads(0), fMutexes(NULL), fIMutexes(NULL), fFMutexes(NULL), fStopThreads(kTRUE), fAIObjects(NULL), fAOObjects(NULL) {}
-    QProcList(const char *name, const char *title): QProcessor(name,title), fQPL(new QList<TObject*>), fPProcessor(fDefPProcessor), fThreads(NULL), fNThreads(0), fMutexes(NULL), fIMutexes(NULL), fFMutexes(NULL), fStopThreads(kTRUE), fAIObjects(NULL), fAOObjects(NULL) {}
-    QProcList(const QProcList &rhs): QProcessor(rhs), fQPL(new QList<TObject*>(*rhs.fQPL)), fPProcessor(rhs.fPProcessor), fThreads(NULL), fNThreads(0), fMutexes(NULL), fIMutexes(NULL), fFMutexes(NULL), fStopThreads(kTRUE), fAIObjects(NULL), fAOObjects(NULL) {}
+    QProcList(): QProcessor(), fQPL(new QList<TObject*>), fPProcessor(fDefPProcessor), fPPUsesMain(kTRUE), fThreads(NULL), fNThreads(0), fMutexes(NULL), fIMutexes(NULL), fFMutexes(NULL), fStopThreads(kTRUE), fAIObjects(NULL), fAOObjects(NULL) {}
+    QProcList(const char *name, const char *title): QProcessor(name,title), fQPL(new QList<TObject*>), fPProcessor(fDefPProcessor), fPPUsesMain(kTRUE), fThreads(NULL), fNThreads(0), fMutexes(NULL), fIMutexes(NULL), fFMutexes(NULL), fStopThreads(kTRUE), fAIObjects(NULL), fAOObjects(NULL) {}
+    QProcList(const QProcList &rhs): QProcessor(rhs), fQPL(new QList<TObject*>(*rhs.fQPL)), fPProcessor(rhs.fPProcessor), fPPUsesMain(rhs.fPPUsesMain), fThreads(NULL), fNThreads(0), fMutexes(NULL), fIMutexes(NULL), fFMutexes(NULL), fStopThreads(kTRUE), fAIObjects(NULL), fAOObjects(NULL) {}
 
     virtual ~QProcList();
 
@@ -26,8 +26,10 @@ class QProcList: public QProcessor
     Int_t GetNQProcs() const{return fQPL->Count();}
 
     const Bool_t& GetPProcessor() const{return fPProcessor;}
+    const Bool_t& GetPPUsesMain() const{return fPPUsesMain;}
 
     void InitProcess(Bool_t allocateparammem=kTRUE);
+    void InitThreads();
 
     void PrintAnalysisResults() const;
     void PrintProcesses(const UInt_t &level=0, const Bool_t &printdeps=kTRUE) const;
@@ -44,9 +46,11 @@ class QProcList: public QProcessor
     void SetParamAddress(const Int_t &index, Double_t* const paddr=NULL);
     void SetParamAddress(const char *paramname, Double_t* const paddr=NULL){QProcessor::SetParamAddress(paramname,paddr);}
 
-    virtual void SetPProcessor(const Bool_t &pprocessor=0){fPProcessor=pprocessor;}
+    void SetPProcessor(const Bool_t &pprocessor=kFALSE){fPProcessor=pprocessor;}
+    void SetPPUsesMain(const Bool_t &ppusesmain=kTRUE){fPPUsesMain=ppusesmain;}
 
     void TerminateProcess();
+    void TerminateThreads();
 
     void Browse(TBrowser *b);
 
@@ -71,7 +75,8 @@ class QProcList: public QProcessor
     const QList<QProcObj*>& GetIObjList() const{return *fAIObjects;}
     const QList<QProcObj*>& GetOObjList() const{return *fAOObjects;}
     QList<TObject*> *fQPL;         //-> List of QProcessor objects
-    Bool_t fPProcessor;
+    Bool_t fPProcessor;            //! Use pthreads
+    Bool_t fPPUsesMain;             //! Main thread participates to execution
     SThreadConfig *fThreads;       //! List of threads
     Int_t         fNThreads;       //! Number of threads
     QList<void*> *fMutexes; //! List of mutexes used by the threads

@@ -5,7 +5,7 @@
 ClassImp(QProcList)
 
 const QProcList *gQProcList;
-Bool_t QProcList::fDefPProcessor=kTRUE;
+Bool_t QProcList::fDefPProcessor=kFALSE;
 
 QProcList::~QProcList()
 {
@@ -72,25 +72,28 @@ void QProcList::Exec() const
     //printf("Main has unlocked initial mutex %p\n",(*fIMutexes)[lIBuf]);
   }
 
-  for(lIBuf=fThreads->NChains-1; lIBuf>=0; --lIBuf) {
-    //printf("Main thread start chain index %i\n",lIBuf);
+  if(fPPUsesMain) {
 
-    for(lIBuf2=fThreads->Chains[lIBuf].NDOMutexes-1; lIBuf2>=0; --lIBuf2) {
-      //printf("Main locking DO mutex %p\n",fThreads->Chains[lIBuf].DOMutexes[lIBuf2]);
-      pthread_mutex_lock((pthread_mutex_t*)fThreads->Chains[lIBuf].DOMutexes[lIBuf2]);
-      //printf("Main has locked DO mutex %p\n",fThreads->Chains[lIBuf].DOMutexes[lIBuf2]);
+    for(lIBuf=fThreads->NChains-1; lIBuf>=0; --lIBuf) {
+      //printf("Main thread start chain index %i\n",lIBuf);
+
+      for(lIBuf2=fThreads->Chains[lIBuf].NDOMutexes-1; lIBuf2>=0; --lIBuf2) {
+	//printf("Main locking DO mutex %p\n",fThreads->Chains[lIBuf].DOMutexes[lIBuf2]);
+	pthread_mutex_lock((pthread_mutex_t*)fThreads->Chains[lIBuf].DOMutexes[lIBuf2]);
+	//printf("Main has locked DO mutex %p\n",fThreads->Chains[lIBuf].DOMutexes[lIBuf2]);
+      }
+      for(lIBuf2=fThreads->Chains[lIBuf].NProcs-1; lIBuf2>=0; --lIBuf2) {
+	//printf("Main thread start exec proc %i (%p) of chain index %i\n",lIBuf2,fThreads->Chains[lIBuf].Procs[lIBuf2],lIBuf);
+	fThreads->Chains[lIBuf].Procs[lIBuf2]->Exec();
+	//printf("Main thread done exec proc %i (%p) of chain index %i\n",lIBuf2,fThreads->Chains[lIBuf].Procs[lIBuf2],lIBuf);
+      }
+      for(lIBuf2=fThreads->Chains[lIBuf].NDMutexes-1; lIBuf2>=0; --lIBuf2) {
+	//printf("Main unlocking D mutex %p\n",fThreads->Chains[lIBuf].DMutexes[lIBuf2]);
+	pthread_mutex_unlock((pthread_mutex_t*)fThreads->Chains[lIBuf].DMutexes[lIBuf2]);
+	//printf("Main has unlocked D mutex %p\n",fThreads->Chains[lIBuf].DMutexes[lIBuf2]);
+      }
+      //printf("Main thread done chain index %i\n",lIBuf);
     }
-    for(lIBuf2=fThreads->Chains[lIBuf].NProcs-1; lIBuf2>=0; --lIBuf2) {
-      //printf("Main thread start exec proc %i (%p) of chain index %i\n",lIBuf2,fThreads->Chains[lIBuf].Procs[lIBuf2],lIBuf);
-      fThreads->Chains[lIBuf].Procs[lIBuf2]->Exec();
-      //printf("Main thread done exec proc %i (%p) of chain index %i\n",lIBuf2,fThreads->Chains[lIBuf].Procs[lIBuf2],lIBuf);
-    }
-    for(lIBuf2=fThreads->Chains[lIBuf].NDMutexes-1; lIBuf2>=0; --lIBuf2) {
-      //printf("Main unlocking D mutex %p\n",fThreads->Chains[lIBuf].DMutexes[lIBuf2]);
-      pthread_mutex_unlock((pthread_mutex_t*)fThreads->Chains[lIBuf].DMutexes[lIBuf2]);
-      //printf("Main has unlocked D mutex %p\n",fThreads->Chains[lIBuf].DMutexes[lIBuf2]);
-    }
-    //printf("Main thread done chain index %i\n",lIBuf);
   }
 
   for(lIBuf=fFMutexes->Count()-1; lIBuf>=0; --lIBuf) {
@@ -103,13 +106,11 @@ void QProcList::Exec() const
 void QProcList::InitProcess(Bool_t allocateparammem)
 {
   TerminateProcess();
-  Int_t i,j,k,l;
 
-  for(i=0; i<fQPL->Count(); ++i)  {
+  for(Int_t i=0; i<fQPL->Count(); ++i)  {
 
     try {
       ((QProcessor*)(*fQPL)[i])->InitProcess(kFALSE);
-      if(fPProcessor) ((QProcessor*)(*fQPL)[i])->BuildObjLists();
 
     } catch (Int_t e) {
       fprintf(stderr,"QProcList::InitProcess(): Error thrown by QProcessor index %i\n",i);
@@ -117,6 +118,14 @@ void QProcList::InitProcess(Bool_t allocateparammem)
     }
   }
   QProcessor::InitProcess(allocateparammem);
+  InitThreads();
+}
+
+void QProcList::InitThreads()
+{
+  TerminateThreads();
+
+  Int_t i,j,k,l;
   QList<QList<Int_t> > chains;
   QList<QList<Int_t> > chainsdepons;
   QList<QList<Int_t> > chainsdeps;
@@ -137,6 +146,7 @@ void QProcList::InitProcess(Bool_t allocateparammem)
 
     for(i=0; i<fQPL->Count(); ++i)  {
       proc=((QProcessor*)(*fQPL)[i]);
+      proc->BuildObjLists();
       npiobjs=proc->GetIObjList().Count();
       npoobjs=proc->GetOObjList().Count();
 
@@ -323,8 +333,8 @@ void QProcList::InitProcess(Bool_t allocateparammem)
 	  fThreads[chainthr[k]].Chains[chainidx[k]].DMutexes[chainsdeps[k].BinarySearch(i)]=(pthread_mutex_t*)fMutexes->GetLast();
 	}
 
-	//Else if it is the first chain in the thread and it is not the first (main) thread
-      } else if(chainthr[i]) {
+	//Else if it is the first chain in the thread and it is not the first (main) thread or if not using the main thread for execution
+      } else if(!fPPUsesMain || chainthr[i]) {
 	chain->NDOMutexes=1;
 	chain->DOMutexes=new pthread_mutex_t*[1];
 	(*fMutexes)++;
@@ -343,7 +353,7 @@ void QProcList::InitProcess(Bool_t allocateparammem)
 	chain->NDMutexes=chainsdeps[i].Count();
 	chain->DMutexes=new pthread_mutex_t*[chain->NDMutexes];
 
-      } else if(chainthr[i]) {
+      } else if(!fPPUsesMain || chainthr[i]) {
 	chain->NDMutexes=1;
 	chain->DMutexes=new pthread_mutex_t*[1];
 	(*fMutexes)++;
@@ -410,7 +420,7 @@ void QProcList::InitProcess(Bool_t allocateparammem)
   }
   fStopThreads=kFALSE;
 
-  for(i=1; i<fNThreads; ++i) {
+  for(i=fPPUsesMain; i<fNThreads; ++i) {
     fThreads[i].Stop=&fStopThreads;
     pthread_create(&fThreads[i].Thread, NULL, QPLThread, &fThreads[i]);
   }
@@ -478,10 +488,16 @@ void QProcList::SetParamAddress(const Int_t &index, Double_t* const paddr)
 
 void QProcList::TerminateProcess()
 {
-  Int_t i,j;
-  for(i=0; i<fQPL->Count(); i++) ((QProcessor*)(*fQPL)[i])->TerminateProcess();
+  for(Int_t i=0; i<fQPL->Count(); i++) ((QProcessor*)(*fQPL)[i])->TerminateProcess();
+  TerminateThreads();
+}
+
+void QProcList::TerminateThreads()
+{
+  Int_t i;
 
   if(fThreads) {
+    Int_t j;
     fStopThreads=kTRUE;
 
     for(i=fMutexes->Count()-1; i>=0; --i) pthread_mutex_unlock((pthread_mutex_t*)(*fMutexes)[i]);

@@ -62,7 +62,7 @@ class QProcessor: public TNamed
     virtual void SetParamAddress(const char *paramname, Double_t* const paddr=NULL);
     void SetParams(Double_t const* const params);
 
-    virtual void SetPProcessing(const Bool_t &pprocessing=0){fPProcessing=pprocessing;}
+    virtual void SetPProcessing(const Bool_t &pprocessing=kFALSE){fPProcessing=pprocessing;}
     virtual void SetVerbosity(const UInt_t &verbosity=0){fVerbosity=verbosity;}
 
     virtual void TerminateProcess()=0;

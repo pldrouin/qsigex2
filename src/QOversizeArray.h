@@ -68,7 +68,7 @@ class QOversizeArray
 
     void SetBuffer(void *buffer){fBuffer=buffer;}
 
-    static void SetMemConstraints(const Long64_t &critmemsize=0, const Long64_t &level1memsize=0, const Long64_t &level2memsize=0, const Long64_t &cthreshmemsize=-1);
+    static void SetMemConstraints(const Long64_t &critmemsize=0, const Long64_t &level1memsize=0, const Long64_t &level2memsize=0, Long64_t cthreshmemsize=-1);
 
     void SetNOAllocBlock(const UInt_t &noallocblock){fNOAllocBlock=noallocblock;}
 
