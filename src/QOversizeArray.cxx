@@ -124,17 +124,19 @@ void QOversizeArray::CloseFile()
     pthread_mutex_unlock(&fMMMutex);
     //From here QOAMMThread won't try to send a new job to either fMWThread of fMCThread of the big lock on fILMutex
 
-    //Send a signal to fMWThread to terminate and wait for termination
-    pthread_mutex_lock(&fMWMutex);
-    fMWAction=2;
-    //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
-    pthread_mutex_lock(&fMWCMutex);
-    pthread_mutex_unlock(&fMWMutex);
-    pthread_cond_signal(&fMWCond);
-    pthread_mutex_unlock(&fMWCMutex);
-    //printf("Waiting for MW thread %p to terminate...\n",this);
-    pthread_join(fMWThread,NULL);
-    //printf("MW thread %p has terminated\n",this);
+    if(fOpenMode!=kRead) {
+      //Send a signal to fMWThread to terminate and wait for termination
+      pthread_mutex_lock(&fMWMutex);
+      fMWAction=2;
+      //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
+      pthread_mutex_lock(&fMWCMutex);
+      pthread_mutex_unlock(&fMWMutex);
+      pthread_cond_signal(&fMWCond);
+      pthread_mutex_unlock(&fMWCMutex);
+      //printf("Waiting for MW thread %p to terminate...\n",this);
+      pthread_join(fMWThread,NULL);
+      //printf("MW thread %p has terminated\n",this);
+    }
 
     //If no instances are left, wait for QOAMCThread to stop
     if(!fInstances.Count()) {
@@ -536,7 +538,7 @@ void QOversizeArray::OpenFile()
   }
 
   //Create memory writing thread
-  pthread_create(&fMWThread, NULL, QOAMWThread, this);
+  if(fOpenMode!=kRead) pthread_create(&fMWThread, NULL, QOAMWThread, this);
   //Create buffer loading thread
   pthread_create(&fBLThread, NULL, QOABLThread, this);
 
@@ -604,17 +606,19 @@ void QOversizeArray::ResetArray()
   pthread_cond_wait(&fBLWCond,&fBLCMutex);
   pthread_mutex_unlock(&fBLCMutex);
 
-  pthread_mutex_lock(&fMWMutex);
-  //Request a pause from memory writing thread
-  fMWAction=1;
-  //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
-  pthread_mutex_lock(&fMWCMutex);
-  pthread_mutex_unlock(&fMWMutex);
-  pthread_cond_signal(&fMWCond);
-  //Wait for pause confirmation
-  pthread_cond_wait(&fMWPCond,&fMWCMutex);
-  pthread_mutex_unlock(&fMWCMutex);
-  printstatus("Memory writing thread confirmed to be in pausing condition");
+  if(fOpenMode!=kRead) {
+    pthread_mutex_lock(&fMWMutex);
+    //Request a pause from memory writing thread
+    fMWAction=1;
+    //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
+    pthread_mutex_lock(&fMWCMutex);
+    pthread_mutex_unlock(&fMWMutex);
+    pthread_cond_signal(&fMWCond);
+    //Wait for pause confirmation
+    pthread_cond_wait(&fMWPCond,&fMWCMutex);
+    pthread_mutex_unlock(&fMWCMutex);
+    printstatus("Memory writing thread confirmed to be in pausing condition");
+  }
 
   if(fCThreshMemSize<=fCritMemSize) {
     //A Giant lock is used here to avoid conflicts when ResetArray for different QOA instances are called at the same time (for a multi-threaded application).
@@ -674,15 +678,17 @@ void QOversizeArray::ResetArray()
     pthread_mutex_unlock(&fMCGMutex);
   }
 
-  //Remove pause condition on memory writing thread
-  pthread_mutex_lock(&fMWMutex);
-  fMWAction=0;
-  //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
-  pthread_mutex_lock(&fMWCMutex);
-  pthread_mutex_unlock(&fMWMutex);
-  printstatus("QOversizeArray::ResetArray: Removing pausing condition from memory writing thread");
-  pthread_cond_signal(&fMWCond);
-  pthread_mutex_unlock(&fMWCMutex);
+  if(fOpenMode!=kRead) {
+    //Remove pause condition on memory writing thread
+    pthread_mutex_lock(&fMWMutex);
+    fMWAction=0;
+    //It is important to unlock fMWMutex after locking fMWCMutex to ensure getting the right condition from QOAMWThread
+    pthread_mutex_lock(&fMWCMutex);
+    pthread_mutex_unlock(&fMWMutex);
+    printstatus("QOversizeArray::ResetArray: Removing pausing condition from memory writing thread");
+    pthread_cond_signal(&fMWCond);
+    pthread_mutex_unlock(&fMWCMutex);
+  }
 
   //Unlock buffer structure
   pthread_mutex_unlock(&fBuffersMutex);
