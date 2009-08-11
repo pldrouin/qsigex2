@@ -45,7 +45,7 @@ class QProcedure
 
     const QProcObj* IObj(const Int_t &i) const{return fArgs.IObj(i);}
     QProcObj* OObj(const Int_t &i) const{return fArgs.OObj(i);}
-    Double_t& Param(const Int_t &i) const{return fArgs.Param(i);}
+    Double_t const& Param(const Int_t &i) const{return fArgs.Param(i);}
 
     void SetIVarPtr(const Int_t &index, void* const buf, const Int_t &type=-1){fArgs.SetIVarPtr(index,buf,type);}
     void SetIObjPtr(const Int_t &index, QProcObj* const obj){fArgs.SetIObjPtr(index,obj);}

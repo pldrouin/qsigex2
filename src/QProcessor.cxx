@@ -24,7 +24,7 @@ QProcessor::~QProcessor()
   fChildParamsMapping=NULL;
 }
 
-QProcessor::QProcessor(const QProcessor &rhs): TNamed(rhs), fParams(new QList<Double_t*>(*rhs.fParams)), fOwnsParams(new QList<Bool_t>), fParamsNames(new QList<TString>(*rhs.fParamsNames)), fParamsChildIndices(new QList<QList<Int_t > >(*rhs.fParamsChildIndices)), fChildParamsMapping(new QList<QList<Int_t> >(*rhs.fChildParamsMapping)), fVerbosity(0)
+QProcessor::QProcessor(const QProcessor &rhs): TNamed(rhs), fParams(new QList<Double_t*>(*rhs.fParams)), fOwnsParams(new QList<Bool_t>), fParamsNames(new QList<TString>(*rhs.fParamsNames)), fParamsChildIndices(new QList<QList<Int_t > >(*rhs.fParamsChildIndices)), fChildParamsMapping(new QList<QList<Int_t> >(*rhs.fChildParamsMapping)), fForceExecAll(rhs.fForceExecAll), fVerbosity(rhs.fVerbosity), fPProcessing(rhs.fPProcessing)
 {
   fOwnsParams->RedimList(rhs.fParams->Count(),-1,kFALSE);
 }

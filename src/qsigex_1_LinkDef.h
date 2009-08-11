@@ -31,6 +31,7 @@
 #pragma link C++ class QList<QProcObj*>-;
 #pragma link C++ class QList<QProcArray*>-;
 #pragma link C++ class QList<QOversizeArray*>-;
+#pragma link C++ class QList<QDepTree*>-;
 
 #pragma link C++ class QNamedVar<Bool_t>;
 #pragma link C++ class QNamedVar<TString>;
@@ -58,7 +59,7 @@
 #pragma link C++ class QProcBranch-;
 #pragma link C++ class QProcQOA-;
 #pragma link C++ class QProcTBranchWrapper;
-#pragma link C++ class QDependentProcs;
+#pragma link C++ class QDepTree;
 #pragma link C++ class QProcessor;
 #pragma link C++ class QStdProcessor;
 #pragma link C++ class QArrayProcessor;

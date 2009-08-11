@@ -29,7 +29,7 @@ class QProcObjProcessor: public QStdProcessor
     void DelProc(const Int_t &index=-1){fProcs->Del(index);}
     void DelProc(const char *procname);
 
-    void Exec(const Bool_t &forceall=kFALSE) const;
+    void Exec() const;
 
     void InitProcess(Bool_t allocateparammem=kTRUE);
 
@@ -43,6 +43,10 @@ class QProcObjProcessor: public QStdProcessor
     void Browse(TBrowser *b);
 
   protected:
+    void BuildObjLists(){}
+    void ClearObjLists(){}
+    const QList<QProcObj*>& GetIObjList() const{return *fIObjects;}
+    const QList<QProcObj*>& GetOObjList() const{return *fOObjects;}
 
   private:
     QList<QList<Int_t> > *fIOIndices;    //-> Indices of objects that are used as input for each process
@@ -50,6 +54,14 @@ class QProcObjProcessor: public QStdProcessor
     QList<QMask >             *fObjsPDepends; //-> Dependencies of processes on input objects
     QList<QProcObj*>         *fIObjects; //! Input objects 
     QList<QProcObj*>         *fOObjects; //! Output objects 
+
+    mutable QMask lExecpardiffs;            //! Modified parameters since the last call
+    mutable QMask lExecdepmods;             //! Required processes due to modified input objects
+    mutable Bool_t lExecrunall;
+    mutable Int_t lExeci;
+    mutable Int_t lExecj;
+    mutable QList<QProcObj*> lExecoobjects; //! List for output objects needing update
+    mutable QList<TObject*> lExecprocs;     //! List of needed processes
 
     mutable QList<Bool_t>	fNeededOO; //Needed output objects
 

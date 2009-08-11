@@ -66,7 +66,11 @@ class QProcArgs
   const UInt_t& IVarUI(const Int_t &i) const{CHECKIBTYPE(i,kUInt); return *(UInt_t*)fIBuffers[i]; QPACATCHRETI(UInt_t)}
   const ULong64_t& IVarUL(const Int_t &i) const{CHECKIBTYPE(i,kULong64); return *(ULong64_t*)fIBuffers[i]; QPACATCHRETI(ULong64_t)}
   const UShort_t& IVarUS(const Int_t &i) const{CHECKIBTYPE(i,kUShort); return *(UShort_t*)fIBuffers[i]; QPACATCHRETI(UShort_t)}
+#ifndef QSFAST
   const QProcObj* IObj(const Int_t &i) const{return fIObjects[i];}
+#else
+  QProcObj* const& IObj(const Int_t &i) const{return fIObjects[i];}
+#endif
   Double_t& OVar(const Int_t &i) const{CHECKOBTYPE(i,kDouble); return *(Double_t*)fOBuffers[i]; QPACATCHRETO(Double_t)}
   Bool_t& OVarB(const Int_t &i) const{CHECKOBTYPE(i,kBool); return *(Bool_t*)fOBuffers[i]; QPACATCHRETO(Bool_t)}
   Char_t& OVarC(const Int_t &i) const{CHECKOBTYPE(i,kChar); return *(Char_t*)fOBuffers[i]; QPACATCHRETO(Char_t)}
@@ -79,12 +83,12 @@ class QProcArgs
   UInt_t& OVarUI(const Int_t &i) const{CHECKOBTYPE(i,kUInt); return *(UInt_t*)fOBuffers[i]; QPACATCHRETO(UInt_t)}
   ULong64_t& OVarUL(const Int_t &i) const{CHECKOBTYPE(i,kULong64); return *(ULong64_t*)fOBuffers[i]; QPACATCHRETO(ULong64_t)}
   UShort_t& OVarUS(const Int_t &i) const{CHECKOBTYPE(i,kShort); return *(UShort_t*)fOBuffers[i]; QPACATCHRETO(UShort_t)}
-  QProcObj* OObj(const Int_t &i) const{return fOObjects[i];}
-  Double_t& Param(const Int_t &i) const{QPATRY return *fPBuffers[i]; QPACATCHRETP}
+  QProcObj* const& OObj(const Int_t &i) const{return fOObjects[i];}
+  const Double_t& Param(const Int_t &i) const{QPATRY return *fPBuffers[i]; QPACATCHRETP}
 #ifdef __CINT__
   Double_t ** Params() const{return fPBuffers.GetArray();}
 #else
-  Double_t* const* Params() const{return fPBuffers.GetArray();}
+  Double_t** const & Params() const{return fPBuffers.GetArray();}
 #endif
 
   protected:

@@ -71,7 +71,7 @@ template <typename U> inline void QList<U>::Add(const U& newelement, const Int_t
   fUArray[i]=newelement;
 }
 
-template <typename U> void QList<U>::Add(const U* newelements, const Int_t &nelements, const Int_t &index)
+template <typename U> void QList<U>::Add(const U* const newelements, const Int_t &nelements, const Int_t &index)
 {
   // This function adds elements to the list, given a U array of the same U
   // type. Elements are copied using *this[i]=newelements[i]. Consequently, if U is a data
@@ -116,7 +116,7 @@ template <typename U> Int_t QList<U>::AddUnique(const U& newelement, const Int_t
   return idx;
 }
 
-template <typename U> Int_t QList<U>::AddUnique(const U* newelements, const Int_t &nelements, const Int_t &index)
+template <typename U> Int_t QList<U>::AddUnique(const U* const newelements, const Int_t &nelements, const Int_t &index)
 {
   // This functions has the same behaviour than the Add function with the same arguments,
   // except that elements are added only if they are not found using the corresponding 
@@ -127,6 +127,15 @@ template <typename U> Int_t QList<U>::AddUnique(const U* newelements, const Int_
   Int_t idx=FindFirst(newelements,nelements);
   if(idx == -1) Add(newelements,nelements,index);
   return idx;
+}
+
+template<typename U> Int_t QList<U>::BinarySearch(const U &u, const Int_t &fromindex) const
+{
+  if(fromindex>fNElements-1) return -1;
+  Int_t pos=std::lower_bound(fUArray+(fromindex<0?0:fromindex), fUArray+fNElements, u)-fUArray;
+
+  if(pos==fNElements || fUArray[pos]!=u) return -1;
+  return pos;
 }
 
 template <typename U> void QList<U>::Set(const QList<U>& newqlist)
@@ -164,7 +173,7 @@ template <typename U> void QList<U>::Set(const U& newelement)
   fUArray[0]=newelement;
 }
 
-template <typename U> void QList<U>::Set(const U* newelements, const Int_t &nelements)
+template <typename U> void QList<U>::Set(const U* const newelements, const Int_t &nelements)
 {
   // This function sets the list to hold the same values than the ones that are held by a
   // U array of the same U type. Elements are copied using *this[i]=newelements[i].
@@ -214,7 +223,7 @@ template <typename U> Int_t QList<U>::Del(const QList<U>& delqlist, const Int_t 
   return Del(&delu,1,maxmatches);
 }*/
 
-template <typename U> Int_t QList<U>::Del(const U* delus, const Int_t &nelements, const Int_t &maxmatches)
+template <typename U> Int_t QList<U>::Del(const U* const delus, const Int_t &nelements, const Int_t &maxmatches)
 {
   // This function looks in *this for a list part of length nelements that has
   // the sames U values than delus and deletes it. It repeats this process until
@@ -313,7 +322,7 @@ template <typename U> QList<Int_t> QList<U>::Find(const U& u, const Int_t &maxma
   return Find(&u,1,maxmatches,fromindex);
 }
 
-template <typename U> QList<Int_t> QList<U>::Find(const U* us, const Int_t &nelements, const Int_t &maxmatches, const Int_t &fromindex) const
+template <typename U> QList<Int_t> QList<U>::Find(const U* const us, const Int_t &nelements, const Int_t &maxmatches, const Int_t &fromindex) const
 {
   // This function browses the QList<U> U list in a similar manner to the Del member function with
   // the same arguments. However, instead of deleting list parts and returning the number of
@@ -373,7 +382,7 @@ template <typename U> Int_t QList<U>::FindFirst(const U& u, const Int_t &fromind
   return FindFirst(&u,1,fromindex);
 }
 
-template <typename U> Int_t QList<U>::FindFirst(const U* us, const Int_t &nelements, const Int_t &fromindex) const
+template <typename U> Int_t QList<U>::FindFirst(const U* const us, const Int_t &nelements, const Int_t &fromindex) const
 {
   // This function browses the QList<U> U list in a similar manner to the Del member function with
   // the same arguments. However, instead of deleting list parts and returning the number of

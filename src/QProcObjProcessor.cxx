@@ -78,7 +78,7 @@ void QProcObjProcessor::Analyze()
 
   fIOIndices->RedimList(nprocs);
   fOOIndices->RedimList(nprocs);
-  QDependentProcs *depprocs=new QDependentProcs[nprocs]; //QDependentProcs objects contain a list of processes that should be triggered
+  QDepTree *depprocs=new QDepTree[nprocs]; //QDepTree objects contain a list of processes that should be triggered
   QList<Int_t> oolastproc; //Index of last process having recorded its output in a given object
   fProcsParDepends->RedimList(nprocs);
 
@@ -219,99 +219,101 @@ void QProcObjProcessor::DelProc(const char *procname)
   }
 }
 
-void QProcObjProcessor::Exec(const Bool_t &forceall) const
+void QProcObjProcessor::Exec() const
 {
-  static QMask pardiffs; //Modified parameters since the last call
-  static QMask depmods;  //Required processes due to modified input objects
-  static Bool_t runall;
-  pardiffs.Clear();
-  depmods.Clear();
-  static Int_t i,j;
+  lExecpardiffs.Clear();
+  lExecdepmods.Clear();
 
   //fLastExec gets cleared by the function Analyze, so this is how the first run is identified
   if(fLastExec.GetSec() != 0) {
 
     //Loop over parameters
-    for(i=fParams->Count()-1; i>=0; --i) {
+    for(lExeci=fParams->Count()-1; lExeci>=0; --lExeci) {
 
       //If the current parameter value has changed, set the correspongind bit in the parameter mask
-      if(*(fParams->GetArray()[i]) != fLastParams->GetArray()[i]) pardiffs.SetBit(i,1);
+      if(*(fParams->GetArray()[lExeci]) != fLastParams->GetArray()[lExeci]) lExecpardiffs.SetBit(lExeci,1);
     }
 
     //Loop over all input objects
-    for(i=fIObjects->Count()-1; i>=0; --i) {
+    for(lExeci=fIObjects->Count()-1; lExeci>=0; --lExeci) {
 
       //If the current input object has been modified after the last run, add its mask to the mask of required processes
-      if((*fIObjects)[i]->NewerThan(fLastExec)) depmods|=(*fObjsPDepends)[i];
+      if((*fIObjects)[lExeci]->NewerThan(fLastExec)) lExecdepmods|=(*fObjsPDepends)[lExeci];
     }
 
-    runall=forceall;
+    lExecrunall=fForceExecAll;
   } else {
     fNeededOO.RedimList(fOObjects->Count());
-    runall=kTRUE;
+    lExecrunall=kTRUE;
   }
 
   //printf("Mask for the current parameters: ");
-  //pardiffs.Print();
+  //lExecpardiffs.Print();
 
   //If at least one of the parameters has changed
-  if(pardiffs || depmods || runall) {
+  if(lExecpardiffs || lExecdepmods || lExecrunall) {
     if(GetVerbosity()&QProcessor::kShowExec) printf("QProcObjProcessor('%s')::Exec()\n",GetName());
 
-    static QList<QProcObj*> oobjects; //List for output objects needing update
-    static QList<TObject*> procs;     //List of needed processes
-
-    oobjects.Clear();
-    procs.Clear();
+    lExecoobjects.Clear();
+    lExecprocs.Clear();
 
     memset(fNeededOO.GetArray(),0,fNeededOO.Count()*sizeof(Bool_t));
 
     //Loop over all processes
-    for(i=0; i<fProcs->Count(); i++) {
+    for(lExeci=0; lExeci<fProcs->Count(); lExeci++) {
 
       //If the current process has never been run or if it is triggered by the parameters mask
-      if(((*fProcsParDepends)[i] && pardiffs) || depmods.GetBit(i) || runall) {
+      if(((*fProcsParDepends)[lExeci] && lExecpardiffs) || lExecdepmods.GetBit(lExeci) || lExecrunall) {
 
-	if(GetVerbosity()&QProcessor::kShowExec) printf("\tProcess '%s' will be called\n",(*fProcs)[i].GetName());
+	if(GetVerbosity()&QProcessor::kShowExec) printf("\tProcess '%s' will be called\n",(*fProcs)[lExeci].GetName());
 	//Add it to the list of needed processes
-	procs.Add(&(*fProcs)[i]);
+	lExecprocs.Add(&(*fProcs)[lExeci]);
 
 	//Loop over output objets of the current process
-	for(j=(*fOOIndices)[i].Count()-1; j>=0; --j) {
+	for(lExecj=(*fOOIndices)[lExeci].Count()-1; lExecj>=0; --lExecj) {
 	  //Add the current object to the list of needed output objects
-	  fNeededOO[(*fOOIndices)[i][j]]=kTRUE;
+	  fNeededOO[(*fOOIndices)[lExeci][lExecj]]=kTRUE;
 	}
       }
     }
 
+    //printf("%p: Init output objects\n",this);
     //Loop over all output objects
-    for(i=fNeededOO.Count()-1; i>=0; --i) {
+    for(lExeci=fNeededOO.Count()-1; lExeci>=0; --lExeci) {
+      //printf("%p: %i (%p)\n",this,lExeci,(*fOObjects)[lExeci]);
 
       //If the current output object is needed
-      if(fNeededOO[i]) {
+      if(fNeededOO[lExeci]) {
 	//Add it to the list of needed output objects
-	oobjects.Add((*fOObjects)[i]);
+	lExecoobjects.Add((*fOObjects)[lExeci]);
 	//Initialize the object
-	(*fOObjects)[i]->InitProcObj();
+	(*fOObjects)[lExeci]->InitProcObj();
       }
     }
+    //printf("%p: Done init output objects\n",this);
 
+    //printf("%p: Exec procs\n",this);
     //Loop over all triggered processes
-    for(j=0; j<procs.Count(); ++j) {
+    for(lExecj=0; lExecj<lExecprocs.Count(); ++lExecj) {
+      //printf("%p: %i\n",this,lExecj);
       //Exec the process.
-      ((QNamedProc*)procs.GetArray()[j])->Exec();
+      ((QNamedProc*)lExecprocs.GetArray()[lExecj])->Exec();
     }
+    //printf("%p: Done exec procs\n",this);
 
+    //printf("%p: Terminate output objects\n",this);
     //Loop over needed output objects
-    for(i=oobjects.Count()-1; i>=0; --i) {
+    for(lExeci=lExecoobjects.Count()-1; lExeci>=0; --lExeci) {
+      //printf("%p: %i\n",this,lExeci);
       //Terminate the object
-      oobjects[i]->TerminateProcObj();
+      lExecoobjects[lExeci]->TerminateProcObj();
       //Update the modification time for the object
-      oobjects[i]->UpdateModTime();
+      lExecoobjects[lExeci]->UpdateModTime();
     }
+    //printf("%p: Done terminating output objects\n",this);
 
     //Save the parameters
-    for(i=fParams->Count()-1; i>=0; --i) fLastParams->GetArray()[i]=*(fParams->GetArray()[i]);
+    for(lExeci=fParams->Count()-1; lExeci>=0; --lExeci) fLastParams->GetArray()[lExeci]=*(fParams->GetArray()[lExeci]);
     fLastExec.Set();
 
   } else {

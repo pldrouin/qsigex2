@@ -11,6 +11,7 @@ class QProcObj
     QProcObj(const QProcObj& qprocobj): fLastModified(qprocobj.fLastModified){}
     virtual ~QProcObj(){}
     virtual const TTimeStamp& GetTimeStamp() const{return fLastModified;}
+    virtual const Bool_t& IsReadThreadSafe() const{return kTRUE;}
     virtual Bool_t NewerThan(const TTimeStamp &time) const;
     const QProcObj& operator=(const QProcObj& rhs){fLastModified=rhs.fLastModified; return *this;}
     virtual void UpdateModTime(){fLastModified.Set();}

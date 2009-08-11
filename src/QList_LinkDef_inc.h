@@ -4,3 +4,4 @@
 #include "QProcArray.h"
 
 class QOversizeArray;
+class QDepTree;

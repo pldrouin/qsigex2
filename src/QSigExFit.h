@@ -19,7 +19,7 @@ class QSigExFit: public TObject
 
     virtual Double_t EvalFCN() const=0;
 
-    void ExecProc(const Bool_t &forceall=kFALSE) const{fQProcessor->Exec(forceall);}
+    void ExecProc() const{fQProcessor->Exec();}
 
     Int_t FindFreeParamIndex(const char *paramname) const;
     Int_t FindParamIndex(const char *paramname) const;

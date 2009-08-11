@@ -12,6 +12,7 @@ class QProcTObject: public QProcObj
     virtual ~QProcTObject(){}
     void InitProcObj(){}
     TObject* GetObject() const{return fObject;}
+    const Bool_t& IsReadThreadSafe() const{return kTRUE;}
     operator TObject*() const{return fObject;}
     operator const TObject*() const{return fObject;}
     const QProcTObject& operator=(const QProcTObject &rhs){fObject=rhs.fObject; return *this;}

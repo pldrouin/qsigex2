@@ -46,6 +46,7 @@ template <> EXTERN void QList<TObject*>::Streamer(TBuffer &R__b);
 template <> EXTERN void QList<QProcObj*>::Streamer(TBuffer &R__b);
 template <> EXTERN void QList<QProcArray*>::Streamer(TBuffer &R__b);
 template <> EXTERN void QList<QOversizeArray*>::Streamer(TBuffer &R__b);
+template <> EXTERN void QList<QDepTree*>::Streamer(TBuffer &R__b);
 #else
 template <> void QList<UChar_t>::Streamer(TBuffer &R__b)
 {
@@ -163,5 +164,6 @@ template <> void QList<TObject*>::Streamer(TBuffer &){}
 template <> void QList<QProcObj*>::Streamer(TBuffer &){}
 template <> void QList<QProcArray*>::Streamer(TBuffer &){}
 template <> void QList<QOversizeArray*>::Streamer(TBuffer &){}
+template <> void QList<QDepTree*>::Streamer(TBuffer &){}
 
 #endif

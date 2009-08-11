@@ -82,8 +82,8 @@ class QPHN: public QHN_D
     inline void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6),y);}
     inline void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7),y);}
     inline void Fill(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8, const Float_t &y){AddBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8),y);}
-    inline const Double_t& GetBinContent(const Long64_t &bin) const{static Double_t ret; return ret=(fBinEntries[bin]?fBinContent[bin]/fBinEntries[bin]:0);}
-    inline const Double_t& GetFBinContent(const Long64_t &fbin) const{static Double_t ret; return ret=(fBinEntries[fbin]?fBinContent[fbin]/fBinEntries[fbin]:0);}
+    inline const Double_t& GetBinContent(const Long64_t &bin) const{return lBCret=(fBinEntries[bin]?fBinContent[bin]/fBinEntries[bin]:0);}
+    inline const Double_t& GetFBinContent(const Long64_t &fbin) const{return lBCret=(fBinEntries[fbin]?fBinContent[fbin]/fBinEntries[fbin]:0);}
     QHN_D* New() const{return new QPHN;}
     QHN_D* New(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QPHN(name,title,ndims);}
     const QPHN& operator=(const QPHN &qthn);
@@ -95,9 +95,11 @@ class QPHN: public QHN_D
     void Init(){fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t)); memset(fBinEntries,0,fNBins*sizeof(Double_t));}
   private:
     Double_t *fBinEntries;
+    mutable Double_t lBCret;
     void AddFBinContent(const Long64_t &fbin, const Double_t &w){}
     void Fill(const Double_t &x0){}
     void Fill(const Float_t &x0){}
+    const Bool_t& IsReadThreadSafe() const{return kFALSE;}
     const QPHN& operator=(const QHN_D &qthn){return *this;}
     void ScaleBinContent(const Long64_t &bin, const Double_t &scale){}
     void ScaleBinContent(const Int_t *coords, const Double_t &scale){}

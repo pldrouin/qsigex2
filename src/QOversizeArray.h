@@ -47,6 +47,8 @@ class QOversizeArray
     const UInt_t& GetObjSize() const{return fObjectSize;}
     const Char_t* GetObjTypeName() const{return fObjectTypeName.Data();}
 
+    const Bool_t& IsReadThreadSafe() const{return kFALSE;}
+
     void LoadEntry(const Long64_t &entry = 0);
 
     const omode& GetOpenMode(){return fOpenMode;}
@@ -145,6 +147,12 @@ class QOversizeArray
     QOABuffer     **fUZQOAB;       //! Array of QOABuffers that have been unzipped
     Char_t        **fUZBuffers;    //! Array of unzipped buffers
     pthread_mutex_t fUZBMutex;     // Lock on unzipped buffer arrays
+
+    UInt_t lFillallocsize;
+    UInt_t lFillnextbufidx;
+    Int_t  lLEuzbidx;
+    Int_t  lLEibuf;
+
     static QList<QOversizeArray*> fInstances; // List of QOversizeArray instances
     static QList<Float_t>         fICumulPriority; // Cumulative array priorities
     static Long64_t fLevel1MemSize; // Memory level at which memory management thread stops attempting to free memory
@@ -164,6 +172,7 @@ class QOversizeArray
     static pthread_mutex_t fMWCDMutex;    // Memory writing/compression thread done condition mutex
     static pthread_cond_t fMWCDCond;      // Memory writing/compression thread done confirmation condition
     static pthread_t fMCThread;           // Memory compression thread
+    static pthread_mutex_t fMCGMutex;     // Memory compression thread giant mutex
     static pthread_mutex_t fMCMutex;      // Memory compression thread mutex
     static pthread_cond_t fMCCond;        // Memory compression thread condition
     static pthread_mutex_t fMCCMutex;     // Memory compression thread condition mutex

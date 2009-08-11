@@ -32,6 +32,7 @@ QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omod
     }
     ui=GetTypeSize(fBTypeID);
   }
+  fOwnsBuffer=kTRUE;
   fBuffer=new Char_t[ui];
   fArray->SetBuffer(fBuffer);
 }
