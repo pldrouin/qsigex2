@@ -221,8 +221,13 @@ void QProcObjProcessor::DelProc(const char *procname)
 
 void QProcObjProcessor::Exec() const
 {
-  lExecpardiffs.Clear();
-  lExecdepmods.Clear();
+  QMask lExecpardiffs;            //Modified parameters since the last call
+  QMask lExecdepmods;             //Required processes due to modified input objects
+  Bool_t lExecrunall;
+  Int_t lExeci;
+  Int_t lExecj;
+  //lExecpardiffs.Clear();
+  //lExecdepmods.Clear();
 
   //fLastExec gets cleared by the function Analyze, so this is how the first run is identified
   if(fLastExec.GetSec() != 0) {
@@ -254,8 +259,10 @@ void QProcObjProcessor::Exec() const
   if(lExecpardiffs || lExecdepmods || lExecrunall) {
     if(GetVerbosity()&QProcessor::kShowExec) printf("QProcObjProcessor('%s')::Exec()\n",GetName());
 
-    lExecoobjects.Clear();
-    lExecprocs.Clear();
+    QList<QProcObj*> lExecoobjects; //List for output objects needing update
+    QList<TObject*> lExecprocs;     //List of needed processes
+    //lExecoobjects.Clear();
+    //lExecprocs.Clear();
 
     memset(fNeededOO.GetArray(),0,fNeededOO.Count()*sizeof(Bool_t));
 

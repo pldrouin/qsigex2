@@ -252,6 +252,8 @@ void QOversizeArray::Fill()
 
   //If fWriteBuffer contains the maximum number of objects allowed by the currently allocated memory
   if(fNObjects-fWBFirstObjIdx == fWBNAllocObjs) {
+
+    UInt_t lFillallocsize=0;
     printstatus("Fill needs to allocate more space");
 
     if(fWBNAllocObjs<fNOPerBuffer) {
@@ -278,7 +280,7 @@ void QOversizeArray::Fill()
       }
 #endif
 
-      lFillnextbufidx=fWriteBuffer->fBufferIdx+1;
+      UInt_t lFillnextbufidx=fWriteBuffer->fBufferIdx+1;
 
       //If switching from read mode
       pthread_mutex_lock(&fBuffersMutex);
@@ -389,7 +391,7 @@ void QOversizeArray::LoadEntry(const Long64_t &entry)
     return;
   }
 
-  lLEibuf=entry/fNOPerBuffer;
+  Int_t lLEibuf=entry/fNOPerBuffer;
 
   //If the read buffer for the current event is already loaded
   if(fCurReadBuffer && lLEibuf==fCurReadBuffer->fBufferIdx) {
@@ -461,7 +463,7 @@ void QOversizeArray::LoadEntry(const Long64_t &entry)
       pthread_mutex_lock(&fUZBMutex);
 
       //Find fCurReadBuffer in fUZQOAB
-      for(lLEuzbidx=0;;++lLEuzbidx) {
+      for(Int_t lLEuzbidx=0;;++lLEuzbidx) {
 
 	if(fUZQOAB[lLEuzbidx]==fCurReadBuffer) {
 	  //printf("LoadEntry: Uncompressed buffer %i==%i (%p) is found in fUZQOAB[%i]\n",fCurReadBuffer->fBufferIdx,fUZQOAB[lLEuzbidx]->fBufferIdx,fUZQOAB[lLEuzbidx],lLEuzbidx);
@@ -469,7 +471,7 @@ void QOversizeArray::LoadEntry(const Long64_t &entry)
 	  break;
 	}
       }
-      ASSERT(lLEuzbidx<fNPCBuffers+2 && fUZQOAB[lLEuzbidx]->fBufferIdx==fCurReadBuffer->fBufferIdx);
+      //ASSERT(lLEuzbidx<fNPCBuffers+2 && fUZQOAB[lLEuzbidx]->fBufferIdx==fCurReadBuffer->fBufferIdx);
       pthread_mutex_unlock(&fUZBMutex);
     }
 

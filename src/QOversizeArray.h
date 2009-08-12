@@ -148,11 +148,6 @@ class QOversizeArray
     Char_t        **fUZBuffers;    //! Array of unzipped buffers
     pthread_mutex_t fUZBMutex;     // Lock on unzipped buffer arrays
 
-    UInt_t lFillallocsize;
-    UInt_t lFillnextbufidx;
-    Int_t  lLEuzbidx;
-    Int_t  lLEibuf;
-
     static QList<QOversizeArray*> fInstances; // List of QOversizeArray instances
     static QList<Float_t>         fICumulPriority; // Cumulative array priorities
     static Long64_t fLevel1MemSize; // Memory level at which memory management thread stops attempting to free memory
