@@ -532,13 +532,13 @@ void QArrayProcessor::DelProc(const char *procname)
 
 void QArrayProcessor::Exec() const
 {
-  QMask lExecpardiffs;    //! Modified parameters since the last call
-  QMask lExecdepmods;     //! Required processes due to modified input arrays or input objects
+  //QMask lExecpardiffs;    //! Modified parameters since the last call
+  //QMask lExecdepmods;     //! Required processes due to modified input arrays or input objects
   Bool_t lExecrunall;
   Int_t lExeci;
   Int_t lExecj;
-  //lExecpardiffs.Clear();
-  //lExecdepmods.Clear();
+  lExecpardiffs.Clear();
+  lExecdepmods.Clear();
 
   //fLastParams gets cleared by the function Analyze, so this is how the first run is identified
   if(fForceExecAll || fLastExec.GetSec() != 0) {
@@ -586,15 +586,15 @@ void QArrayProcessor::Exec() const
     //printf("Object mask for the current parameters: ");
     //lExecdepmods.Print();
 
-    QList<QProcArray*>  lExeciaarrays;    //! List for needed input all events arrays
-    QList<QProcArray*>  lExecisarrays;    //! List for needed input selected events arrays
-    QList<QProcArray*>  lExecoarrays;     //! List for output arrays needing update
-    QList<QProcObj*>    lExecoobjects;    //! List for output objects needing update
-    QList<Bool_t>       lExecoasproc;     //! Indicate if output array needing update are dependent or not on a selector process
-    QList<TObject*>     lExecprocs;       //! List of needed processes
+    //QList<QProcArray*>  lExeciaarrays;    //! List for needed input all events arrays
+    //QList<QProcArray*>  lExecisarrays;    //! List for needed input selected events arrays
+    //QList<QProcArray*>  lExecoarrays;     //! List for output arrays needing update
+    //QList<QProcObj*>    lExecoobjects;    //! List for output objects needing update
+    //QList<Bool_t>       lExecoasproc;     //! Indicate if output array needing update are dependent or not on a selector process
+    //QList<TObject*>     lExecprocs;       //! List of needed processes
     Int_t               lExecnaeprocs=0;    //! Number of processes that process all entries in the array
-    QList<Bool_t>       lExecselprocs;    //! Indicate if the needed processes is a selector process or not
-    QList<Bool_t>       lExecseldepprocs; //! Indicate if the needed processes depends on a selector process or not
+    //QList<Bool_t>       lExecselprocs;    //! Indicate if the needed processes is a selector process or not
+    //QList<Bool_t>       lExecseldepprocs; //! Indicate if the needed processes depends on a selector process or not
     Bool_t              lExecdoselection=kFALSE;
     Long64_t            lExecneaea;       //! Number of entries for arrays that should contain all events
     Long64_t            lExecneaealast=-1;   //! Number of entries for the previous input array that should contain all events
@@ -603,9 +603,15 @@ void QArrayProcessor::Exec() const
     Long64_t            lExecli;
     Bool_t              lExeceventselected;
 
+    lExeciaarrays.Clear();
+    lExecisarrays.Clear();
+    lExecoarrays.Clear();
+    lExecoobjects.Clear();
+    lExecoasproc.Clear();
+    lExecprocs.Clear();
     //lExecnaeprocs=0;
-    //lExecselprocs.Clear();
-    //lExecseldepprocs.Clear();
+    lExecselprocs.Clear();
+    lExecseldepprocs.Clear();
     //lExecdoselection=kFALSE;
     //lExecneaealast=-1;
     //lExecnesealast=-1;

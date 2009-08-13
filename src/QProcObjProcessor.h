@@ -55,13 +55,13 @@ class QProcObjProcessor: public QStdProcessor
     QList<QProcObj*>         *fIObjects; //! Input objects 
     QList<QProcObj*>         *fOObjects; //! Output objects 
 
-    //mutable QMask lExecpardiffs;            //! Modified parameters since the last call
-    //mutable QMask lExecdepmods;             //! Required processes due to modified input objects
+    mutable QMask lExecpardiffs;            //! Modified parameters since the last call
+    mutable QMask lExecdepmods;             //! Required processes due to modified input objects
     //mutable Bool_t lExecrunall;
     //mutable Int_t lExeci;
     //mutable Int_t lExecj;
-    //mutable QList<QProcObj*> lExecoobjects; //! List for output objects needing update
-    //mutable QList<TObject*> lExecprocs;     //! List of needed processes
+    mutable QList<QProcObj*> lExecoobjects; //! List for output objects needing update
+    mutable QList<TObject*> lExecprocs;     //! List of needed processes
 
     mutable QList<Bool_t>	fNeededOO; //Needed output objects
 

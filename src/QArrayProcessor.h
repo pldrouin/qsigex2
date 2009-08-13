@@ -86,20 +86,20 @@ class QArrayProcessor: public QStdProcessor
     QList<QProcObj*>        *fAIObjects; //! All input objects, including input arrays (temporary)
     QList<QProcObj*>        *fAOObjects; //! All output objects, including output arrays (temporary)
 
-    //mutable QMask		lExecpardiffs;    //! Modified parameters since the last call
-    //mutable QMask		lExecdepmods;     //! Required processes due to modified input arrays or input objects
+    mutable QMask		lExecpardiffs;    //! Modified parameters since the last call
+    mutable QMask		lExecdepmods;     //! Required processes due to modified input arrays or input objects
     //mutable Bool_t		lExecrunall;
     //mutable Int_t		lExeci;
     //mutable Int_t		lExecj;
-    //mutable QList<QProcArray*>  lExeciaarrays;    //! List for needed input all events arrays
-    //mutable QList<QProcArray*>  lExecisarrays;    //! List for needed input selected events arrays
-    //mutable QList<QProcArray*>  lExecoarrays;     //! List for output arrays needing update
-    //mutable QList<QProcObj*>    lExecoobjects;    //! List for output objects needing update
-    //mutable QList<Bool_t>       lExecoasproc;     //! Indicate if output array needing update are dependent or not on a selector process
-    //mutable QList<TObject*>     lExecprocs;       //! List of needed processes
+    mutable QList<QProcArray*>  lExeciaarrays;    //! List for needed input all events arrays
+    mutable QList<QProcArray*>  lExecisarrays;    //! List for needed input selected events arrays
+    mutable QList<QProcArray*>  lExecoarrays;     //! List for output arrays needing update
+    mutable QList<QProcObj*>    lExecoobjects;    //! List for output objects needing update
+    mutable QList<Bool_t>       lExecoasproc;     //! Indicate if output array needing update are dependent or not on a selector process
+    mutable QList<TObject*>     lExecprocs;       //! List of needed processes
     //mutable Int_t               lExecnaeprocs;    //! Number of processes that process all entries in the array
-    //mutable QList<Bool_t>       lExecselprocs;    //! Indicate if the needed processes is a selector process or not
-    //mutable QList<Bool_t>       lExecseldepprocs; //! Indicate if the needed processes depends on a selector process or not
+    mutable QList<Bool_t>       lExecselprocs;    //! Indicate if the needed processes is a selector process or not
+    mutable QList<Bool_t>       lExecseldepprocs; //! Indicate if the needed processes depends on a selector process or not
     //mutable Bool_t              lExecdoselection;
     //mutable Long64_t            lExecneaea;       //! Number of entries for arrays that should contain all events
     //mutable Long64_t            lExecneaealast;   //! Number of entries for the previous input array that should contain all events
