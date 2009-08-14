@@ -715,7 +715,7 @@ void QArrayProcessor::Exec() const
 
 	  //If the number of entries for the current input array does not match the number of entries for the previous triggered input array
 	  if(lExecnesea != lExecnesealast && lExecnesealast != -1) {
-	    fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' (%lli) does not match the number of entries for the previously triggered input array (%lli)\n",(*fIANames)[lExeci][0].Data(),(*fIANames)[lExeci][1].Data(),lExecneaea,lExecneaealast);
+	    fprintf(stderr,"QArrayProcessor::Exec(): Error: The number of entries in array '%s\t%s' (%lli) does not match the number of entries for the previously triggered input array (%lli)\n",(*fIANames)[lExeci][0].Data(),(*fIANames)[lExeci][1].Data(),lExecneasea,lExecneasealast);
 	    throw 1;
 	  }
 	  lExecnesealast=lExecnesea;
