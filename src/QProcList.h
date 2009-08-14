@@ -7,9 +7,9 @@
 class QProcList: public QProcessor
 {
   public:
-    QProcList(): QProcessor(), fQPL(new QList<TObject*>), fPProcessor(fDefPProcessor), fChains(NULL), fNChains(0), fIFirstChain(NULL), fILastChain(NULL), fFirstChain(NULL), fLastChain(NULL), fChMutex(), fTWCMutex(), fTWCond(), fRNotify(NULL), fNRNotify(0), fMTRNotify(NULL), fThreads(NULL), fNThreads(0), fRNThreads(2), fStopThreads(kTRUE), fAIObjects(NULL), fAOObjects(NULL) {pthread_mutex_init(&fChMutex,NULL); pthread_mutex_init(&fTWCMutex,NULL); pthread_cond_init(&fTWCond,NULL);}
-    QProcList(const char *name, const char *title): QProcessor(name,title), fQPL(new QList<TObject*>), fPProcessor(fDefPProcessor), fChains(NULL), fNChains(0), fIFirstChain(NULL), fILastChain(NULL), fFirstChain(NULL), fLastChain(NULL), fChMutex(), fTWCMutex(), fTWCond(), fRNotify(NULL), fNRNotify(0), fMTRNotify(NULL), fThreads(NULL), fNThreads(0), fRNThreads(2), fStopThreads(kTRUE), fAIObjects(NULL), fAOObjects(NULL) {pthread_mutex_init(&fChMutex,NULL); pthread_mutex_init(&fTWCMutex,NULL); pthread_cond_init(&fTWCond,NULL);}
-    QProcList(const QProcList &rhs): QProcessor(rhs), fQPL(new QList<TObject*>(*rhs.fQPL)), fPProcessor(rhs.fPProcessor), fChains(NULL), fNChains(0), fIFirstChain(NULL), fILastChain(NULL), fFirstChain(NULL), fLastChain(NULL), fChMutex(), fTWCMutex(), fTWCond(), fRNotify(NULL), fNRNotify(0), fMTRNotify(NULL), fThreads(NULL), fNThreads(0), fRNThreads(2), fStopThreads(kTRUE), fAIObjects(NULL), fAOObjects(NULL) {pthread_mutex_init(&fChMutex,NULL); pthread_mutex_init(&fTWCMutex,NULL); pthread_cond_init(&fTWCond,NULL);}
+    QProcList(): QProcessor(), fQPL(new QList<TObject*>), fPProcessor(fDefPProcessor), fPPFastExec(kFALSE), fThreads(NULL), fNThreads(0), fMutexes(NULL), fIMutexes(NULL), fFMutexes(NULL), fStopThreads(kTRUE), fAIObjects(NULL), fAOObjects(NULL) {}
+    QProcList(const char *name, const char *title): QProcessor(name,title), fQPL(new QList<TObject*>), fPProcessor(fDefPProcessor), fPPFastExec(kFALSE), fThreads(NULL), fNThreads(0), fMutexes(NULL), fIMutexes(NULL), fFMutexes(NULL), fStopThreads(kTRUE), fAIObjects(NULL), fAOObjects(NULL) {}
+    QProcList(const QProcList &rhs): QProcessor(rhs), fQPL(new QList<TObject*>(*rhs.fQPL)), fPProcessor(rhs.fPProcessor), fPPFastExec(rhs.fPPFastExec), fThreads(NULL), fNThreads(0), fMutexes(NULL), fIMutexes(NULL), fFMutexes(NULL), fStopThreads(kTRUE), fAIObjects(NULL), fAOObjects(NULL) {}
 
     virtual ~QProcList();
 
@@ -23,11 +23,10 @@ class QProcList: public QProcessor
 
     static const Bool_t& GetDefPProcessor(){return fDefPProcessor;}
 
-    const Int_t& GetNThreads() const{return fNThreads;}
-
     Int_t GetNQProcs() const{return fQPL->Count();}
 
     const Bool_t& GetPProcessor() const{return fPProcessor;}
+    const Bool_t& GetPPFastExec() const{return fPPFastExec;}
 
     void InitProcess(Bool_t allocateparammem=kTRUE);
     void InitThreads();
@@ -44,38 +43,32 @@ class QProcList: public QProcessor
 
     void SetForceExecAll(const Bool_t &forceexecall=kFALSE);
 
-    void SetNThreads(const Int_t &nthreads){fRNThreads=nthreads;}
-
     void SetParamAddress(const Int_t &index, Double_t* const paddr=NULL);
     void SetParamAddress(const char *paramname, Double_t* const paddr=NULL){QProcessor::SetParamAddress(paramname,paddr);}
 
     void SetPProcessor(const Bool_t &pprocessor=kFALSE){fPProcessor=pprocessor;}
+    void SetPPFastExec(const Bool_t &ppfastexec=kFALSE){fPPFastExec=ppfastexec;}
 
     void TerminateProcess();
     void TerminateThreads();
 
     void Browse(TBrowser *b);
 
-    struct SRNotify {
-      pthread_mutex_t RNCMutex;    //Condition mutex for results notification
-      Int_t Init;                  //Initial readiness counter value
-      Int_t RCountDown;            //Result readiness
-      pthread_cond_t  RNCond;      //Condition for results notification
-    };
-
     struct SChainConfig {
       QProcessor **Procs;          //List of QProcessors objects. Stored in reverse order
       Int_t       NProcs;          //Number of procs
-      Int_t	  NDOChains;       //Number of chains on which the chain depends on
-      Int_t       NRDOChains;      //Number of remaining DO chains
-      pthread_mutex_t DOCMutex;    //Mutex for the number of remaining DO chains
-      SChainConfig **DChains;      //List of dependent chains. Stored in reverse order
-      Int_t       NDChains;        //Number of dependency chains
-      SRNotify   *RNotify;         //Result notification
-      SChainConfig *NextInit;      //Next chain that should be queueed for initial chains
-      SChainConfig *Next;          //Next chain in queue
+      pthread_mutex_t **DOMutexes; //List of mutexes on which the current thread depends on. Stored in reverse order
+      Int_t       NDOMutexes;      //Number of mutexes in DOMutexes
+      pthread_mutex_t **DMutexes;  //List of dependent mutexes. Stored in reverse order
+      Int_t       NDMutexes;       //Number of mutexes in DMutexes
     };
 
+    struct SThreadConfig {
+      pthread_t   Thread;
+      Bool_t      *Stop;
+      SChainConfig *Chains;         //List of chains. Stored in reverse order
+      Int_t       NChains;          //Number of chains
+    };
   protected:
     void BuildObjLists();
     void ClearObjLists();
@@ -83,29 +76,20 @@ class QProcList: public QProcessor
     const QList<QProcObj*>& GetOObjList() const{return *fAOObjects;}
     QList<TObject*> *fQPL;         //-> List of QProcessor objects
     Bool_t fPProcessor;            //! Use pthreads
-    SChainConfig *fChains;         //! List of chains
-    Int_t         fNChains;        //! Number of chains
-    SChainConfig *fIFirstChain;    //! Initial first chain pointer
-    SChainConfig *fILastChain;     //! Initial last chain pointer
-    mutable SChainConfig *fFirstChain;     //! First chain
-    mutable SChainConfig *fLastChain;      //! Last chain
-    pthread_mutex_t fChMutex;      //! Chain queue mutex
-    mutable pthread_mutex_t fTWCMutex;     //! Mutex for the thread wait condition
-    mutable pthread_cond_t  fTWCond;       //! Thread wait condition
-    SRNotify        *fRNotify;     //! List of result notifications
-    Int_t           fNRNotify;     //! Number of result notifications
-    SRNotify      *fMTRNotify;     //! Result notification for the main thread
+    Bool_t fPPFastExec;             //! Main thread participates to execution
+    SThreadConfig *fThreads;       //! List of threads
+    Int_t         fNThreads;       //! Number of threads
+    QList<void*> *fMutexes; //! List of mutexes used by the threads
+    QList<void*> *fIMutexes; //! List of initial mutexes. Stored in reverse order
+    QList<void*> *fFMutexes; //! List of final mutexes. Stored in reverse order
+    Bool_t fStopThreads;
 
-    pthread_t       *fThreads;     //! List of threads
-    Int_t           fNThreads;     //! Number of threads
-    Int_t           fRNThreads;    //! Number of requested threads
-    Bool_t          fStopThreads;  //!
-
-    friend void* QPLThread(void *args);
     static Bool_t fDefPProcessor;
   private:
     QList<QProcObj*>        *fAIObjects; //! All input objects, including input arrays, for all processors (temporary)
     QList<QProcObj*>        *fAOObjects; //! All output objects, including output arrays, for all processors (temporary)
+    mutable Int_t	     lIBuf;      //!
+    mutable Int_t	     lIBuf2;     //!
     ClassDef(QProcList,1) //Processor of processor objects
 };
 
