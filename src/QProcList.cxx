@@ -511,14 +511,15 @@ void QProcList::TerminateThreads()
       delete[] fThreads[i].Chains;
     }
     delete[] fThreads;
-    fNThreads=NULL;
+    fThreads=NULL;
+    fNThreads=0;
   }
 
   if(fMutexes) {
 
     for(i=fMutexes->Count()-1; i>=0; --i) {
       pthread_mutex_destroy((pthread_mutex_t*)(*fMutexes)[i]);
-      delete (*fMutexes)[i];
+      delete (pthread_mutex_t*)(*fMutexes)[i];
     }
     delete fMutexes;
     fMutexes=NULL;
