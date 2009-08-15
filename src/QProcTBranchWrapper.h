@@ -16,7 +16,7 @@ class QProcTBranchWrapper: public QProcArray
     void ClearBuffer();
     Int_t Fill(){return fBranch->Fill();}
     TBranch* GetBranch(){return fBranch;}
-    void* GetBuffer() const{return fBuffer;}
+    void* const& GetBuffer() const{return fBuffer;}
     Long64_t GetEntries() const{return fBranch->GetEntries();}
     void LoadEntry(const Long64_t &entry = 0){fBranch->GetEntry(entry);}
     void InitProcObj(){ResetArray();}
