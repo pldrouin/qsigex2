@@ -216,7 +216,7 @@ void QDepTree::GetChains(QList<QList< Int_t> > *chains, QList<QList<Int_t> > *ch
 }
 
 Int_t QDepTree::MeasDownPathLengths(){
-  Int_t i,j,k;
+  Int_t i,j;
   QDepTree *obj, *obj2;
   Int_t max=0;
   QDepTree *maxobj;
