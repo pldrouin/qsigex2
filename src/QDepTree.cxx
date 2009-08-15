@@ -157,7 +157,7 @@ void QDepTree::GetChains(QList<QList< Int_t> > *chains, QList<QList<Int_t> > *ch
 {
   if(fQDTObjs.Count()) {
     Int_t i,j,k;
-    QDepTree *obj, *newobj;
+    QDepTree *obj=NULL, *newobj;
     fNCalled.RedimList(fQDTObjs.Count()-1);
 
     for(i=0; i<fQDTObjs.Count(); ++i) if(fQDTObjs[i]->fEnabled) {obj=fQDTObjs[i]; break;}
@@ -165,10 +165,13 @@ void QDepTree::GetChains(QList<QList< Int_t> > *chains, QList<QList<Int_t> > *ch
     j=0;
     if(i<fQDTObjs.Count()) for(i=obj->fIdx+1; i<fQDTObjs.Count(); ++i) if(fQDTObjs[i]->fEnabled) fNCalled[j++]=fQDTObjs[i];
     fNCalled.RedimList(j);
-    ++(*chains);
-    chains->GetLast()+=obj->GetIndex();
+    chains->Clear();
+    chainsdepons->Clear();
+    chainsdeps->Clear();
 
     if(fNCalled.Count()) {
+      ++(*chains);
+      chains->GetLast()+=obj->GetIndex();
 
       for(;;) {
 
