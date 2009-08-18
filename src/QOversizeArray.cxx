@@ -1083,7 +1083,7 @@ void QOversizeArray::Save(const Float_t &compfrac)
 void QOversizeArray::SetMemConstraints(const Long64_t &critmemsize,const Long64_t &level1memsize,const Long64_t &level2memsize,Long64_t cthreshmemsize)
 {
   FuncDef(SetMemConstraints,1);
-  cthreshmemsize=(cthreshmemsize>=0?cthreshmemsize:9223372036854775808);
+  cthreshmemsize=(cthreshmemsize>=0?cthreshmemsize:9223372036854775808ll);
 
   pthread_mutex_lock(&fILMutex);
   if(fInstances.Count()>0) {
