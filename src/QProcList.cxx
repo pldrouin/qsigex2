@@ -9,6 +9,8 @@ Bool_t QProcList::fDefPProcessor=kFALSE;
 
 QProcList::~QProcList()
 {
+  pthread_mutex_destroy(&fChMutex);
+  sem_destroy(&fTWSem);
   delete fQPL;
   fQPL=NULL;
 }
@@ -66,37 +68,17 @@ void QProcList::Exec() const
 {
   if(GetVerbosity()&QProcessor::kShowExec2) printf("QProcList('%s')::Exec()\n",GetName());
 
-  for(lIBuf=fIMutexes->Count()-1; lIBuf>=0; --lIBuf) {
-    //printf("Main unlocking initial mutex %p\n",(*fIMutexes)[lIBuf]);
-    pthread_mutex_unlock((pthread_mutex_t*)(*fIMutexes)[lIBuf]);
-    //printf("Main has unlocked initial mutex %p\n",(*fIMutexes)[lIBuf]);
-  }
+  fFirstChain=fIFirstChain;
+  fLastChain=fILastChain;
 
-  for(lIBuf=fThreads->NChains-1; lIBuf>=0; --lIBuf) {
-    //printf("Main thread start chain index %i\n",lIBuf);
+  for(Int_t i=fINChains-1; i>=0; --i) sem_post(&fTWSem);
 
-    for(lIBuf2=fThreads->Chains[lIBuf].NDOMutexes-1; lIBuf2>=0; --lIBuf2) {
-      //printf("Main locking DO mutex %p\n",fThreads->Chains[lIBuf].DOMutexes[lIBuf2]);
-      pthread_mutex_lock((pthread_mutex_t*)fThreads->Chains[lIBuf].DOMutexes[lIBuf2]);
-      //printf("Main has locked DO mutex %p\n",fThreads->Chains[lIBuf].DOMutexes[lIBuf2]);
+  if(fMTRNotify) {
+    if(fMTRNotify->Init) {
+      //printf("Waiting for notification %p\n",fMTRNotify);
+      sem_wait(&fMTRNotify->RNSem);
+      //printf("Received notification %p\n",fMTRNotify);
     }
-    for(lIBuf2=fThreads->Chains[lIBuf].NProcs-1; lIBuf2>=0; --lIBuf2) {
-      //printf("Main thread start exec proc %i (%p) of chain index %i\n",lIBuf2,fThreads->Chains[lIBuf].Procs[lIBuf2],lIBuf);
-      fThreads->Chains[lIBuf].Procs[lIBuf2]->Exec();
-      //printf("Main thread done exec proc %i (%p) of chain index %i\n",lIBuf2,fThreads->Chains[lIBuf].Procs[lIBuf2],lIBuf);
-    }
-    for(lIBuf2=fThreads->Chains[lIBuf].NDMutexes-1; lIBuf2>=0; --lIBuf2) {
-      //printf("Main unlocking D mutex %p\n",fThreads->Chains[lIBuf].DMutexes[lIBuf2]);
-      pthread_mutex_unlock((pthread_mutex_t*)fThreads->Chains[lIBuf].DMutexes[lIBuf2]);
-      //printf("Main has unlocked D mutex %p\n",fThreads->Chains[lIBuf].DMutexes[lIBuf2]);
-    }
-    //printf("Main thread done chain index %i\n",lIBuf);
-  }
-
-  for(lIBuf=fFMutexes->Count()-1; lIBuf>=0; --lIBuf) {
-    //printf("Main locking final mutex %p\n",(*fFMutexes)[lIBuf]);
-    pthread_mutex_lock((pthread_mutex_t*)(*fFMutexes)[lIBuf]);
-    //printf("Main thread has locked final mutex %p\n",(*fFMutexes)[lIBuf]);
   }
 }
 
@@ -126,9 +108,8 @@ void QProcList::InitThreads()
   QList<QList<Int_t> > chains;
   QList<QList<Int_t> > chainsdepons;
   QList<QList<Int_t> > chainsdeps;
-  QList<QList<Int_t> > thrchains;
-  QList<Int_t> chainthr;
-  QList<Int_t> chainidx;
+  QList<Int_t>         initchains;  //Initial chains
+  QList<void*> notifchains; //Chains sending notifications
 
   if(fPProcessor) {
     QProcessor* proc;
@@ -222,204 +203,135 @@ void QProcList::InitThreads()
     QDepTree::GetChains(&chains,&chainsdepons,&chainsdeps);
     delete[] depprocs;
 
-    depprocs=new QDepTree[chains.Count()];
-
-    for(i=chains.Count()-1; i>=0; --i) {
-
-      for(j=chainsdepons[i].Count()-1; j>=0; --j) {
-	depprocs[i].AddDepend(chainsdepons[i][j]);
-	depprocs[chainsdepons[i][j]].AddDepend(i);
-      }
-
-      for(j=chainsdeps[i].Count()-1; j>=0; --j) {
-	depprocs[i].AddDepend(chainsdeps[i][j]);
-	depprocs[chainsdeps[i][j]].AddDepend(i);
-      }
-    }
-    chainthr.RedimList(chains.Count());
-    chainidx.RedimList(chains.Count());
-
-    while((i=QDepTree::MeasDownPathLengths())!=-1) {
-      //printf("Length of chain %i for thread %i: %i\n",depprocs[i].GetIndex(),thrchains.Count(),depprocs[i].GetLPathLength());
-      ++thrchains;
-
-      for(;;) {
-	chainthr[i]=thrchains.Count()-1;
-	thrchains.GetLast()+=i;
-	chainidx[i]=thrchains.GetLast().Count()-1;
-	depprocs[i].SetState(kFALSE);
-
-	for(j=depprocs[i].GetNUpDepends()-1; j>=0; --j) {
-	  //printf("Chain length for chain %i: %i\n",depprocs[i].UpDepend(j).GetIndex(),depprocs[i].UpDepend(j).GetLPathLength());
-	  if(depprocs[i].UpDepend(j).GetLPathLength()==depprocs[i].GetLPathLength()-1) {
-	    i=depprocs[i].UpDepend(j).GetIndex();
-	    break;
-	  }
-	}
-
-	if(j==-1) break;
-      }
-    }
-
-    delete[] depprocs;
-
-    //Remove dependencies between chains located in a same thread
-    for(i=0; i<thrchains.Count(); ++i) {
-
-      for(j=thrchains[i].Count()-1; j>0; --j) {
-
-	for(k=j-1; k>=0; --k) {
-
-	  if((l=chainsdeps[thrchains[i][j]].BinarySearch(thrchains[i][k]))!=-1) {
-	    chainsdeps[thrchains[i][j]].Del(l);
-	    chainsdepons[thrchains[i][k]].Del(chainsdepons[thrchains[i][j-1]].BinarySearch(thrchains[i][j]));
-	  }
-	}
-      }
-    }
-
   } else {
     chains++;
     chainsdepons++;
     chainsdeps++;
     chains.GetLast().RedimList(fQPL->Count());
-    for(j=fQPL->Count()-1; j>=0; --j) chains.GetLast()[j]=j;
-
-    ++thrchains;
-    thrchains[0]+=0;
-    chainthr+=0;
-    chainidx+=0;
+    for(i=fQPL->Count()-1; i>=0; --i) chains.GetLast()[i]=i;
   }
 
-  fNThreads=thrchains.Count();
-  fThreads=new SThreadConfig[fNThreads];
-  fMutexes=new QList<void*>;
-  fIMutexes=new QList<void*>;
-  fFMutexes=new QList<void*>;
+  notifchains.RedimList(chains.Count(),0,NULL);
 
-  for(i=0; i<fNThreads; ++i) {
-    fThreads[i].NChains=thrchains[i].Count();
-    fThreads[i].Chains=new SChainConfig[fThreads[i].NChains];
-  }
+  fNRNotify=0;
+  //Should add code to add other notifications here. These can be identified by setting the corresponding elements in notifchains to non-zero pointers
 
-  SChainConfig *chain;
+  if(!fNRNotify) fNRNotify=1;
 
-  for(i=0; i<chains.Count(); i++) {
-    chain=fThreads[chainthr[i]].Chains+chainidx[i];
+  if(fNRNotify) {
+    fRNotify=new SRNotify[fNRNotify];
+    j=0;
 
-    chain->NProcs=chains[i].Count();
-    chain->Procs=new QProcessor*[chain->NProcs];
+    for(i=chains.Count()-1; i>=0; --i) if(notifchains[i] || !chainsdeps[i].Count()) {
+      //If no extra notification is requested but the main thread should be notified
+      if(notifchains[i]) {
+	notifchains[i]=fRNotify+j;
+	fRNotify[j].Init=1;
+	++j;
 
-    //Store QProcessor pointers for the current thread in REVERSE ORDER
-    for(j=chain->NProcs-1; j>=0; --j) chain->Procs[j]=((QProcessor*)(*fQPL)[chains[i][chain->NProcs-1-j]]);
+      } else {
 
-    if(fNThreads>1) {
-      if(chainidx[i]!=thrchains[chainthr[i]].Count()-1 || chainsdepons[i].Count()) {
-	//Remove 1 entry for chains that are not listed first in their thread (since all chains within a given thread have inter-dependencies by construction)
-	chain->NDOMutexes=chainsdepons[i].Count();
-	chain->DOMutexes=new pthread_mutex_t*[chain->NDOMutexes];
-
-	for(j=chainsdepons[i].Count()-1; j>=0; --j) {
-	  k=chainsdepons[i][j];
-
-	  (*fMutexes)++;
-	  fMutexes->GetLast()=new pthread_mutex_t;
-	  pthread_mutex_init((pthread_mutex_t*)fMutexes->GetLast(),NULL);
-	  chain->DOMutexes[j]=(pthread_mutex_t*)fMutexes->GetLast();
-	  //Get the index of the chain for the link currently handled by the current chain
-	  fThreads[chainthr[k]].Chains[chainidx[k]].DMutexes[chainsdeps[k].BinarySearch(i)]=(pthread_mutex_t*)fMutexes->GetLast();
+	if(!fMTRNotify) {
+	  fMTRNotify=fRNotify+j;
+	  notifchains[i]=fRNotify+j;
+	  fRNotify[j].Init=1;
+	  ++j;
+	} else {
+	  notifchains[i]=fMTRNotify;
+	  ++(fMTRNotify->Init);
 	}
-
-	//Else if it is the first chain in the thread and it is not the first (main) thread or if using fast exec mode
-      } else if(fPPFastExec || chainthr[i]) {
-	chain->NDOMutexes=1;
-	chain->DOMutexes=new pthread_mutex_t*[1];
-	(*fMutexes)++;
-	fMutexes->GetLast()=new pthread_mutex_t;
-	pthread_mutex_init((pthread_mutex_t*)fMutexes->GetLast(),NULL);
-	chain->DOMutexes[0]=(pthread_mutex_t*)fMutexes->GetLast();
-	fIMutexes->Add(fMutexes->GetLast(),0);
-
-      } else {
-	chain->NDOMutexes=0;
-	chain->DOMutexes=NULL;
       }
+    }
 
-      if(chainidx[i]!=0 || chainsdeps[i].Count()) {
-	//Remove 1 entry for chains that are not listed last in their thread (since all chains within a given thread have inter-dependencies by construction)
-	chain->NDMutexes=chainsdeps[i].Count();
-	chain->DMutexes=new pthread_mutex_t*[chain->NDMutexes];
-
-      } else if(fPPFastExec || chainthr[i]) {
-	chain->NDMutexes=1;
-	chain->DMutexes=new pthread_mutex_t*[1];
-	(*fMutexes)++;
-	fMutexes->GetLast()=new pthread_mutex_t;
-	pthread_mutex_init((pthread_mutex_t*)fMutexes->GetLast(),NULL);
-	chain->DMutexes[0]=(pthread_mutex_t*)fMutexes->GetLast();
-	fFMutexes->Add(fMutexes->GetLast(),0);
-
-      } else {
-	chain->NDMutexes=0;
-	chain->DMutexes=NULL;
-      }
-
-    } else {
-      chain->NDOMutexes=0;
-      chain->DOMutexes=NULL;
-      chain->NDMutexes=0;
-      chain->DMutexes=NULL;
+    for(i=fNRNotify-1; i>=0; --i) {
+      pthread_mutex_init(&fRNotify[i].RNCMutex,NULL);
+      fRNotify[i].RCountDown=fRNotify[i].Init;
+      sem_init(&fRNotify[i].RNSem,0,0);
     }
   }
 
+  fNChains=chains.Count();
+  fChains=new SChainConfig[fNChains];
+
+  SChainConfig *chain;
+
+  for(i=0; i<fNChains; i++) {
+    fChains[i].NProcs=chains[i].Count();
+    fChains[i].Procs=new QProcessor*[fChains[i].NProcs];
+
+    //Store QProcessor pointers for the current thread in REVERSE ORDER
+    for(j=fChains[i].NProcs-1; j>=0; --j) fChains[i].Procs[j]=((QProcessor*)(*fQPL)[chains[i][fChains[i].NProcs-1-j]]);
+
+    fChains[i].NDChains=chainsdeps[i].Count();
+
+    if(fChains[i].NDChains) {
+      fChains[i].DChains=new SChainConfig*[fChains[i].NDChains];
+
+      for(j=fChains[i].NDChains-1; j>=0; --j) fChains[i].DChains[fChains[i].NDChains-1-j]=fChains+chainsdeps[i][j];
+    }
+    fChains[i].RNotify=(SRNotify*)notifchains[i];
+    fChains[i].NRDOChains=fChains[i].NDOChains=chainsdepons[i].Count();
+
+    if(fChains[i].NDOChains>1) {
+      pthread_mutex_init(&fChains[i].DOCMutex,NULL);
+      fChains[i].Next=fChains[i].NextInit=NULL;
+
+    } else if(fChains[i].NDOChains==1) fChains[i].Next=fChains[i].NextInit=NULL;
+
+    else {
+      initchains+=i;
+    }
+  }
+
+  fIFirstChain=fChains+initchains[0];
+  fILastChain=fChains+initchains[initchains.Count()-1];
+  fILastChain->Next=fILastChain->NextInit=NULL;
+  fINChains=initchains.Count();
+
+  for(i=0; i<initchains.Count()-1; ++i) fChains[initchains[i]].Next=fChains[initchains[i]].NextInit=fChains+initchains[i+1];
+
   if(GetVerbosity()&QProcessor::kShowExec) {
-    printf("QProcList('%s')::InitProcObj(): %i threads have been defined\n",GetName(),thrchains.Count());
+    printf("QProcList('%s')::InitProcObj(): %i chains have been defined\n",GetName(),chains.Count());
 
-    for(i=0; i<thrchains.Count(); ++i) {
-      printf("\tThread %3i (%p):\n",i,&fThreads[i].Thread);
+      for(j=0; j<chains.Count(); ++j) {
+	printf("\t\tChain %3i (%p):\n",j,fChains+j);
 
-      for(j=thrchains[i].Count()-1; j>=0; --j) {
-	printf("\t\tChain %3i:\n",thrchains[i][j]);
-
-	if(chainsdepons[thrchains[i][j]].Count()) {
+	if(chainsdepons[j].Count()) {
 	  printf("\t\t\tWait for chain:");
-	  for(k=0; k<chainsdepons[thrchains[i][j]].Count(); ++k) printf(" %i(%p)",chainsdepons[thrchains[i][j]][k],fThreads[i].Chains[j].DOMutexes[k]);
+	  for(k=0; k<chainsdepons[j].Count(); ++k) printf(" %i",chainsdepons[j][k]);
 	  printf("\n");
 
-	} else if(fThreads[i].Chains[j].NDOMutexes==1) {
-	  printf("\t\t\tLock initial mutex %p\n",fThreads[i].Chains[j].DOMutexes[0]);
-	  
 	} else {
 	  printf("\t\t\tDo not wait for any chain\n");
 	}
 
 	printf("\t\t\tProcessors:\n");
-	for(k=0; k<chains[thrchains[i][j]].Count(); ++k) printf("\t\t\tProcessor '%s' (%i)\n",((QProcessor*)(*fQPL)[chains[thrchains[i][j]][k]])->GetName(),chains[thrchains[i][j]][k]);
+	for(k=0; k<chains[j].Count(); ++k) printf("\t\t\tProcessor '%s' (%i)\n",((QProcessor*)(*fQPL)[chains[j][k]])->GetName(),chains[j][k]);
 	printf("\n");
 
-	if(chainsdeps[thrchains[i][j]].Count()) {
+	if(chainsdeps[j].Count()) {
 	  printf("\t\t\tSend a signal to chains:");
-	  for(k=0; k<chainsdeps[thrchains[i][j]].Count(); ++k) printf(" %i(%p)",chainsdeps[thrchains[i][j]][k],fThreads[i].Chains[j].DMutexes[k]);
+	  for(k=0; k<chainsdeps[j].Count(); ++k) printf(" %i",chainsdeps[j][k]);
 	  printf("\n");
-
-	} else if (fThreads[i].Chains[j].NDMutexes==1) {
-	  printf("\t\t\tUnlock final mutex %p\n",fThreads[i].Chains[j].DMutexes[0]);
 
 	} else {
 	  printf("\t\t\tDo not have to send a signal to any chain\n");
 	}
       }
-    }
   }
 
-  for(i=fMutexes->Count()-1; i>=0; --i) {
-    pthread_mutex_lock((pthread_mutex_t*)(*fMutexes)[i]);
-  }
   fStopThreads=kFALSE;
+  fFirstChain=NULL;
+  fLastChain=NULL;
+  fNThreads=(fPProcessor?fRNThreads:1);
+  if(fNThreads<0) fNThreads=0;
 
-  for(i=(!fPProcessor || !fPPFastExec); i<fNThreads; ++i) {
-    fThreads[i].Stop=&fStopThreads;
-    pthread_create(&fThreads[i].Thread, NULL, QPLThread, &fThreads[i]);
+  if(fNThreads) {
+    fThreads=new pthread_t[fNThreads];
+
+    for(i=fNThreads-1; i>=0; --i) {
+      pthread_create(&fThreads[i], NULL, QPLThread, this);
+    }
   }
 }
 
@@ -491,49 +403,43 @@ void QProcList::TerminateProcess()
 
 void QProcList::TerminateThreads()
 {
-  Int_t i;
+  Int_t i,j;
 
   if(fThreads) {
-    Int_t j;
     fStopThreads=kTRUE;
+    for(i=fINChains-1; i>=0; --i) sem_post(&fTWSem);
 
-    for(i=fMutexes->Count()-1; i>=0; --i) pthread_mutex_unlock((pthread_mutex_t*)(*fMutexes)[i]);
-
-    for(i=fNThreads-1; i>=0; --i) {
-      if(i) pthread_join(fThreads[i].Thread,NULL);
-
-      for(j=fThreads[i].NChains-1; j>=0; --j) {
-
-	if(i || j) delete[] fThreads[i].Chains[j].DMutexes;
-	delete[] fThreads[i].Chains[j].Procs;
-	delete[] fThreads[i].Chains[j].DOMutexes;
-      }
-      delete[] fThreads[i].Chains;
-    }
+    for(i=fNThreads-1; i>=0; --i) pthread_join(fThreads[i],NULL);
     delete[] fThreads;
     fThreads=NULL;
     fNThreads=0;
   }
 
-  if(fMutexes) {
+  if(fChains) {
+    for(i=fNChains-1; i>=0; --i) {
+      delete[] fChains[i].Procs;
+      if(fChains[i].NDChains) delete[] fChains[i].DChains;
 
-    for(i=fMutexes->Count()-1; i>=0; --i) {
-      pthread_mutex_destroy((pthread_mutex_t*)(*fMutexes)[i]);
-      delete (pthread_mutex_t*)(*fMutexes)[i];
+      if(fChains[i].NDOChains>1) pthread_mutex_destroy(&fChains[i].DOCMutex);
     }
-    delete fMutexes;
-    fMutexes=NULL;
+    delete[] fChains;
+    fChains=NULL;
+    fNChains=0;
   }
 
-  if(fIMutexes) {
-    delete fIMutexes;
-    fIMutexes=NULL;
+  if(fRNotify) {
+    for(i=fNRNotify-1; i>=0; --i) {
+      pthread_mutex_destroy(&fRNotify[i].RNCMutex);
+      sem_destroy(&fRNotify[i].RNSem);
+    }
+    delete[] fRNotify;
+    fRNotify=NULL;
+    fNRNotify=0;
+    fMTRNotify=NULL;
   }
-
-  if(fFMutexes) {
-    delete fFMutexes;
-    fFMutexes=NULL;
-  }
+  fIFirstChain=NULL;
+  fILastChain=NULL;
+  fINChains=0;
 }
 
 void QProcList::Browse(TBrowser *b)
@@ -571,32 +477,86 @@ void QProcList::ClearObjLists()
 }
 
 void* QPLThread(void *args){
-  const QProcList::SThreadConfig &config=*((const QProcList::SThreadConfig*)args);
+  QProcList &plist=*((QProcList*)args);
+  QProcList::SChainConfig *chain;
   Int_t i,j;
 
-  while(1) {
-    for(i=config.NChains-1; i>=0; --i) {
-      //printf("%p,Start chain index %i\n",&config.Thread,i);
+  for(;;) {
+    sem_wait(&plist.fTWSem);
+    if(plist.fStopThreads) return NULL;
+    pthread_mutex_lock(&plist.fChMutex);
+    //printf("Chain %p is ready for thread\n",plist.fFirstChain);
+    chain=plist.fFirstChain;
+    if(!chain) {
+      fprintf(stderr,"Error: No chain found\n");
+      throw 1;
+    }
+    //printf("FirstChain %p -> %p\n",plist.fFirstChain,plist.fFirstChain->Next);
+    plist.fFirstChain=plist.fFirstChain->Next;
+    if(!plist.fFirstChain) plist.fLastChain=NULL;
+    pthread_mutex_unlock(&plist.fChMutex);
 
-      for(j=config.Chains[i].NDOMutexes-1; j>=0; --j) {
-	//printf("%p,chain idx %i locking DO mutex %p with index %i\n",&config.Thread,i,config.Chains[i].DOMutexes[j],j);
-	pthread_mutex_lock(config.Chains[i].DOMutexes[j]);
-	//printf("%p, chain idx %i has locked DO mutex %p with index %i\n",&config.Thread,i,config.Chains[i].DOMutexes[j],j);
-      }
+    for(i=chain->NProcs-1; i>=0; --i) {
+      //printf("Start exec proc %i (%p) of chain %p\n",i,chain->Procs[i],chain);
+      chain->Procs[i]->Exec();
+      //printf("Done exec proc %i (%p) of chain %p\n",i,chain->Procs[i],chain);
+    }
 
-      if(!*config.Stop) for(j=config.Chains[i].NProcs-1; j>=0; --j) {
-	//printf("%p,Start exec proc %i (%p) of chain index %i\n",&config.Thread,j,config.Chains[i].Procs[j],i);
-	config.Chains[i].Procs[j]->Exec();
-	//printf("%p,Done exec proc %i (%p) of chain index %i\n",&config.Thread,j,config.Chains[i].Procs[j],i);
-      }
-      else return NULL;
+    for(i=chain->NDChains-1; i>=0; --i) {
+      if(chain->DChains[i]->NDOChains==1) {
+	pthread_mutex_lock(&plist.fChMutex);
+	//printf("Adding chain %p to queue\n",chain->DChains[i]);
 
-      for(j=config.Chains[i].NDMutexes-1; j>=0; --j) {
-	//printf("%p, chain idx %i unlocking D mutex %p with index %i\n",&config.Thread,i,config.Chains[i].DMutexes[j],j);
-	pthread_mutex_unlock(config.Chains[i].DMutexes[j]);
-	//printf("%p, chain idx %i has unlocked D mutex %p with index %i\n",&config.Thread,i,config.Chains[i].DMutexes[j],j);
+	if(plist.fLastChain) {
+	  plist.fLastChain->Next=chain->DChains[i];
+	  plist.fLastChain=chain->DChains[i];
+
+	} else {
+	  plist.fFirstChain=plist.fLastChain=chain->DChains[i];
+	}
+	pthread_mutex_unlock(&plist.fChMutex);
+	sem_post(&plist.fTWSem);
+
+      } else {
+	pthread_mutex_lock(&chain->DChains[i]->DOCMutex);
+	//printf("Split-up chain %p dep: %i -> %i\n",chain->DChains[i],chain->DChains[i]->NRDOChains,chain->DChains[i]->NRDOChains-1);
+	--(chain->DChains[i]->NRDOChains);
+
+	if(!chain->DChains[i]->NRDOChains) {
+	  chain->DChains[i]->NRDOChains=chain->DChains[i]->NDOChains;
+	  pthread_mutex_unlock(&chain->DChains[i]->DOCMutex);
+
+	  pthread_mutex_lock(&plist.fChMutex);
+	  //printf("Adding split-up chain %p to queue\n",chain->DChains[i]);
+
+	  if(plist.fLastChain) {
+	    plist.fLastChain->Next=chain->DChains[i];
+	    plist.fLastChain=chain->DChains[i];
+
+	  } else {
+	    plist.fFirstChain=plist.fLastChain=chain->DChains[i];
+	  }
+	  pthread_mutex_unlock(&plist.fChMutex);
+	  sem_post(&plist.fTWSem);
+
+	} else pthread_mutex_unlock(&chain->DChains[i]->DOCMutex);
       }
-      //printf("%p,Done chain index %i\n",&config.Thread,i);
+    }
+
+    //Get the chain ready for its next execution
+    chain->Next=chain->NextInit;
+
+    if(chain->RNotify) {
+      pthread_mutex_lock(&chain->RNotify->RNCMutex);
+      //printf("Notification %p: %i -> %i\n",chain->RNotify,chain->RNotify->RCountDown,chain->RNotify->RCountDown-1);
+      --(chain->RNotify->RCountDown);
+
+      if(!chain->RNotify->RCountDown) {
+	chain->RNotify->RCountDown=chain->RNotify->Init;
+        pthread_mutex_unlock(&chain->RNotify->RNCMutex);
+	//printf("Sending signal for notification %p\n",chain->RNotify);
+	sem_post(&chain->RNotify->RNSem);
+      } else pthread_mutex_unlock(&chain->RNotify->RNCMutex);
     }
   }
   return NULL;

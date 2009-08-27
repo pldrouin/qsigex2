@@ -64,25 +64,34 @@ inline long long int q_load(long long int const volatile *ptr) {
 #endif
 
 #ifdef GCC_VERSION
+#define q_add(ptr,val) __sync_add_and_fetch(ptr,val)
+#else
+template <typename U, typename V> void q_add(U volatile *ptr, const V &val){q_add(ptr,(U)val);}
+template <typename U> void q_add(U volatile *ptr, const U &val) {
+  //add with 64-bit operand not defined for IA-32
+  __asm__ __volatile__ (
+      "lock; add %1, %0"
+      :"+m" (*ptr)
+      :"q" (val)
+      );
+}
+#endif
+
+#ifdef GCC_VERSION
 #define q_add_and_fetch(ptr,val) __sync_add_and_fetch(ptr,val)
 #else
 template <typename U, typename V> U q_add_and_fetch(U volatile *ptr, const V &val){return q_add_and_fetch(ptr,(U)val);}
 template <typename U> U q_add_and_fetch(U volatile *ptr, const U &val) {
   U ret;
+  //cmpxchg with 64-bit operand not defined for IA-32
   __asm__ __volatile__ (
-      "0: mov %3, %4; add %4, %2; lock; cmpxchg %2, %0; jnz 0b"
-      :"=m" (*ptr), "=q" (ret)
-      :"1" (val), "m" (*ptr), "a" (ret)
+      "0: mov %0, %2; mov %2, %1; add %3, %1; lock; cmpxchg %1, %0; jnz 0b"
+      :"+m" (*ptr), "=q" (ret)
+      :"a" (ret), "q" (val)
       :"cc"
       );
   return ret;
 }
-/*long long int q_add_and_fetch(long long int volatile *ptr, const long long int &val) {
-  long long int ret;
-  __asm__ __volatile__ (
-  );
-  return ret;
-}*/
 #endif
 
 #endif

@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
+
+#include "qatomic.h"
 #else
 struct pthread_t;
 struct pthread_mutex_t;
@@ -155,7 +157,7 @@ class QOversizeArray
     static Long64_t fCritMemSize;   // Critical memory level at which the main thread pauses until some memory is freed
     static Long64_t fCThreshMemSize; // Memory level at which memory management thread starts compressing the buffers to save memory
     static Long64_t fTotalMemSize;  //Total amount of memory used by the buffers of all arrays
-    static pthread_mutex_t fMSizeMutex; //Total memory size mutex
+    //static pthread_mutex_t fMSizeMutex; //Total memory size mutex
     static pthread_mutex_t fCMSCMutex;  //Critical memory size condition mutex
     static pthread_cond_t fCMSCond;     //Critical memory size condition
     static Bool_t fCLReached;           //Indicate when critical memory size has been reached
