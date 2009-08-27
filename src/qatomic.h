@@ -11,33 +11,44 @@
 #endif
 #endif
 
+//#undef GCC_VERSION
+
 #ifdef GCC_VERSION
-#define q_load(ptr) _sync_add_and_fetch(ptr,0)
+#define q_load(ptr) __sync_add_and_fetch(ptr,0)
 #else
 #ifdef __LP64__
-template <typename U> U q_load(U const volatile *ptr) {U ret=0; __asm__ __volatile__ ("lock; addq %1, %0" : "=q" (ret) : "m" (*ptr)); return ret;}
+template <typename U> U q_load(U const volatile *ptr) {
+  U ret=0;
+  __asm__ __volatile__ (
+      "lock; xadd %0, %1"
+      :"=q" (ret)
+      :"m" (*ptr),"0" (ret)
+      );
+  return ret;
+}
 #else
 template <typename U> U q_load(U const volatile *ptr) {
   U ret=0;
   __asm__ __volatile__ (
-      "lock; add %1, %0"
+      "lock; xadd %0, %1"
       :"=q" (ret)
-      :"m" (*ptr)
+      :"m" (*ptr),"0" (ret)
       );
   return ret;
 }
-long long int q_load(long long int const volatile *ptr) {
+
+inline long long int q_load(long long int const volatile *ptr) {
   long long int ret=0;
   //Need to push one general register to stack
   __asm__ __volatile__ (
       "pushl %%ebx;"
-      "0: movl %0, %%eax; movl 4%0, %%edx;"
+      "0: movl %1, %%eax; movl 4%1, %%edx;"
       "movl %%eax, %%ebx; movl %%edx, %%ecx;"
-      "lock; cmpxchg8b %0;"
+      "lock; cmpxchg8b %1;"
       "jnz 0b;"
-      "movl %%ebx, %1; movl %%ecx, 4%1;"
+      "movl %%ebx, %0; movl %%ecx, 4%0;"
       "popl %%ebx"
-      :"=m" (*ptr), "=m" (ret)
+      :"=m" (ret)
       :"m" (*ptr)
       :"eax", "edx", "ecx", "cc"
       );
@@ -47,13 +58,13 @@ long long int q_load(long long int const volatile *ptr) {
 #endif
 
 #ifdef GCC_VERSION
-#define q_store(ptr,val) _sync_lock_test_and_set(ptr,val)
+#define q_store(ptr,val) __sync_lock_test_and_set(ptr,val)
 #else
 #define q_store(ptr,val) __asm__ __volatile__ ("lock; xchg %0, %1" : "=m" (*ptr), "=q" (val) : "m" (*ptr), "q" (val))
 #endif
 
 #ifdef GCC_VERSION
-#define q_add_and_fetch(ptr,val) _sync_add_and_fetch(ptr,val)
+#define q_add_and_fetch(ptr,val) __sync_add_and_fetch(ptr,val)
 #else
 template <typename U, typename V> U q_add_and_fetch(U volatile *ptr, const V &val){return q_add_and_fetch(ptr,(U)val);}
 template <typename U> U q_add_and_fetch(U volatile *ptr, const U &val) {
