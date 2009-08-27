@@ -70,7 +70,7 @@ template <typename U, typename V> U q_add_and_fetch(U volatile *ptr, const V &va
 template <typename U> U q_add_and_fetch(U volatile *ptr, const U &val) {
   U ret;
   __asm__ __volatile__ (
-      "0: mov %0, %4; add %4, %2; lock; cmpxchg %2, %0; jnz 0b"
+      "0: mov %3, %4; add %4, %2; lock; cmpxchg %2, %0; jnz 0b"
       :"=m" (*ptr), "=q" (ret)
       :"1" (val), "m" (*ptr), "a" (ret)
       :"cc"
