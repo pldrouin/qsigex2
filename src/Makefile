@@ -43,6 +43,9 @@ QSIGEX_OBJSDEP	=	$(QSIGEX_OBJS:.o=.d)
 QSIGEX_OOBJSDEP	=	$(QSIGEX_OOBJS:.o=.d)
 QSIGEX_DICTOBJDEP=	$(QSIGEX_DICTOBJ:.o=.d)
 
+CXXFLAGSSH	=	$(CXXFLAGS)
+CXXFLAGSST	=	$(CXXFLAGS)
+
 ifeq ($(CXX),icpc)
 STCOM	=	xiar cru
 ifdef PROFGEN
@@ -52,6 +55,7 @@ else
 ifeq ($(findstring -ipo,$(CXXFLAGS)),-ipo)
 STD	=	qsigex_1.ipos qsigex_2.ipos
 SHD	=	qsigex_1.ipo qsigex_2.ipo
+CXXFLAGSSH	=	$(filter-out -ipo,$(CXXFLAGSSH))
 else
 STD     =       $(QSIGEX_OBJSS) $(QSIGEX_OOBJSS) $(QSIGEX_DICTOBJS)
 SHD     =       $(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ)
@@ -70,7 +74,7 @@ libqsigex2.a: $(STD)
 	rm -rf $@ && $(STCOM) $@ $^
 
 libqsigex2.so: $(SHD)
-	$(CXX) $(CXXFLAGS) -shared -o $@ $^
+	$(CXX) $(CXXFLAGSSH) -shared -o $@ $^
 
 clean:
 	rm -f *.d
@@ -93,28 +97,28 @@ $(QSIGEX_OBJSDEP) $(QSIGEX_OOBJSDEP) $(QSIGEX_DICTOBJDEP): %.d: %.cxx %.h
 include $(QSIGEX_OBJSDEP) $(QSIGEX_OOBJSDEP) $(QSIGEX_DICTOBJDEP)
 
 qsigex_1.ipos: $(QSIGEX_OBJSS_1) $(QSIGEX_OOBJSS) $(QSIGEX_DICTOBJS_1)
-	$(CXX) -ipo_c -o $@ $(CXXFLAGS) $^
+	$(CXX) -ipo_c -o $@ $(CXXFLAGSST) $^
 
 qsigex_2.ipos: $(QSIGEX_OBJSS_2) $(QSIGEX_DICTOBJS_2)
-	$(CXX) -ipo_c -o $@ $(CXXFLAGS) $^
+	$(CXX) -ipo_c -o $@ $(CXXFLAGSST) $^
 
 $(QSIGEX_OBJSS) $(QSIGEX_OOBJSS): %.os: %.cxx
-	$(CXX) -c -o $@ $(CXXFLAGS) $(INCLUDES) $<
+	$(CXX) -c -o $@ $(CXXFLAGSST) $(INCLUDES) $<
 
 $(QSIGEX_DICTOBJS): %.os: %.cxx
-	$(CXX) -c -o $@ $(CXXFLAGS) $(INCLUDES) $< >& /dev/null
+	$(CXX) -c -o $@ $(CXXFLAGSST) $(INCLUDES) $< >& /dev/null
 
 qsigex_1.ipo: $(QSIGEX_OBJS_1) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ_1)
-	$(CXX) -ipo_c -o $@ -fPIC $(CXXFLAGS) $^
+	$(CXX) -ipo_c -o $@ -fPIC $(CXXFLAGSSH) $^
 
 qsigex_2.ipo: $(QSIGEX_OBJS_2) $(QSIGEX_DICTOBJ_2)
-	$(CXX) -ipo_c -o $@ -fPIC $(CXXFLAGS) $^
+	$(CXX) -ipo_c -o $@ -fPIC $(CXXFLAGSSH) $^
 
 $(QSIGEX_OBJS) $(QSIGEX_OOBJS): %.o: %.cxx
-	$(CXX) -c -o $@ -fPIC $(CXXFLAGS) $(INCLUDES) $<
+	$(CXX) -c -o $@ -fPIC $(CXXFLAGSSH) $(INCLUDES) $<
 
 $(QSIGEX_DICTOBJ): %.o: %.cxx
-	$(CXX) -c -o $@ -fPIC $(CXXFLAGS) $(INCLUDES) $< >& /dev/null
+	$(CXX) -c -o $@ -fPIC $(CXXFLAGSSH) $(INCLUDES) $< >& /dev/null
 
 $(QSIGEX_DICTOBJ_1:.o=.h): $(QSIGEX_DICTOBJ_1:.o=.cxx)
 $(QSIGEX_DICTOBJ_1:.o=.cxx): $(QSIGEX_CLHD_1) $(QSIGEX_1_LINKDEF)
