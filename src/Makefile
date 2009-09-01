@@ -55,7 +55,7 @@ else
 ifeq ($(findstring -ipo,$(CXXFLAGS)),-ipo)
 STD	=	qsigex_1.ipos qsigex_2.ipos
 SHD	=	qsigex_1.ipo qsigex_2.ipo
-CXXFLAGSSH	=	$(filter-out -ipo,$(CXXFLAGSSH))
+CXXFLAGSSH	:=	$(filter-out -ipo,$(CXXFLAGSSH))
 else
 STD     =       $(QSIGEX_OBJSS) $(QSIGEX_OOBJSS) $(QSIGEX_DICTOBJS)
 SHD     =       $(QSIGEX_OBJS) $(QSIGEX_OOBJS) $(QSIGEX_DICTOBJ)
