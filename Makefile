@@ -4,11 +4,22 @@ ifdef QSFAST
 CXXFLAGS	+=	-DQSFAST
 endif
 
+ifeq ($(CXX),icpc)
 ifdef PROFGEN
 CXXFLAGS	:=	$(filter-out -ipo -ip,$(CXXFLAGS)) -prof-gen
 else
 ifdef PROFUSE
 CXXFLAGS	+=	-prof-use
+endif
+endif
+
+else
+ifdef PROFGEN
+CXXFLAGS        +=      -fprofile-generate
+else
+ifdef PROFUSE
+CXXFLAGS        +=      -fprofile-use -fprofile-correction
+endif
 endif
 endif
 

@@ -68,8 +68,10 @@ void QProcList::Exec() const
 {
   if(GetVerbosity()&QProcessor::kShowExec2) printf("QProcList('%s')::Exec()\n",GetName());
 
+  pthread_mutex_lock(&fChMutex);
   fFirstChain=fIFirstChain;
   fLastChain=fILastChain;
+  pthread_mutex_unlock(&fChMutex);
 
   for(Int_t i=fINChains-1; i>=0; --i) sem_post(&fTWSem);
 
@@ -104,7 +106,7 @@ void QProcList::InitThreads()
 {
   TerminateThreads();
 
-  Int_t i,j,k,l;
+  Int_t i,j,k;
   QList<QList<Int_t> > chains;
   QList<QList<Int_t> > chainsdepons;
   QList<QList<Int_t> > chainsdeps;
@@ -252,8 +254,6 @@ void QProcList::InitThreads()
 
   fNChains=chains.Count();
   fChains=new SChainConfig[fNChains];
-
-  SChainConfig *chain;
 
   for(i=0; i<fNChains; i++) {
     fChains[i].NProcs=chains[i].Count();
@@ -403,7 +403,7 @@ void QProcList::TerminateProcess()
 
 void QProcList::TerminateThreads()
 {
-  Int_t i,j;
+  Int_t i;
 
   if(fThreads) {
     fStopThreads=kTRUE;
@@ -479,7 +479,7 @@ void QProcList::ClearObjLists()
 void* QPLThread(void *args){
   QProcList &plist=*((QProcList*)args);
   QProcList::SChainConfig *chain;
-  Int_t i,j;
+  Int_t i;
 
   for(;;) {
     sem_wait(&plist.fTWSem);
@@ -488,7 +488,9 @@ void* QPLThread(void *args){
     //printf("Chain %p is ready for thread\n",plist.fFirstChain);
     chain=plist.fFirstChain;
     if(!chain) {
+      sem_getvalue(&plist.fTWSem,&i);
       fprintf(stderr,"Error: No chain found\n");
+      fprintf(stderr,"Semaphore value is %i\n",i);
       throw 1;
     }
     //printf("FirstChain %p -> %p\n",plist.fFirstChain,plist.fFirstChain->Next);

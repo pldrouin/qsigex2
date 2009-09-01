@@ -98,7 +98,7 @@ class QProcList: public QProcessor
     Int_t fINChains;               //! Number of initial chains
     mutable SChainConfig *fFirstChain;     //! First chain
     mutable SChainConfig *fLastChain;      //! Last chain
-    pthread_mutex_t fChMutex;      //! Chain queue mutex
+    mutable pthread_mutex_t fChMutex;      //! Chain queue mutex
     mutable sem_t fTWSem;          //! Semaphore for thread waiting
     SRNotify        *fRNotify;     //! List of result notifications
     Int_t           fNRNotify;     //! Number of result notifications

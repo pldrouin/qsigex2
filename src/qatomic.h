@@ -66,13 +66,12 @@ inline long long int q_load(long long int const volatile *ptr) {
 #ifdef GCC_VERSION
 #define q_add(ptr,val) __sync_add_and_fetch(ptr,val)
 #else
-template <typename U, typename V> void q_add(U volatile *ptr, const V &val){q_add(ptr,(U)val);}
-template <typename U> void q_add(U volatile *ptr, const U &val) {
+template <typename U, typename V> void q_add(U volatile *ptr, const V &val) {
   //add with 64-bit operand not defined for IA-32
   __asm__ __volatile__ (
       "lock; add %1, %0"
       :"+m" (*ptr)
-      :"q" (val)
+      :"q" ((U)val)
       );
 }
 #endif
@@ -80,18 +79,33 @@ template <typename U> void q_add(U volatile *ptr, const U &val) {
 #ifdef GCC_VERSION
 #define q_add_and_fetch(ptr,val) __sync_add_and_fetch(ptr,val)
 #else
-template <typename U, typename V> U q_add_and_fetch(U volatile *ptr, const V &val){return q_add_and_fetch(ptr,(U)val);}
-template <typename U> U q_add_and_fetch(U volatile *ptr, const U &val) {
-  U ret;
+template <typename U, typename V> U q_add_and_fetch(U volatile *ptr, const V &val) {
+  U ret=0;
   //cmpxchg with 64-bit operand not defined for IA-32
+  //Code is twice as slow as gcc built-in functions
   __asm__ __volatile__ (
       "0: mov %0, %2; mov %2, %1; add %3, %1; lock; cmpxchg %1, %0; jnz 0b"
       :"+m" (*ptr), "=q" (ret)
-      :"a" (ret), "q" (val)
+      :"a" (ret), "q" ((U)val)
       :"cc"
       );
   return ret;
 }
+
+/*template <typename V> long long int q_add_and_fetch(long long int volatile *ptr, const  V &val) {
+  long long int ret=0;
+  __asm__ __volatile__ (
+      "0: movl %0, %%eax; movl 4%0, %%edx;"
+      "movl %%eax, %%ebx; movl %%edx, %%ecx;"
+      "lock; cmpxchg8b %0;"
+      "jnz 0b;"
+      "movl %%ebx, %%eax; movl %%ecx, 4%%eax;"
+      :"+m" (*ptr), "=rax" (ret)
+      :"q" ((long long int)val)
+      :"ebx", "edx", "ecx", "cc"
+      );
+  return ret;
+}*/
 #endif
 
 #endif
