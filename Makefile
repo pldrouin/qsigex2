@@ -25,7 +25,7 @@ endif
 
 all: $(ALLINCS)
 	cd ./src; $(MAKE) shared static
-	cp ./src/libqsigex*.{a,so} ./lib/
+	cp ./src/libqsigex*.a ./src/libqsigex*.so ./lib/
 
 static: $(ALLINCS)
 	cd ./src; $(MAKE) static
