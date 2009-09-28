@@ -163,8 +163,8 @@ void QProcList::InitThreads()
 	oidx=oobjs.FindFirst(proc->GetOObjList()[j]);
 
 	if(oidx==-1 && iidx!=-1 && iolastproc[iidx]!=i) {
-	  if(dynamic_cast<TObject*>(proc->GetOObjList()[j])) fprintf(stderr,"QProcList: InitProcess(): Error with process '%s': Object '%s' (%p) cannot be overwritten\n",proc->GetName(),dynamic_cast<TObject*>(proc->GetOObjList()[j])->GetName(),proc->GetOObjList()[j]);
-	  else fprintf(stderr,"QProcList: InitProcess(): Error with process '%s': Object %p cannot be overwritten\n",proc->GetName(),proc->GetOObjList()[j]);
+	  if(dynamic_cast<TObject*>(proc->GetOObjList()[j])) fprintf(stderr,"QProcList: InitThreads(): Error with process '%s': Object '%s' (%p) cannot be overwritten\n",proc->GetName(),dynamic_cast<TObject*>(proc->GetOObjList()[j])->GetName(),proc->GetOObjList()[j]);
+	  else fprintf(stderr,"QProcList: InitThreads(): Error with process '%s': Object %p cannot be overwritten\n",proc->GetName(),proc->GetOObjList()[j]);
 	  throw 1;
 	}
 

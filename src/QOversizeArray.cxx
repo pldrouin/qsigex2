@@ -511,6 +511,7 @@ void QOversizeArray::OpenFile()
       fFDesc=open(fFilename,O_RDONLY);
 
       if(fFDesc<0) {
+	perror("QOversizeArray");
 	fprintf(stderr,"QOversizeArray::OpenFile: Error: file '%s' cannot be opened in read-only mode\n",fFilename.Data());
 	throw 1;
       }
@@ -521,6 +522,7 @@ void QOversizeArray::OpenFile()
       fFDesc=open(fFilename,O_RDWR);
 
       if(fFDesc<0) {
+	perror("QOversizeArray");
 	fprintf(stderr,"QOversizeArray::OpenFile: Error: file '%s' cannot be opened in read-write mode\n",fFilename.Data());
 	throw 1;
       }
@@ -531,6 +533,7 @@ void QOversizeArray::OpenFile()
       fFDesc=open(fFilename,O_RDWR|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 
       if(fFDesc<0) {
+	perror("QOversizeArray");
 	fprintf(stderr,"QOversizeArray::OpenFile: Error: file '%s' cannot be recreated\n",fFilename.Data());
 	throw 1;
       }
