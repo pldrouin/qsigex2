@@ -107,7 +107,9 @@ class QProcList: public QProcessor
     pthread_t       *fThreads;     //! List of threads
     Int_t           fNThreads;     //! Number of threads
     Int_t           fRNThreads;    //! Number of requested threads
-    Bool_t          fStopThreads;  //!
+#ifndef __CINT__
+    volatile Bool_t fStopThreads;  //!
+#endif
 
     friend void* QPLThread(void *args);
     static Bool_t fDefPProcessor;
