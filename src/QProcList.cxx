@@ -487,12 +487,12 @@ void* QPLThread(void *args){
     pthread_mutex_lock(&plist.fChMutex);
     //printf("Chain %p is ready for thread\n",plist.fFirstChain);
     chain=plist.fFirstChain;
-    if(!chain) {
+    /*if(!chain) {
       sem_getvalue(&plist.fTWSem,&i);
       fprintf(stderr,"Error: No chain found\n");
       fprintf(stderr,"Semaphore value is %i\n",i);
       throw 1;
-    }
+    }*/
     //printf("FirstChain %p -> %p\n",plist.fFirstChain,plist.fFirstChain->Next);
     plist.fFirstChain=plist.fFirstChain->Next;
     if(!plist.fFirstChain) plist.fLastChain=NULL;
