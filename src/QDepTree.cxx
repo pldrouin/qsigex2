@@ -15,53 +15,63 @@ void QDepTree::Simplify()
 
   for(i=fQDTObjs.Count()-1; i>=0; --i) {
     fQDTObjs[i]->fSplit=kNoSplit;
+    //printf("Node %i: \n",i);
 
     if((n=fQDTObjs[i]->GetNDownDepends())>1) {
+      //printf("Down depends on %i nodes\n",n);
 
       for(j=n-1; j>=0; --j) {
+	//printf("Down dependency %i: %i\n",j,fQDTObjs[i]->DownDepend(j).GetIndex());
 
 	idxlist=fQDTObjs[i]->DownDepend(j).GetAllUpDepends();
 
 	for(k=n-1; k>=0; --k) {
 	  if(k==j) continue;
+	  //printf("\tDown dependency' %i: %i",k,fQDTObjs[i]->DownDepend(k).GetIndex());
 	  id1=fQDTObjs[i]->DownDepend(k).GetIndex();
 
 	  if(idxlist.FindFirst(id1)==-1) {
 	    fQDTObjs[i]->fSplit=kSplitDown;
+	    //printf(" -> causes splitdown\n");
 
 	  } else {
 	    fQDTObjs[i]->fDownDepends.Del(k);
+	    //printf(" -> irrelevant\n");
 
 	    if(j>k) --j;
-	    --k;
 	    --n;
 	  }
 	}
       }
-    }
+
+    } //else printf("does not down depend on any node\n");
 
     if((n=fQDTObjs[i]->GetNUpDepends())>1) {
+      //printf("Up depends on %i nodes\n",n);
 
       for(j=n-1; j>=0; --j) {
+	//printf("Up dependency %i: %i\n",j,fQDTObjs[i]->UpDepend(j).GetIndex());
 	idxlist=fQDTObjs[i]->UpDepend(j).GetAllUpDepends();
 
 	for(k=n-1; k>=0; --k) {
 	  if(k==j) continue;
+	  //printf("\tUp dependency' %i: %i",k,fQDTObjs[i]->UpDepend(k).GetIndex());
 	  id1=fQDTObjs[i]->UpDepend(k).GetIndex();
 
 	  if(idxlist.FindFirst(id1)==-1) {
 	    fQDTObjs[i]->fSplit|=kSplitUp;
+	    //printf(" -> causes splitup\n");
 
 	  } else {
 	    fQDTObjs[i]->fUpDepends.Del(k);
+	    //printf(" -> irrelevant\n");
 
 	    if(j>k) --j;
-	    --k;
 	    --n;
 	  }
 	}
       }
-    }
+    } //else printf("does not up depend on any node\n");
   }
 }
 
