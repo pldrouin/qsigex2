@@ -68,10 +68,24 @@ void QProcList::Exec() const
 {
   if(GetVerbosity()&QProcessor::kShowExec2) printf("QProcList('%s')::Exec()\n",GetName());
 
-  pthread_mutex_lock(&fChMutex);
+  //pthread_mutex_lock(&fChMutex);
   fFirstChain=fIFirstChain;
   fLastChain=fILastChain;
-  pthread_mutex_unlock(&fChMutex);
+  /*SChainConfig *chain=fFirstChain;
+  Int_t j=0;
+  fprintf(stderr,"Adding initial chains: ");
+  while(chain) {
+    fprintf(stderr,"%p ",chain);
+    j++;
+    chain=chain->Next;
+  }
+  fprintf(stderr,"\n");
+
+  if(j!=fINChains) {
+    fprintf(stderr,"Exec: Error: Number of initial chains does not match\n");
+    throw 1;
+  }*/
+  //pthread_mutex_unlock(&fChMutex);
 
   for(Int_t i=fINChains-1; i>=0; --i) sem_post(&fTWSem);
 
@@ -471,7 +485,7 @@ void QProcList::ClearObjLists()
   if(fAIObjects) {
     delete fAIObjects; fAIObjects=NULL;
     delete fAOObjects; fAOObjects=NULL;
-  }
+    }
 
   for(i=0; i<fQPL->Count(); i++) ((QProcessor*)(*fQPL)[i])->ClearObjLists();
 }
@@ -487,15 +501,28 @@ void* QPLThread(void *args){
     pthread_mutex_lock(&plist.fChMutex);
     //printf("Chain %p is ready for thread\n",plist.fFirstChain);
     chain=plist.fFirstChain;
-    /*if(!chain) {
+    /*if(!plist.fFirstChain && plist.fLastChain) {
+      fprintf(stderr,"Inconsistency detected. fFirstChain is NULL and fLastChain is %p\n",plist.fLastChain);
+      throw;
+    }
+
+    if(!plist.fFirstChain->Next && plist.fFirstChain!=plist.fLastChain) {
+      fprintf(stderr,"Inconsistency detected. Last chain but fFirstChain is %p and fLastChain is %p\n",plist.fFirstChain,plist.fLastChain);
+      throw;
+    }
+
+    if(!chain) {
       sem_getvalue(&plist.fTWSem,&i);
       fprintf(stderr,"Error: No chain found\n");
       fprintf(stderr,"Semaphore value is %i\n",i);
       throw 1;
-    }*/
-    //printf("FirstChain %p -> %p\n",plist.fFirstChain,plist.fFirstChain->Next);
+    }
+    fprintf(stderr,"FirstChain %p -> %p\n",plist.fFirstChain,plist.fFirstChain->Next);*/
     plist.fFirstChain=plist.fFirstChain->Next;
-    if(!plist.fFirstChain) plist.fLastChain=NULL;
+    if(!plist.fFirstChain) {
+      //fprintf(stderr,"Chain is empty\n");
+      plist.fLastChain=NULL;
+    }
     pthread_mutex_unlock(&plist.fChMutex);
 
     for(i=chain->NProcs-1; i>=0; --i) {
@@ -504,16 +531,22 @@ void* QPLThread(void *args){
       //printf("Done exec proc %i (%p) of chain %p\n",i,chain->Procs[i],chain);
     }
 
+    //Get the chain ready for its next execution (has to do it now before adding other chains, because otherwise it could get reinitialize after the next Exec starts)
+    //fprintf(stderr,"Next pointer for chain %p is set to %p\n",chain,chain->NextInit);
+    chain->Next=chain->NextInit;
+
     for(i=chain->NDChains-1; i>=0; --i) {
       if(chain->DChains[i]->NDOChains==1) {
 	pthread_mutex_lock(&plist.fChMutex);
 	//printf("Adding chain %p to queue\n",chain->DChains[i]);
 
 	if(plist.fLastChain) {
+	  //fprintf(stderr,"Adding chain %p to chain %p\n",chain->DChains[i],plist.fLastChain);
 	  plist.fLastChain->Next=chain->DChains[i];
 	  plist.fLastChain=chain->DChains[i];
 
 	} else {
+	  //fprintf(stderr,"Adding first chain %p\n",plist.fFirstChain);
 	  plist.fFirstChain=plist.fLastChain=chain->DChains[i];
 	}
 	pthread_mutex_unlock(&plist.fChMutex);
@@ -532,10 +565,12 @@ void* QPLThread(void *args){
 	  //printf("Adding split-up chain %p to queue\n",chain->DChains[i]);
 
 	  if(plist.fLastChain) {
+	    //fprintf(stderr,"Adding chain %p to chain %p\n",chain->DChains[i],plist.fLastChain);
 	    plist.fLastChain->Next=chain->DChains[i];
 	    plist.fLastChain=chain->DChains[i];
 
 	  } else {
+	    //fprintf(stderr,"Adding first chain %p\n",plist.fFirstChain);
 	    plist.fFirstChain=plist.fLastChain=chain->DChains[i];
 	  }
 	  pthread_mutex_unlock(&plist.fChMutex);
@@ -544,9 +579,6 @@ void* QPLThread(void *args){
 	} else pthread_mutex_unlock(&chain->DChains[i]->DOCMutex);
       }
     }
-
-    //Get the chain ready for its next execution
-    chain->Next=chain->NextInit;
 
     if(chain->RNotify) {
       pthread_mutex_lock(&chain->RNotify->RNCMutex);
