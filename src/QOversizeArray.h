@@ -3,6 +3,7 @@
 
 #ifndef __CINT__
 #include <pthread.h>
+#include <semaphore.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -14,6 +15,7 @@
 struct pthread_t;
 struct pthread_mutex_t;
 struct pthread_cond_t;
+struct sem_t;
 #endif
 #include <cstdlib>
 #include <cstdio>
@@ -30,6 +32,14 @@ struct pthread_cond_t;
 
 extern "C" void R__zip (Int_t cxlevel, Int_t *nin, char *bufin, Int_t *lout, char *bufout, Int_t *nout);
 extern "C" void R__unzip(Int_t *nin, UChar_t *bufin, Int_t *lout, char *bufout, Int_t *nout);
+
+class QOversizeArray;
+
+struct QOAQueue
+{
+  QOversizeArray	*Array; //Protected by fBuffersMutex
+  struct QOAQueue	*Next;  //Protected by fB2LMutex
+};
 
 class QOversizeArray
 {
@@ -71,6 +81,8 @@ class QOversizeArray
     void SetBuffer(void *buffer){fBuffer=buffer;}
 
     static void SetMemConstraints(const Long64_t &critmemsize=0, const Long64_t &level1memsize=0, const Long64_t &level2memsize=0, Long64_t cthreshmemsize=-1);
+
+    static void SetNLoaders(const UInt_t &nloaders){fNLoaders=(nloaders>0?nloaders:1);}
 
     void SetNOAllocBlock(const UInt_t &noallocblock){fNOAllocBlock=noallocblock;}
 
@@ -139,13 +151,11 @@ class QOversizeArray
     QOABuffer      *fMWBuffer;     // QOABuffer to be freed by fMWThread
     QOABuffer      *fMWWBuffer;    // QOABuffer being written by fMWThread
     Bool_t	   fSigMMThread;   // Send signal to memory management thread
-    pthread_t fBLThread;           // Buffer loading thread
-    pthread_mutex_t fBLMutex;      // Buffer loading thread mutex
-    pthread_cond_t fBLCond;        // Buffer loading thread condition
-    pthread_mutex_t fBLCMutex;     // Buffer loading thread condition mutex
-    pthread_cond_t fBLCCond;       // Buffer loading thread confirmation condition
-    pthread_cond_t fBLWCond;       // Buffer loading thread waiting condition. Can use this instead of a pause condition for this thread since only the main thread can be calling for both a waiting condition or a command
+    sem_t	   fBLCSem;        // Buffer loading thread confirmation semaphore
+    sem_t	   fBLWSem;        // Buffer loading thread waiting condition semaphore
     Char_t          fBLAction;     // Flag to control the action of the buffer loading thread (0: Normal 1: Wait 2: Stop)
+    struct QOAQueue	   fQOAQ;          // QOAQueue structure for this
+    QOABuffer	   *fCurBLBuffer;  //Current buffer hold by QOABLThread
     QOABuffer     **fUZQOAB;       //! Array of QOABuffers that have been unzipped
     Char_t        **fUZBuffers;    //! Array of unzipped buffers
     pthread_mutex_t fUZBMutex;     // Lock on unzipped buffer arrays
@@ -157,6 +167,7 @@ class QOversizeArray
     static Long64_t fCritMemSize;   // Critical memory level at which the main thread pauses until some memory is freed
     static Long64_t fCThreshMemSize; // Memory level at which memory management thread starts compressing the buffers to save memory
     static Long64_t fTotalMemSize;  //Total amount of memory used by the buffers of all arrays
+    static UInt_t   fNLoaders;      //Number of QOABLThreads
     //static pthread_mutex_t fMSizeMutex; //Total memory size mutex
     static pthread_mutex_t fCMSCMutex;  //Critical memory size condition mutex
     static pthread_cond_t fCMSCond;     //Critical memory size condition
@@ -168,6 +179,7 @@ class QOversizeArray
     static pthread_mutex_t fPriorityMutex; //Mutex for instance priorities
     static pthread_mutex_t fMWCDMutex;    // Memory writing/compression thread done condition mutex
     static pthread_cond_t fMWCDCond;      // Memory writing/compression thread done confirmation condition
+    static pthread_t     *fBLThreads;     // Buffer loading threads
     static pthread_t fMCThread;           // Memory compression thread
     static pthread_mutex_t fMCGMutex;     // Memory compression thread giant mutex
     static pthread_mutex_t fMCMutex;      // Memory compression thread mutex
@@ -181,10 +193,15 @@ class QOversizeArray
     static QOversizeArray *fMCQOA;        // QOversizeArray to be compressed by fMCThread
     static QOABuffer      *fMCBuffer;     // QOABuffer to be compressed by fMCThread
     static QOABuffer      *fMCCBuffer;    // QOABuffer being compressed by fMCThread
+    static Int_t	fMaxNPCBuffers;	  // Maximum number of buffers that are pre-cached (to speed up reading) 
+    static struct QOAQueue	  *fFirstB2L;     // Head of the queue of buffers to load
+    static struct QOAQueue      **fLastB2Ls;     // Tails of the queue of buffers to load (fNPCBuffers+1) pointers
+    static pthread_mutex_t fB2LMutex;     // Buffers to load mutex
+    static sem_t           fB2LSem;       // Buffers to load semaphore
 
     static void* QOAMCThread(void *array);
     static void* QOAMWThread(void *array);
-    static void* QOABLThread(void *array);
+    static void* QOABLThread(void*);
     static void* QOAMMThread(void *);
 
     ClassDef(QOversizeArray,1) //Multi-threaded array class optimized for speed when handling large amount of data
