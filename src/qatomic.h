@@ -60,7 +60,7 @@ inline long long int q_load(long long int const volatile *ptr) {
 #ifdef GCC_VERSION
 #define q_store(ptr,val) __sync_lock_test_and_set(ptr,val)
 #else
-template <typename U, typename V> void q_store(U* ptr, V val) {__asm__ __volatile__ ("lock; xchg %0, %1" : "=m" (*ptr), "=q" (val) : "m" (*ptr), "q" (val));}
+#define q_store(ptr,val) __asm__ __volatile__ ("lock; xchg %1, %0" : "=m" (*ptr) : "q" (val), "m" (*ptr))
 #endif
 
 #ifdef GCC_VERSION
