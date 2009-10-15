@@ -21,7 +21,7 @@ template <typename U> U q_load(U const volatile *ptr) {
   U ret=0;
   __asm__ (
       "lock; xadd %0, %1"
-      :"+g" (ret)
+      :"+r" (ret)
       :"m" (*ptr)
       );
   return ret;
@@ -31,7 +31,7 @@ template <typename U> U q_load(U const volatile *ptr) {
   U ret=0;
   __asm__ (
       "lock; xadd %0, %1"
-      :"+g" (ret)
+      :"+r" (ret)
       :"m" (*ptr)
       );
   return ret;
@@ -63,7 +63,7 @@ inline long long int q_load(long long int const volatile *ptr) {
 template <typename U, typename V> void q_store(U* ptr, V val) {__asm__ ("lock; xchg %0, %1" : "+m" (*ptr), "+r" (val));}
 #endif
 
-template <typename U, typename V, typename W> U q_fetch_and_compare_and_set(U* ptr, const V& cmp, const W& val) {U ret; __asm__ ("lock; cmpxchg %3,%1" : "=a" (ret), "+m" (*ptr) : "a" (cmp), "g" (val)); return ret;}
+template <typename U, typename V, typename W> U q_fetch_and_compare_and_set(U* ptr, const V& cmp, const W& val) {U ret; __asm__ ("lock; cmpxchg %3,%1" : "=a" (ret), "+m" (*ptr) : "a" (cmp), "ir" (val)); return ret;}
 
 #ifdef GCC_VERSION
 #define q_add(ptr,val) __sync_add_and_fetch(ptr,val)
@@ -73,7 +73,7 @@ template <typename U, typename V> void q_add(U volatile *ptr, const V &val) {
   __asm__ (
       "lock; add %1, %0"
       :"+m" (*ptr)
-      :"g" ((U)val)
+      :"ir" ((U)val)
       );
 }
 #endif
@@ -87,7 +87,7 @@ template <typename U, typename V> U q_add_and_fetch(U volatile *ptr, const V &va
   //Code is twice as slow as gcc built-in functions
   __asm__ (
       "0: mov %0, %2; mov %2, %1; add %3, %1; lock; cmpxchg %1, %0; jnz 0b"
-      :"+m" (*ptr), "=g" (ret)
+      :"+m" (*ptr), "=r" (ret)
       :"a" (ret), "g" ((U)val)
       :"cc"
       );
