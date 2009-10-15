@@ -19,20 +19,20 @@
 #ifdef __LP64__
 template <typename U> U q_load(U const volatile *ptr) {
   U ret=0;
-  __asm__ __volatile__ (
+  __asm__ (
       "lock; xadd %0, %1"
-      :"=q" (ret)
-      :"m" (*ptr),"0" (ret)
+      :"+g" (ret)
+      :"m" (*ptr)
       );
   return ret;
 }
 #else
 template <typename U> U q_load(U const volatile *ptr) {
   U ret=0;
-  __asm__ __volatile__ (
+  __asm__ (
       "lock; xadd %0, %1"
-      :"=q" (ret)
-      :"m" (*ptr),"0" (ret)
+      :"+g" (ret)
+      :"m" (*ptr)
       );
   return ret;
 }
@@ -40,7 +40,7 @@ template <typename U> U q_load(U const volatile *ptr) {
 inline long long int q_load(long long int const volatile *ptr) {
   long long int ret=0;
   //Need to push one general register to stack
-  __asm__ __volatile__ (
+  __asm__ (
       "pushl %%ebx;"
       "0: movl %1, %%eax; movl 4%1, %%edx;"
       "movl %%eax, %%ebx; movl %%edx, %%ecx;"
@@ -48,7 +48,7 @@ inline long long int q_load(long long int const volatile *ptr) {
       "jnz 0b;"
       "movl %%ebx, %0; movl %%ecx, 4%0;"
       "popl %%ebx"
-      :"=m" (ret)
+      :"=g" (ret)
       :"m" (*ptr)
       :"eax", "edx", "ecx", "cc"
       );
@@ -60,18 +60,20 @@ inline long long int q_load(long long int const volatile *ptr) {
 #ifdef GCC_VERSION
 #define q_store(ptr,val) __sync_lock_test_and_set(ptr,val)
 #else
-template <typename U, typename V> void q_store(volatile U* ptr, V val) {__asm__ __volatile__ ("lock; xchg %0, %1" : "=q" (val), "=m" (*ptr) : "0" (val), "m" (*ptr));}
+template <typename U, typename V> void q_store(U* ptr, V val) {__asm__ ("lock; xchg %0, %1" : "+m" (*ptr), "+r" (val));}
 #endif
+
+template <typename U, typename V, typename W> U q_fetch_and_compare_and_set(U* ptr, const V& cmp, const W& val) {U ret; __asm__ ("lock; cmpxchg %3,%1" : "=a" (ret), "+m" (*ptr) : "a" (cmp), "g" (val)); return ret;}
 
 #ifdef GCC_VERSION
 #define q_add(ptr,val) __sync_add_and_fetch(ptr,val)
 #else
 template <typename U, typename V> void q_add(U volatile *ptr, const V &val) {
   //add with 64-bit operand not defined for IA-32
-  __asm__ __volatile__ (
+  __asm__ (
       "lock; add %1, %0"
       :"+m" (*ptr)
-      :"q" ((U)val)
+      :"g" ((U)val)
       );
 }
 #endif
@@ -83,10 +85,10 @@ template <typename U, typename V> U q_add_and_fetch(U volatile *ptr, const V &va
   U ret=0;
   //cmpxchg with 64-bit operand not defined for IA-32
   //Code is twice as slow as gcc built-in functions
-  __asm__ __volatile__ (
+  __asm__ (
       "0: mov %0, %2; mov %2, %1; add %3, %1; lock; cmpxchg %1, %0; jnz 0b"
-      :"+m" (*ptr), "=q" (ret)
-      :"a" (ret), "q" ((U)val)
+      :"+m" (*ptr), "=g" (ret)
+      :"a" (ret), "g" ((U)val)
       :"cc"
       );
   return ret;
