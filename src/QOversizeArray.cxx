@@ -519,7 +519,7 @@ void QOversizeArray::LoadEntry(const Long64_t &entry)
 	pthread_mutex_unlock(&fBuffersMutex);
 
       //If this is not in the B2L queue
-      if(q_fetch_and_compare_and_set(&fQOAQ.Array,NULL,this)) {
+      if(!q_fetch_and_compare_and_set(&fQOAQ.Array,NULL,this)) {
 	pthread_mutex_lock(&fB2LMutex);
         //printf("Adding node %p (array %p) with priority %i\n",&fQOAQ,this,0);
 
@@ -547,7 +547,7 @@ void QOversizeArray::LoadEntry(const Long64_t &entry)
 	pthread_mutex_unlock(&fBuffersMutex);
 
       //If this is not in the B2L queue
-      if(q_fetch_and_compare_and_set(&fQOAQ.Array,NULL,this)) {
+      if(!q_fetch_and_compare_and_set(&fQOAQ.Array,NULL,this)) {
 	pthread_mutex_lock(&fB2LMutex);
         //printf("Adding node %p (array %p) with priority %i\n",&fQOAQ,this,fNPCBuffers);
 

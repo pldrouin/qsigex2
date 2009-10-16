@@ -63,7 +63,7 @@ inline long long int q_load(long long int const volatile *ptr) {
 template <typename U, typename V> void q_store(U* ptr, V val) {__asm__ ("lock; xchg %0, %1" : "+m" (*ptr), "+r" (val));}
 #endif
 
-template <typename U, typename V, typename W> U q_fetch_and_compare_and_set(U* ptr, const V& cmp, const W& val) {U ret; __asm__ ("lock; cmpxchg %3,%1" : "=a" (ret), "+m" (*ptr) : "a" (cmp), "ir" (val)); return ret;}
+template <typename U, typename V, typename W> U q_fetch_and_compare_and_set(U* ptr, const V& cmp, const W& val) {U ret; __asm__ ("lock; cmpxchg %3,%1" : "=a" (ret), "+m" (*ptr) : "a" (cmp), "ir" (val) : "cc"); return ret;}
 
 #ifdef GCC_VERSION
 #define q_add(ptr,val) __sync_add_and_fetch(ptr,val)
