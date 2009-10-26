@@ -1545,7 +1545,7 @@ void* QOversizeArray::QOABLThread(void*)
   FuncDef(QOABLThread,1);
   QOversizeArray *qoa=NULL;
   Int_t ibuf, ibuf2, ibuf3;
-  QOABuffer *buf2;
+  QOABuffer *buf2, *buf3, *initcurreadbuffer;
   Int_t action;
   printstatus("Starting buffer loading thread");
 
@@ -1578,17 +1578,17 @@ void* QOversizeArray::QOABLThread(void*)
       //If there are some parked buffers
       if(qoa->fFirstParkedBuffer) {
 	//Delete all parked buffers
-	qoa->fCurBLBuffer=qoa->fFirstParkedBuffer;
+	buf3=qoa->fFirstParkedBuffer;
 	//pthread_mutex_lock(&fMSizeMutex);
 
-	while(qoa->fCurBLBuffer) {
-	  buf2=qoa->fCurBLBuffer->fNextOAB;
+	while(buf3) {
+	  buf2=buf3->fNextOAB;
 	  //fTotalMemSize-=buf->fBufferSize+sizeof(QOABuffer);
 	  //qoa->fArrayMemSize-=buf->fBufferSize+sizeof(QOABuffer);
-	  q_add(&fTotalMemSize,-(qoa->fCurBLBuffer->fBufferSize+sizeof(QOABuffer)));
-	  q_add(&qoa->fArrayMemSize,-(qoa->fCurBLBuffer->fBufferSize+sizeof(QOABuffer)));
-	  delete qoa->fCurBLBuffer;
-	  qoa->fCurBLBuffer=buf2;
+	  q_add(&fTotalMemSize,-(buf3->fBufferSize+sizeof(QOABuffer)));
+	  q_add(&qoa->fArrayMemSize,-(buf3->fBufferSize+sizeof(QOABuffer)));
+	  delete buf3;
+	  buf3=buf2;
 	}
 	//pthread_mutex_unlock(&fMSizeMutex);
 	qoa->fFirstParkedBuffer=NULL;
@@ -1634,6 +1634,7 @@ void* QOversizeArray::QOABLThread(void*)
 
       //Trying to loop over the buffer that currently needs to be loaded and the pre-cached buffers
       ibuf=qoa->fCurRBIdx;
+      initcurreadbuffer=qoa->fCurReadBuffer;
       for(;;) {
 	//printf("%p: qoa->fCurBLBuffer idx: %i\treq idx: %i\n",qoa,qoa->fCurBLBuffer?qoa->fCurBLBuffer->fBufferIdx:-1,ibuf);
 
@@ -1689,8 +1690,8 @@ void* QOversizeArray::QOABLThread(void*)
 
 	  //printf("1: fCurBLBuffer: %p\tfCurReadBuffer: %p\n",qoa->fCurBLBuffer,qoa->fCurReadBuffer);
 
-	  //If fCurReadBuffer has changed while the first buffer in the range was being loaded, scan for the previous buffer from fFirstReadBuffer (in case buf was deleted while fBuffersMutex was unlocked)
-	  if(ibuf==qoa->fCurBLRBIdx && qoa->fCurBLBuffer!=qoa->fCurReadBuffer) {
+	  //If fCurReadBuffer has changed while the first buffer in the range was being loaded, scan for the previous buffer from fFirstReadBuffer (in case fCurBLBuffer was deleted while fBuffersMutex was unlocked)
+	  if(ibuf==qoa->fCurBLRBIdx && qoa->fCurBLBuffer==initcurreadbuffer && qoa->fCurReadBuffer!=initcurreadbuffer) {
 	    qoa->fCurBLBuffer=qoa->fFirstReadBuffer;
 	    while(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=ibuf) qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
 	  }
