@@ -167,7 +167,7 @@ void QOversizeArray::CloseFile()
       fMaxNPCBuffers=-1;
 
       pthread_mutex_lock(&fBuffersMutex);
-      if(fCurReadBuffer) {
+      if(fCurRBIdx>=0) {
 	fCurReadBuffer=NULL;
 	fCurRBIdx=-1;
         pthread_mutex_unlock(&fBuffersMutex);
@@ -176,6 +176,7 @@ void QOversizeArray::CloseFile()
 	  //Wait for confirmation
 	  sem_wait(&fBLWSem);
 	}
+	ASSERT(q_load(&fQOAQ.Array)==NULL);
 	fCurBLBuffer=NULL;
 
 	if(fCurBLRBIdx!=-2) {   
@@ -206,7 +207,7 @@ void QOversizeArray::CloseFile()
       //printf("MC thread %p is done compressing\n",this);
 
       pthread_mutex_lock(&fBuffersMutex);
-      if(fCurReadBuffer) {
+      if(fCurRBIdx>=0) {
 	fCurReadBuffer=NULL;
 	fCurRBIdx=-1;
 	pthread_mutex_unlock(&fBuffersMutex);
@@ -215,6 +216,7 @@ void QOversizeArray::CloseFile()
 	  //Wait for confirmation
 	  sem_wait(&fBLWSem);
 	}
+	ASSERT(q_load(&fQOAQ.Array)==NULL);
 	fCurBLBuffer=NULL;
 
 	if(fCurBLRBIdx!=-2) {   
@@ -331,6 +333,7 @@ void QOversizeArray::Fill()
       //If fWriteBuffer is full
     } else {
       printstatus("Write buffer is full");
+      pthread_mutex_unlock(&fBuffersMutex);
 #ifndef QSFAST
       if(fOpenMode == kRead) {
 	fprintf(stderr,"QOversizeArray::Fill(): Error: File '%s' is opened in read-only mode\n",fFilename.Data());
@@ -342,7 +345,7 @@ void QOversizeArray::Fill()
 
       //If switching from read mode
       pthread_mutex_lock(&fBuffersMutex);
-      if(fCurReadBuffer) {
+      if(fCurRBIdx>=0) {
 	fCurReadBuffer=NULL;
 	fCurRBIdx=-1;
 
@@ -352,6 +355,7 @@ void QOversizeArray::Fill()
 	  sem_wait(&fBLWSem);
 	  pthread_mutex_lock(&fBuffersMutex);
 	}
+	ASSERT(q_load(&fQOAQ.Array)==NULL);
 	fCurBLBuffer=NULL;
 
 	if(fCurBLRBIdx!=-2) {   
@@ -472,7 +476,7 @@ void QOversizeArray::LoadEntry(const Long64_t &entry)
     pthread_mutex_lock(&fBuffersMutex);
     fCurRBIdx=lLEibuf;
 
-    if(!fCurReadBuffer || fCurReadBuffer->fBufferIdx>fCurRBIdx) fCurReadBuffer=fFirstReadBuffer;
+    if((!fCurReadBuffer || fCurReadBuffer->fBufferIdx>fCurRBIdx) && fFirstReadBuffer && fFirstReadBuffer->fBufferIdx<=fCurRBIdx) fCurReadBuffer=fFirstReadBuffer;
 
     if(fCurReadBuffer) while(fCurReadBuffer->fNextOAB && fCurReadBuffer->fNextOAB->fBufferIdx<=fCurRBIdx) fCurReadBuffer=fCurReadBuffer->fNextOAB;
     //printf("Looping on buffers with fCurReadBuffer==%p with buffer index %i\n",fCurReadBuffer,fCurReadBuffer?fCurReadBuffer->fBufferIdx:-1);
@@ -725,6 +729,7 @@ void QOversizeArray::ResetArray()
   if(q_load(&fQOAQ.Array)) {
     //Wait for confirmation
     sem_wait(&fBLWSem);
+    ASSERT(q_load(&fQOAQ.Array)==NULL);
     fCurBLBuffer=NULL;
 
     if(fCurBLRBIdx!=-2) {   
@@ -1604,10 +1609,22 @@ void* QOversizeArray::QOABLThread(void*)
 
       if(qoa->fCurReadBuffer) {
 	qoa->fCurBLBuffer=qoa->fCurReadBuffer;
-	while(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=qoa->fCurRBIdx) qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
+	while(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=qoa->fCurRBIdx) {
+	  //if(qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=qoa->fCurBLBuffer->fBufferIdx) {
+	    //fprintf(stderr,"%p\tBuffer to load: %i, previous buffer: %i, next buffer: %i\n",qoa,qoa->fCurRBIdx,qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fNextOAB->fBufferIdx);
+	    //ASSERT(qoa->fCurBLBuffer->fNextOAB->fBufferIdx>qoa->fCurBLBuffer->fBufferIdx)
+	  //}
+	  qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
+	}
       } else if(qoa->fFirstReadBuffer && qoa->fFirstReadBuffer->fBufferIdx<=qoa->fCurRBIdx) {
 	qoa->fCurBLBuffer=qoa->fFirstReadBuffer;
-	while(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=qoa->fCurRBIdx) qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
+	while(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=qoa->fCurRBIdx) {
+	  //if(qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=qoa->fCurBLBuffer->fBufferIdx) {
+	    //fprintf(stderr,"%p\tBuffer to load: %i, previous buffer: %i, next buffer: %i\n",qoa,qoa->fCurRBIdx,qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fNextOAB->fBufferIdx);
+	    //ASSERT(qoa->fCurBLBuffer->fNextOAB->fBufferIdx>qoa->fCurBLBuffer->fBufferIdx)
+	  //}
+	  qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
+	}
       } else {
 	qoa->fCurBLBuffer=NULL;
       }
@@ -1673,7 +1690,7 @@ void* QOversizeArray::QOABLThread(void*)
 	  //printf("1: fCurBLBuffer: %p\tfCurReadBuffer: %p\n",qoa->fCurBLBuffer,qoa->fCurReadBuffer);
 
 	  //If fCurReadBuffer has changed while the first buffer in the range was being loaded, scan for the previous buffer from fFirstReadBuffer (in case buf was deleted while fBuffersMutex was unlocked)
-	  if(ibuf==qoa->fCurBLRBIdx &&  qoa->fCurBLBuffer!=qoa->fCurReadBuffer) {
+	  if(ibuf==qoa->fCurBLRBIdx && qoa->fCurBLBuffer!=qoa->fCurReadBuffer) {
 	    qoa->fCurBLBuffer=qoa->fFirstReadBuffer;
 	    while(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=ibuf) qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
 	  }
@@ -1682,24 +1699,34 @@ void* QOversizeArray::QOABLThread(void*)
 
 	  //If qoa->fCurBLBuffer==NULL (first buffer in read buffer structure)
 	  if(!qoa->fCurBLBuffer) {
-	    ASSERT(!qoa->fFirstReadBuffer);
-	    ASSERT(!qoa->fLastReadBuffer);
 	    buf2->fPreviousOAB=NULL;
-	    buf2->fNextOAB=NULL;
+
+	    if(qoa->fFirstReadBuffer) {
+	      qoa->fFirstReadBuffer->fPreviousOAB=buf2;
+	      buf2->fNextOAB=qoa->fFirstReadBuffer;
+
+	    } else {
+	      //fprintf(stderr,"%p\tAdding first buffer\n",qoa);
+	      ASSERT(!qoa->fFirstReadBuffer);
+	      ASSERT(!qoa->fLastReadBuffer);
+	      buf2->fNextOAB=NULL;
+	      qoa->fLastReadBuffer=buf2;
+	    }
 	    qoa->fFirstReadBuffer=buf2;
-	    qoa->fLastReadBuffer=buf2;
 	    qoa->fCurBLBuffer=buf2;
 
 	    // else if qoa->fCurBLBuffer has a smaller buffer index (this can be the case when qoa->fCurBLBuffer==fCurReadBuffer!=NULL)
 	  } else {
 	    //printf("Buffer index of qoa->fCurBLBuffer: %i\n",qoa->fCurBLBuffer->fBufferIdx);
 	    //if(qoa->fCurBLBuffer->fNextOAB) {
-	    //printf("qoa->fCurBLBuffer idx: %i\tqoa->fCurBLBuffer->fNextOAB idx: %i\n",qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fNextOAB->fBufferIdx);
-	    //ASSERT(qoa->fCurBLBuffer->fNextOAB->fBufferIdx>qoa->fCurBLBuffer->fBufferIdx);
+	      //printf("qoa->fCurBLBuffer idx: %i\tqoa->fCurBLBuffer->fNextOAB idx: %i\n",qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fNextOAB->fBufferIdx);
+	      //fprintf(stderr,"%p\tLoaded buffer: %i, previous buffer: %i, next buffer: %i curreadbuffer: %i\n",qoa,buf2->fBufferIdx,qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fNextOAB->fBufferIdx);
+	      //ASSERT(qoa->fCurBLBuffer->fNextOAB->fBufferIdx>buf2->fBufferIdx);
 	    //}
 	    //if(qoa->fCurBLBuffer->fPreviousOAB) {
 	    //printf("qoa->fCurBLBuffer idx: %i\tqoa->fCurBLBuffer->fPreviousOAB idx: %i\n",qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx);
-	    //ASSERT(qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx<qoa->fCurBLBuffer->fBufferIdx);
+	    //fprintf(stderr,"%p\tLoaded buffer: %i, 2nd previous buffer: %i, previous buffer: %i\n",qoa,buf2->fBufferIdx,qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx,qoa->fCurBLBuffer->fBufferIdx);
+	    //ASSERT(qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx<buf2->fBufferIdx);
 	    //}
 	    buf2->fNextOAB=qoa->fCurBLBuffer->fNextOAB;
 	    if(qoa->fCurBLBuffer->fNextOAB) qoa->fCurBLBuffer->fNextOAB->fPreviousOAB=buf2;
@@ -1723,7 +1750,7 @@ void* QOversizeArray::QOABLThread(void*)
 	  if(qoa->fCurBLBuffer->fIsCompressed==2) {
 	    pthread_mutex_unlock(&qoa->fBuffersMutex);
 	    pthread_mutex_lock(&fMCDMutex);
-	    if(fMCCBuffer) pthread_cond_wait(&fMCDCond, &fMCDMutex);
+	    if(fMCCBuffer==qoa->fCurBLBuffer) pthread_cond_wait(&fMCDCond, &fMCDMutex);
 	    pthread_mutex_unlock(&fMCDMutex);
 
 	    //Else if the buffer is compressed

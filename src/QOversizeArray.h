@@ -120,7 +120,7 @@ class QOversizeArray
     Int_t fMaxBDataSize;         //Maximum buffer data size
     Int_t fMaxBHBDataSize;       //fBufferHeaderSize+fMaxBHBDataSize 
     Long64_t fNObjects;          // Total number of objects
-    QOABuffer *fCurReadBuffer;   //! Current read buffer
+    QOABuffer *fCurReadBuffer;   //! Current read buffer. Should always point to a buffer with fBufferIdx<=fCurRBIdx
     QOABuffer *fFirstReadBuffer; //!
     QOABuffer *fLastReadBuffer;  //!
     QOABuffer *fWriteBuffer;     //!
