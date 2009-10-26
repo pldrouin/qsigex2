@@ -12,6 +12,7 @@ Long64_t QOversizeArray::fTotalMemSize=0;
 UInt_t   QOversizeArray::fNLoaders=1;
 //pthread_mutex_t QOversizeArray::fMSizeMutex=PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t QOversizeArray::fCMSCMutex=PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t QOversizeArray::fFileWMutex=PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t QOversizeArray::fCMSCond=PTHREAD_COND_INITIALIZER;
 Bool_t QOversizeArray::fCLReached=kFALSE;
 pthread_t QOversizeArray::fMMThread;
@@ -1006,6 +1007,7 @@ void QOversizeArray::ReadWriteBuffer()
   UInt_t allocsize;
 
   if(numobjs) {
+    pthread_mutex_lock(&fFileWMutex);
     pthread_mutex_lock(&fFileMutex);
     if(lseek(fFDesc,bufferidx*fMaxBHBDataSize+fFirstDataByte,SEEK_SET)==-1){
       perror("QOversizeArray::ReadWriteBuffer: Error: ");
@@ -1047,6 +1049,7 @@ void QOversizeArray::ReadWriteBuffer()
       throw 1;
     }
     pthread_mutex_unlock(&fFileMutex);
+    pthread_mutex_unlock(&fFileWMutex);
 
   } else {
 
@@ -1359,6 +1362,7 @@ void QOversizeArray::WriteHeader() const
   time_t sec=fTStamp.GetSec();
   Int_t nsec=fTStamp.GetNanoSec();
 
+  pthread_mutex_lock(&fFileWMutex);
   pthread_mutex_lock(&fFileMutex);
   if(lseek(fFDesc,0,SEEK_SET)==-1) {
     perror("QOversizeArray::WriteHeader: Error: ");
@@ -1378,12 +1382,14 @@ void QOversizeArray::WriteHeader() const
     throw 1;
   }
   pthread_mutex_unlock(&fFileMutex);
+  pthread_mutex_unlock(&fFileWMutex);
 }
 
 void QOversizeArray::WriteBuffer(const QOABuffer *buf) const
 {
   CFuncDef(WriteBuffer,0);
   //printf("Write buffer %u at %u\n",buf->fBufferIdx,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte);
+  pthread_mutex_lock(&fFileWMutex);
   pthread_mutex_lock(&fFileMutex);
   if(lseek(fFDesc,buf->fBufferIdx*fMaxBHBDataSize+fFirstDataByte,SEEK_SET)==-1){
     perror("QOversizeArray::WriteBuffer: lseek Error: ");
@@ -1394,6 +1400,7 @@ void QOversizeArray::WriteBuffer(const QOABuffer *buf) const
     throw 1;
   }
   pthread_mutex_unlock(&fFileMutex);
+  pthread_mutex_unlock(&fFileWMutex);
 }
 
 void QOversizeArray::WriteWriteBuffer() const

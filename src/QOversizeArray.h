@@ -175,6 +175,7 @@ class QOversizeArray
     static pthread_t fMMThread;      //Memory management thread
     static pthread_mutex_t fMMMutex; //Memory management condition mutex
     static pthread_cond_t fMMCond;   //Memory management condition
+    static pthread_mutex_t fFileWMutex; // Static mutex on file writing operations (patch for stability while waiting for a FIFO queue implementation)
     static pthread_mutex_t fILMutex; //Instance list mutex. Locks the existence of a QOversizeArray instance.
     static pthread_mutex_t fPriorityMutex; //Mutex for instance priorities
     static pthread_mutex_t fMWCDMutex;    // Memory writing/compression thread done condition mutex
