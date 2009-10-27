@@ -1830,19 +1830,24 @@ void* QOversizeArray::QOABLThread(void*)
 	  action=1;
 	}
 
+	//Switching to write mode, or no need to load additional buffers
 	if(qoa->fCurRBIdx<0 || ibuf==qoa->fCurRBIdx+qoa->fNPCBuffers || (ibuf+2)*qoa->fNOPerBuffer>qoa->fWBFirstObjIdx) {
 	  action=-1;
 	  break;
 
+	//fCurRBIdx has switched outside the current range, need to load a buffer in first priority
 	} else if(ibuf>qoa->fCurRBIdx+qoa->fNPCBuffers || ibuf<qoa->fCurRBIdx) {
 	  //printf("ibuf=%i, fCurRBIdx=%i\n",ibuf,qoa->fCurRBIdx);
 	  action=0;
 	  break;
 
+	//Loaded buffer, and need to load another buffer with a computed priority
 	} else if(action==1) {
 	  action=ibuf+1-qoa->fCurRBIdx;
+	  if(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=ibuf+1) qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
 	  break;
 
+	//No buffer was loaded, stay in the loop and search for next buffer
 	} else {
 	  ++ibuf;
 	  if(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=ibuf) qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
