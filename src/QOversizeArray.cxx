@@ -42,8 +42,8 @@ struct QOAQueue**	QOversizeArray::fLastB2Ls=NULL;
 pthread_mutex_t QOversizeArray::fB2LMutex=PTHREAD_MUTEX_INITIALIZER;
 sem_t		QOversizeArray::fB2LSem;
 
-//#define FuncDef(a,b) const char* thefunc=#a; Bool_t show=b; TString indent; const void* me=NULL;
-//#define CFuncDef(a,b) const char* thefunc=#a; Bool_t show=b; TString indent; const void* me=this;
+//#define FuncDef(a,b) const char* thefunc=#a; Bool_t show=b; const void* me=NULL;
+//#define CFuncDef(a,b) const char* thefunc=#a; Bool_t show=b; const void* me=this;
 //#define printstatus(a) {if(show) printf("%p\t%s\n",me,a);}
 //#define pthread_mutex_lock(a) {if(show) printf("\n %p%slocking %s in function %s...\n",me,indent.Data(),#a,thefunc); pthread_mutex_lock(a); if(show) printf("%p %s%s is now locked in function %s\n",me,indent.Data(),#a,thefunc); indent+="     ";}
 //#define pthread_mutex_unlock(a) {indent=indent(0,indent.Length()-5); if(show) printf("\n%p %sunlocking %s in function %s...\n",me,indent.Data(),#a,thefunc); pthread_mutex_unlock(a); if(show) printf("%p %s%s is now unlocked in function %s\n",me,indent.Data(),#a,thefunc);}
@@ -473,7 +473,7 @@ void QOversizeArray::LoadEntry(const Long64_t &entry)
   } else {
     printstatus("LoadEntry needs to load an entry from a new buffer");
 
-    //printf("%p\tCalling LoadEntry with entry==%lli (buffer index %i)\n",this,entry,lLEibuf);
+    //fprintf(stderr,"%p\tCalling LoadEntry with entry==%lli (buffer index %i)\n",this,entry,lLEibuf);
     pthread_mutex_lock(&fBuffersMutex);
     fCurRBIdx=lLEibuf;
 
@@ -1552,7 +1552,8 @@ void* QOversizeArray::QOABLThread(void*)
   FuncDef(QOABLThread,1);
   QOversizeArray *qoa=NULL;
   Int_t ibuf, ibuf2, ibuf3;
-  QOABuffer *buf2, *buf3, *initcurreadbuffer;
+  QOABuffer *buf2, *buf3;
+  Int_t curblbufidx;
   Int_t action;
   printstatus("Starting buffer loading thread");
 
@@ -1614,26 +1615,39 @@ void* QOversizeArray::QOABLThread(void*)
 	qoa->CleanUZBuffers();
       }
 
-      if(qoa->fCurReadBuffer) {
+      if(qoa->fCurBLBuffer && qoa->fCurBLBuffer->fBufferIdx<=qoa->fCurRBIdx) {
+
+	while(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=qoa->fCurRBIdx) {
+	  ASSERT(qoa->fCurBLBuffer->fNextOAB->fBufferIdx>qoa->fCurBLBuffer->fBufferIdx);
+	  qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
+	}
+	curblbufidx=qoa->fCurBLBuffer->fBufferIdx;
+
+      } else if(qoa->fCurReadBuffer) {
 	qoa->fCurBLBuffer=qoa->fCurReadBuffer;
 	while(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=qoa->fCurRBIdx) {
 	  //if(qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=qoa->fCurBLBuffer->fBufferIdx) {
 	    //fprintf(stderr,"%p\tBuffer to load: %i, previous buffer: %i, next buffer: %i\n",qoa,qoa->fCurRBIdx,qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fNextOAB->fBufferIdx);
-	    //ASSERT(qoa->fCurBLBuffer->fNextOAB->fBufferIdx>qoa->fCurBLBuffer->fBufferIdx)
+	    ASSERT(qoa->fCurBLBuffer->fNextOAB->fBufferIdx>qoa->fCurBLBuffer->fBufferIdx)
 	  //}
 	  qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
 	}
+	curblbufidx=qoa->fCurBLBuffer->fBufferIdx;
+
       } else if(qoa->fFirstReadBuffer && qoa->fFirstReadBuffer->fBufferIdx<=qoa->fCurRBIdx) {
 	qoa->fCurBLBuffer=qoa->fFirstReadBuffer;
 	while(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=qoa->fCurRBIdx) {
 	  //if(qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=qoa->fCurBLBuffer->fBufferIdx) {
 	    //fprintf(stderr,"%p\tBuffer to load: %i, previous buffer: %i, next buffer: %i\n",qoa,qoa->fCurRBIdx,qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fNextOAB->fBufferIdx);
-	    //ASSERT(qoa->fCurBLBuffer->fNextOAB->fBufferIdx>qoa->fCurBLBuffer->fBufferIdx)
+	    ASSERT(qoa->fCurBLBuffer->fNextOAB->fBufferIdx>qoa->fCurBLBuffer->fBufferIdx)
 	  //}
 	  qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
 	}
+	curblbufidx=qoa->fCurBLBuffer->fBufferIdx;
+
       } else {
 	qoa->fCurBLBuffer=NULL;
+	curblbufidx=-1;
       }
       //printf("fCurBLBuffer: %p\tfCurReadBuffer: %p\n",qoa->fCurBLBuffer,qoa->fCurReadBuffer);
 
@@ -1641,7 +1655,6 @@ void* QOversizeArray::QOABLThread(void*)
 
       //Trying to loop over the buffer that currently needs to be loaded and the pre-cached buffers
       ibuf=qoa->fCurRBIdx;
-      initcurreadbuffer=qoa->fCurReadBuffer;
       for(;;) {
 	//printf("%p: qoa->fCurBLBuffer idx: %i\treq idx: %i\n",qoa,qoa->fCurBLBuffer?qoa->fCurBLBuffer->fBufferIdx:-1,ibuf);
 
@@ -1697,10 +1710,20 @@ void* QOversizeArray::QOABLThread(void*)
 
 	  //printf("1: fCurBLBuffer: %p\tfCurReadBuffer: %p\n",qoa->fCurBLBuffer,qoa->fCurReadBuffer);
 
-	  //If fCurReadBuffer has changed while the first buffer in the range was being loaded, scan for the previous buffer from fFirstReadBuffer (in case fCurBLBuffer was deleted while fBuffersMutex was unlocked)
-	  if(ibuf==qoa->fCurBLRBIdx && qoa->fCurBLBuffer==initcurreadbuffer && qoa->fCurReadBuffer!=initcurreadbuffer) {
-	    qoa->fCurBLBuffer=qoa->fFirstReadBuffer;
-	    while(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=ibuf) qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
+	  //If the index of the buffer that was pointed by fCurBLBuffer was not protected, retrieve the pointer again from the chain, since it can have been deleted while fBuffersMutex was unlocked
+	  if(curblbufidx<qoa->fCurBLRBIdx) {
+
+	    if(qoa->fCurReadBuffer && qoa->fCurReadBuffer->fBufferIdx<ibuf) {
+	      qoa->fCurBLBuffer=qoa->fCurReadBuffer;
+	      while(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<ibuf) qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
+
+	    } else if(qoa->fFirstReadBuffer && qoa->fFirstReadBuffer->fBufferIdx<ibuf) {
+	      qoa->fCurBLBuffer=qoa->fFirstReadBuffer;
+	      while(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<ibuf) qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
+
+	    } else {
+	      qoa->fCurBLBuffer=NULL;
+	    }
 	  }
 
 	  //printf("2: fCurBLBuffer: %p\tfCurReadBuffer: %p\n",qoa->fCurBLBuffer,qoa->fCurReadBuffer);
@@ -1732,9 +1755,9 @@ void* QOversizeArray::QOABLThread(void*)
 	      //ASSERT(qoa->fCurBLBuffer->fNextOAB->fBufferIdx>buf2->fBufferIdx);
 	    //}
 	    //if(qoa->fCurBLBuffer->fPreviousOAB) {
-	    //printf("qoa->fCurBLBuffer idx: %i\tqoa->fCurBLBuffer->fPreviousOAB idx: %i\n",qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx);
-	    //fprintf(stderr,"%p\tLoaded buffer: %i, 2nd previous buffer: %i, previous buffer: %i\n",qoa,buf2->fBufferIdx,qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx,qoa->fCurBLBuffer->fBufferIdx);
-	    //ASSERT(qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx<buf2->fBufferIdx);
+	      //printf("qoa->fCurBLBuffer idx: %i\tqoa->fCurBLBuffer->fPreviousOAB idx: %i\n",qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx);
+	      //fprintf(stderr,"%p\tLoaded buffer: %i, 2nd previous buffer: %i, previous buffer: %i\n",qoa,buf2->fBufferIdx,qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx,qoa->fCurBLBuffer->fBufferIdx);
+	      //ASSERT(qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx<buf2->fBufferIdx);
 	    //}
 	    buf2->fNextOAB=qoa->fCurBLBuffer->fNextOAB;
 	    if(qoa->fCurBLBuffer->fNextOAB) qoa->fCurBLBuffer->fNextOAB->fPreviousOAB=buf2;
@@ -1806,21 +1829,23 @@ void* QOversizeArray::QOABLThread(void*)
 	  }
 	  action=1;
 	}
-	if(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=ibuf+1) qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
-	++ibuf;
 
-	if(qoa->fCurRBIdx<0 || ibuf-1==qoa->fCurRBIdx+qoa->fNPCBuffers || (ibuf+1)*qoa->fNOPerBuffer>qoa->fWBFirstObjIdx) {
+	if(qoa->fCurRBIdx<0 || ibuf==qoa->fCurRBIdx+qoa->fNPCBuffers || (ibuf+2)*qoa->fNOPerBuffer>qoa->fWBFirstObjIdx) {
 	  action=-1;
 	  break;
 
-	} else if(ibuf-1>qoa->fCurRBIdx+qoa->fNPCBuffers || ibuf-1<qoa->fCurRBIdx) {
+	} else if(ibuf>qoa->fCurRBIdx+qoa->fNPCBuffers || ibuf<qoa->fCurRBIdx) {
 	  //printf("ibuf=%i, fCurRBIdx=%i\n",ibuf,qoa->fCurRBIdx);
 	  action=0;
 	  break;
 
 	} else if(action==1) {
-	  action=ibuf-qoa->fCurRBIdx;
+	  action=ibuf+1-qoa->fCurRBIdx;
 	  break;
+
+	} else {
+	  ++ibuf;
+	  if(qoa->fCurBLBuffer->fNextOAB && qoa->fCurBLBuffer->fNextOAB->fBufferIdx<=ibuf) qoa->fCurBLBuffer=qoa->fCurBLBuffer->fNextOAB;
 	}
       }
     }
@@ -1847,7 +1872,7 @@ void* QOversizeArray::QOABLThread(void*)
       pthread_mutex_unlock(&fB2LMutex);
       sem_post(&fB2LSem);
 
-      //Else if all the pre-cached buffers are loaded
+      //Else if all the pre-cached buffers are loaded, if a waiting request is made of if the array is going inro write mode
     } else {
       //Do not add the array to the queue
       q_store(&qoa->fQOAQ.Array,NULL);
@@ -1859,6 +1884,7 @@ void* QOversizeArray::QOABLThread(void*)
 
 	//Else if qoa->fCurRBIdx==-2, clear old unzipped buffers that are no longer necessary
       } else if(qoa->fCurRBIdx==-2 && qoa->fCurBLRBIdx!=-2){
+	qoa->fCurBLBuffer=NULL;
 	qoa->fCurBLRBIdx=-2;
 	qoa->CleanUZBuffers();
       }

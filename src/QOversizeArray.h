@@ -128,7 +128,7 @@ class QOversizeArray
     Long64_t   fWBFirstObjIdx;   // Index of the first object contained in the write buffer. ****Value should be modified only by the main thread
     UInt_t     fWBNAllocObjs;    // Number of objects for which memory is allocated in the write buffer
     Int_t fCurRBIdx;             // Current read buffer index. A value of -1 indicates the array is in write mode
-    Int_t fCurBLRBIdx;           // Current read buffer index used by buffer loading thread.
+    Int_t fCurBLRBIdx;           // Current read buffer index used by buffer loading thread. Value should not be changed outside of QOABLThread unless it is not working on this.
     Int_t fNReadBuffers;         // Number of active buffers that are full and ready for reading
     Long64_t fPTNRBObjects;      // Total number of objects in read buffers in the previous pass (==fWBFirstObjIdx after the last call of Fill())
     QOABuffer **fUMBuffers;       //! Array of unmodified buffers
