@@ -127,8 +127,8 @@ class QOversizeArray
     Char_t    *fCRBData;         //! Pointer to current read buffer uncompressed data
     Long64_t   fWBFirstObjIdx;   // Index of the first object contained in the write buffer. ****Value should be modified only by the main thread
     UInt_t     fWBNAllocObjs;    // Number of objects for which memory is allocated in the write buffer
-    Int_t fCurRBIdx;             // Current read buffer index. A value of -1 indicates the array is in write mode
-    Int_t fCurBLRBIdx;           // Current read buffer index used by buffer loading thread. Value should not be changed outside of QOABLThread unless it is not working on this.
+    Int_t fCurRBIdx;             // Current read buffer index. A value of -1 indicates the array is in write mode, a value of -2 indicates that unzipped buffers should be cleaned by QOABLThread. A value >=0 indicates that the main thread considers the array to be in read mode. Read mode check should also ensure that fCurBLRBIdx>=0.
+    Int_t fCurBLRBIdx;           // Current read buffer index used by buffer loading thread. Value should not be changed outside of QOABLThread unless it is not working on this. A value of -2 indicates that QOABLThread does not consider the array to be in read mode.
     Int_t fNReadBuffers;         // Number of active buffers that are full and ready for reading
     Long64_t fPTNRBObjects;      // Total number of objects in read buffers in the previous pass (==fWBFirstObjIdx after the last call of Fill())
     QOABuffer **fUMBuffers;       //! Array of unmodified buffers
