@@ -1831,12 +1831,12 @@ void* QOversizeArray::QOABLThread(void*)
 #ifndef QSFAST
 	    if(qoa->fCurBLBuffer->fNextOAB) {
 	      //printf("qoa->fCurBLBuffer idx: %i\tqoa->fCurBLBuffer->fNextOAB idx: %i\n",qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fNextOAB->fBufferIdx);
-	      fprintf(stderr,"%p\tLoaded buffer: %i, previous buffer: %i, next buffer: %i curreadbuffer: %i\n",qoa,buf2->fBufferIdx,qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fNextOAB->fBufferIdx);
+	      //fprintf(stderr,"%p\tLoaded buffer: %i, previous buffer: %i, next buffer: %i curreadbuffer: %i\n",qoa,buf2->fBufferIdx,qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fNextOAB->fBufferIdx);
 	      ASSERT(qoa->fCurBLBuffer->fNextOAB->fBufferIdx>buf2->fBufferIdx);
 	    }
 	    if(qoa->fCurBLBuffer->fPreviousOAB) {
 	      //printf("qoa->fCurBLBuffer idx: %i\tqoa->fCurBLBuffer->fPreviousOAB idx: %i\n",qoa->fCurBLBuffer->fBufferIdx,qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx);
-	      fprintf(stderr,"%p\tLoaded buffer: %i, 2nd previous buffer: %i, previous buffer: %i\n",qoa,buf2->fBufferIdx,qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx,qoa->fCurBLBuffer->fBufferIdx);
+	      //fprintf(stderr,"%p\tLoaded buffer: %i, 2nd previous buffer: %i, previous buffer: %i\n",qoa,buf2->fBufferIdx,qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx,qoa->fCurBLBuffer->fBufferIdx);
 	      ASSERT(qoa->fCurBLBuffer->fPreviousOAB->fBufferIdx<buf2->fBufferIdx);
 	    }
 #endif

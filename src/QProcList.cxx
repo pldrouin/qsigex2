@@ -29,7 +29,7 @@ void QProcList::Analyze()
     ((QProcessor*)(*fQPL)[i])->Analyze();
 
     } catch (Int_t e) {
-      fprintf(stderr,"QProcList::Analyze(): Error thrown by QProcessor index %i\n",i);
+      fprintf(stderr,"QProcList::Analyze(): Error thrown by QProcessor index %i ('%s')\n",i,((QProcessor*)(*fQPL)[i])->GetName());
       throw e;
     }
 
@@ -108,7 +108,7 @@ void QProcList::InitProcess(Bool_t allocateparammem)
       ((QProcessor*)(*fQPL)[i])->InitProcess(kFALSE);
 
     } catch (Int_t e) {
-      fprintf(stderr,"QProcList::InitProcess(): Error thrown by QProcessor index %i\n",i);
+      fprintf(stderr,"QProcList::InitProcess(): Error thrown by QProcessor index %i ('%s')\n",i,((QProcessor*)(*fQPL)[i])->GetName());
       throw e;
     }
   }
@@ -367,7 +367,7 @@ void QProcList::PrintAnalysisResults() const
       ((QProcessor*)(*fQPL)[i])->PrintAnalysisResults();
 
     } catch (Int_t e) {
-      fprintf(stderr,"QProcList::PrintAnalysisResults(): Error thrown by QProcessor index %i\n",i);
+      fprintf(stderr,"QProcList::PrintAnalysisResults(): Error thrown by QProcessor index %i ('%s')\n",i,((QProcessor*)(*fQPL)[i])->GetName());
       throw e;
     }
   }
