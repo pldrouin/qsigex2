@@ -23,12 +23,22 @@ struct sem_t;
 #include <algorithm>
 #include <errno.h>
 
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
 #include "Rtypes.h"
 #include "TString.h"
 #include "TRandom.h"
 #include "TTimeStamp.h"
+
+#ifdef WITH_LIBPROCINFO
+#include "procinfo.h"
+#endif
+
 #include "QOABuffer.h"
 #include "QList.h"
+
+#define QOA_MAXPROCS 256
 
 extern "C" void R__zip (Int_t cxlevel, Int_t *nin, char *bufin, Int_t *lout, char *bufout, Int_t *nout);
 extern "C" void R__unzip(Int_t *nin, UChar_t *bufin, Int_t *lout, char *bufout, Int_t *nout);
@@ -48,6 +58,8 @@ class QOversizeArray
     QOversizeArray(const char *filename, const char *arraydescr, omode openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=0, const Int_t &npcbuffers=1, const UInt_t &nobjectsallocblock=0);
     virtual ~QOversizeArray();
 
+    static void ClearShMem();
+
     void CloseFile();
 
     void Fill();
@@ -58,6 +70,8 @@ class QOversizeArray
     const Char_t* GetArrayName() const{return fArrayName;}
     const UInt_t& GetObjSize() const{return fObjectSize;}
     const Char_t* GetObjTypeName() const{return fObjectTypeName.Data();}
+
+    static void InitShMem();
 
     const Bool_t& IsReadThreadSafe() const{return kFALSE;}
 
@@ -161,12 +175,14 @@ class QOversizeArray
     pthread_mutex_t fUZBMutex;     // Lock on unzipped buffer arrays
 
     static QList<QOversizeArray*> fInstances; // List of QOversizeArray instances
+    static void* fShMem;                      // Pointer to shared memory
+    static Int_t fShMemId;                    // Shared memory ID
     static QList<Float_t>         fICumulPriority; // Cumulative array priorities
     static Long64_t fLevel1MemSize; // Memory level at which memory management thread stops attempting to free memory
     static Long64_t fLevel2MemSize; // Memory level at which memory management thread starts attempting to free memory
     static Long64_t fCritMemSize;   // Critical memory level at which the main thread pauses until some memory is freed
     static Long64_t fCThreshMemSize; // Memory level at which memory management thread starts compressing the buffers to save memory
-    static Long64_t fTotalMemSize;  //Total amount of memory used by the buffers of all arrays
+    static Long64_t *fTotalMemSize;  //Total amount of memory used by the buffers of all arrays
     static UInt_t   fNLoaders;      //Number of QOABLThreads
     //static pthread_mutex_t fMSizeMutex; //Total memory size mutex
     static pthread_mutex_t fCMSCMutex;  //Critical memory size condition mutex

@@ -1,7 +1,12 @@
-ALLINCS		=	$(addprefix include/,$(notdir $(wildcard src/*.h)))
+ALLINCS_ORIG	=	$(wildcard src/*.h)
+ALLINCS		=	$(addprefix include/,$(notdir $(ALLINCS_ORIG)))
 
 ifdef QSFAST
 CXXFLAGS	+=	-DQSFAST
+endif
+
+ifdef WITH_LIBPROCINFO
+CXXFLAGS	+=	-DWITH_LIBPROCINFO
 endif
 
 ifeq ($(CXX),icpc)
@@ -44,5 +49,5 @@ clear:
 	cd ./src; $(MAKE) clear
 	rm -f lib/* include/*
 
-$(ALLINCS): include/%: src/%
-	cp $^ $@
+$(ALLINCS):
+	ln -s ../src/$(notdir $@) include/
