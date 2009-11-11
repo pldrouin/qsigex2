@@ -125,13 +125,13 @@ QOversizeArray::~QOversizeArray()
   sem_destroy(&fBLWSem);
 }
 
-void QOversizeArray::ClearShMem()
+void QOversizeArray::ClearShMem(const Bool_t &forcedel)
 {
   if(fShMem) {
     //Now get rid of the shared memory properly
     q_add((Int_t*)fShMem,-1);
 
-    if(!q_fetch_and_compare_and_set((Int_t*)fShMem,0,-1)) {
+    if(forcedel || !q_fetch_and_compare_and_set((Int_t*)fShMem,0,-1)) {
       if(shmctl(fShMemId,IPC_RMID,NULL)<0) {
 	perror("shmctl");
 	throw 1;
@@ -386,7 +386,7 @@ reload:
       throw 1;
     }
 
-    //printf("ID is %i\n",id);
+    printf("ID is %i\n",id);
 
     fTotalMemSize=(Long64_t*)((Char_t*)fShMem+sizeof(Int_t)+QOA_MAXPROCS+id*sizeof(Long64_t));
     q_store(fTotalMemSize,(Long64_t)0);

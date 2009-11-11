@@ -59,7 +59,7 @@ class QOversizeArray
     QOversizeArray(const char *filename, const char *arraydescr, omode openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=0, const Int_t &npcbuffers=1, const UInt_t &nobjectsallocblock=0);
     virtual ~QOversizeArray();
 
-    static void ClearShMem();
+    static void ClearShMem(const Bool_t &forcedel=kFALSE);
 
     void CloseFile();
 
