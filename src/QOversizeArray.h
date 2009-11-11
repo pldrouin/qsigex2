@@ -181,7 +181,7 @@ class QOversizeArray
     pthread_mutex_t fUZBMutex;     // Lock on unzipped buffer arrays
 
     static QList<QOversizeArray*> fInstances; // List of QOversizeArray instances
-    static void* fShMem;                      // Pointer to shared memory
+    static void* fShMem;             // Pointer to shared memory
     static Int_t fShMemId;                    // Shared memory ID
     static QList<Float_t>         fICumulPriority; // Cumulative array priorities
     static Long64_t fMinMemSize;    // Minimum amount of memory needed for all QOversizeArray instances of the current process
