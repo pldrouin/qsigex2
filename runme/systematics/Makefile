@@ -10,7 +10,7 @@
 ROOTLIBS	=	$(shell root-config --libs) -lMinuit
 ROOTINCLUDE	?=	$(shell root-config --incdir)
 
-CXXFLAGS    	+=	-I$(ROOTINCLUDE) -I$(QSIGEXDIR)/include
+CXXFLAGS    	+=	-I$(ROOTINCLUDE) -I$(QSIGEXDIR)/include 
 
 MOBJ		=	testproc_tree.o testproc_qoa.o
 EXEC		=	$(MOBJ:.o=)
@@ -21,7 +21,6 @@ examples: $(EXEC)
 
 $(EXEC): %: %.o $(POBJ)
 	$(CXX) $(CXXFLAGS) $(ROOTLIBS) $^ -L$(QSIGEXDIR)/lib -lqsigex2 -o $@
-
 $(DEP): %.d: %.cxx
 	@echo "Generating dependency file $@"
 	@set -e; rm -f $@

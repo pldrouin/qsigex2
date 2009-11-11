@@ -6,11 +6,20 @@ QList<QOversizeArray*> QOversizeArray::fInstances;
 void* QOversizeArray::fShMem=NULL;
 Int_t QOversizeArray::fShMemId=-1;
 QList<Float_t> QOversizeArray::fICumulPriority;
+Long64_t QOversizeArray::fMinMemSize=0;
 Long64_t QOversizeArray::fLevel1MemSize=0;
+Float_t  QOversizeArray::fLevel1=0;
 Long64_t QOversizeArray::fLevel2MemSize=0;
+Float_t  QOversizeArray::fLevel2=0;
 Long64_t QOversizeArray::fCritMemSize=0;
+Float_t  QOversizeArray::fCritLevel=0;
 Long64_t QOversizeArray::fCThreshMemSize=0;
-Long64_t *QOversizeArray::fTotalMemSize=0;
+Float_t  QOversizeArray::fCThreshLevel=0;
+Long64_t *QOversizeArray::fTotalMemSize=NULL;
+#ifdef WITH_LIBPROCINFO
+time_t QOversizeArray::fMemUpdateInt=2;
+time_t QOversizeArray::fMemUpdateTime=0;
+#endif
 UInt_t   QOversizeArray::fNLoaders=1;
 pthread_mutex_t QOversizeArray::fCMSCMutex=PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t QOversizeArray::fFileWMutex=PTHREAD_MUTEX_INITIALIZER;
@@ -151,10 +160,7 @@ void QOversizeArray::CloseFile()
     fICumulPriority.Del(idx);
     fInstances.Del(idx);
     pthread_mutex_unlock(&fILMutex);
-    pthread_mutex_lock(&fMMMutex);
-    pthread_cond_signal(&fMMCond);
-    pthread_mutex_unlock(&fMMMutex);
-    //From here QOAMMThread won't try to send a new job to either fMWThread of fMCThread of the big lock on fILMutex
+    //From here QOAMMThread won't try to send a new job to either fMWThread of fMCThread for this array
 
     if(fOpenMode!=kRead) {
       //Send a signal to fMWThread to terminate and wait for termination
@@ -172,7 +178,14 @@ void QOversizeArray::CloseFile()
 
     //If no instances are left, wait for QOAMCThread to stop
     if(!fInstances.Count()) {
-      if(fCThreshMemSize<=fCritMemSize) {
+      
+      //Wait for QOAMMThread to exit if it is the last instance
+      pthread_mutex_lock(&fMMMutex);
+      pthread_cond_signal(&fMMCond);
+      pthread_mutex_unlock(&fMMMutex);
+      pthread_join(fMMThread,NULL);
+
+      if(fCThreshLevel<=fCritLevel) {
 	//Send a signal to fMCThread to terminate and wait for termination
 	pthread_mutex_lock(&fMCMutex);
 	fMCAction=2;
@@ -198,6 +211,13 @@ void QOversizeArray::CloseFile()
 	if(q_load(&fQOAQ.Array)) {
 	  pthread_mutex_unlock(&fBuffersMutex);
 	  //Wait for confirmation
+
+	  //Make sure the BLThread is not waiting for memory
+	  if(q_load(&fCLReached)) {
+	    pthread_mutex_lock(&fCMSCMutex);
+	    pthread_cond_broadcast(&fCMSCond);
+	    pthread_mutex_unlock(&fCMSCMutex);
+	  }
 	  sem_wait(&fBLWSem);
 	  pthread_mutex_lock(&fBuffersMutex);
 	}
@@ -268,21 +288,19 @@ void QOversizeArray::CheckMemory()
 {
   FuncDef(CheckMemory,1);
   //printf("fCritMemSize=%lli, fTotalMemSize=%lli\n",fCritMemSize,q_load(fTotalMemSize));
-  if(fLevel2MemSize && q_load(fTotalMemSize) > fLevel2MemSize) {
+  if(q_load(&fLevel2MemSize) && q_load(fTotalMemSize) > q_load(&fLevel2MemSize)) {
     pthread_mutex_lock(&fMMMutex);
     pthread_cond_signal(&fMMCond);
     pthread_mutex_unlock(&fMMMutex);
   }
-  pthread_mutex_lock(&fCMSCMutex);
 
-  if(fCritMemSize && q_load(fTotalMemSize) > fCritMemSize) {
+  if(q_load(&fCritMemSize) && q_load(fTotalMemSize) > q_load(&fCritMemSize)) {
     //Need to use this order for unlocking to avoid deadlock with MMThread due to wait on fC<SCond
     printstatus("***** Critical memory size has been reached");
-    fCLReached=kTRUE;
-    pthread_cond_wait(&fCMSCond, &fCMSCMutex);
-    pthread_mutex_unlock(&fCMSCMutex);
-
-  } else {
+    //printf("***** Critical memory size has been reached\n");
+    q_store(&fCLReached,(Bool_t)kTRUE);
+    pthread_mutex_lock(&fCMSCMutex);
+    pthread_cond_wait(&fCMSCond,&fCMSCMutex);
     pthread_mutex_unlock(&fCMSCMutex);
   }
 }
@@ -330,7 +348,7 @@ void QOversizeArray::InitShMem()
 
     while(1) {
 
-      if((fShMemId=shmget(17685,sizeof(Int_t)+QOA_MAXPROCS*(sizeof(Char_t)+sizeof(Long64_t)),IPC_CREAT|SHM_R|SHM_W))<0) {
+      if((fShMemId=shmget(17686,sizeof(Int_t)+QOA_MAXPROCS*(sizeof(Char_t)+sizeof(Long64_t)),IPC_CREAT|SHM_R|SHM_W))<0) {
 	perror("shmget");
 	throw 1;
       }
@@ -342,13 +360,13 @@ void QOversizeArray::InitShMem()
 
 reload:
       if((val=q_load((Int_t*)fShMem))==-1) {
-	printf("Shared memory segment is being deleted\n");
+	//printf("Shared memory segment is being deleted\n");
 	shmdt(fShMem);
 	usleep(1000);
 	continue;
       }
 
-      if(!val) printf("New shared memory segment\n");
+      //if(!val) printf("New shared memory segment\n");
 
       if(q_fetch_and_compare_and_set((Int_t*)fShMem,val,val+1)!=val) goto reload;
       break;
@@ -368,7 +386,7 @@ reload:
       throw 1;
     }
 
-    printf("ID is %i\n",id);
+    //printf("ID is %i\n",id);
 
     fTotalMemSize=(Long64_t*)((Char_t*)fShMem+sizeof(Int_t)+QOA_MAXPROCS+id*sizeof(Long64_t));
     q_store(fTotalMemSize,(Long64_t)0);
@@ -772,6 +790,9 @@ void QOversizeArray::OpenFile()
     pthread_mutex_unlock(&fILMutex);
 
     InitShMem();
+#ifdef WITH_LIBPROCINFO
+    while (sysfreemem() < fMinMemSize) sleep(fMemUpdateInt);
+#endif
 
     sem_init(&fB2LSem,0,0);
     fBLThreads=new pthread_t[fNLoaders];
@@ -780,7 +801,7 @@ void QOversizeArray::OpenFile()
       pthread_create(fBLThreads+i, NULL, QOABLThread, NULL);
     }
     pthread_create(&fMMThread, NULL, QOAMMThread, NULL);
-    if(fCThreshMemSize<=fCritMemSize) pthread_create(&fMCThread, NULL, QOAMCThread, NULL);
+    if(fCThreshLevel<=fCritLevel) pthread_create(&fMCThread, NULL, QOAMCThread, NULL);
 
   } else {
     pthread_mutex_unlock(&fILMutex);
@@ -856,7 +877,7 @@ void QOversizeArray::ResetArray()
     printstatus("Memory writing thread confirmed to be in pausing condition");
   }
 
-  if(fCThreshMemSize<=fCritMemSize) {
+  if(fCThreshLevel<=fCritLevel) {
     //A Giant lock is used here to avoid conflicts when ResetArray for different QOA instances are called at the same time (for a multi-threaded application).
     pthread_mutex_lock(&fMCGMutex);
     pthread_mutex_lock(&fMCMutex);
@@ -904,7 +925,7 @@ void QOversizeArray::ResetArray()
   if(fWriteBuffer) fWriteBuffer->fBufferIdx=0;
   fNObjects=0;
 
-  if(fCThreshMemSize<=fCritMemSize) {
+  if(fCThreshLevel<=fCritLevel) {
     //Remove pause condition on memory compression thread
     pthread_mutex_lock(&fMCMutex);
     fMCAction=0;
@@ -1190,7 +1211,7 @@ void QOversizeArray::Save(const Float_t &compfrac)
   pthread_mutex_unlock(&fMWCMutex);
   printstatus("Memory writing thread confirmed to be in pausing condition");
 
-  if(fCThreshMemSize<=fCritMemSize) {
+  if(fCThreshLevel<=fCritLevel) {
     pthread_mutex_lock(&fMCGMutex);
     pthread_mutex_lock(&fMCMutex);
     //Request a pause from memory compression thread
@@ -1278,7 +1299,7 @@ void QOversizeArray::Save(const Float_t &compfrac)
 
   WriteWriteBuffer();
 
-  if(fCThreshMemSize<=fCritMemSize) {
+  if(fCThreshLevel<=fCritLevel) {
     //Remove pause condition on memory compression thread
     pthread_mutex_lock(&fMCMutex);
     fMCAction=0;
@@ -1306,16 +1327,18 @@ void QOversizeArray::Save(const Float_t &compfrac)
   WriteHeader();
 }
 
-void QOversizeArray::SetMemConstraints(const Long64_t &critmemsize,const Long64_t &level1memsize,const Long64_t &level2memsize,Long64_t cthreshmemsize)
+void QOversizeArray::SetMemConstraints(const Long64_t &minmemsize, Float_t critlevel, const Float_t &level1, const Float_t &level2, Float_t cthreshlevel)
 {
   FuncDef(SetMemConstraints,1);
-  cthreshmemsize=(cthreshmemsize>=0?cthreshmemsize:9223372036854775807ull);
+
+  if(critlevel>1) critlevel=1;
+  if(cthreshlevel<0) cthreshlevel=2;
 
   pthread_mutex_lock(&fILMutex);
   if(fInstances.Count()>0) {
     pthread_mutex_unlock(&fILMutex);
-    if(cthreshmemsize<=critmemsize && fCThreshMemSize>fCritMemSize) pthread_create(&fMCThread, NULL, QOAMCThread, NULL);
-    else if(cthreshmemsize>critmemsize && fCThreshMemSize<=fCritMemSize) {
+    if(cthreshlevel<=critlevel && fCThreshLevel>fCritLevel) pthread_create(&fMCThread, NULL, QOAMCThread, NULL);
+    else if(cthreshlevel>critlevel && fCThreshLevel<=fCritLevel) {
       //Send a signal to fMCThread to terminate and wait for termination
       pthread_mutex_lock(&fMCMutex);
       fMCAction=2;
@@ -1332,16 +1355,66 @@ void QOversizeArray::SetMemConstraints(const Long64_t &critmemsize,const Long64_
   } else pthread_mutex_unlock(&fILMutex);
 
   //pthread_mutex_lock(&fMSizeMutex);
-  fCritMemSize=critmemsize;
-  fLevel1MemSize=level1memsize;
-  fLevel2MemSize=level2memsize;
-  fCThreshMemSize=cthreshmemsize;
+  fMinMemSize=(minmemsize<0?0:minmemsize);
+  fCritLevel=critlevel;
+  fLevel1=level1;
+  fLevel2=level2;
+  fCThreshLevel=cthreshlevel;
 
-  if(fCritMemSize) {
-    if(!fLevel2MemSize) fLevel2MemSize=(UInt_t)(0.95*fCritMemSize);
-    if(!fLevel1MemSize || fLevel1MemSize > fLevel2MemSize) fLevel1MemSize=(UInt_t)(0.95*fLevel2MemSize);
+  if(fCritLevel) {
+    if(!fLevel2) fLevel2=(UInt_t)(0.95*fCritLevel);
+    if(!fLevel1|| fLevel1> fLevel2) fLevel1=(UInt_t)(0.95*fLevel2);
   }
+
+#ifdef WITH_LIBPROCINFO
+  while (sysfreemem()+(fTotalMemSize?q_load(fTotalMemSize):0) < fMinMemSize) sleep(fMemUpdateInt);
+#else
+    fLevel1MemSize=fLevel1*fMinMemSize;
+    fLevel2MemSize=fLevel2*fMinMemSize;
+    fCritMemSize=fCritLevel*fMinMemSize;
+    fCThreshMemSize=fCThreshLevel*fMinMemSize;
+#endif
   //pthread_mutex_unlock(&fMSizeMutex);
+}
+
+void QOversizeArray::UpdateMemStats()
+{
+#ifdef WITH_LIBPROCINFO
+  struct timeval now;
+  gettimeofday(&now,NULL);
+
+  if(now.tv_sec-fMemUpdateTime >= fMemUpdateInt) {
+    long long int avail=sysfreemem();
+    //printf("Free system memory: %lli\n",avail);
+
+    for(int i=QOA_MAXPROCS-1; i>=0; --i) {
+      avail+=q_load((Long64_t*)((Char_t*)fShMem+sizeof(Int_t)+QOA_MAXPROCS+i*sizeof(Long64_t)));
+    }
+    //printf("Total available memory: %lli\n",avail);
+    avail/=q_load((Int_t*)((Char_t*)fShMem));
+    //printf("Available memory for this process: %lli\n",avail);
+
+    if(avail<fMinMemSize) avail=fMinMemSize;
+
+    fLevel1MemSize=fLevel1*avail; //Does not need an atomic operation since it is only read from QOAMMThread (i.e. the only thread calling UpdateMemStats
+    q_store(&fLevel2MemSize,(Long64_t)(fLevel2*avail));
+    q_store(&fCritMemSize,(Long64_t)(fCritLevel*avail));
+    fCThreshMemSize=fCThreshLevel*avail; //Does not need an atomic operation since it is only read from QOAMMThread (i.e. the only thread calling UpdateMemStats
+    //printf("fLevel1: %f\tfLevel1MemSize: %lli\n",fLevel1,fLevel1MemSize);
+    //printf("fCritLevel: %f\tfCritLevelMemSize: %lli\n",fCritLevel,fCritMemSize);
+  }
+  fMemUpdateTime=now.tv_sec;
+#endif
+
+  if(q_load(&fCLReached) && q_load(fTotalMemSize) <= fCritMemSize) {
+    //printstatus("***** Memory size is no longer critical");
+    //printf("***** Memory size is no longer critical\n");
+    q_store(&fCLReached,(Bool_t)kFALSE);
+    //printstatus("Sending signal back to CheckMemory");
+    pthread_mutex_lock(&fCMSCMutex);
+    pthread_cond_broadcast(&fCMSCond);
+    pthread_mutex_unlock(&fCMSCMutex);
+  }
 }
 
 void QOversizeArray::Terminate()
@@ -2009,6 +2082,8 @@ void* QOversizeArray::QOAMMThread(void *)
   QOABuffer *bbuf, *bbuf2;
   Long64_t libuf,libuf2;
   Bool_t dwait;
+  struct timespec waittime;
+  waittime.tv_nsec=0;
   //printstatus("Starting memory management thread");
 
   for(;;) {
@@ -2023,11 +2098,21 @@ void* QOversizeArray::QOAMMThread(void *)
     } else {
       pthread_mutex_unlock(&fILMutex);
     }
+    
+#ifdef WITH_LIBPROCINFO
+    waittime.tv_sec=fMemUpdateTime+fMemUpdateInt;
+#endif
 
     //Wait for memory management condition
     pthread_mutex_lock(&fMMMutex);
+#ifdef WITH_LIBPROCINFO
+    pthread_cond_timedwait(&fMMCond, &fMMMutex, &waittime);
+#else
     pthread_cond_wait(&fMMCond, &fMMMutex);
+#endif
     pthread_mutex_unlock(&fMMMutex);
+
+    UpdateMemStats();
 
     //While total memory size exceeds fLevel1MemSize
     while(fLevel1MemSize && q_load(fTotalMemSize) > fLevel1MemSize) {
@@ -2332,17 +2417,7 @@ void* QOversizeArray::QOAMMThread(void *)
 skippoint:
       pthread_mutex_unlock(&fILMutex);
 
-      //printf("CritMemSize: %lli\tTotalMemSize: %lli\n",fCritMemSize,fTotalMemSize);
-      pthread_mutex_lock(&fCMSCMutex);
-      if(fCLReached && q_load(fTotalMemSize) <= fCritMemSize) {
-	//printstatus("***** Memory size is no longer critical");
-	fCLReached=kFALSE;
-	//printstatus("Sending signal back to CheckMemory");
-	pthread_cond_broadcast(&fCMSCond);
-	pthread_mutex_unlock(&fCMSCMutex);
-      } else {
-	pthread_mutex_unlock(&fCMSCMutex);
-      }
+      UpdateMemStats();
     }
   }
 

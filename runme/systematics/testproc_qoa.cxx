@@ -18,7 +18,7 @@ Bool_t FillHist(QProcArgs &args);
 int main()
 {
   QArrayProcessor *ttp=new QArrayProcessor;
-  QOversizeArray::SetMemConstraints(200*1024*1024,160*1024*1024,170*1024*1024,1000*1024*1024);
+  QOversizeArray::SetMemConstraints(200*1024*1024,1,0.8,0.85,2);
   QProcBranchHandler::SaveOutputs(kFALSE);
   QProcQOAHandler::SaveOutputs(kFALSE);
 

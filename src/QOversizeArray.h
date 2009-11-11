@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 #include "qatomic.h"
 #else
@@ -38,7 +39,7 @@ struct sem_t;
 #include "QOABuffer.h"
 #include "QList.h"
 
-#define QOA_MAXPROCS 256
+#define QOA_MAXPROCS 16
 
 extern "C" void R__zip (Int_t cxlevel, Int_t *nin, char *bufin, Int_t *lout, char *bufout, Int_t *nout);
 extern "C" void R__unzip(Int_t *nin, UChar_t *bufin, Int_t *lout, char *bufout, Int_t *nout);
@@ -94,7 +95,11 @@ class QOversizeArray
 
     void SetBuffer(void *buffer){fBuffer=buffer;}
 
-    static void SetMemConstraints(const Long64_t &critmemsize=0, const Long64_t &level1memsize=0, const Long64_t &level2memsize=0, Long64_t cthreshmemsize=-1);
+    static void SetMemConstraints(const Long64_t &minmemsize=0, Float_t critlevel=0, const Float_t &level1=0, const Float_t &level2=0, Float_t cthreshlevel=-1);
+
+#ifdef WITH_LIBPROCINFO
+    static void SetMemUpdateInt(const time_t &nsecs){fMemUpdateInt=nsecs;}
+#endif
 
     static void SetNLoaders(const UInt_t &nloaders){fNLoaders=(nloaders>0?nloaders:1);}
 
@@ -104,13 +109,14 @@ class QOversizeArray
 
   protected:
     QOversizeArray(): fFirstDataByte(0), fBufferHeaderSize(0) {}
-    static void CheckMemory();
+    static void CheckMemory(); //Can only be called by the main thread and the BL threads
     void CleanUZBuffers();
     void Init();
     void ReadHeader();
     void ReadBuffer(QOABuffer **buf, const UInt_t &bufferidx);
     void ReadWriteBuffer();
     void Terminate();
+    static void UpdateMemStats();
     void WriteHeader() const;
     void WriteBuffer(const QOABuffer *buf) const;
     void WriteWriteBuffer() const;
@@ -178,15 +184,24 @@ class QOversizeArray
     static void* fShMem;                      // Pointer to shared memory
     static Int_t fShMemId;                    // Shared memory ID
     static QList<Float_t>         fICumulPriority; // Cumulative array priorities
-    static Long64_t fLevel1MemSize; // Memory level at which memory management thread stops attempting to free memory
-    static Long64_t fLevel2MemSize; // Memory level at which memory management thread starts attempting to free memory
-    static Long64_t fCritMemSize;   // Critical memory level at which the main thread pauses until some memory is freed
-    static Long64_t fCThreshMemSize; // Memory level at which memory management thread starts compressing the buffers to save memory
+    static Long64_t fMinMemSize;    // Minimum amount of memory needed for all QOversizeArray instances of the current process
+    static Long64_t fLevel1MemSize; // Memory level (B) at which memory management thread stops attempting to free memory
+    static Float_t  fLevel1;        // Memory level (fraction) at which memory management thread stops attempting to free memory
+    static Long64_t fLevel2MemSize; // Memory level (B) at which memory management thread starts attempting to free memory
+    static Float_t  fLevel2;        // Memory level (fraction) at which memory management thread starts attempting to free memory
+    static Long64_t fCritMemSize;   // Critical memory level (B) at which the main thread pauses until some memory is freed
+    static Float_t  fCritLevel;   // Critical memory level (fraction) at which the main thread pauses until some memory is freed
+    static Long64_t fCThreshMemSize; // Memory level (B) at which memory management thread starts compressing the buffers to save memory
+    static Float_t  fCThreshLevel;   // Memory level (fraction) at which memory management thread starts compressing the buffers to save memory
     static Long64_t *fTotalMemSize;  //Total amount of memory used by the buffers of all arrays
+#ifdef WITH_LIBPROCINFO
+    static time_t   fMemUpdateInt; //Memory usage update time interval
+    static time_t   fMemUpdateTime; //Memory usage update time interval
+#endif
     static UInt_t   fNLoaders;      //Number of QOABLThreads
     //static pthread_mutex_t fMSizeMutex; //Total memory size mutex
-    static pthread_mutex_t fCMSCMutex;  //Critical memory size condition mutex
-    static pthread_cond_t fCMSCond;     //Critical memory size condition
+    static pthread_mutex_t fCMSCMutex;    //Critical memory size mutex
+    static pthread_cond_t   fCMSCond;     //Critical memory size condition
     static Bool_t fCLReached;           //Indicate when critical memory size has been reached
     static pthread_t fMMThread;      //Memory management thread
     static pthread_mutex_t fMMMutex; //Memory management condition mutex
