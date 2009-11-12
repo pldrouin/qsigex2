@@ -59,7 +59,7 @@ class QOversizeArray
     QOversizeArray(const char *filename, const char *arraydescr, omode openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=0, const Int_t &npcbuffers=1, const UInt_t &nobjectsallocblock=0);
     virtual ~QOversizeArray();
 
-    static void ClearShMem(const Bool_t &forcedel=kFALSE);
+    static void ClearShMem(const Bool_t &forcedel=kFALSE, const Bool_t &remdepend=kTRUE);
 
     void CloseFile();
 
@@ -72,7 +72,7 @@ class QOversizeArray
     const UInt_t& GetObjSize() const{return fObjectSize;}
     const Char_t* GetObjTypeName() const{return fObjectTypeName.Data();}
 
-    static void InitShMem();
+    static void InitShMem(const Bool_t &adddepend=kTRUE);
 
     const Bool_t& IsReadThreadSafe() const{return kFALSE;}
 
@@ -102,6 +102,8 @@ class QOversizeArray
 #endif
 
     static void SetNLoaders(const UInt_t &nloaders){fNLoaders=(nloaders>0?nloaders:1);}
+
+    static void ShowMemStats();
 
     void SetNOAllocBlock(const UInt_t &noallocblock){fNOAllocBlock=noallocblock;}
 

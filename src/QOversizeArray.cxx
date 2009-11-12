@@ -125,19 +125,20 @@ QOversizeArray::~QOversizeArray()
   sem_destroy(&fBLWSem);
 }
 
-void QOversizeArray::ClearShMem(const Bool_t &forcedel)
+void QOversizeArray::ClearShMem(const Bool_t &forcedel, const Bool_t &remdepend)
 {
   if(fShMem) {
     //Now get rid of the shared memory properly
-    q_add((Int_t*)fShMem,-1);
+    if(remdepend) q_add((Int_t*)fShMem,(Int_t)-1);
 
-    if(forcedel || !q_fetch_and_compare_and_set((Int_t*)fShMem,0,-1)) {
+    if(forcedel || !q_fetch_and_compare_and_set((Int_t*)fShMem,(Int_t)0,(Int_t)-1)) {
       if(shmctl(fShMemId,IPC_RMID,NULL)<0) {
 	perror("shmctl");
 	throw 1;
       }
     }
 
+    printf("Freeing shared memory segment at ID %i\n",int(((Int_t)((Char_t*)fTotalMemSize-(Char_t*)fShMem)-sizeof(Int_t)-QOA_MAXPROCS)/sizeof(Long64_t)));
     q_store((Char_t*)fShMem+sizeof(Int_t)+(int((Char_t*)fTotalMemSize-(Char_t*)fShMem)-sizeof(Int_t)-QOA_MAXPROCS)/sizeof(Long64_t),(Char_t)0);
 
     if(shmdt(fShMem)<0) {
@@ -340,7 +341,7 @@ void QOversizeArray::Init()
   ReadWriteBuffer();
 }
 
-void QOversizeArray::InitShMem()
+void QOversizeArray::InitShMem(const Bool_t &adddepend)
 {
   if(!fShMem) {
     Int_t i;
@@ -368,14 +369,19 @@ reload:
 
       //if(!val) printf("New shared memory segment\n");
 
-      if(q_fetch_and_compare_and_set((Int_t*)fShMem,val,val+1)!=val) goto reload;
+      if(adddepend && q_fetch_and_compare_and_set((Int_t*)fShMem,val,val+1)!=val) goto reload;
       break;
     }
     id=-1;
 
     for(i=QOA_MAXPROCS-1; i>=0; --i) {
 
-      if(!q_fetch_and_compare_and_set((Char_t*)fShMem+sizeof(Int_t)+i,0,1)) {
+      if(!q_fetch_and_compare_and_set((Char_t*)fShMem+sizeof(Int_t)+i,(Char_t)0,(Char_t)1)) {
+
+	if(!q_load((Char_t*)fShMem+sizeof(Int_t)+i)) {
+	  fprintf(stderr,"Error: Could not properly set the bit %i in the shared segment\n",i);
+	  throw 1;
+	}
 	id=i;
 	break;
       }
@@ -1375,6 +1381,22 @@ void QOversizeArray::SetMemConstraints(const Long64_t &minmemsize, Float_t critl
     fCThreshMemSize=fCThreshLevel*fMinMemSize;
 #endif
   //pthread_mutex_unlock(&fMSizeMutex);
+}
+
+void QOversizeArray::ShowMemStats()
+{
+#ifdef WITH_LIBPROCINFO
+  printf("Available memory: %lli\n",sysfreemem());
+#endif
+
+  printf("Memory used by the %i QOversizeArray processes:\n",q_load((Int_t*)((Char_t*)fShMem)));
+  Long64_t llbuf;
+
+  for(int i=QOA_MAXPROCS-1; i>=0; --i) {
+    llbuf=q_load((Long64_t*)((Char_t*)fShMem+sizeof(Int_t)+QOA_MAXPROCS+i*sizeof(Long64_t)));
+
+    if(llbuf) printf("%3i: %lli\n",i,llbuf);
+  }
 }
 
 void QOversizeArray::UpdateMemStats()
