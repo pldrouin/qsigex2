@@ -23,7 +23,7 @@ void QDepTree::Simplify()
       for(j=n-1; j>=0; --j) {
 	//printf("Down dependency %i: %i\n",j,fQDTObjs[i]->DownDepend(j).GetIndex());
 
-	idxlist=fQDTObjs[i]->DownDepend(j).GetAllUpDepends();
+	idxlist=fQDTObjs[i]->DownDepend(j).GetAllDownDepends();
 
 	for(k=n-1; k>=0; --k) {
 	  if(k==j) continue;
@@ -51,7 +51,7 @@ void QDepTree::Simplify()
 
       for(j=n-1; j>=0; --j) {
 	//printf("Up dependency %i: %i\n",j,fQDTObjs[i]->UpDepend(j).GetIndex());
-	idxlist=fQDTObjs[i]->UpDepend(j).GetAllDownDepends();
+	idxlist=fQDTObjs[i]->UpDepend(j).GetAllUpDepends();
 
 	for(k=n-1; k>=0; --k) {
 	  if(k==j) continue;
