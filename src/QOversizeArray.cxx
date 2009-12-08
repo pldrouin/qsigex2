@@ -1839,7 +1839,7 @@ void* QOversizeArray::QOABLThread(void*)
 
 #ifndef QSFAST
 	  if(qoa->fCurBLBuffer && !(qoa->fCurBLBuffer->fBufferIdx<ibuf)) {
-	    fprintf(stderr,"Error: QOABLThread: fCurBLBuffer index=%i and ibuf=%i (fCurBLRBIdx is %i, total number of read buffers is %i)\n",qoa->fCurBLBuffer->fBufferIdx,ibuf,qoa->fCurBLRBIdx,qoa->fWBFirstObjIdx/qoa->fNOPerBuffer);
+	    fprintf(stderr,"Error: QOABLThread: fCurBLBuffer index=%i and ibuf=%i (fCurBLRBIdx is %i, total number of read buffers is %lli)\n",qoa->fCurBLBuffer->fBufferIdx,ibuf,qoa->fCurBLRBIdx,qoa->fWBFirstObjIdx/qoa->fNOPerBuffer);
 	    throw 1;
 	  }
 #endif
