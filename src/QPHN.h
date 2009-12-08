@@ -58,6 +58,7 @@ class QPHN: public QHN_D
 #endif
       QHN_D::fBinContent[bin]+=w*y; fBinEntries[bin]+=w; QHN_D::fEntries+=w;
     }
+    void CopyStruct(const QHN_D &qthn);
     void Clear(Option_t* option=""){QHN_D::Clear(); if(fBinEntries) {free(fBinEntries); fBinEntries=NULL;}}
     TObject* Clone(const char* newname = NULL) const{QPHN* ret=new QPHN(*this); if(newname) ret->SetName(newname); return ret;}
     inline void Fill(Double_t const * const &x, const Double_t &y){AddBinContent(FindBin(x),y);}

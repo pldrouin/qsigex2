@@ -92,6 +92,25 @@ template <typename U> void QHNF<U>::ComputeNBins()
   for(Int_t i=QHN<U>::fNDims-1; i>=0; --i) if(QHN<U>::fAxes[i]) QHN<U>::fNBins*=QHN<U>::fAxes[i]->GetNBins()+2;
 }
 
+template <typename U> void QHNF<U>::CopyStruct(const QHN<U> &qthn)
+{
+  Clear();
+  TNamed::operator=(qthn);
+  QHN<U>::fNDims=qthn.GetNDims();
+  QHN<U>::fAxes=new QAxis*[QHN<U>::fNDims];
+  for(Int_t i=QHN<U>::fNDims-1; i>=0; --i) QHN<U>::fAxes[i]=qthn.GetAxis(i)?(QAxis*)qthn.GetAxis(i)->Clone():NULL;
+  QHN<U>::fEntries=qthn.GetEntries();
+  QHN<U>::fNBins=qthn.GetNBins();
+  fNFBins=qthn.GetNFbins();
+  fBins=(Long64_t*)malloc(qthn.GetNFbins()*sizeof(Long64_t));
+  QHN<U>::fBinContent=(U*)malloc(qthn.GetNFbins()*sizeof(U));
+  const QHNF<U> *qhnf=dynamic_cast<const QHNF<U>*>(&qthn);
+
+  if(qhnf) memcpy(fBins,qhnf->fBins,fNFBins*sizeof(Long64_t));
+  else for(Long64_t li=fNFBins-1; li>=0; --li) fBins[li]=li;
+  memset(QHN<U>::fBinContent,0,fNFBins*sizeof(U));
+}
+
 template <typename U> void QHNF<U>::Init()
 {
   QHN<U>::fNBins=1;
@@ -180,14 +199,14 @@ template <typename U> const QHNF<U>& QHNF<U>::operator=(const QHN<U> &qthn)
   for(Int_t i=QHN<U>::fNDims-1; i>=0; --i) QHN<U>::fAxes[i]=qthn.GetAxis(i)?(QAxis*)qthn.GetAxis(i)->Clone():NULL;
   QHN<U>::fEntries=qthn.GetEntries();
   QHN<U>::fNBins=qthn.GetNBins();
-  fBins=(Long64_t*)malloc(QHN<U>::fNBins*sizeof(Long64_t));
-  QHN<U>::fBinContent=(U*)malloc(QHN<U>::fNBins*sizeof(U));
+  fBins=(Long64_t*)malloc(qthn.GetNFbins()*sizeof(Long64_t));
+  QHN<U>::fBinContent=(U*)malloc(qthn.GetNFbins()*sizeof(U));
 
-  for(Long64_t li=QHN<U>::fNBins-1; li>=0; --li) {
+  for(Long64_t li=QHN<U>::GetNFbins()-1; li>=0; --li) {
 
-    if(qthn.GetBinContent(li)) {
-      fBins[fNFBins]=li;
-      QHN<U>::fBinContent[fNFBins]=qthn.GetBinContent(li);
+    if(qthn.GetFBinContent(li)) {
+      fBins[fNFBins]=qthn.GetFBinCoord(li);
+      QHN<U>::fBinContent[fNFBins]=qthn.GetFBinContent(li);
       ++fNFBins;
     }
   }

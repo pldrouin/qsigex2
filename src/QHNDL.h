@@ -38,14 +38,15 @@ template <typename U> class QHNDL: public QHNF<U>
     void AddBinContent(const Long64_t &bin, const U &w=1);
     void Clear(Option_t* option="");
     TObject* Clone(const char* newname = NULL) const{QHNDL<U>* ret=new QHNDL(*this); if(newname) ret->SetName(newname); return ret;}
+    void CopyStruct(const QHN<U> &qthn);
     inline Long64_t GetFBin(const Int_t *coords) const{return fFBins[QHN<U>::GetBin(coords)];}
     inline Long64_t GetFBin(const Long64_t &bin) const{return fFBins[bin];}
     const U& GetBinContent(const Long64_t &bin) const;
     QHN<U>* New() const{return new QHNDL<U>;}
     QHN<U>* New(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHNDL<U>(name,title,ndims);}
     const QHNDL<U>& operator=(const QHNDL<U> &qthn);
-    const QHNDL<U>& operator=(const QHNF<U> &qthn){Clear(); QHNF<U>::operator=(qthn); ComputeNBins(); return *this;}
-    const QHNDL<U>& operator=(const QHN<U> &qthn){Clear(); QHNF<U>::operator=(qthn); ComputeNBins(); return *this;}
+    const QHNDL<U>& operator=(const QHNF<U> &qthn){QHNF<U>::operator=(qthn); ComputeNBins(); return *this;}
+    const QHNDL<U>& operator=(const QHN<U> &qthn){QHNF<U>::operator=(qthn); ComputeNBins(); return *this;}
     void Reset();
     void SetBinContent(const Long64_t &bin, const U &content);
     void SetFBinContent(const Long64_t &fbin, const U &content);

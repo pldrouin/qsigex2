@@ -2,9 +2,18 @@
 
 ClassImp(QPHN)
 
+void QPHN::CopyStruct(const QHN_D &qthn)
+{
+  QHN_D::CopyStruct(qthn);
+  const QPHN *qphn=dynamic_cast<const QPHN*>(&qthn);
+  fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t));
+
+  if(qphn) memcpy(fBinEntries,qphn->fBinEntries,fNBins*sizeof(Double_t));
+  else for(Long64_t li=fNBins-1; li>=0; --li) fBinEntries[li]=1;
+}
+
 const QPHN& QPHN::operator=(const QPHN &qthn)
 {
-  Clear();
   QHN_D::operator=(qthn);
   fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t));
   memcpy(fBinEntries,qthn.fBinEntries,fNBins*sizeof(Double_t));

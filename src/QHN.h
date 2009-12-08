@@ -161,6 +161,7 @@ template <typename U> class QHN: public QDis
     inline virtual const Long64_t& GetFBinCoord(const Long64_t &fbin) const{return fbin;}
     inline virtual void GetFBinCoords(const Long64_t &fbin, Int_t *coords) const{return GetBinCoords(fbin,coords);}
     const Bool_t& GetIntUseFBinLoop() const {return fIntUseFBinLoop;}
+    virtual void CopyStruct(const QHN<U> &qthn);
     void GetMeans(Double_t means[], Bool_t width=kTRUE) const;
     inline void InitProcObj(){Reset();}
     Double_t Integral(Int_t const* const* binranges=NULL, const Bool_t *widths=NULL) const;

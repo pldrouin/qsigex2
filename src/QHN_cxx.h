@@ -346,6 +346,19 @@ template <typename U> void QHN<U>::ComputeNBins()
   fBinContent=(U*)malloc(fNBins*sizeof(U));
 }
 
+template <typename U> void QHN<U>::CopyStruct(const QHN<U> &qthn)
+{
+  Clear();
+  QDis::operator=(qthn);
+  fNDims=qthn.fNDims;
+  fEntries=qthn.fEntries;
+  fNBins=qthn.fNBins;
+  fAxes=new QAxis*[fNDims];
+  for(Int_t i=fNDims-1; i>=0; --i) fAxes[i]=qthn.fAxes[i]?(QAxis*)qthn.fAxes[i]->Clone():NULL;
+  fBinContent=(U*)malloc(fNBins*sizeof(U));
+  memset(fBinContent,0,fNBins*sizeof(U));
+}
+
 template <typename U> void QHN<U>::Divide(const QHN<U> *qhn)
 {
   if(qhn->GetNBins()!=GetNBins()) {

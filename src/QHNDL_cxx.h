@@ -57,6 +57,17 @@ template <typename U> void QHNDL<U>::Clear(Option_t* option)
   fFBins=NULL;
 }
 
+template <typename U> void QHNDL<U>::CopyStruct(const QHN<U> &qthn)
+{
+  QHNF<U>::CopyStruct(qthn);
+  const QHNDL<U> *qhndl=dynamic_cast<const QHNDL<U>*>(&qthn);
+
+  if(qhndl) {
+    fFBins=(Long64_t*)malloc(QHN<U>::fNBins*sizeof(Long64_t));
+    memcpy(fFBins,qhndl->fFBins,QHN<U>::fNBins*sizeof(Long64_t));
+  } else ComputeNBins();
+}
+
 template <typename U> inline const U& QHNDL<U>::GetBinContent(const Long64_t &bin) const
 {
   if(fFBins[bin]!=-1) return QHN<U>::fBinContent[fFBins[bin]];
@@ -65,7 +76,6 @@ template <typename U> inline const U& QHNDL<U>::GetBinContent(const Long64_t &bi
 
 template <typename U> const QHNDL<U>& QHNDL<U>::operator=(const QHNDL<U> &qthn)
 {
-  Clear();
   QHNF<U>::operator=(qthn);
   fFBins=(Long64_t*)malloc(QHN<U>::fNBins*sizeof(Long64_t));
   memcpy(fFBins,qthn.fFBins,QHN<U>::fNBins*sizeof(Long64_t));

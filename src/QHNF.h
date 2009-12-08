@@ -52,6 +52,7 @@ template <typename U> class QHNF: public QHN<U>
     }
     virtual void Clear(Option_t* option="");
     TObject* Clone(const char* newname = NULL) const{QHNF<U>* ret=new QHNF(*this); if(newname) ret->SetName(newname); return ret;}
+    virtual void CopyStruct(const QHN<U> &qthn);
     virtual Long64_t GetFBin(const Int_t *coords) const;
     virtual Long64_t GetFBin(const Long64_t &bin) const;
     inline const Long64_t& GetNFbins() const {return fNFBins;}
@@ -62,7 +63,7 @@ template <typename U> class QHNF: public QHN<U>
     virtual QHN<U>* New() const{return new QHNF<U>;}
     virtual QHN<U>* New(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHNF<U>(name,title,ndims);}
     const QHNF<U>& operator=(const QHNF<U> &qthn);
-    const QHNF<U>& operator=(const QHN<U> &qthn);
+    virtual const QHNF<U>& operator=(const QHN<U> &qthn);
     virtual void Reset();
     void ScaleBinContent(const Long64_t &bin, const Double_t &scale);
     void ScaleBinContent(const Int_t *coords, const Double_t &scale);
