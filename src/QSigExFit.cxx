@@ -10,6 +10,10 @@ QSigExFit::~QSigExFit()
     delete fCovMatrix;
     fCovMatrix=NULL;
   }
+  if(fCorMatrix) {
+    delete fCorMatrix;
+    fCorMatrix=NULL;
+  }
 }
 
 Int_t QSigExFit::FindFreeParamIndex(const char *paramname) const
@@ -29,6 +33,27 @@ Int_t QSigExFit::FindParamIndex(const char *paramname) const
     if(!strcmp(fParams[i].GetName(),paramname)) ret=i;
   }
   return ret;
+}
+
+const TMatrixDSym& QSigExFit::GetCorMatrix()
+{
+  if(fCorMatrix) delete fCorMatrix;
+  fCorMatrix=NULL;
+
+  if(fCovMatrix) {
+    fCorMatrix=new TMatrixDSym(fCovMatrix->GetNrows());
+
+    Int_t j;
+
+    for(Int_t i=fCovMatrix->GetNrows()-1; i>=0; --i) {
+
+      for(j=fCovMatrix->GetNrows()-1; j>=i; --j) {
+	(*fCorMatrix)(i,j)=(*fCorMatrix)(j,i)=(*fCovMatrix)(i,j)/TMath::Sqrt((*fCovMatrix)(i,i)*(*fCovMatrix)(j,j));
+      }
+    }
+  }
+
+  return *fCorMatrix;
 }
 
 void QSigExFit::Init()
@@ -101,6 +126,7 @@ void QSigExFit::PrintParams() const
 void QSigExFit::Browse(TBrowser *b)
 {
   b->Add(&fParams,"Fit Parameters");
+  if(fCorMatrix) b->Add(fCorMatrix,"Correlation Matrix");
   if(fCovMatrix) b->Add(fCovMatrix,"Covariance Matrix");
   b->Add(&fFCNMin);
 }

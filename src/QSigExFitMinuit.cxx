@@ -126,7 +126,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
     j=0;
 
     //Loop over the parameters
-    for(Int_t i=0;i<numpar;i++){
+    for(i=0;i<numpar;i++){
 
       //If the parameter is not hided to Minuit
       if(fParams[i].IsFixed()!=1) {
@@ -164,6 +164,11 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
     if(fCovMatrix) {
       delete fCovMatrix;
       fCovMatrix=NULL;
+    }
+
+    if(fCorMatrix) {
+      delete fCorMatrix;
+      fCorMatrix=NULL;
     }
 
     if(fituncerts) {

@@ -2,6 +2,7 @@
 #define _QSIGEXFIT_
 
 #include "TMatrixDSym.h"
+#include "TMath.h"
 #include "QList.h"
 #include "QProcessor.h"
 #include "QProcDouble.h"
@@ -10,8 +11,8 @@
 class QSigExFit: public TObject
 {
   public:
-    QSigExFit(): TObject(), fQProcessor(NULL), fQPOutputs(), fParams(), fFCNError("Min Function Error",1.0), fFCNMin("Minimization Function Minimum",1e99), fCovMatrix(NULL), fVerbose(0) {}
-    QSigExFit(const QSigExFit &rhs): TObject(rhs), fQProcessor(rhs.fQProcessor), fQPOutputs(rhs.fQPOutputs), fParams(rhs.fParams), fFCNError(rhs.fFCNError), fFCNMin(rhs.fFCNMin), fCovMatrix(new TMatrixDSym(*rhs.fCovMatrix)), fVerbose(0) {};
+    QSigExFit(): TObject(), fQProcessor(NULL), fQPOutputs(), fParams(), fFCNError("Min Function Error",1.0), fFCNMin("Minimization Function Minimum",1e99), fCovMatrix(NULL), fCorMatrix(NULL), fVerbose(0) {}
+    QSigExFit(const QSigExFit &rhs): TObject(rhs), fQProcessor(rhs.fQProcessor), fQPOutputs(rhs.fQPOutputs), fParams(rhs.fParams), fFCNError(rhs.fFCNError), fFCNMin(rhs.fFCNMin), fCovMatrix(new TMatrixDSym(*rhs.fCovMatrix)), fCorMatrix(NULL), fVerbose(0) {};
     virtual ~QSigExFit();
 
     void AddProcOutput(const QProcObj* procobj, Int_t index=-1){fQPOutputs.Add(const_cast<QProcObj*>(procobj),index);}
@@ -26,6 +27,7 @@ class QSigExFit: public TObject
 
     virtual Double_t Fit(Bool_t fituncerts=kTRUE)=0;
 
+    const TMatrixDSym& GetCorMatrix();
     const TMatrixDSym& GetCovMatrix() const{return *fCovMatrix;}
     const static QSigExFit& GetCurInstance(){return *fCurInstance;}
     const Double_t& GetFCNError() const{return fFCNError;}
@@ -67,6 +69,7 @@ class QSigExFit: public TObject
     QNamedVar<Double_t> fFCNError; //Minimization function error used to compute asymmetric errors
     QNamedVar<Double_t> fFCNMin;   //Minimum value reached for the minimization function
     TMatrixDSym *fCovMatrix;
+    TMatrixDSym *fCorMatrix;       //!
     Int_t fVerbose;
     static const QSigExFit   *fCurInstance; //!
   private:
