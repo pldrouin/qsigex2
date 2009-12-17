@@ -1424,8 +1424,8 @@ void QOversizeArray::UpdateMemStats()
     fCThreshMemSize=fCThreshLevel*avail; //Does not need an atomic operation since it is only read from QOAMMThread (i.e. the only thread calling UpdateMemStats
     //printf("fLevel1: %f\tfLevel1MemSize: %lli\n",fLevel1,fLevel1MemSize);
     //printf("fCritLevel: %f\tfCritLevelMemSize: %lli\n",fCritLevel,fCritMemSize);
+    fMemUpdateTime=now.tv_sec;
   }
-  fMemUpdateTime=now.tv_sec;
 #endif
 
   if(q_load(&fCLReached) && q_load(fTotalMemSize) <= fCritMemSize) {
