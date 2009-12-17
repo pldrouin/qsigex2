@@ -1373,7 +1373,7 @@ void QOversizeArray::SetMemConstraints(const Long64_t &minmemsize, Float_t critl
   }
 
 #ifdef WITH_LIBPROCINFO
-  while (sysfreemem()+(fTotalMemSize?q_load(fTotalMemSize):0) < fMinMemSize) sleep(fMemUpdateInt);
+  //while (sysfreemem()+(fTotalMemSize?q_load(fTotalMemSize):0) < fMinMemSize) sleep(fMemUpdateInt);
 #else
     fLevel1MemSize=fLevel1*fMinMemSize;
     fLevel2MemSize=fLevel2*fMinMemSize;
