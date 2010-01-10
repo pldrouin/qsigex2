@@ -32,7 +32,7 @@ template <typename U> class QProcNamedVar: public QNamedVar<U>, public QProcObj
 
   private:
 
-  ClassDef(QProcNamedVar,1) //Generic named value template class
+  ClassDef(QProcNamedVar,1) //Generic named value template class with proc obj properties
 };
 
 #include "debugger.h"
