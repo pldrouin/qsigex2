@@ -39,6 +39,7 @@
 #pragma link C++ class QNamedVar<Int_t>;
 #pragma link C++ class QNamedVar<Float_t>;
 #pragma link C++ class QNamedVar<Double_t>;
+#pragma link C++ class QProcNamedVar<Double_t>;
 
 #pragma link C++ class QMask;
 #pragma link C++ class QOversizeArray;

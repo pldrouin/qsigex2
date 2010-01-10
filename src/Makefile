@@ -24,8 +24,8 @@ QSIGEX_OBJS_2	=	$(QSIGEX_QCXX_2:.cxx=.o)
 QSIGEX_OBJSS_2	=	$(QSIGEX_QCXX_2:.cxx=.os)
 QSIGEX_OBJS	=	$(QSIGEX_OBJS_1) $(QSIGEX_OBJS_2)
 QSIGEX_OBJSS	=	$(QSIGEX_OBJSS_1) $(QSIGEX_OBJSS_2)
-QSIGEX_CLHD_1	=	$(QSIGEX_QCXX_1:.cxx=.h) QList.h QNamedVar.h
-QSIGEX_CLHD_2	=	$(QSIGEX_QCXX_2:.cxx=.h) QList.h QNamedVar.h QHN.h QHNF.h QHNDL.h
+QSIGEX_CLHD_1	=	$(QSIGEX_QCXX_1:.cxx=.h) QList.h QNamedVar.h QProcNamedVar.h
+QSIGEX_CLHD_2	=	$(QSIGEX_QCXX_2:.cxx=.h) QList.h QNamedVar.h QProcNamedVar.h QHN.h QHNF.h QHNDL.h
 QSIGEX_CLHD	=	$(QSIGEX_CLHD_1) $(QSIGEX_CLHD_2)
 
 QSIGEX_DICTCXX_1=	qsigex_1_Dict.cxx
