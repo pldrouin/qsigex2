@@ -28,12 +28,14 @@ template <typename U> class QProcNamedVar: public QNamedVar<U>, public QProcObj
 
     virtual ~QProcNamedVar(){}
     
-    template<typename V> friend Bool_t operator==(const QProcNamedVar<V> &lhs, const QProcNamedVar<V> &rhs){return (dynamic_cast<const QNamedVar<V>&>(lhs)==dynamic_cast<const QNamedVar<V>&>(rhs));}
+    template<typename V> friend Bool_t operator==(const QProcNamedVar<V> &lhs, const QProcNamedVar<V> &rhs);
 
   private:
 
   ClassDef(QProcNamedVar,1) //Generic named value template class with proc obj properties
 };
+
+template<typename V> Bool_t operator==(const QProcNamedVar<V> &lhs, const QProcNamedVar<V> &rhs){return (dynamic_cast<const QNamedVar<V>&>(lhs)==dynamic_cast<const QNamedVar<V>&>(rhs));}
 
 #include "debugger.h"
 
