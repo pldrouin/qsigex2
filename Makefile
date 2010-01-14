@@ -1,6 +1,10 @@
 ALLINCS_ORIG	=	$(wildcard src/*.h)
 ALLINCS		=	$(addprefix include/,$(notdir $(ALLINCS_ORIG)))
 
+ifndef CXXFLAGS
+export CXXFLAGS	=	
+endif
+
 ifdef QSFAST
 CXXFLAGS	+=	-DQSFAST
 endif
