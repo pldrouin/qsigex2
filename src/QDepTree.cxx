@@ -15,7 +15,7 @@ void QDepTree::Simplify()
 
   for(i=fQDTObjs.Count()-1; i>=0; --i) {
     fQDTObjs[i]->fSplit=kNoSplit;
-    //printf("Node %i: \n",i);
+    //printf("Node %i (Down %i, Up %i): \n",i,fQDTObjs[i]->GetNDownDepends(),fQDTObjs[i]->GetNUpDepends());
 
     if((n=fQDTObjs[i]->GetNDownDepends())>1) {
       //printf("Down depends on %i nodes\n",n);
@@ -42,6 +42,11 @@ void QDepTree::Simplify()
 	    --n;
 	  }
 	}
+      }
+
+      if(fQDTObjs[i]->GetNDownDepends()<=1) {
+	//printf("Node %i does not down split after all\n",i);
+	fQDTObjs[i]->fSplit=0;
       }
 
     } //else printf("does not down depend on any node\n");
@@ -71,7 +76,12 @@ void QDepTree::Simplify()
 	  }
 	}
       }
-    } //else printf("does not up depend on any node\n");
+
+      if(fQDTObjs[i]->GetNUpDepends()<=1) {
+	//printf("Node %i does not up split after all\n",i);
+	fQDTObjs[i]->fSplit&=~kSplitUp;
+      }
+    } //else printf("Does not up depend on any node\n");
   }
 }
 
@@ -181,27 +191,48 @@ void QDepTree::GetChains(QList<QList< Int_t> > *chains, QList<QList<Int_t> > *ch
 
     if(fNCalled.Count()) {
       ++(*chains);
+      //printf("Starting the first chain with process %i\n",obj->GetIndex());
       chains->GetLast()+=obj->GetIndex();
 
       for(;;) {
 
 	while(obj->GetNDownDepends()==1 && (newobj=obj->fDownDepends[0])->fSplit==kNoSplit) {
+	  //printf("Process %i has only one down dependency (%i) which does not split up or down\n",obj->GetIndex(),newobj->GetIndex());
+          //printf("Adding dependency %i to chain %i\n",newobj->GetIndex(),chains->Count()-1);
 	  obj=newobj;
 	  chains->GetLast()+=obj->GetIndex();
 	  fNCalled.Del(&obj,1);
 	}
 
 	if(fNCalled.Count()) {
+	  //printf("%i processes are still not taken care of\n",fNCalled.Count());
 
-	  if(obj->GetNDownDepends() && (newobj=obj->fDownDepends[0])->fSplit&kSplitDown) {
+	  if(obj->GetNDownDepends()==1 && fNCalled.FindFirst((newobj=obj->fDownDepends[0]))>=0 && newobj->fSplit&kSplitDown) {
+	    //printf("Process %i has only 1 down dependency (%i) and this dependency at least splits down\n",obj->GetIndex(),newobj->GetIndex());
+	    //printf("The dependency splits down to "); for(i=0; i<newobj->GetNDownDepends(); ++i) printf(" %i",newobj->fDownDepends[i]->GetIndex()); printf("\n");
 	    //If kSplitDown AND kSplitUp
-	    if(newobj->fSplit!=kSplitDown) ++(*chains);
+	    if(newobj->fSplit!=kSplitDown) {
+	      //printf("Dependency %i also splits up\n",newobj->GetIndex());
+	      //printf("The dependency splits up to "); for(i=0; i<newobj->GetNUpDepends(); ++i) printf(" %i",newobj->fUpDepends[i]->GetIndex()); printf("\n");
+	      ++(*chains);
+              //printf("Starting chain %i with dependency %i\n",chains->Count()-1,newobj->GetIndex());
+	    //} else {
+	    //  printf("Dependency %i does not split up\n",newobj->GetIndex());
+            //  printf("Adding dependency %i to chain %i\n",newobj->GetIndex(),chains->Count()-1);
+	    }
 
 	    chains->GetLast()+=newobj->GetIndex();
 	    fNCalled.Del(&newobj,1);
+	  //} else {
+	  //  if(obj->GetNDownDepends()!=1) printf("Process %i has %i dependencies\n",obj->GetIndex(),obj->GetNDownDepends());
+	  //  if(obj->GetNDownDepends()==1) {
+	  //    if((obj->fDownDepends[0])->fSplit&kSplitDown) printf("Process %i's first dependency at least splits down\n",obj->GetIndex());
+	  //    else printf("Process %i's first dependency does not split down\n",obj->GetIndex());
+	  //  }
 	  }
 	  obj=fNCalled[0];
 	  ++(*chains);
+          //printf("Starting chain %i with process %i\n",chains->Count()-1,obj->GetIndex());
 	  chains->GetLast()+=obj->GetIndex();
 	  fNCalled.Del(0);
 
@@ -213,15 +244,24 @@ void QDepTree::GetChains(QList<QList< Int_t> > *chains, QList<QList<Int_t> > *ch
 
     //Loop over chains
     for(i=0; i<chains->Count(); ++i) {
+      //printf("Looking at chain %i\n",i);
+      //printf("First process of chain %i up depends on %i other chains\n",i,fQDTObjs[(*chains)[i][0]]->GetNUpDepends());
 
       //Loop over dependency nodes of the current chain
       for(j=0; j<fQDTObjs[(*chains)[i][0]]->GetNUpDepends(); ++j)
 
 	//Among the previous chains, find the one which last node is the current dependency node of the current chain and add the current chain to the list of dependency chains. Add also the identified chain to the list of chains on which the current chain depends on.
-	for(k=0; k<i ; ++k) if((*chains)[k].GetLast()==fQDTObjs[(*chains)[i][0]]->UpDepend(j).GetIndex()) {
-	  (*chainsdeps)[k]+=i;
-	  (*chainsdepons)[i]+=k;
-	  break;
+	for(k=0; k<chains->Count() ; ++k) {
+
+	  if(k==i) continue;
+	  //printf("\tUp dependency %i is process %i and chain %i's last process is %i\n",j,fQDTObjs[(*chains)[i][0]]->UpDepend(j).GetIndex(),k,(*chains)[k].GetLast());
+
+	  if((*chains)[k].GetLast()==fQDTObjs[(*chains)[i][0]]->UpDepend(j).GetIndex()) {
+	    //printf("\tUp dependency %i is chain %i\n",j,k);
+	    (*chainsdeps)[k]+=i;
+	    (*chainsdepons)[i]+=k;
+	    break;
+	  }
 	}
       (*chainsdepons)[i].Sort();
     }
