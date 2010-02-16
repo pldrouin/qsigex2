@@ -127,7 +127,7 @@ void QProcList::InitThreads()
   QList<Int_t>         initchains;  //Initial chains
   QList<void*> notifchains; //Chains sending notifications
 
-  if(fPProcessor) {
+  if(fPProcessor && fRNThreads>1) {
     QProcessor* proc;
     Int_t npiobjs, npoobjs;
     QList<QProcObj*> iobjs;
