@@ -51,7 +51,7 @@ template <typename U> class QHNF: public QHN<U>
       QHN<U>::fBinContent[fbin]+=w; QHN<U>::fEntries+=w;
     }
     virtual void Clear(Option_t* option="");
-    TObject* Clone(const char* newname = NULL) const{QHNF<U>* ret=new QHNF(*this); if(newname) ret->SetName(newname); return ret;}
+    TObject* Clone(const char* newname = "") const{QHNF<U>* ret=new QHNF<U>(*this); if(strcmp(newname,"")) dynamic_cast<TNamed*>(ret)->SetName(newname); return dynamic_cast<TObject*>(ret);}
     virtual void CopyStruct(const QHN<U> &qthn);
     virtual Long64_t GetFBin(const Int_t *coords) const;
     virtual Long64_t GetFBin(const Long64_t &bin) const;

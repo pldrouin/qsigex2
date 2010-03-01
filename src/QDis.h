@@ -54,7 +54,6 @@ class QDis: public TNamed, public QProcObj
   virtual void Normalize(Double_t* integral=NULL, Bool_t reverse=kFALSE)=0;
 
   const QDis& operator=(const QDis &rhs){
-    TNamed::operator=(rhs);
     fCutExpr=rhs.fCutExpr;
     fNormFlags=rhs.fNormFlags;
     fNFixedCoords=rhs.fNFixedCoords;

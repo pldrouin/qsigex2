@@ -36,7 +36,7 @@ template <typename U> class QNamedVar: public TObject
 
     void Copy(TObject &obj) const{TObject::Copy(obj); dynamic_cast<QNamedVar<U>&>(obj).fVal = fVal;}
 
-    const char* GetName() const{return fName;}
+    virtual const char* GetName() const{return fName;}
     const char* GetTitle() const{fTitle=""; fTitle+=fVal; return fTitle;}
     const U& GetValue() const{return fVal;} 
 
