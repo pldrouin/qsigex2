@@ -12,6 +12,6 @@ void QProcRandom3::SetGSeed(const UInt_t &seed)
   fSRndm.SetSeed(seed);
 
   for(Int_t i=0; i<fSInstances.Count(); ++i) {
-    ((QProcRandom3*)fSInstances[i])->SetSeed((UInt_t)(4294967294u*fSRndm.Rndm())+1);
+    ((QProcRandom3*)fSInstances[i])->SetInitSeed((UInt_t)(4294967294u*fSRndm.Rndm())+1);
   }
 }

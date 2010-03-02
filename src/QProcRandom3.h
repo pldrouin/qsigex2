@@ -8,14 +8,14 @@
 class QProcRandom3: public QProcObj, public TRandom3
 {
   public:
-    QProcRandom3(): QProcObj(), TRandom3(){SetSeed((UInt_t)(4294967294u*fSRndm.Rndm())+1); fSInstances.Add(this);}
+    QProcRandom3(): QProcObj(), TRandom3(){SetInitSeed((UInt_t)(4294967294u*fSRndm.Rndm())+1); fSInstances.Add(this);}
     QProcRandom3(const QProcRandom3 &rhs): QProcObj(rhs), TRandom3(rhs){fSInstances.Add(this);}
     virtual ~QProcRandom3(){fSInstances.Del(this);}
     static UInt_t GetInitGSeed(){return fInitGSeed;}
     UInt_t GetInitSeed() const{return fInitSeed;}
-    void InitProcObj(){TRandom3::SetSeed(fInitSeed);}
+    void InitProcObj(){SetSeed(fInitSeed);}
     static void SetGSeed(const UInt_t &seed=0);
-    void SetSeed(UInt_t seed=0){fInitSeed=seed; TRandom3::SetSeed(seed);}
+    void SetInitSeed(UInt_t seed=0){fInitSeed=seed; SetSeed(seed);}
   protected:
     UInt_t fInitSeed;
     static UInt_t fInitGSeed;
