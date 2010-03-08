@@ -25,7 +25,8 @@ void QProgress::operator()(Int_t curval,Bool_t force)
      fLastTime=time;
      Int_t runtime=(Int_t)((time-fInitTime)/1000.);
      Float_t frac=(Float_t)curval/fMaxVal;
-     Int_t tottime=(Int_t)(runtime/frac);
+     Float_t mfrac=(Float_t)(curval-fStartVal)/(fMaxVal-fStartVal);
+     Int_t tottime=(Int_t)(runtime/mfrac);
      Int_t remtime=tottime-runtime;
     if(runtime>=1){
       fprintf(stderr,"\r[%2i:%02i]  %7i/%7i  (%3i%%)  [rem: %2i:%02i, total: %2i:%02i]",runtime/60,runtime%60,curval,fMaxVal,(Int_t)(100*frac),remtime/60,remtime%60,tottime/60,tottime%60);

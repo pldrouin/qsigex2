@@ -19,9 +19,9 @@
 
 class QProgress{
   public:
-    QProgress(Int_t maxval=0, Int_t interval=1000):fMaxVal(maxval),fInterval(interval),fInitTime(GetTime()),fLastTime(GetTime()-interval){}
+    QProgress(Int_t maxval=0, Int_t startval=0, Int_t interval=1000):fMaxVal(maxval),fStartVal(startval),fInterval(interval),fInitTime(GetTime()),fLastTime(GetTime()-interval){}
     virtual ~QProgress(){}
-    void Init(){fInitTime=GetTime(); fLastTime=fInitTime-fInterval;}
+    void Init(Int_t startval=0){fStartVal=startval; fInitTime=GetTime(); fLastTime=fInitTime-fInterval;}
     void SetMaxVal(Int_t maxval){fMaxVal=maxval;}
     void SetInterval(Int_t interval){fInterval=interval;}
     Int_t GetMaxVal(){return fMaxVal;}
@@ -29,6 +29,7 @@ class QProgress{
 
   private:
     Long_t GetTime();
+    Int_t fStartVal;
     Int_t fMaxVal;
     Int_t fInterval;
     Long_t fInitTime;
