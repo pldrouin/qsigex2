@@ -29,8 +29,8 @@ class QProgress{
 
   private:
     Long_t GetTime();
-    Int_t fStartVal;
     Int_t fMaxVal;
+    Int_t fStartVal;
     Int_t fInterval;
     Long_t fInitTime;
     Long_t fLastTime;
