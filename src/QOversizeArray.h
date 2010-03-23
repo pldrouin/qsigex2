@@ -1,5 +1,5 @@
-#ifndef _OVERSIZEARRAY_
-#define _OVERSIZEARRAY_
+#ifndef _QOVERSIZEARRAY_
+#define _QOVERSIZEARRAY_
 
 #ifndef __CINT__
 #include <pthread.h>
@@ -56,7 +56,7 @@ class QOversizeArray
 {
   public:
     enum omode{kRead, kRW, kRecreate};
-    QOversizeArray(const char *filename, const char *arraydescr, omode openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=0, const Int_t &npcbuffers=1, const UInt_t &nobjectsallocblock=0);
+    QOversizeArray(const char *filename, const char *arraydescr, const Int_t& openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=0, const Int_t &npcbuffers=1, const UInt_t &nobjectsallocblock=0);
     virtual ~QOversizeArray();
 
     static void ClearShMem(const Bool_t &forcedel=kFALSE, const Bool_t &remdepend=kTRUE);
@@ -78,7 +78,7 @@ class QOversizeArray
 
     void LoadEntry(const Long64_t &entry = 0);
 
-    const omode& GetOpenMode(){return fOpenMode;}
+    Int_t GetOpenMode(){return fOpenMode;}
 
     const TTimeStamp& GetTimeStamp() const{return fTStamp;}
 
@@ -133,7 +133,7 @@ class QOversizeArray
     int fFDesc;                  //!
     const UInt_t fFirstDataByte; // Size of file header
     const Int_t fBufferHeaderSize; // Size of buffer header
-    omode fOpenMode;             // Array opening mode
+    Int_t fOpenMode;             // Array opening mode
     UInt_t fObjectSize;          // Size of a single stored object
     TString fObjectTypeName;
     void *fBuffer;               //! Pointer to the current object
