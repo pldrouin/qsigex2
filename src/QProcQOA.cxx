@@ -2,7 +2,7 @@
 
 ClassImp(QProcQOA)
 
-QProcQOA::QProcQOA(const char *filename, const char* adesc, QOversizeArray::omode openmode, const UInt_t &nobjectsperbuffer, const Int_t &npcbuffers, const UInt_t &nobjectsallocblock): QProcArray()
+QProcQOA::QProcQOA(const char *filename, const char* adesc, Int_t openmode, const UInt_t &nobjectsperbuffer, const Int_t &npcbuffers, const UInt_t &nobjectsallocblock): QProcArray()
 {
   TString sbuf;
   fBTypeID=GetNameTypeID(adesc,&sbuf);

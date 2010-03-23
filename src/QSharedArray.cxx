@@ -67,10 +67,22 @@ QSharedArray::QSharedArray(const char *filename, const char *arraydescr, const u
   }
   sbuf1[0]=0;
   //ASSERTION: path contains '/[file_devID]_[file_inode]' 
+
+  sigset_t oset,nset;
+
+  if(sigfillset(&nset)) {
+    perror("sigfillset");
+    throw 1;
+  }
+
+  //Block all signals
+  block_signals(&nset,&oset,throw 1);
   fShPath=path;
   sbuf1[0]='+';
   sbuf1[1]='0';
   fShAPath=path;
+  //Unblock all signals
+  unblock_signals(&oset,throw 1);
 
   pthread_mutex_lock(&fIMutex);
 
@@ -140,6 +152,7 @@ void QSharedArray::ClearShMem()
   sigset_t nset,oset;
   block_signals(&nset,&oset,);
   int i,j;
+  bool error=false;
 
   //If the shared memory was ready to be accessed
   if(fShArSt) {
@@ -170,14 +183,12 @@ retry2:
 
       if(shm_unlink(fShPath.c_str())==-1){
 	perror("shm_unlink");
-	unblock_signals(&oset,);
-	throw 1;
+	error=true;
       }
 
       if(shm_unlink(fShAPath.c_str())==-1){
 	perror("shm_unlink");
-	unblock_signals(&oset,);
-	throw 1;
+	error=true;
       }
 
       //If not last user 
@@ -188,28 +199,43 @@ retry2:
       printf("Decremented the shared memory usage to %i\n",j-1);
     }
 
+    if(munmap(fShMem,sSHPAMSize)) {
+      perror("munmap");
+    }
+    fShMem=NULL;
+    fShArSt=NULL;
+
     //Else of owner but could not get shared memory
   } else if(fOwns) {
 
     if(shm_unlink(fShPath.c_str())==-1){
       perror("shm_unlink");
-      unblock_signals(&oset,);
-      throw 1;
+      error=true;
     }
   }
 
-  if(fFDesc>0 && close(fFDesc)) {
-    perror("close");
-    unblock_signals(&oset,);
-    throw 1;
+  if(fFDesc>0) {
+
+    if(close(fFDesc)) {
+      fFDesc=0;
+      perror("close");
+      error=true;
+    }
+    fFDesc=0;
   }
 
-  if(fFADesc>0 && close(fFADesc)) {
-    perror("close");
-    unblock_signals(&oset,);
-    throw 1;
+  if(fFADesc>0) {
+
+    if(close(fFADesc)) {
+      fFADesc=0;
+      perror("close");
+      error=true;
+    }
+    fFADesc=0;
   }
   unblock_signals(&oset,);
+
+  if(error) throw 1;
 }
 
 void QSharedArray::InitShMem()
@@ -640,7 +666,10 @@ void QSharedArray::Terminate()
   if(fBuffers) { //Should check fBuffers since it garanties the memory was allocated
 
     for(unsigned int i=0; i<fNBuffers; ++i) {
-      munmap(fBuffers[i],fMemPerBuffer);
+
+      if(munmap(fBuffers[i],fMemPerBuffer)) {
+	perror("munmap");
+      }
     }
     free(fBuffers);
     fNBuffers=0;
