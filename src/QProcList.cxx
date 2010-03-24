@@ -349,6 +349,23 @@ void QProcList::InitThreads()
   }
 }
 
+void QProcList::KillThreads()
+{
+  //For signal-handling only! Do not clear any memory. Just cancel all threads recursively
+  Int_t i;
+
+  if(fThreads) {
+    for(i=fNThreads-1; i>=0; --i) {
+      pthread_cancel(fThreads[i]);
+      pthread_join(fThreads[i],NULL);
+    }
+  }
+  fThreads=NULL;
+
+  for(i=0; i<fQPL->Count(); ++i) ((QProcessor*)(*fQPL)[i])->KillThreads;
+  fQPL->Clear();
+}
+
 void QProcList::PrintAnalysisResults() const
 {
   Int_t i;
@@ -491,6 +508,7 @@ void QProcList::ClearObjLists()
 }
 
 void* QPLThread(void *args){
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL); //Thread will cancel right away if pthread_cancel is called
   QProcList &plist=*((QProcList*)args);
   QProcList::SChainConfig *chain;
   Int_t i;

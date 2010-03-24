@@ -47,6 +47,8 @@ class QProcessor: public TNamed
     const Bool_t& GetPProcessing() const{return fPProcessing;}
     const UInt_t& GetVerbosity() const{return fVerbosity;}
 
+    virtual void KillThreads(){}
+
     const QProcessor& operator=(const QProcessor &rhs);
 
     virtual void PrintAnalysisResults() const=0;

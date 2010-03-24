@@ -40,6 +40,8 @@ class QProcList: public QProcessor
     void InitProcess(Bool_t allocateparammem=kTRUE);
     void InitThreads();
 
+    void KillThreads(); //For signal-handling only! Does not clear any memory!
+
     void PrintAnalysisResults() const;
     void PrintProcesses(const UInt_t &level=0, const Bool_t &printdeps=kTRUE) const;
 

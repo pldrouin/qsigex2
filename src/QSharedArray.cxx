@@ -30,7 +30,7 @@ QSharedArray::QSharedArray(const char *filename, const char *arraydescr, const u
   string sbuf=arraydescr;
   int k=sbuf.find_last_of('/');
 
-  if(k==string::npos) fArrayName=sbuf;
+  if(k==(int)string::npos) fArrayName=sbuf;
   else {
     fArrayName=sbuf.substr(0,k);
     fObjectTypeName=sbuf.substr(k+1);
@@ -442,7 +442,7 @@ void QSharedArray::Fill()
 void QSharedArray::LoadArray()
 {
   fArrayPars=(struct sharpars*)((char*)fShMem+sizeof(struct sharst));
-  int fd;
+  int fd=0;
 
   if(fOwns) {
     fd=open(fFilename.c_str(),O_RDONLY);

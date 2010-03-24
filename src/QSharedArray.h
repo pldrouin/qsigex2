@@ -129,7 +129,7 @@ class QSharedArray
   void *fBuffer;               //! Pointer to the current object
   unsigned int fNOPerBuffer;   // Maximum number of objects per buffer
   unsigned long long int fMemPerBuffer;  // Memory per buffer
-  int64_t fNObjects;           // Total number of objects
+  long long int fNObjects;               // Total number of objects
   void **fBuffers;                  //! Buffer Addresses
   unsigned int fNBuffers;           //! Number of buffers
 
