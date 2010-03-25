@@ -568,21 +568,43 @@ void QOversizeArray::KillThreads()
   block_signals_once();
 
   if(fInstances.Count()) {
-    pthread_cancel(fMMThread);
-    pthread_join(fMMThread,NULL);
+
+    //If thread is alive
+    if(!pthread_kill(fMMThread,0)) {
+      pthread_cancel(fMMThread);
+      pthread_join(fMMThread,NULL);
+    }
 
     for(i=fNLoaders-1; i>=0; --i) {
-      pthread_cancel(fBLThreads[i]);
-      pthread_join(fBLThreads[i],NULL);
+
+      //If thread is alive
+      if(!pthread_kill(fBLThreads[i],0)) {
+	pthread_cancel(fBLThreads[i]);
+	pthread_join(fBLThreads[i],NULL);
+      }
     }
-  if(fCThreshLevel<=fCritLevel) {
-    pthread_cancel(fMCThread);
-    pthread_join(fMCThread,NULL);
-  }
+
+    //If thread is alive
+#ifdef __linux__
+    if(fCThreshLevel<=fCritLevel) {
+#else
+    if(!pthread_kill(fMCThread,0)) { //This is broken on Linux
+#endif
+	pthread_cancel(fMCThread);
+	pthread_join(fMCThread,NULL);
+#ifdef __linux__
+     }
+#else
+    }
+#endif
 
     for(i=fInstances.Count()-1; i>=0; --i) {
-      pthread_cancel(fInstances[i]->fMWThread);
-      pthread_join(fInstances[i]->fMWThread,NULL);
+
+      //If thread is alive
+      if(!pthread_kill(fInstances[i]->fMWThread,0)) {
+	pthread_cancel(fInstances[i]->fMWThread);
+	pthread_join(fInstances[i]->fMWThread,NULL);
+      }
     }
     fInstances.Clear();
   }
