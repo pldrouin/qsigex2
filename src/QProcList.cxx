@@ -7,6 +7,9 @@ ClassImp(QProcList)
 const QProcList *gQProcList;
 Bool_t QProcList::fDefPProcessor=kFALSE;
 
+//Workaround a bug with gdb that causes sem_wait to exit with EINTR
+#define sem_wait(semp) while(sem_wait(semp) && errno==EINTR){}
+
 QProcList::~QProcList()
 {
   pthread_mutex_destroy(&fChMutex);
@@ -104,6 +107,7 @@ void QProcList::Exec() const
 
 void QProcList::InitProcess(Bool_t allocateparammem)
 {
+  //printf("InitProcess %p\n",this);
   TerminateProcess();
 
   for(Int_t i=0; i<fQPL->Count(); ++i)  {

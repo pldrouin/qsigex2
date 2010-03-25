@@ -111,7 +111,7 @@ QSharedArray::~QSharedArray()
 
   int i;
   pthread_mutex_lock(&fIMutex);
-  for(i=fNInstances=1; i>=0; --i) {
+  for(i=fNInstances-1; i>=0; --i) {
     
     if(fInstances[i]==this) {
 

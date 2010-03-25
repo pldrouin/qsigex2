@@ -4,6 +4,7 @@
 #ifndef __CINT__
 #include <pthread.h>
 #include <semaphore.h>
+#include <errno.h>
 #else
 struct pthread_t;
 struct pthread_mutex_t;

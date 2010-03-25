@@ -188,11 +188,14 @@ class QOversizeArray
     static const unsigned int sSHPAMSize; //Shared Header Page-Aligned memory size
     static int   fShFDesc;         //!
     static bool  fShOwns;             //!
+#pragma pack(push)  /* push current alignment to stack */
+#pragma pack(1)     /* set alignment to 1 byte boundary */
     static struct sharst {
       int32_t susers;
       bool used[QOA_MAXPROCS];
       Long64_t memory[QOA_MAXPROCS];
     } *fShArSt;
+#pragma pack(pop)   /* restore original alignment from stack */
     static QList<Float_t>         fICumulPriority; // Cumulative array priorities
     static Long64_t fMinMemSize;    // Minimum amount of memory needed for all QOversizeArray instances of the current process
     static Long64_t fLevel1MemSize; // Memory level (B) at which memory management thread stops attempting to free memory

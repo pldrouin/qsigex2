@@ -54,6 +54,9 @@ struct QOAQueue**	QOversizeArray::fLastB2Ls=NULL;
 pthread_mutex_t QOversizeArray::fB2LMutex=PTHREAD_MUTEX_INITIALIZER;
 sem_t		QOversizeArray::fB2LSem;
 
+//Workaround a bug with gdb that causes sem_wait to exit with EINTR
+#define sem_wait(semp) while(sem_wait(semp) && errno==EINTR){}
+
 //#define FuncDef(a,b) const char* thefunc=#a; Bool_t show=b; const void* me=NULL;
 //#define CFuncDef(a,b) const char* thefunc=#a; Bool_t show=b; const void* me=this;
 //#define printstatus(a) {if(show) printf("%p\t%s\n",me,a);}
