@@ -24,7 +24,7 @@ int QSharedArray::fNInstances=0;
 //Base the alignment on the alignment for a double
 const unsigned int QSharedArray::sSHPAMSize=(((sizeof(struct sharst)+sizeof(struct sharpars))/sysconf(_SC_PAGESIZE))+((sizeof(struct sharst)+sizeof(struct sharpars))%sysconf(_SC_PAGESIZE)!=0))*sysconf(_SC_PAGESIZE);
 
-QSharedArray::QSharedArray(const char *filename, const char *arraydescr, const unsigned int &objectsize, const unsigned int &nobjectsperbuffer): fShArSt(NULL), fFilename(filename), fShPath(), fFDesc(0), fShAPath(), fFADesc(0), fOwns(false), fShMem(NULL), fWIdx(-1), fArrayPars(NULL), fArrayName(), fTStamp(), fObjectSize(objectsize), fObjectTypeName(), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fMemPerBuffer(0), fNObjects(0), fBuffers(NULL), fNBuffers(0)
+QSharedArray::QSharedArray(const char *filename, const char *arraydescr, const unsigned int &objectsize, const unsigned int &nobjectsperbuffer): fShArSt(NULL), fFilename(filename), fShPath(), fFDesc(0), fShAPath(), fFADesc(0), fOwns(false), fWIdx(-1), fArrayPars(NULL), fArrayName(), fTStamp(), fObjectSize(objectsize), fObjectTypeName(), fBuffer(NULL), fNOPerBuffer(nobjectsperbuffer), fMemPerBuffer(0), fNObjects(0), fBuffers(NULL), fNBuffers(0)
 {
   CFuncDef(QSharedArray,1);
   string sbuf=arraydescr;
@@ -68,38 +68,31 @@ QSharedArray::QSharedArray(const char *filename, const char *arraydescr, const u
   sbuf1[0]=0;
   //ASSERTION: path contains '/[file_devID]_[file_inode]' 
 
-  sigset_t oset,nset;
-
-  if(sigfillset(&nset)) {
-    perror("sigfillset");
-    throw 1;
-  }
-
   //Block all signals
-  block_signals(&nset,&oset,throw 1);
+  block_signals_once(throw 1);
   fShPath=path;
   sbuf1[0]='+';
   sbuf1[1]='0';
   fShAPath=path;
   //Unblock all signals
-  unblock_signals(&oset,throw 1);
+  unblock_signals_once(throw 1);
 
   pthread_mutex_lock(&fIMutex);
 
   if(!fNInstances) {
-    //Add handler for SIGCONT
+    //Add handler for SIGALRM
     sigset_t mset;
     sigemptyset(&mset);
-    //Add SIGCONT to the set
-    sigaddset(&mset,SIGCONT);
-    //Block SIGCONT
+    //Add SIGALRM to the set
+    sigaddset(&mset,SIGALRM);
+    //Block SIGALRM
     if(sigprocmask(SIG_BLOCK,&mset,NULL)) {
       perror("sigprocmask");
       throw 1;
     }
 
-    if(signal(SIGCONT, dummy_h) == SIG_ERR) {
-      fprintf(stderr,"Failed to install SIGCONT handler in parent process\n");
+    if(signal(SIGALRM, dummy_h) == SIG_ERR) {
+      fprintf(stderr,"Failed to install SIGALRM handler in parent process\n");
       throw 1;
     }
   }
@@ -149,37 +142,36 @@ void QSharedArray::ClearAllShMem()
 void QSharedArray::ClearShMem()
 {
   //Block Signals in case the function is called by a signal handler
-  sigset_t nset,oset;
-  block_signals(&nset,&oset,);
-  int i,j;
   bool error=false;
+  block_signals_once();
+  int i,j;
 
   //If the shared memory was ready to be accessed
   if(fShArSt) {
     Terminate();
 
     //If owned the shared memory but could not finish loading
-    if(fOwns && q_load(&fShArSt->lstatus)!=2) {
+    if(fOwns && q_load(&fShArSt->lstatus)<2) {
       printf("Owner sets failed status\n");
-      q_store(&fShArSt->lstatus,-1);
+      q_store(&fShArSt->lstatus,(char)-1);
 
       for(i=0; i<MAX_WAITERS; ++i) if((j=q_load(&fShArSt->waiters[i]))) {
-	printf("Sending SIGCONT to process %i\n",j);
-	kill(j,SIGCONT);
+	//printf("Sending SIGALRM to process %i\n",j);
+	kill(j,SIGALRM);
       }
     }
 
     //If has index in waiters list
     if(fWIdx!=-1) {
       //Erase it
-      q_fetch_and_compare_and_set(&fShArSt->waiters[fWIdx],getpid(),0);
+      q_fetch_and_compare_and_set(&fShArSt->waiters[fWIdx],(uint32_t)getpid(),(uint32_t)0);
       fWIdx=-1;
     }
 
 retry2:
     //If last user
-    if((i=q_fetch_and_compare_and_set(&fShArSt->susers,1,0))==1) {
-      printf("Destroying the shared memory space\n");
+    if((i=q_fetch_and_compare_and_set(&fShArSt->susers,(int32_t)1,(int32_t)0))==1) {
+      //printf("Destroying the shared memory space\n");
 
       if(shm_unlink(fShPath.c_str())==-1){
 	perror("shm_unlink");
@@ -195,14 +187,13 @@ retry2:
     } else {
 
       //Try decrement if value has not changed. If value has changed and was 1, goto retry2. Otherwise retry
-      while((j=q_fetch_and_compare_and_set(&fShArSt->susers,i,i-1))!=i) {if(j==1) goto retry2; i=j;}
-      printf("Decremented the shared memory usage to %i\n",j-1);
+      while((j=q_fetch_and_compare_and_set(&fShArSt->susers,(int32_t)i,(int32_t)(i-1)))!=i) {if(j==1) goto retry2; i=j;}
+      //printf("Decremented the shared memory usage to %i\n",j-1);
     }
 
-    if(munmap(fShMem,sSHPAMSize)) {
+    if(munmap(fShArSt,sSHPAMSize)) {
       perror("munmap");
     }
-    fShMem=NULL;
     fShArSt=NULL;
 
     //Else of owner but could not get shared memory
@@ -233,7 +224,7 @@ retry2:
     }
     fFADesc=0;
   }
-  unblock_signals(&oset,);
+  unblock_signals_once();
 
   if(error) throw 1;
 }
@@ -241,30 +232,27 @@ retry2:
 void QSharedArray::InitShMem()
 {
   ClearShMem();
-  //Add handler for SIGCONT
+  //Add handler for SIGALRM
   sigset_t mset;
   sigemptyset(&mset);
-  //Add SIGCONT to the set
-  sigaddset(&mset,SIGCONT);
+  //Add SIGALRM to the set
+  sigaddset(&mset,SIGALRM);
 
   int i,j;
   fOwns=false;
-  sigset_t oset,nset;
 
-  if(sigfillset(&nset)) {
-    perror("sigfillset");
-    throw 1;
-  }
+  block_signals_init(nset,oset,throw 1);
 
   //Block all signals
   block_signals(&nset,&oset,throw 1);
 
 retry:
-  printf("Path is '%s'\n",fShPath.c_str());
+  //printf("Filename is '%s'\n",fFilename.c_str());
+  //printf("Path is '%s'\n",fShPath.c_str());
   fFDesc=shm_open(fShPath.c_str(),O_RDWR,S_IRUSR|S_IWUSR);
 
   if(fFDesc==-1 && errno==ENOENT) {
-    printf("Owns the shared segment\n");
+    //printf("Owns the shared segment\n");
     fOwns=true;
     fFDesc=shm_open(fShPath.c_str(),O_RDWR|O_CREAT|O_EXCL,S_IRUSR|S_IWUSR);
 
@@ -276,6 +264,7 @@ retry:
   }
 
   if(fFDesc==-1) {
+    //printf("%s:\n",fFilename.c_str());
     perror("shm_open");
     //Stop blocking signals.
     unblock_signals(&oset,);
@@ -289,21 +278,20 @@ retry:
     throw 1;
   }
 
-  fShMem=(char*)mmap(NULL,sSHPAMSize,PROT_READ|PROT_WRITE,MAP_SHARED,fFDesc,0);
+  fShArSt=(struct sharst*)mmap(NULL,sSHPAMSize,PROT_READ|PROT_WRITE,MAP_SHARED,fFDesc,0);
 
-  if(fShMem==MAP_FAILED) {
+  if(fShArSt==MAP_FAILED) {
     perror("mmap");
     //Stop blocking signals. Need to call terminatesmem to handle the fFDesc and the mmap
     sigprocmask(SIG_SETMASK,&oset,NULL);
     throw 1;
   }
 
-  fShArSt=(struct sharst*)fShMem;
-  //q_store(&fShArSt->susers,0);
+  //q_store(&fShArSt->susers,(int32_t)0);
   //fOwns=true;
-  q_add(&fShArSt->susers,1);
-  printf("pid is %u\n",getpid());
-  printf("nusers is %i\n",q_load(&fShArSt->susers));
+  q_add(&fShArSt->susers,(int32_t)1);
+  //printf("pid is %u\n",getpid());
+  //printf("nusers is %i\n",q_load(&fShArSt->susers));
 
   //Knows the ownership, so safe to unblock signals
   unblock_signals(&oset,throw 1);
@@ -311,30 +299,32 @@ retry:
   //If creator of the shared memory
   if(fOwns) {
     //The owner indicates it is ready to start loading
-    q_store(&fShArSt->lstatus,1);
+    q_store(&fShArSt->lstatus,(char)1);
 newowner:
 
-    printf("Loading the data...\n");
-
-    LoadArray();
+    //printf("Loading the data...\n");
 
     //sleep(20);
 
-    printf("Done Loading\n");
+    LoadArray();
+
+    //printf("Done Loading\n");
 
     //The owner indicates it is done loading
-    q_store(&fShArSt->lstatus,2);
+    //q_store(&fShArSt->lstatus,(char)(k=int(2+rand()*120./RAND_MAX)));
+    q_store(&fShArSt->lstatus,(char)2);
+    //printf("Status is %i\n",k);
     //Sends a signal to all waiters
     for(i=0; i<MAX_WAITERS; ++i) if((j=q_load(&fShArSt->waiters[i]))) {
-      printf("Sending SIGCONT to process %i\n",j);
-      kill(j,SIGCONT);
+      //printf("Sending SIGALRM to process %i (%i)\n",j,k);
+      kill(j,SIGALRM);
     }
 
   } else {
     i=-1;
 
     //Wait for the owner to change the status
-    printf("Trying to read the status\n");
+    //printf("Trying to read the status\n");
     while(!q_load(&fShArSt->lstatus) && ++i<1000) {
       //printf("Sleep %i\n",i);
       usleep(1000);
@@ -353,7 +343,7 @@ newowner:
     int sig;
 
     //If owner is not done loading
-    if(q_load(&fShArSt->lstatus)!=2) {
+    if(q_load(&fShArSt->lstatus)<2) {
 
       for(;;) {
 
@@ -363,7 +353,7 @@ newowner:
 	  block_signals(&nset,&oset,throw 1);
 
 	  for(i=0; i<MAX_WAITERS; ++i)
-	    if(!q_fetch_and_compare_and_set(&fShArSt->waiters[i],0,pid)) {
+	    if(!q_fetch_and_compare_and_set(&fShArSt->waiters[i],(uint32_t)0,(uint32_t)pid)) {
 	      fWIdx=i;
 	      break;
 	    }
@@ -376,7 +366,7 @@ newowner:
 	  //If the owner is still not done loading
 	  if(q_load(&fShArSt->lstatus)==1) {
 
-	    printf("Waiting for Signal\n");
+	    //printf("Waiting for Signal\n");
 	    //If sigtimedwait generated an error
 	    if((sig=sigtimedwait(&mset,NULL,&timeout))<0 && errno!=EAGAIN) {
 	      perror("sigtimedwait");
@@ -387,23 +377,23 @@ newowner:
 
 	      //Timed out!
 	      if(errno==EAGAIN) {
-		printf("sigtimedwait received no signal\n");
+		//printf("sigtimedwait received no signal\n");
 
-		//Else if SIGCONT has been received and the owner is done loading
-	      } else if(q_load(&fShArSt->lstatus)==2) {
-		printf("sigtimedwait received SIGCONT and owner is done loading\n");
-		q_store(&fShArSt->waiters[fWIdx],0);
+		//Else if SIGALRM has been received and the owner is done loading
+	      } else if(q_load(&fShArSt->lstatus)>=2) {
+		//printf("sigtimedwait received SIGALRM and owner is done loading (%i)\n",i);
+		q_store(&fShArSt->waiters[fWIdx],(uint32_t)0);
 		fWIdx=-1;
 		break;
 
 	      } else {
-		printf("sigtimedwait received SIGCONT but owner is not done loading\n");
+		//printf("sigtimedwait received SIGALRM but owner is not done loading\n");
 	      }
 	    }
 
 	    //Else if the owner is done loading
-	  } else if(q_load(&fShArSt->lstatus)==2) {
-	    q_store(&fShArSt->waiters[fWIdx],0);
+	  } else if(q_load(&fShArSt->lstatus)>=2) {
+	    q_store(&fShArSt->waiters[fWIdx],(uint32_t)0);
 	    fWIdx=-1;
 	    break;
 	  }
@@ -412,22 +402,22 @@ newowner:
 	} else {
 	  usleep(1000);
 	  //If owner is done loading
-	  if(q_load(&fShArSt->lstatus)==2) break;
+	  if(q_load(&fShArSt->lstatus)>=2) break;
 	}
 
 	//If owner has terminated
-	if(q_fetch_and_compare_and_set(&fShArSt->lstatus,-1,1)==-1) {
-	  printf("Acquiring ownership\n");
-	  q_store(&fShArSt->waiters[fWIdx],0);
+	if(q_fetch_and_compare_and_set(&fShArSt->lstatus,(char)-1,(char)1)==-1) {
+	  //printf("Acquiring ownership\n");
+	  q_store(&fShArSt->waiters[fWIdx],(uint32_t)0);
 	  fWIdx=-1;
 	  fOwns=true;
 	  goto newowner;
 	}
       }
     }
-    printf("Loading the data...\n");
+    //printf("Loading the data...\n");
     LoadArray();
-    printf("Done Loading\n");
+    //printf("Done Loading\n");
   }
 }
 
@@ -441,7 +431,7 @@ void QSharedArray::Fill()
 
 void QSharedArray::LoadArray()
 {
-  fArrayPars=(struct sharpars*)((char*)fShMem+sizeof(struct sharst));
+  fArrayPars=(struct sharpars*)((char*)fShArSt+sizeof(struct sharst));
   int fd=0;
 
   if(fOwns) {
@@ -498,6 +488,7 @@ void QSharedArray::LoadArray()
     fFADesc=shm_open(fShAPath.c_str(),O_RDWR|O_CREAT,S_IRUSR|S_IWUSR);
 
     if(fFADesc==-1) {
+      printf("%s+:\n",fFilename.c_str());
       perror("shm_open");
       throw 1;
     }
@@ -603,9 +594,11 @@ void QSharedArray::LoadArray()
 
     //Ese if not owner
   } else {
-    fFADesc=shm_open(fShAPath.c_str(),O_RDONLY,S_IRUSR|S_IWUSR);
+    //This is really weird that without O_CREAT, Linux can generate an error here
+    fFADesc=shm_open(fShAPath.c_str(),O_RDONLY|O_CREAT,S_IRUSR|S_IWUSR);
 
     if(fFADesc==-1) {
+      printf("%s+:\n",fFilename.c_str());
       perror("shm_open");
       throw 1;
     }

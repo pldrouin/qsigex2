@@ -9,6 +9,7 @@ struct pthread_t;
 struct pthread_mutex_t;
 struct sem_t;
 #endif
+#include "sigcontrol.h"
 #include "QList.h"
 #include "QProcessor.h"
 
@@ -21,7 +22,7 @@ class QProcList: public QProcessor
 
     virtual ~QProcList();
 
-    void AddQProc(QProcessor* const qproc, const Int_t &index=-1){fQPL->Add(qproc,index);}
+    void AddQProc(QProcessor* const qproc, const Int_t &index=-1){block_signals_once(throw 1); fQPL->Add(qproc,index); unblock_signals_once(throw 1);}
 
     void Analyze();
 
@@ -48,7 +49,7 @@ class QProcList: public QProcessor
     const QProcList& operator=(const QProcList &rhs);
     QProcessor& operator[](const Int_t &index) const{return *((QProcessor*)(*fQPL)[index]);}
 
-    void RemoveQProc(const Int_t &index=-1){fQPL->Del(index);}
+    void RemoveQProc(const Int_t &index=-1){block_signals_once(throw 1); fQPL->Del(index); unblock_signals_once(throw 1);}
 
     static void SetDefPProcessor(const Bool_t &pprocessor=kTRUE){fDefPProcessor=pprocessor;}
 

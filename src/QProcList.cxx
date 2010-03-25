@@ -11,8 +11,10 @@ QProcList::~QProcList()
 {
   pthread_mutex_destroy(&fChMutex);
   sem_destroy(&fTWSem);
+  block_signals_once(throw 1);
   delete fQPL;
   fQPL=NULL;
+  unblock_signals_once(throw 1);
 }
 
 void QProcList::Analyze()
@@ -51,6 +53,7 @@ void QProcList::DeleteChildren(const Int_t &nsublevels)
 {
   Int_t i;
 
+  block_signals_once(throw 1);
   if(nsublevels) {
 
     for(i=0; i<fQPL->Count(); i++) {
@@ -62,6 +65,7 @@ void QProcList::DeleteChildren(const Int_t &nsublevels)
   }
 
   for(i=0; i<fQPL->Count(); i++) delete fQPL->GetArray()[i]; 
+  unblock_signals_once(throw 1);
 }
 
 void QProcList::Exec() const
@@ -340,6 +344,8 @@ void QProcList::InitThreads()
   fNThreads=(fPProcessor?fRNThreads:1);
   if(fNThreads<0) fNThreads=0;
 
+  block_signals_once(throw 1);
+
   if(fNThreads) {
     fThreads=new pthread_t[fNThreads];
 
@@ -347,6 +353,7 @@ void QProcList::InitThreads()
       pthread_create(&fThreads[i], NULL, QPLThread, this);
     }
   }
+  unblock_signals_once(throw 1);
 }
 
 void QProcList::KillThreads()
@@ -354,16 +361,19 @@ void QProcList::KillThreads()
   //For signal-handling only! Do not clear any memory. Just cancel all threads recursively
   Int_t i;
 
+  block_signals_once();
+
   if(fThreads) {
     for(i=fNThreads-1; i>=0; --i) {
       pthread_cancel(fThreads[i]);
       pthread_join(fThreads[i],NULL);
     }
+    fThreads=NULL;
   }
-  fThreads=NULL;
 
-  for(i=0; i<fQPL->Count(); ++i) ((QProcessor*)(*fQPL)[i])->KillThreads;
+  for(i=0; i<fQPL->Count(); ++i) dynamic_cast<QProcessor*>((*fQPL)[i])->KillThreads();
   fQPL->Clear();
+  unblock_signals_once();
 }
 
 void QProcList::PrintAnalysisResults() const
@@ -403,7 +413,9 @@ void QProcList::PrintProcesses(const UInt_t &level, const Bool_t &printdeps) con
 const QProcList& QProcList::operator=(const QProcList &rhs)
 {
   QProcessor::operator=(rhs);
+  block_signals_once(throw 1);
   *fQPL=*rhs.fQPL;
+  unblock_signals_once(throw 1);
   return *this;
 }
 
@@ -508,6 +520,7 @@ void QProcList::ClearObjLists()
 }
 
 void* QPLThread(void *args){
+  pthread_block_signals_once(throw 1);
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL); //Thread will cancel right away if pthread_cancel is called
   QProcList &plist=*((QProcList*)args);
   QProcList::SChainConfig *chain;

@@ -6,12 +6,14 @@
 #include <semaphore.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
 #include <sys/time.h>
 
 #include "qatomic.h"
+#include "sigcontrol.h"
 #else
 struct pthread_t;
 struct pthread_mutex_t;
@@ -23,9 +25,7 @@ struct sem_t;
 #include <cmath>
 #include <algorithm>
 #include <errno.h>
-
-#include <sys/ipc.h>
-#include <sys/shm.h>
+#include <stdint.h>
 
 #include "Rtypes.h"
 #include "TString.h"
@@ -59,7 +59,7 @@ class QOversizeArray
     QOversizeArray(const char *filename, const char *arraydescr, const Int_t& openmode=kRead, const UInt_t &objectsize=0, const UInt_t &nobjectsperbuffer=0, const Int_t &npcbuffers=1, const UInt_t &nobjectsallocblock=0);
     virtual ~QOversizeArray();
 
-    static void ClearShMem(const Bool_t &forcedel=kFALSE, const Bool_t &remdepend=kTRUE);
+    static void ClearShMem();
 
     void CloseFile();
 
@@ -72,9 +72,11 @@ class QOversizeArray
     const UInt_t& GetObjSize() const{return fObjectSize;}
     const Char_t* GetObjTypeName() const{return fObjectTypeName.Data();}
 
-    static void InitShMem(const Bool_t &adddepend=kTRUE);
+    static void InitShMem();
 
     const Bool_t& IsReadThreadSafe() const{return kFALSE;}
+
+    static void KillThreads();
 
     void LoadEntry(const Long64_t &entry = 0);
 
@@ -183,8 +185,14 @@ class QOversizeArray
     pthread_mutex_t fUZBMutex;     // Lock on unzipped buffer arrays
 
     static QList<QOversizeArray*> fInstances; // List of QOversizeArray instances
-    static void* fShMem;             // Pointer to shared memory
-    static Int_t fShMemId;                    // Shared memory ID
+    static const unsigned int sSHPAMSize; //Shared Header Page-Aligned memory size
+    static int   fShFDesc;         //!
+    static bool  fShOwns;             //!
+    static struct sharst {
+      int32_t susers;
+      bool used[QOA_MAXPROCS];
+      Long64_t memory[QOA_MAXPROCS];
+    } *fShArSt;
     static QList<Float_t>         fICumulPriority; // Cumulative array priorities
     static Long64_t fMinMemSize;    // Minimum amount of memory needed for all QOversizeArray instances of the current process
     static Long64_t fLevel1MemSize; // Memory level (B) at which memory management thread stops attempting to free memory

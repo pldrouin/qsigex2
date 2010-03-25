@@ -3,8 +3,10 @@
 ClassImp(QOversizeArray)
 
 QList<QOversizeArray*> QOversizeArray::fInstances;
-void* QOversizeArray::fShMem=NULL;
-Int_t QOversizeArray::fShMemId=-1;
+const unsigned int QOversizeArray::sSHPAMSize=(sizeof(struct sharst)/sysconf(_SC_PAGESIZE)+sizeof(struct sharst)%sysconf(_SC_PAGESIZE)!=0)*sysconf(_SC_PAGESIZE);
+int QOversizeArray::fShFDesc=0;
+bool QOversizeArray::fShOwns=0;
+struct QOversizeArray::sharst* QOversizeArray::fShArSt=NULL;
 QList<Float_t> QOversizeArray::fICumulPriority;
 Long64_t QOversizeArray::fMinMemSize=0;
 Long64_t QOversizeArray::fLevel1MemSize=0;
@@ -125,29 +127,70 @@ QOversizeArray::~QOversizeArray()
   sem_destroy(&fBLWSem);
 }
 
-void QOversizeArray::ClearShMem(const Bool_t &forcedel, const Bool_t &remdepend)
+void QOversizeArray::ClearShMem()
 {
-  if(fShMem) {
-    //Now get rid of the shared memory properly
-    if(remdepend) q_add((Int_t*)fShMem,(Int_t)-1);
+  //Block Signals in case the function is called by a signal handler
+  bool error=false;
+  block_signals_once();
+  int i,j;
 
-    if(forcedel || !q_fetch_and_compare_and_set((Int_t*)fShMem,(Int_t)0,(Int_t)-1)) {
-      if(shmctl(fShMemId,IPC_RMID,NULL)<0) {
-	perror("shmctl");
-	throw 1;
+  //If the shared memory was ready to be accessed
+  if(fShArSt) {
+
+    //If has index in waiters list
+    if(fTotalMemSize) {
+      printf("Freeing shared memory segment at ID %i\n",int(fTotalMemSize-fShArSt->memory));
+      //Erase it
+      q_store(fTotalMemSize,(Long64_t)0);
+      q_store(fShArSt->used+int(fTotalMemSize-fShArSt->memory),(bool)0);
+      fTotalMemSize=0;
+    }
+
+retry2:
+    //If last user
+    if((i=q_fetch_and_compare_and_set(&fShArSt->susers,(int32_t)1,(int32_t)0))==1) {
+      //printf("Destroying the shared memory space\n");
+
+      if(shm_unlink("/QOversizeArray")==-1){
+	perror("shm_unlink");
+	error=true;
       }
+
+      //If not last user 
+    } else {
+
+      //Try decrement if value has not changed. If value has changed and was 1, goto retry2. Otherwise retry
+      while((j=q_fetch_and_compare_and_set(&fShArSt->susers,(int32_t)i,(int32_t)(i-1)))!=i) {if(j==1) goto retry2; i=j;}
+      //printf("Decremented the shared memory usage to %i\n",j-1);
     }
 
-    printf("Freeing shared memory segment at ID %i\n",int(((Int_t)((Char_t*)fTotalMemSize-(Char_t*)fShMem)-sizeof(Int_t)-QOA_MAXPROCS)/sizeof(Long64_t)));
-    q_store((Char_t*)fShMem+sizeof(Int_t)+(int((Char_t*)fTotalMemSize-(Char_t*)fShMem)-sizeof(Int_t)-QOA_MAXPROCS)/sizeof(Long64_t),(Char_t)0);
-
-    if(shmdt(fShMem)<0) {
-      perror("shmctl");
-      throw 1;
+    if(munmap(fShArSt,sSHPAMSize)) {
+      perror("munmap");
     }
-    fShMem=NULL;
-    fTotalMemSize=NULL;
+    fShArSt=NULL;
+
+    //Else if owner but could not get shared memory
+  } else if(fShOwns) {
+
+    if(shm_unlink("/QOversizeArray")==-1){
+      perror("shm_unlink");
+      error=true;
+    }
   }
+
+  if(fShFDesc>0) {
+
+    if(close(fShFDesc)) {
+      fShFDesc=0;
+      perror("close");
+      error=true;
+    }
+    fShFDesc=0;
+  }
+
+  unblock_signals_once();
+
+  if(error) throw 1;
 }
 
 void QOversizeArray::CloseFile()
@@ -155,12 +198,14 @@ void QOversizeArray::CloseFile()
   CFuncDef(CloseFile,1);
   printstatus("void QOversizeArray::CloseFile()");
   if(fFDesc) {
+    block_signals_once();
     pthread_mutex_lock(&fILMutex);
 
     Int_t idx=fInstances.FindFirst(this);
     fICumulPriority.Del(idx);
     fInstances.Del(idx);
     pthread_mutex_unlock(&fILMutex);
+    unblock_signals_once();
     //From here QOAMMThread won't try to send a new job to either fMWThread of fMCThread for this array
 
     if(fOpenMode!=kRead) {
@@ -341,61 +386,60 @@ void QOversizeArray::Init()
   ReadWriteBuffer();
 }
 
-void QOversizeArray::InitShMem(const Bool_t &adddepend)
+void QOversizeArray::InitShMem()
 {
-  if(!fShMem) {
-    Int_t i;
-    Int_t id, val;
+  ClearShMem();
 
-    while(1) {
+  bool fOwns=false;
 
-      if((fShMemId=shmget(17686,sizeof(Int_t)+QOA_MAXPROCS*(sizeof(Char_t)+sizeof(Long64_t)),IPC_CREAT|SHM_R|SHM_W))<0) {
-	perror("shmget");
-	throw 1;
-      }
+  block_signals_init(nset,oset,throw 1);
 
-      if((fShMem=shmat(fShMemId,NULL,0))<0) {
-	perror("shmat");
-	throw 1;
-      }
+  //Block all signals
+  block_signals(&nset,&oset,throw 1);
 
-reload:
-      if((val=q_load((Int_t*)fShMem))==-1) {
-	//printf("Shared memory segment is being deleted\n");
-	shmdt(fShMem);
-	usleep(1000);
-	continue;
-      }
+  fShFDesc=shm_open("/QOversizeArray",O_RDWR|O_CREAT,S_IRUSR|S_IWUSR);
 
-      //if(!val) printf("New shared memory segment\n");
+  if(fShFDesc==-1) {
+    perror("QOversizeArray::shm_open");
+    //Stop blocking signals.
+    unblock_signals(&oset,);
+    throw 1;
+  }
 
-      if(adddepend && q_fetch_and_compare_and_set((Int_t*)fShMem,val,val+1)!=val) goto reload;
+  if(ftruncate(fShFDesc, sSHPAMSize)==-1) { 
+    perror("ftruncate");
+    //Stop blocking signals. Need to call terminatesmem to just handle the fShFDesc
+    unblock_signals(&oset,);
+    throw 1;
+  }
+
+  fShArSt=(struct sharst*)mmap(NULL,sSHPAMSize,PROT_READ|PROT_WRITE,MAP_SHARED,fShFDesc,0);
+
+  if(fShArSt==MAP_FAILED) {
+    perror("mmap");
+    //Stop blocking signals. Need to call terminatesmem to handle the fShFDesc and the mmap
+    sigprocmask(SIG_SETMASK,&oset,NULL);
+    throw 1;
+  }
+
+  //q_store(&fShArSt->susers,0);
+  q_add(&fShArSt->susers,(int32_t)1);
+  //printf("pid is %u\n",getpid());
+  //printf("nusers is %i\n",q_load(&fShArSt->susers));
+  int i;
+
+  for(i=QOA_MAXPROCS-1; i>=0; --i)
+    if(!q_fetch_and_compare_and_set(&fShArSt->used[i],(bool)false,(bool)true)) {
+      printf("ID is %i\n",i);
+      fTotalMemSize=fShArSt->memory+i;
+      q_store(fTotalMemSize,(Long64_t)0);
       break;
     }
-    id=-1;
+  unblock_signals(&oset,throw 1);
 
-    for(i=QOA_MAXPROCS-1; i>=0; --i) {
-
-      if(!q_fetch_and_compare_and_set((Char_t*)fShMem+sizeof(Int_t)+i,(Char_t)0,(Char_t)1)) {
-
-	if(!q_load((Char_t*)fShMem+sizeof(Int_t)+i)) {
-	  fprintf(stderr,"Error: Could not properly set the bit %i in the shared segment\n",i);
-	  throw 1;
-	}
-	id=i;
-	break;
-      }
-    }
-
-    if(id<0) {
-      fprintf(stderr,"QOversizeArray::OpenFile(): Error: Cannot find available room for a new process in the shared memory segment\n");
-      throw 1;
-    }
-
-    printf("ID is %i\n",id);
-
-    fTotalMemSize=(Long64_t*)((Char_t*)fShMem+sizeof(Int_t)+QOA_MAXPROCS+id*sizeof(Long64_t));
-    q_store(fTotalMemSize,(Long64_t)0);
+  if(i<0) {
+    fprintf(stderr,"QOversizeArray::InitShMem(): Error: Cannot find available room for a new process in the shared memory segment\n");
+    throw 1;
   }
 }
 
@@ -515,6 +559,34 @@ void QOversizeArray::Fill()
   memcpy(fWriteBuffer->fBuffer+(fNObjects-fWBFirstObjIdx)*fObjectSize,fBuffer,fObjectSize);
   ++fNObjects;
   //printstatus("Exiting Fill");
+}
+
+void QOversizeArray::KillThreads()
+{
+  Int_t i;
+
+  block_signals_once();
+
+  if(fInstances.Count()) {
+    pthread_cancel(fMMThread);
+    pthread_join(fMMThread,NULL);
+
+    for(i=fNLoaders-1; i>=0; --i) {
+      pthread_cancel(fBLThreads[i]);
+      pthread_join(fBLThreads[i],NULL);
+    }
+  if(fCThreshLevel<=fCritLevel) {
+    pthread_cancel(fMCThread);
+    pthread_join(fMCThread,NULL);
+  }
+
+    for(i=fInstances.Count()-1; i>=0; --i) {
+      pthread_cancel(fInstances[i]->fMWThread);
+      pthread_join(fInstances[i]->fMWThread,NULL);
+    }
+    fInstances.Clear();
+  }
+  unblock_signals_once();
 }
 
 void QOversizeArray::LoadEntry(const Long64_t &entry)
@@ -788,12 +860,16 @@ void QOversizeArray::OpenFile()
   if(fOpenMode!=kRead) pthread_create(&fMWThread, NULL, QOAMWThread, this);
   //Create buffer loading thread
 
+  //printf("Block signals\n");
+  block_signals_once();
   pthread_mutex_lock(&fILMutex);
   fInstances.Add(this);
   fICumulPriority.Add(0);
 
   if(fInstances.Count() == 1) {
     pthread_mutex_unlock(&fILMutex);
+    //printf("Unblock signals\n");
+    unblock_signals_once();
 
     InitShMem();
 #ifdef WITH_LIBPROCINFO
@@ -811,6 +887,8 @@ void QOversizeArray::OpenFile()
 
   } else {
     pthread_mutex_unlock(&fILMutex);
+    //printf("Unblock signals2\n");
+    unblock_signals_once();
   }
 
   Init();
@@ -1389,11 +1467,11 @@ void QOversizeArray::ShowMemStats()
   printf("Available memory: %lli\n",sysfreemem());
 #endif
 
-  printf("Memory used by the %i QOversizeArray processes:\n",q_load((Int_t*)((Char_t*)fShMem)));
+  printf("Memory used by the %u QOversizeArray processes:\n",q_load((uint32_t*)(&fShArSt->susers)));
   Long64_t llbuf;
 
   for(int i=QOA_MAXPROCS-1; i>=0; --i) {
-    llbuf=q_load((Long64_t*)((Char_t*)fShMem+sizeof(Int_t)+QOA_MAXPROCS+i*sizeof(Long64_t)));
+    llbuf=q_load(fShArSt->memory+i);
 
     if(llbuf) printf("%3i: %lli\n",i,llbuf);
   }
@@ -1410,10 +1488,10 @@ void QOversizeArray::UpdateMemStats()
     //printf("Free system memory: %lli\n",avail);
 
     for(int i=QOA_MAXPROCS-1; i>=0; --i) {
-      avail+=q_load((Long64_t*)((Char_t*)fShMem+sizeof(Int_t)+QOA_MAXPROCS+i*sizeof(Long64_t)));
+      avail+=q_load(fShArSt->memory+i);
     }
     //printf("Total available memory: %lli\n",avail);
-    avail/=q_load((Int_t*)((Char_t*)fShMem));
+    avail/=q_load(&fShArSt->susers);
     //printf("Available memory for this process: %lli\n",avail);
 
     if(avail<fMinMemSize) avail=fMinMemSize;
@@ -1585,6 +1663,8 @@ void QOversizeArray::WriteWriteBuffer() const
 void* QOversizeArray::QOAMWThread(void *array)
 {
   FuncDef(QOAMWThread,1);
+  pthread_block_signals_once(throw 1);
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL); //Thread will cancel right away if pthread_cancel is called
   QOversizeArray *qoa=(QOversizeArray*)array;
   QOABuffer *buf;
   //printstatus("Starting memory writing thread");
@@ -1713,6 +1793,8 @@ void* QOversizeArray::QOAMWThread(void *array)
 void* QOversizeArray::QOABLThread(void*)
 {
   FuncDef(QOABLThread,1);
+  pthread_block_signals_once(throw 1);
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL); //Thread will cancel right away if pthread_cancel is called
   QOversizeArray *qoa=NULL;
   Int_t ibuf, ibuf2, ibuf3;
   QOABuffer *buf2, *buf3;
@@ -2097,6 +2179,8 @@ void* QOversizeArray::QOABLThread(void*)
 void* QOversizeArray::QOAMMThread(void *)
 {
   FuncDef(QOAMMThread,1);
+  pthread_block_signals_once(throw 1);
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL); //Thread will cancel right away if pthread_cancel is called
   Int_t i,j;
   Float_t fbuf, fbuf2;
   TRandom rnd;
@@ -2450,6 +2534,8 @@ skippoint:
 void* QOversizeArray::QOAMCThread(void *array)
 {
   FuncDef(QOAMCThread,1);
+  pthread_block_signals_once(throw 1);
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL); //Thread will cancel right away if pthread_cancel is called
   QOABuffer *buf;
   char* tmpbuf;
   Int_t ibuf;

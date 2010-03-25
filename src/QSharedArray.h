@@ -17,10 +17,10 @@
 #include <cstring>
 #include <string>
 #include <cmath>
-#include <signal.h>
 #include <errno.h>
 
 #include "qatomic.h"
+#include "sigcontrol.h"
 #else
 struct pthread_mutex_t;
 #endif
@@ -36,9 +36,6 @@ struct pthread_mutex_t;
 #define MAX_WAITERS 256
 
 #define MAX_ANAMELEN 256
-
-#define block_signals(pnset, poset, err) if(sigprocmask(SIG_SETMASK,pnset,poset)) {perror("sigprocmask"); err;}
-#define unblock_signals(poset,err) if(sigprocmask(SIG_SETMASK,poset,NULL)) {perror("sigprocmask"); err;}
 
 void dummy_h(int sig);
 
@@ -106,7 +103,6 @@ class QSharedArray
   string fShAPath;
   int fFADesc;
   bool fOwns;			//!
-  void* fShMem;                 //! Pointer to shared memory
   int fWIdx;			//!
   //Enforce 1-byte alignment
 #pragma pack(push)  /* push current alignment to stack */
