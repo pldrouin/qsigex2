@@ -193,7 +193,8 @@ retry2:
 
   unblock_signals_once();
 
-  if(error) throw 1;
+  //Should never throw in a function called during exception handling
+  //if(error) throw 1;
 }
 
 void QOversizeArray::CloseFile()
@@ -327,7 +328,6 @@ void QOversizeArray::CloseFile()
 
     if(close(fFDesc)) {
       perror("QOversizeArray::~QOversizeArray(): Error: ");
-      throw 1;
     }
     fFDesc=0;
   }
@@ -609,7 +609,6 @@ void QOversizeArray::KillThreads()
 	pthread_join(fInstances[i]->fMWThread,NULL);
       }
     }
-    fInstances.Clear();
   }
   unblock_signals_once();
 }
@@ -1688,7 +1687,7 @@ void QOversizeArray::WriteWriteBuffer() const
 void* QOversizeArray::QOAMWThread(void *array)
 {
   FuncDef(QOAMWThread,1);
-  pthread_block_signals_once(throw 1);
+  pthread_block_signals_once();
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL); //Thread will cancel right away if pthread_cancel is called
   QOversizeArray *qoa=(QOversizeArray*)array;
   QOABuffer *buf;
@@ -1818,7 +1817,7 @@ void* QOversizeArray::QOAMWThread(void *array)
 void* QOversizeArray::QOABLThread(void*)
 {
   FuncDef(QOABLThread,1);
-  pthread_block_signals_once(throw 1);
+  pthread_block_signals_once();
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL); //Thread will cancel right away if pthread_cancel is called
   QOversizeArray *qoa=NULL;
   Int_t ibuf, ibuf2, ibuf3;
@@ -2204,7 +2203,7 @@ void* QOversizeArray::QOABLThread(void*)
 void* QOversizeArray::QOAMMThread(void *)
 {
   FuncDef(QOAMMThread,1);
-  pthread_block_signals_once(throw 1);
+  pthread_block_signals_once();
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL); //Thread will cancel right away if pthread_cancel is called
   Int_t i,j;
   Float_t fbuf, fbuf2;
@@ -2559,7 +2558,7 @@ skippoint:
 void* QOversizeArray::QOAMCThread(void *array)
 {
   FuncDef(QOAMCThread,1);
-  pthread_block_signals_once(throw 1);
+  pthread_block_signals_once();
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL); //Thread will cancel right away if pthread_cancel is called
   QOABuffer *buf;
   char* tmpbuf;

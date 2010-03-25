@@ -72,7 +72,7 @@ QSharedArray::QSharedArray(const char *filename, const char *arraydescr, const u
   block_signals_once(throw 1);
   fShPath=path;
   sbuf1[0]='+';
-  sbuf1[1]='0';
+  sbuf1[1]=0;
   fShAPath=path;
   //Unblock all signals
   unblock_signals_once(throw 1);
@@ -594,8 +594,7 @@ void QSharedArray::LoadArray()
 
     //Ese if not owner
   } else {
-    //This is really weird that without O_CREAT, Linux can generate an error here
-    fFADesc=shm_open(fShAPath.c_str(),O_RDONLY|O_CREAT,S_IRUSR|S_IWUSR);
+    fFADesc=shm_open(fShAPath.c_str(),O_RDONLY,S_IRUSR|S_IWUSR);
 
     if(fFADesc==-1) {
       printf("%s+:\n",fFilename.c_str());
