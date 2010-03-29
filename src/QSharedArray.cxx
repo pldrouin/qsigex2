@@ -130,6 +130,7 @@ QSharedArray::~QSharedArray()
   }
   pthread_mutex_unlock(&fIMutex);
   ClearShMem();
+  Terminate();
 }
 
 void QSharedArray::ClearAllShMem()
@@ -148,7 +149,7 @@ void QSharedArray::ClearShMem()
 
   //If the shared memory was ready to be accessed
   if(fShArSt) {
-    Terminate();
+    //Terminate();
 
     //If owned the shared memory but could not finish loading
     if(fOwns && q_load(&fShArSt->lstatus)<2) {
@@ -191,9 +192,9 @@ retry2:
       //printf("Decremented the shared memory usage to %i\n",j-1);
     }
 
-    if(munmap(fShArSt,sSHPAMSize)) {
-      perror("munmap");
-    }
+    //if(munmap(fShArSt,sSHPAMSize)) {
+    //  perror("munmap");
+    //}
     fShArSt=NULL;
 
     //Else of owner but could not get shared memory

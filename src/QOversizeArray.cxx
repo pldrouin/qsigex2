@@ -167,9 +167,9 @@ retry2:
       //printf("Decremented the shared memory usage to %i\n",j-1);
     }
 
-    if(munmap(fShArSt,sSHPAMSize)) {
-      perror("munmap");
-    }
+    //if(munmap(fShArSt,sSHPAMSize)) {
+    //  perror("munmap");
+    //}
     fShArSt=NULL;
 
     //Else if owner but could not get shared memory
@@ -603,10 +603,13 @@ void QOversizeArray::KillThreads()
 
     for(i=fInstances.Count()-1; i>=0; --i) {
 
-      //If thread is alive
-      if(!pthread_kill(fInstances[i]->fMWThread,0)) {
-	pthread_cancel(fInstances[i]->fMWThread);
-	pthread_join(fInstances[i]->fMWThread,NULL);
+      if(fInstances[i]->fOpenMode!=kRead) {
+
+	//If thread is alive
+	if(!pthread_kill(fInstances[i]->fMWThread,0)) {
+	  pthread_cancel(fInstances[i]->fMWThread);
+	  pthread_join(fInstances[i]->fMWThread,NULL);
+	}
       }
     }
   }
