@@ -11,10 +11,14 @@
 #include <sys/uio.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <stdint.h>
 
 #include "qatomic.h"
 #include "sigcontrol.h"
 #else
+typedef UInt_t uint32_t;
+typedef Int_t int32_t;
+typedef Long64_t int64_t;
 struct pthread_t;
 struct pthread_mutex_t;
 struct pthread_cond_t;
@@ -25,7 +29,6 @@ struct sem_t;
 #include <cmath>
 #include <algorithm>
 #include <errno.h>
-#include <stdint.h>
 
 #include "Rtypes.h"
 #include "TString.h"

@@ -18,14 +18,18 @@
 #include <string>
 #include <cmath>
 #include <errno.h>
+#include <stdint.h>
 
 #include "qatomic.h"
 #include "sigcontrol.h"
 #else
 struct pthread_mutex_t;
+typedef UInt_t uint32_t;
+typedef Int_t int32_t;
+typedef Long64_t int64_t;
 #endif
 #include <sys/types.h>
-#include <stdint.h>
+#include <sys/cdefs.h>
 
 #include "TTimeStamp.h"
 
