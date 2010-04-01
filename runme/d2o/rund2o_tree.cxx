@@ -53,6 +53,7 @@ int main(int nargs, char* args[])
   QArrayProcessor dataproc("Data Processor","Data Processor");
   QProcBranchHandler::SaveOutputs(kFALSE);
   QProcQOAHandler::SaveOutputs(kFALSE);
+  //QProcessor::SetDefVerbosity(QProcessor::kShowExec|QProcessor::kShowExec2);
 
   dataproc.AddProc("Selector","Selector",Selector,NULL,kTRUE);
   dataproc.GetProc("Selector").AddIVar("energy","tree://d2o_data.root:Tree");
@@ -164,13 +165,11 @@ int main(int nargs, char* args[])
   dataproc.GetProc("LLSum").AddIVar("bk","tree://jointpdf");
   dataproc.GetProc("LLSum").AddOObj(&llsum);
 
-  //dataproc.Analyze();
-  //dataproc.InitProcess();
-  //dataproc.PrintAnalysisResults();
-
   QProcList plist;
   plist.AddQProc(&dataproc);
   plist.Analyze();
+  plist.PrintProcesses(0,kTRUE);
+  //plist.PrintAnalysisResults();
   plist.InitProcess();
 
   QSigExFitMinuit fitter;
@@ -186,9 +185,11 @@ int main(int nargs, char* args[])
 
   fitter.SetVerbose(0);
   fitter.InitFit();
+  //fitter.PrintParams();
   fitter.Fit();
   fitter.PrintParams();
   fitter.GetCovMatrix().Print();
+  fitter.GetCorMatrix().Print();
 
   plist.TerminateProcess();
 
@@ -202,13 +203,13 @@ Bool_t PDFEval(QProcArgs &args)
 {
   switch(args.GetNIVars()) {
     case 1:
-      args.OVar(0)=((QDisTH*)args.IObj(0))->Eval(args.IVar(0));
+      args.OVar(0)=((QDisTH*)args.IObj(0))->Eval(args.IVarF(0));
       break;
     case 2:
-      args.OVar(0)=((QDisTH*)args.IObj(0))->Eval(args.IVar(0),args.IVar(1));
+      args.OVar(0)=((QDisTH*)args.IObj(0))->Eval(args.IVarF(0),args.IVarF(1));
       break;
     case 3:
-      args.OVar(0)=((QDisTH*)args.IObj(0))->Eval(args.IVar(0),args.IVar(1),args.IVar(2));
+      args.OVar(0)=((QDisTH*)args.IObj(0))->Eval(args.IVarF(0),args.IVarF(1),args.IVarF(2));
       break;
     default:
       fprintf(stderr,"FillHist: Error: Number of input variables (%i) is invalid\n",args.GetNIVars());
@@ -218,9 +219,9 @@ Bool_t PDFEval(QProcArgs &args)
 
 Bool_t Selector(QProcArgs &args)
 {
-  if(args.IVar(0)<0 || args.IVar(0)>42) return kFALSE;
-  if(args.IVar(1)<0 || args.IVar(1)>26) return kFALSE;
-  if(args.IVar(2)<0 || args.IVar(2)>40) return kFALSE;
+  if(args.IVarF(0)<0 || args.IVarF(0)>42) return kFALSE;
+  if(args.IVarF(1)<0 || args.IVarF(1)>26) return kFALSE;
+  if(args.IVarF(2)<0 || args.IVarF(2)>40) return kFALSE;
   return kTRUE;
 }
 
@@ -259,5 +260,5 @@ void ELLFunction(Int_t&, Double_t*, Double_t &f, Double_t *, Int_t)
   QSigExFit::GetCurInstance().ExecProc();
   f=0;
   for(i=0; i<QSigExFit::GetCurInstance().GetNParams(); i++) f+=*(pars[i]);
-  f=2*(f-(QProcDouble&)QSigExFit::GetCurInstance().GetProcOutput());
+  f=2*(f-(QProcDouble&)QSigExFit::GetCurInstance().GetProcOutput(0));
 }
