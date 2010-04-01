@@ -2,10 +2,9 @@
 #include "Rtypes.h"
 #include "TFile.h"
 #include "TTree.h"
-#include "QDisTH.h"
+#include "QHN.h"
 #include "QSigExFitMinuit.h"
 #include "QArrayProcessor.h"
-#include "QProcList.h"
 
 int main(int nargs, char* args[]);
 Bool_t PDFEval(QProcArgs &args);

@@ -18,37 +18,53 @@ int main(int nargs, char* args[])
 
   TFile f1(outfile,"RECREATE");
 
-  QDisTH cce("signal_pdf.root","h1001");
-  QDisTH ccr("signal_pdf.root","h1002");
-  QDisTH ccc("signal_pdf.root","h1003");
+  QHN_D* cce=new QHN_D("signal_pdf.root","h1001");
+  QHN_D* ccr=new QHN_D("signal_pdf.root","h1002");
+  QHN_D* ccc=new QHN_D("signal_pdf.root","h1003");
 
-  QDisTH ese("signal_pdf.root","h2001");
-  QDisTH esr("signal_pdf.root","h2002");
-  QDisTH esc("signal_pdf.root","h2003");
+  QHN_D* ese=new QHN_D("signal_pdf.root","h2001");
+  QHN_D* esr=new QHN_D("signal_pdf.root","h2002");
+  QHN_D* esc=new QHN_D("signal_pdf.root","h2003");
 
-  QDisTH nce("signal_pdf.root","h3001");
-  QDisTH ncr("signal_pdf.root","h3002");
-  QDisTH ncc("signal_pdf.root","h3003");
+  QHN_D* nce=new QHN_D("signal_pdf.root","h3001");
+  QHN_D* ncr=new QHN_D("signal_pdf.root","h3002");
+  QHN_D* ncc=new QHN_D("signal_pdf.root","h3003");
 
-  QDisTH bke("bck_pdf.root","h4001");
-  QDisTH bkr("bck_pdf.root","h4002");
-  QDisTH bkc("bck_pdf.root","h4003");
+  QHN_D* bke=new QHN_D("bck_pdf.root","h4001");
+  QHN_D* bkr=new QHN_D("bck_pdf.root","h4002");
+  QHN_D* bkc=new QHN_D("bck_pdf.root","h4003");
 
-  cce.Normalize();
-  ccr.Normalize();
-  ccc.Normalize();
+  cce->Normalize();
+  ccr->Normalize();
+  ccc->Normalize();
 
-  ese.Normalize();
-  esr.Normalize();
-  esc.Normalize();
+  ese->Normalize();
+  esr->Normalize();
+  esc->Normalize();
 
-  nce.Normalize();
-  ncr.Normalize();
-  ncc.Normalize();
+  nce->Normalize();
+  ncr->Normalize();
+  ncc->Normalize();
 
-  bke.Normalize();
-  bkr.Normalize();
-  bkc.Normalize();
+  bke->Normalize();
+  bkr->Normalize();
+  bkc->Normalize();
+
+  gDirectory->Add(cce);
+  gDirectory->Add(ccr);
+  gDirectory->Add(ccc);
+
+  gDirectory->Add(ese);
+  gDirectory->Add(esr);
+  gDirectory->Add(esc);
+
+  gDirectory->Add(nce);
+  gDirectory->Add(ncr);
+  gDirectory->Add(ncc);
+
+  gDirectory->Add(bke);
+  gDirectory->Add(bkr);
+  gDirectory->Add(bkc);
 
   QArrayProcessor dataproc("Data Processor","Data Processor");
   QOversizeArray::SetMemConstraints(200*1024*1024,160*1024*1024,170*1024*1024,1000*1024*1024);
@@ -64,65 +80,65 @@ int main(int nargs, char* args[])
 
   dataproc.AddPSProc("CCE PDF Eval","CCE PDF Eval",PDFEval,NULL,kTRUE);
   dataproc.GetProc("CCE PDF Eval").AddIVar("energy","tree://d2o_data.root:Tree");
-  dataproc.GetProc("CCE PDF Eval").AddIObj(&cce);
+  dataproc.GetProc("CCE PDF Eval").AddIObj(cce);
   dataproc.GetProc("CCE PDF Eval").AddOVar("f_e","qoa://ccpdf_f_e.qoa");
 
   dataproc.AddPSProc("CCR PDF Eval","CCR PDF Eval",PDFEval,NULL,kTRUE);
   dataproc.GetProc("CCR PDF Eval").AddIVar("radius","tree://d2o_data.root:Tree");
-  dataproc.GetProc("CCR PDF Eval").AddIObj(&ccr);
+  dataproc.GetProc("CCR PDF Eval").AddIObj(ccr);
   dataproc.GetProc("CCR PDF Eval").AddOVar("f_r","qoa://ccpdf_f_r.qoa");
 
   dataproc.AddPSProc("CCC PDF Eval","CCC PDF Eval",PDFEval,NULL,kTRUE);
   dataproc.GetProc("CCC PDF Eval").AddIVar("cthsun","tree://d2o_data.root:Tree");
-  dataproc.GetProc("CCC PDF Eval").AddIObj(&ccc);
+  dataproc.GetProc("CCC PDF Eval").AddIObj(ccc);
   dataproc.GetProc("CCC PDF Eval").AddOVar("f_c","qoa://ccpdf_f_c.qoa");
 
 
   dataproc.AddPSProc("ESE PDF Eval","ESE PDF Eval",PDFEval,NULL,kTRUE);
   dataproc.GetProc("ESE PDF Eval").AddIVar("energy","tree://d2o_data.root:Tree");
-  dataproc.GetProc("ESE PDF Eval").AddIObj(&ese);
+  dataproc.GetProc("ESE PDF Eval").AddIObj(ese);
   dataproc.GetProc("ESE PDF Eval").AddOVar("f_e","qoa://espdf_f_e.qoa");
 
   dataproc.AddPSProc("ESR PDF Eval","ESR PDF Eval",PDFEval,NULL,kTRUE);
   dataproc.GetProc("ESR PDF Eval").AddIVar("radius","tree://d2o_data.root:Tree");
-  dataproc.GetProc("ESR PDF Eval").AddIObj(&esr);
+  dataproc.GetProc("ESR PDF Eval").AddIObj(esr);
   dataproc.GetProc("ESR PDF Eval").AddOVar("f_r","qoa://espdf_f_r.qoa");
 
   dataproc.AddPSProc("ESC PDF Eval","ESE PDF Eval",PDFEval,NULL,kTRUE);
   dataproc.GetProc("ESC PDF Eval").AddIVar("cthsun","tree://d2o_data.root:Tree");
-  dataproc.GetProc("ESC PDF Eval").AddIObj(&esc);
+  dataproc.GetProc("ESC PDF Eval").AddIObj(esc);
   dataproc.GetProc("ESC PDF Eval").AddOVar("f_c","qoa://espdf_f_c.qoa");
 
 
   dataproc.AddPSProc("NCE PDF Eval","NCE PDF Eval",PDFEval,NULL,kTRUE);
   dataproc.GetProc("NCE PDF Eval").AddIVar("energy","tree://d2o_data.root:Tree");
-  dataproc.GetProc("NCE PDF Eval").AddIObj(&nce);
+  dataproc.GetProc("NCE PDF Eval").AddIObj(nce);
   dataproc.GetProc("NCE PDF Eval").AddOVar("f_e","qoa://ncpdf_f_e.qoa");
 
   dataproc.AddPSProc("NCR PDF Eval","NCR PDF Eval",PDFEval,NULL,kTRUE);
   dataproc.GetProc("NCR PDF Eval").AddIVar("radius","tree://d2o_data.root:Tree");
-  dataproc.GetProc("NCR PDF Eval").AddIObj(&ncr);
+  dataproc.GetProc("NCR PDF Eval").AddIObj(ncr);
   dataproc.GetProc("NCR PDF Eval").AddOVar("f_r","qoa://ncpdf_f_r.qoa");
 
   dataproc.AddPSProc("NCC PDF Eval","NCC PDF Eval",PDFEval,NULL,kTRUE);
   dataproc.GetProc("NCC PDF Eval").AddIVar("cthsun","tree://d2o_data.root:Tree");
-  dataproc.GetProc("NCC PDF Eval").AddIObj(&ncc);
+  dataproc.GetProc("NCC PDF Eval").AddIObj(ncc);
   dataproc.GetProc("NCC PDF Eval").AddOVar("f_c","qoa://ncpdf_f_c.qoa");
 
 
   dataproc.AddPSProc("BKE PDF Eval","BKE PDF Eval",PDFEval,NULL,kTRUE);
   dataproc.GetProc("BKE PDF Eval").AddIVar("energy","tree://d2o_data.root:Tree");
-  dataproc.GetProc("BKE PDF Eval").AddIObj(&bke);
+  dataproc.GetProc("BKE PDF Eval").AddIObj(bke);
   dataproc.GetProc("BKE PDF Eval").AddOVar("f_e","qoa://bkpdf_f_e.qoa");
 
   dataproc.AddPSProc("BKR PDF Eval","BKR PDF Eval",PDFEval,NULL,kTRUE);
   dataproc.GetProc("BKR PDF Eval").AddIVar("radius","tree://d2o_data.root:Tree");
-  dataproc.GetProc("BKR PDF Eval").AddIObj(&bkr);
+  dataproc.GetProc("BKR PDF Eval").AddIObj(bkr);
   dataproc.GetProc("BKR PDF Eval").AddOVar("f_r","qoa://bkpdf_f_r.qoa");
 
   dataproc.AddPSProc("BKC PDF Eval","BKC PDF Eval",PDFEval,NULL,kTRUE);
   dataproc.GetProc("BKC PDF Eval").AddIVar("cthsun","tree://d2o_data.root:Tree");
-  dataproc.GetProc("BKC PDF Eval").AddIObj(&bkc);
+  dataproc.GetProc("BKC PDF Eval").AddIObj(bkc);
   dataproc.GetProc("BKC PDF Eval").AddOVar("f_c","qoa://bkpdf_f_c.qoa");
 
 
@@ -166,15 +182,13 @@ int main(int nargs, char* args[])
   dataproc.GetProc("LLSum").AddIVar("bk","qoa://jointpdf_bk.qoa");
   dataproc.GetProc("LLSum").AddOObj(&llsum);
 
-  QProcList plist;
-  plist.AddQProc(&dataproc);
-  plist.Analyze();
-  plist.PrintProcesses(0,kTRUE);
-  //plist.PrintAnalysisResults();
-  plist.InitProcess();
+  dataproc.Analyze();
+  dataproc.PrintProcesses(0,kTRUE);
+  //dataproc.PrintAnalysisResults();
+  dataproc.InitProcess();
 
   QSigExFitMinuit fitter;
-  fitter.SetProcessor(&plist);
+  fitter.SetProcessor(&dataproc);
   fitter.AddProcOutput(&llsum);
 
   fitter.Param("ncc").Setup(2000,0.01,0,10000);
@@ -192,7 +206,7 @@ int main(int nargs, char* args[])
   fitter.GetCovMatrix().Print();
   fitter.GetCorMatrix().Print();
 
-  plist.TerminateProcess();
+  dataproc.TerminateProcess();
 
   f1.Add(&fitter);
 
@@ -204,13 +218,13 @@ Bool_t PDFEval(QProcArgs &args)
 {
   switch(args.GetNIVars()) {
     case 1:
-      args.OVar(0)=((QDisTH*)args.IObj(0))->Eval(args.IVarF(0));
+      args.OVar(0)=((QHN_D*)args.IObj(0))->Eval(args.IVarF(0));
       break;
     case 2:
-      args.OVar(0)=((QDisTH*)args.IObj(0))->Eval(args.IVarF(0),args.IVarF(1));
+      args.OVar(0)=((QHN_D*)args.IObj(0))->Eval(args.IVarF(0),args.IVarF(1));
       break;
     case 3:
-      args.OVar(0)=((QDisTH*)args.IObj(0))->Eval(args.IVarF(0),args.IVarF(1),args.IVarF(2));
+      args.OVar(0)=((QHN_D*)args.IObj(0))->Eval(args.IVarF(0),args.IVarF(1),args.IVarF(2));
       break;
     default:
       fprintf(stderr,"FillHist: Error: Number of input variables (%i) is invalid\n",args.GetNIVars());
