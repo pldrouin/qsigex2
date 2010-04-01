@@ -40,6 +40,7 @@ QSharedArray::QSharedArray(const char *filename, const char *arraydescr, const u
 
   //Gets the file info. stat() follows symlinks
   if(stat(fFilename.c_str(),&thestat)) {
+    fprintf(stderr,"Problem with file '%s':",fFilename.c_str());
     perror("stat");
     throw 1;
   }
