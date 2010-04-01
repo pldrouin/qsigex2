@@ -6,3 +6,7 @@
 
 > gmake
 > rund2o_qoa d2o_results.root
+#Or
+> rund2o_tree d2o_results.root
+#Or
+> rund2o_buffers d2o_results.root
