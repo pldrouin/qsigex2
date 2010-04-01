@@ -76,7 +76,7 @@ int main(int nargs, char* args[])
   QProcQOAHandler::SaveOutputs(kTRUE);
   //QProcessor::SetDefVerbosity(QProcessor::kShowExec|QProcessor::kShowExec2);
 
-  //Add a selector process to apply the curs (notice the last argument)
+  //Add a selector process to apply the cuts (notice the last argument).
   dataproc.AddProc("Selector","Selector",Selector,NULL,kTRUE);
   //Add input branches to the selector process
   dataproc.GetProc("Selector").AddIVar("energy","tree://d2o_data.root:Tree");
@@ -84,7 +84,8 @@ int main(int nargs, char* args[])
   dataproc.GetProc("Selector").AddIVar("cthsun","tree://d2o_data.root:Tree");
 
 
-  //Add a Post Selection process to evaluate the 1D PDF. The process will use the function PDFEval
+  //Add a Post Selection process to evaluate the 1D PDF. The process will use the function PDFEval.
+  //Only the selected events will be processed (notice the last argument).
   dataproc.AddPSProc("CCE PDF Eval","CCE PDF Eval",PDFEval,NULL,kTRUE);
   //Assign an input branch to the process
   dataproc.GetProc("CCE PDF Eval").AddIVar("energy","tree://d2o_data.root:Tree");
