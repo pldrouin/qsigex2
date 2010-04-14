@@ -594,6 +594,9 @@ void QSharedArray::LoadArray()
       throw 1;
     }
 
+    //Use memory fence to ensure cache consistency
+    q_mfence();
+
     //Ese if not owner
   } else {
     fFADesc=shm_open(fShAPath.c_str(),O_RDONLY,S_IRUSR|S_IWUSR);

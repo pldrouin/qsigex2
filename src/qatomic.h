@@ -108,6 +108,8 @@ template <typename U, typename V> U q_add_and_fetch(U *ptr, const V &val) {
       );
   return ret;
 }*/
+
 #endif
+#define q_mfence() __asm__ __volatile__ ("mfence":::"memory")
 
 #endif
