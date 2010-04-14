@@ -531,7 +531,7 @@ void QSharedArray::LoadArray()
 	throw 1;
       }
       //Read buffer 
-      if(read(fd, dbuf, uibuf)!=uibuf) {
+      if(read(fd, dbuf, uibuf)!=(int)uibuf) {
 	perror("QSharedArray::LoadArray()::read");
 	throw 1;
       }
