@@ -393,8 +393,6 @@ void QOversizeArray::InitShMem()
 {
   ClearShMem();
 
-  bool fOwns=false;
-
   block_signals_init(nset,oset,throw 1);
 
   //Block all signals
