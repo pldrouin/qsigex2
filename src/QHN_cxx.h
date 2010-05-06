@@ -1752,7 +1752,7 @@ template <typename U> void QHN<U>::WritePSPlot(const char *filename) const
     throw 1;
   }
 
-  FILE* file=filename?fopen(filename,"rw"):stdout;
+  FILE* file=filename?fopen(filename,"w"):stdout;
 
   if(!file) {
     perror("fopen");
