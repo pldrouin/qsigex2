@@ -1759,11 +1759,11 @@ template <typename U> void QHN<U>::WritePSPlot(const char *filename) const
     throw 1;
   }
 
-  fprintf(file,"\\pldata%\n");
+  fprintf(file,"\\pldata%%\n");
   const int nbins=GetNBins()-2;
 
   for(int i=1; i<=nbins; ++i) {
-    fprintf(file,"{%.18f\t%.18f\t%.18f\n}%",fAxes[0]->GetBinLowEdge(i),fAxes[0]->GetBinUpEdge(i),GetBinContent(i));
+    fprintf(file,"{%.18f\t%.18f\t%.18f\n}%%",fAxes[0]->GetBinLowEdge(i),fAxes[0]->GetBinUpEdge(i),GetBinContent(i));
   }
   fprintf(file,"\\endpldata%\n");
 
