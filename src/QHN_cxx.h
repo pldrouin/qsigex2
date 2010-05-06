@@ -1745,5 +1745,29 @@ template <typename U> QHN<U>* QHN<U>::SubHist(const char *name, const Int_t &axi
   return SubHist(name,axes,firstbins,lastbins,3);
 }
 
+template <typename U> void QHN<U>::WritePSPlot(const char *filename) const
+{
+  if(fNDims>1) {
+    fprintf(stderr,"QHN::WritePSPlot: Error: Cannot write the histogram in PS plot format because QHN dimension is too high\n");
+    throw 1;
+  }
+
+  FILE* file=filename?fopen(filename,"rw"):stdout;
+
+  if(!file) {
+    perror("fopen");
+    throw 1;
+  }
+
+  fprintf(file,"\\pldata%\n");
+  const int nbins=GetNBins()-2;
+
+  for(int i=1; i<=nbins; ++i) {
+    fprintf(file,"{%.18f\t%.18f\t%.18f\n}%",fAxes[0]->GetBinLowEdge(i),fAxes[0]->GetBinUpEdge(i),GetBinContent(i));
+  }
+  fprintf(file,"\\endpldata%\n");
+
+  if(filename) fclose(file);
+}
 
 #include "QHN_Dict_cxx.h"

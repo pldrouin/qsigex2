@@ -216,6 +216,7 @@ template <typename U> class QHN: public QDis
     QHN<U>* SubHist(const char *name, const Int_t &axis0, const Int_t &firstbin0, const Int_t &lastbin0, const Int_t &axis1, const Int_t &firstbin1, const Int_t &lastbin1, const Int_t &axis2, const Int_t &firstbin2, const Int_t &lastbin2) const;
     void SetIntUseFBinLoop(const Bool_t &intusefbinloop){fIntUseFBinLoop=intusefbinloop;}
     inline void TerminateProcObj(){Normalize();}
+    void WritePSPlot(const char *filename=NULL) const;
   protected:
     virtual QHN<Double_t>* NewD() const{return new QHN<Double_t>;}
     virtual QHN<Double_t>* NewD(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHN<Double_t>(name,title,ndims);}
