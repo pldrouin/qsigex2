@@ -1765,7 +1765,7 @@ template <typename U> void QHN<U>::WritePSPlot(const char *filename) const
   for(int i=1; i<=nbins; ++i) {
     fprintf(file,"{%.18f\t%.18f\t%.18f\n}%%",fAxes[0]->GetBinLowEdge(i),fAxes[0]->GetBinUpEdge(i),GetBinContent(i));
   }
-  fprintf(file,"\\endpldata%\n");
+  fprintf(file,"\\endpldata%%\n");
 
   if(filename) fclose(file);
 }
