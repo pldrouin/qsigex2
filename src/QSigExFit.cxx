@@ -75,35 +75,50 @@ void QSigExFit::Init()
 
 void QSigExFit::InitFit()
 {
-  Int_t i,j;
+  Int_t i,j,k;
 
-  for (i=0; i<fParams.Count(); i++){
+  for (i=0; i<fParams.Count(); ++i){
     ParamMasterIndex(i)=-1;
+    k=-1;
 
     if(fQProcessor) {
 
-      for (j=0; j<i; j++) {
+      for (j=0; j<i; ++j) {
 
 	if(&fQProcessor->GetParam(i)==&fQProcessor->GetParam(j)) {
+	  //printf("fParams[i=%i]='%s'\tfParams[j=%i]='%s'\n",i,fParams[i].GetName(),j,fParams[j].GetName());
+
+	  if(k==-1) k=j;
 
 	  if(fParams[i].IsFixed()!=fParams[j].IsFixed() || fParams[i].GetMaxVal()!=fParams[j].GetMaxVal() || fParams[i].GetMinVal()!=fParams[j].GetMinVal() || fParams[i].GetStartVal()!=fParams[j].GetStartVal() || fParams[i].GetStepVal()!=fParams[j].GetStepVal()) {
 	    fprintf(stderr,"QSigExFit::InitFit: Error: Slave parameter '%s' does not have the same configuration than master parameter '%s'\n",fParams[i].GetName(),fParams[j].GetName());
 	    throw 1;
 	  }
 
-	  if(fQProcessor->GetParamOwnsBuffer(i)) {
-	    ParamMasterIndex(j)=i;
-	    printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[j].GetName(),fParams[i].GetName());
+	  if(fQProcessor->GetParamOwnsBuffer(i) || fQProcessor->GetParamOwnsBuffer(j)) {
 
-	  } else {
-	    ParamMasterIndex(i)=j;
-	    printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[i].GetName(),fParams[j].GetName());
+	    if(fQProcessor->GetParamOwnsBuffer(i)) {
+	      ParamMasterIndex(j)=i;
+	      //printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[j].GetName(),fParams[i].GetName());
+
+	    } else {
+	      ParamMasterIndex(i)=j;
+	      //printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[i].GetName(),fParams[j].GetName());
+	    }
 	  }
-	  break;
 	}
+      }
+
+      if(k!=-1 && !fQProcessor->GetParamOwnsBuffer(i) && ParamMasterIndex(i)==-1) {
+	ParamMasterIndex(i)=k;
+	//printf("Parameter '%s' is a default slave of parameter '%s'\n",fParams[i].GetName(),fParams[k].GetName());
       }
     }
   }
+
+  for (i=0; i<fParams.Count(); ++i)
+    if(ParamMasterIndex(i)!=-1)
+      printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[i].GetName(),fParams[ParamMasterIndex(i)].GetName());
 }
 
 Int_t QSigExFit::GetNVarParams() const
