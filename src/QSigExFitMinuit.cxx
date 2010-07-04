@@ -240,11 +240,12 @@ void QSigExFitMinuit::InitFit()
   ierflg=0;
   j=0;
 
-  //Loop through parameters, and initialize a variable in Minuit for each one.
+  //Loop through master parameters, and initialize a variable in Minuit for each one.
   for (i=0; i<fParams.Count(); i++){
 
     //If the current parameter is not a slave of another param, add it to Minuit
     if(fParams[i].GetMasterIndex()==-1) {
+      //printf("Param '%s' owns its value\n",fParams[i].GetName());
 
       //If IsFixed() is not equal to 1, add the parameter to Minuit
       if(fParams[i].IsFixed()!=1) {
@@ -272,9 +273,15 @@ void QSigExFitMinuit::InitFit()
 	if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
 	ParamFreeParamIndex(i)=-1;
       }
+    }
+  }
 
-      //otherwise, update the buffer address
-    } else {
+  //Loop through slave parameters
+  for (i=0; i<fParams.Count(); i++){
+
+    if(fParams[i].GetMasterIndex()!=-1) {
+      //Update the buffer address
+      //printf("Param '%s' will get its value from param '%s'\n",fParams[i].GetName(),fParams[fParams[i].GetMasterIndex()].GetName());
 
       if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].GetMasterIndex(),i);
       ParamFreeParamIndex(i)=fParams[fParams[i].GetMasterIndex()].GetFreeParamIndex();

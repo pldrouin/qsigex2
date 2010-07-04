@@ -186,10 +186,11 @@ void QSigExFitMCMC::InitFit()
 
   j=0;
 
-  //Loop through parameters, and initialize parameter value for each one
+  //Loop through the master parameters, and initialize parameter value for each one
   for (i=0; i<fParams.Count(); i++){
 
     if(fParams[i].GetMasterIndex()==-1) {
+      //printf("Param '%s' owns its value\n",fParams[i].GetName());
 
       //If parameter is variable
       if(!fParams[i].IsFixed()) {
@@ -204,8 +205,16 @@ void QSigExFitMCMC::InitFit()
 	if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
 	ParamFreeParamIndex(i)=-1;
       }
+    }
+  }
 
-    } else {
+  //Loop through the slave parameters
+  for (i=0; i<fParams.Count(); i++){
+
+    if(fParams[i].GetMasterIndex()!=-1) {
+      //Update the buffer address
+      //printf("Param '%s' will get its value from param '%s'\n",fParams[i].GetName(),fParams[fParams[i].GetMasterIndex()].GetName());
+
       if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].GetMasterIndex(),i);
       ParamFreeParamIndex(i)=fParams[fParams[i].GetMasterIndex()].GetFreeParamIndex();
     }
