@@ -90,8 +90,15 @@ void QSigExFit::InitFit()
 	    fprintf(stderr,"QSigExFit::InitFit: Error: Slave parameter '%s' does not have the same configuration than master parameter '%s'\n",fParams[i].GetName(),fParams[j].GetName());
 	    throw 1;
 	  }
-	  ParamMasterIndex(i)=j;
-	  printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[i].GetName(),fParams[j].GetName());
+
+	  if(fQProcessor->GetParamOwnsBuffer(i)) {
+	    ParamMasterIndex(j)=i;
+	    printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[j].GetName(),fParams[i].GetName());
+
+	  } else {
+	    ParamMasterIndex(i)=j;
+	    printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[i].GetName(),fParams[j].GetName());
+	  }
 	  break;
 	}
       }

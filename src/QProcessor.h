@@ -36,6 +36,7 @@ class QProcessor: public TNamed
 
     const Double_t& GetParam(const Int_t &index) const{return *((*fParams)[index]);}
     const Double_t& GetParam(const char *paramname) const;
+    const Bool_t& GetParamOwnsBuffer(const Int_t &index) const{return (*fOwnsParams)[index];}
 #ifdef __CINT__
     Double_t ** GetParams() const{return fParams->GetArray();}
 #else
