@@ -71,6 +71,12 @@ void QSigExFitParam::SetSlaveOf(QSigExFitParam &master)
       delete fData;
     }
 
+    //If the master is a slave of the current parameter, throw an error (slavery loops not allowed)
+    if(master.fData == fData) {
+      fprintf(stderr,"QSigExFitParam::SetSlaveOf: Error: Setting parameter '%s' as a slave of parameter '%s' creates a loop\n",GetName(),master.GetName());
+      throw 1;
+    }
+
     //Assign data from the new master
     fData=master.fData;
     fMaster=&master;
