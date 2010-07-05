@@ -60,7 +60,6 @@ class QSigExFit: public TObject
     Double_t& ParamFitVal(Int_t i){return (Double_t&)fParams[i];}
     Double_t& ParamMinusFitError(Int_t i){return fParams[i].MinusFitError();}
     Double_t& ParamPlusFitError(Int_t i){return fParams[i].PlusFitError();}
-    Int_t& ParamMasterIndex(Int_t i){return fParams[i].MasterIndex();}
     Int_t& ParamFreeParamIndex(Int_t i){return fParams[i].FreeParamIndex();}
 
     QProcessor *fQProcessor; //!
@@ -73,7 +72,7 @@ class QSigExFit: public TObject
     Int_t fVerbose;
     static const QSigExFit   *fCurInstance; //!
   private:
-    ClassDef(QSigExFit,1) //Base fitter class that uses QProcessor objects
+    ClassDef(QSigExFit,2) //Base fitter class that uses QProcessor objects
 };
 
 #endif

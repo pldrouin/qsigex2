@@ -67,7 +67,7 @@ void QSigExFit::Init()
     //Loop over all parameters for the QProcessor object
     for(i=0; i<fQProcessor->GetNParams(); i++) {
 
-      fParams[i].SetName(fQProcessor->GetParamName(i));
+      fParams[i].SetNameIndex(fQProcessor->GetParamName(i),i);
       (Double_t&)fParams[i]=0.;
     }
   }
@@ -75,57 +75,16 @@ void QSigExFit::Init()
 
 void QSigExFit::InitFit()
 {
-  Int_t i,j,k;
-
-  for (i=0; i<fParams.Count(); ++i){
-    ParamMasterIndex(i)=-1;
-    k=-1;
-
-    if(fQProcessor) {
-
-      for (j=0; j<i; ++j) {
-
-	if(&fQProcessor->GetParam(i)==&fQProcessor->GetParam(j)) {
-	  //printf("fParams[i=%i]='%s'\tfParams[j=%i]='%s'\n",i,fParams[i].GetName(),j,fParams[j].GetName());
-
-	  if(k==-1) k=j;
-
-	  if(fParams[i].IsFixed()!=fParams[j].IsFixed() || fParams[i].GetMaxVal()!=fParams[j].GetMaxVal() || fParams[i].GetMinVal()!=fParams[j].GetMinVal() || fParams[i].GetStartVal()!=fParams[j].GetStartVal() || fParams[i].GetStepVal()!=fParams[j].GetStepVal()) {
-	    fprintf(stderr,"QSigExFit::InitFit: Error: Slave parameter '%s' does not have the same configuration than master parameter '%s'\n",fParams[i].GetName(),fParams[j].GetName());
-	    throw 1;
-	  }
-
-	  if(fQProcessor->GetParamOwnsBuffer(i) || fQProcessor->GetParamOwnsBuffer(j)) {
-
-	    if(fQProcessor->GetParamOwnsBuffer(i)) {
-	      ParamMasterIndex(j)=i;
-	      //printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[j].GetName(),fParams[i].GetName());
-
-	    } else {
-	      ParamMasterIndex(i)=j;
-	      //printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[i].GetName(),fParams[j].GetName());
-	    }
-	  }
-	}
-      }
-
-      if(k!=-1 && !fQProcessor->GetParamOwnsBuffer(i) && ParamMasterIndex(i)==-1) {
-	ParamMasterIndex(i)=k;
-	//printf("Parameter '%s' is a default slave of parameter '%s'\n",fParams[i].GetName(),fParams[k].GetName());
-      }
-    }
-  }
-
-  for (i=0; i<fParams.Count(); ++i)
-    if(ParamMasterIndex(i)!=-1)
-      printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[i].GetName(),fParams[ParamMasterIndex(i)].GetName());
+  for (Int_t i=0; i<fParams.Count(); ++i)
+    if(!fParams[i].IsMaster())
+      printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[i].GetName(),fParams[fParams[i].GetMasterIndex()].GetName());
 }
 
 Int_t QSigExFit::GetNVarParams() const
 {
   Int_t i,n=0;
 
-  for(i=0; i<fParams.Count(); i++) if(!fParams.GetArray()[i].IsFixed()) n++;
+  for(i=fParams.Count()-1; i>=0; --i) if(!fParams.GetArray()[i].IsFixed()) ++n;
   return n;
 }
 
@@ -142,7 +101,7 @@ QSigExFitParam& QSigExFit::Param(const char* paramname) const
 
 void QSigExFit::PrintParams() const
 {
-  for(Int_t i=0; i<fParams.Count(); i++) fParams[i].Print();
+  for(Int_t i=0; i<fParams.Count(); ++i) fParams[i].Print();
 }
 
 void QSigExFit::Browse(TBrowser *b)
@@ -151,4 +110,41 @@ void QSigExFit::Browse(TBrowser *b)
   if(fCorMatrix) b->Add(fCorMatrix,"Correlation Matrix");
   if(fCovMatrix) b->Add(fCovMatrix,"Covariance Matrix");
   b->Add(&fFCNMin);
+}
+
+void QSigExFit::Streamer(TBuffer &R__b)
+{
+  // Stream an object of class QSigExFit.
+
+  UInt_t R__s, R__c;
+  Int_t i,j;
+  if (R__b.IsReading()) {
+    Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+
+    TObject::Streamer(R__b);
+    fParams.Streamer(R__b);
+
+    for(i=fParams.Count()-1; i>=0; --i) {
+      j=((long)fParams[i].fMaster)-1;
+      fParams[i].fMaster=NULL;
+
+      if(j!=-1) fParams[i].SetSlaveOf(fParams[j]);
+    }
+
+    fFCNError.Streamer(R__b);
+    fFCNMin.Streamer(R__b);
+    R__b >> fCovMatrix;
+    R__b >> fVerbose;
+    R__b.CheckByteCount(R__s, R__c, QSigExFit::IsA());
+
+  } else {
+    R__c = R__b.WriteVersion(QSigExFit::IsA(), kTRUE);
+    TObject::Streamer(R__b);
+    fParams.Streamer(R__b);
+    fFCNError.Streamer(R__b);
+    fFCNMin.Streamer(R__b);
+    R__b << fCovMatrix;
+    R__b << fVerbose;
+    R__b.SetByteCount(R__c, kTRUE);
+  }
 }

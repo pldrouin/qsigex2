@@ -62,7 +62,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
     // Reinitialize floating parameters values
     for (i=0; i<numpar; i++){
 
-      if(fParams[i].GetMasterIndex()==-1) {
+      if(fParams[i].IsMaster()) {
 
 	//If the parameter is not hided to Minuit
 	if(fParams[i].IsFixed()!=1) {
@@ -93,7 +93,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
       for (i=0; i<numpar; i++){
 
 	//If the parameter is not hided to Minuit
-	if(fParams[i].IsFixed()!=1 && fParams[i].GetMasterIndex()==-1) {
+	if(fParams[i].IsFixed()!=1 && fParams[i].IsMaster()) {
 
 	  if(!fParams[i].IsFixed()) {
 	    fMinuit->mnpout(j,strbuf,dbuf4,dbuf1,dbuf2,dbuf3,ibuf1); //dbuf4 contains the fitted value
@@ -131,7 +131,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
       //If the parameter is not hided to Minuit
       if(fParams[i].IsFixed()!=1) {
 
-	if(fParams[i].GetMasterIndex()==-1) {
+	if(fParams[i].IsMaster()) {
 	  //mnpout takes in the index of the parameter we're asking about, and returns
 	  //it's name, fitted value, estimate of parameter uncertainty, lower limit
 	  //on the parameter value, upper limit on the parameter value, and the
@@ -150,10 +150,6 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
 	  else ParamPlusFitError(i)=ParamMinusFitError(i)=0;
 	  j++;
 
-	} else {
-	  ParamFitVal(i)=fParams[fParams[i].GetMasterIndex()].GetValue();
-	  ParamPlusFitError(i)=fParams[fParams[i].GetMasterIndex()].GetPlusFitError();
-	  ParamMinusFitError(i)=fParams[fParams[i].GetMasterIndex()].GetMinusFitError();
 	}
 
       } else {
@@ -244,7 +240,7 @@ void QSigExFitMinuit::InitFit()
   for (i=0; i<fParams.Count(); i++){
 
     //If the current parameter is not a slave of another param, add it to Minuit
-    if(fParams[i].GetMasterIndex()==-1) {
+    if(fParams[i].IsMaster()) {
       //printf("Param '%s' owns its value\n",fParams[i].GetName());
 
       //If IsFixed() is not equal to 1, add the parameter to Minuit
@@ -276,15 +272,13 @@ void QSigExFitMinuit::InitFit()
     }
   }
 
-  //Loop through slave parameters
-  for (i=0; i<fParams.Count(); i++){
+  if(fQProcessor) {
 
-    if(fParams[i].GetMasterIndex()!=-1) {
+    //Loop through slave parameters
+    for (i=0; i<fParams.Count(); i++){
+
       //Update the buffer address
-      //printf("Param '%s' will get its value from param '%s'\n",fParams[i].GetName(),fParams[fParams[i].GetMasterIndex()].GetName());
-
-      if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].GetMasterIndex(),i);
-      ParamFreeParamIndex(i)=fParams[fParams[i].GetMasterIndex()].GetFreeParamIndex();
+      if(!fParams[i].IsMaster()) fQProcessor->CopyParamAddress(fParams[i].GetTopMasterIndex(),i);
     }
   }
 }

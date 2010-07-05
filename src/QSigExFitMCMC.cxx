@@ -87,7 +87,7 @@ Double_t QSigExFitMCMC::Fit(Bool_t fituncerts)
   // Reinitialize floating parameters values
   for (i=0; i<fParams.Count(); i++){
 
-    if(fParams[i].GetMasterIndex()==-1) {
+    if(fParams[i].IsMaster()) {
 
       //If the parameter is not hided to Minuit
       if(!fParams[i].IsFixed()) {
@@ -189,7 +189,7 @@ void QSigExFitMCMC::InitFit()
   //Loop through the master parameters, and initialize parameter value for each one
   for (i=0; i<fParams.Count(); i++){
 
-    if(fParams[i].GetMasterIndex()==-1) {
+    if(fParams[i].IsMaster()) {
       //printf("Param '%s' owns its value\n",fParams[i].GetName());
 
       //If parameter is variable
@@ -208,15 +208,13 @@ void QSigExFitMCMC::InitFit()
     }
   }
 
-  //Loop through the slave parameters
-  for (i=0; i<fParams.Count(); i++){
+  if(fQProcessor) {
 
-    if(fParams[i].GetMasterIndex()!=-1) {
+    //Loop through slave parameters
+    for (i=0; i<fParams.Count(); i++){
+
       //Update the buffer address
-      //printf("Param '%s' will get its value from param '%s'\n",fParams[i].GetName(),fParams[fParams[i].GetMasterIndex()].GetName());
-
-      if(fQProcessor) fQProcessor->CopyParamAddress(fParams[i].GetMasterIndex(),i);
-      ParamFreeParamIndex(i)=fParams[fParams[i].GetMasterIndex()].GetFreeParamIndex();
+      if(!fParams[i].IsMaster()) fQProcessor->CopyParamAddress(fParams[i].GetTopMasterIndex(),i);
     }
   }
 

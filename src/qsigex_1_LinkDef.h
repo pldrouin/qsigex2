@@ -76,8 +76,8 @@
 #pragma link C++ class QFileUtils;
 #pragma link C++ class QTTreeUtils;
 
-#pragma link C++ class QSigExFitParam;
-#pragma link C++ class QSigExFit;
+#pragma link C++ class QSigExFitParam-;
+#pragma link C++ class QSigExFit-;
 #pragma link C++ class QSigExFitMinuit;
 #pragma link C++ class QSigExFitMCMC;
 
