@@ -18,6 +18,8 @@ QProcObjProcessor::~QProcObjProcessor()
   fObjsPDepends=NULL;
   delete fIObjects;
   fIObjects=NULL;
+  delete fAIObjects;
+  fAIObjects=NULL;
   delete fOObjects;
   fOObjects=NULL;
 }
@@ -74,6 +76,7 @@ void QProcObjProcessor::Analyze()
   fIOIndices->Clear();
   fOOIndices->Clear();
   fIObjects->Clear();
+  fAIObjects->Clear();
   fOObjects->Clear();
 
   fIOIndices->RedimList(nprocs);
@@ -106,15 +109,21 @@ void QProcObjProcessor::Analyze()
     for(j=0; j<niobjs; j++) {
       //Add the object
       iidx=fIObjects->AddUnique(const_cast<QProcObj*>(proc->IObj(j)));
+      oidx=fOObjects->FindFirst(const_cast<QProcObj*>(proc->IObj(j)));
 
       if(iidx == -1) {
 	iidx=fIObjects->Count()-1;
-	fObjsPDepends->RedimList(fObjsPDepends->Count()+1);
-      }
-      (*fIOIndices)[i][j]=iidx;
-      (*fObjsPDepends)[iidx].SetBit(i,kTRUE);
 
-      oidx=fOObjects->FindFirst(const_cast<QProcObj*>(proc->IObj(j)));
+	//If this is also an absolute input, add it to the absolute input array and make room for it in fObjsPDepends
+	if(oidx==-1) {
+	  fAIObjects->Add(const_cast<QProcObj*>(proc->IObj(j)));
+	  fObjsPDepends->RedimList(fObjsPDepends->Count()+1);
+          (*fObjsPDepends)[fObjsPDepends->Count()-1].SetBit(i,kTRUE);
+	}
+
+      //Else if this is a known absolute input, add the current process in the list of dependencies
+      } else if(oidx==-1) (*fObjsPDepends)[fAIObjects->FindFirst(const_cast<QProcObj*>(proc->IObj(j)))].SetBit(i,kTRUE);
+      (*fIOIndices)[i][j]=iidx;
 
       //If the object has been updated by a previous process
       if(oidx != -1) {
@@ -131,6 +140,7 @@ void QProcObjProcessor::Analyze()
       iidx=fIObjects->FindFirst(proc->OObj(j));
       oidx=fOObjects->FindFirst(proc->OObj(j));
 
+      //This is required because one does not want a given process to use its own output as an input if it gets triggered by another input object or by a parameter
       if(oidx==-1 && iidx!=-1) {
 	fprintf(stderr,"QArrayProcessor: Analyze(): Error with process '%s': Object '%p' cannot be overwritten\n",proc->GetName(),proc->OObj(j));
 	throw 1;
@@ -193,10 +203,10 @@ void QProcObjProcessor::Analyze()
     //printf("%03i Process '%s'\n",i,proc->GetName());
     dpidx=depprocs[i].GetAllDepends();
 
-    //Loop over all input objects
+    //Loop over all absolute input objects
     for(j=0; j<fObjsPDepends->Count(); j++) {
 
-      //If the current process is triggered by the input object
+      //If the current process is triggered by the absolute input object
       if((*fObjsPDepends)[j].GetBit(i)) {
 
 	//Loop over dependent processes
@@ -239,11 +249,11 @@ void QProcObjProcessor::Exec() const
       if(*(fParams->GetArray()[lExeci]) != fLastParams->GetArray()[lExeci]) lExecpardiffs.SetBit(lExeci,1);
     }
 
-    //Loop over all input objects
-    for(lExeci=fIObjects->Count()-1; lExeci>=0; --lExeci) {
+    //Loop over all absolute input objects
+    for(lExeci=fAIObjects->Count()-1; lExeci>=0; --lExeci) {
 
       //If the current input object has been modified after the last run, add its mask to the mask of required processes
-      if((*fIObjects)[lExeci]->NewerThan(fLastExec)) lExecdepmods|=(*fObjsPDepends)[lExeci];
+      if((*fAIObjects)[lExeci]->NewerThan(fLastExec)) lExecdepmods|=(*fObjsPDepends)[lExeci];
     }
 
     lExecrunall=fForceExecAll;
@@ -352,7 +362,8 @@ const QProcObjProcessor& QProcObjProcessor::operator=(const QProcObjProcessor &r
   *fIOIndices=*rhs.fIOIndices;
   *fOOIndices=*rhs.fOOIndices;
   *fIObjects=*rhs.fIObjects;
-  *fOObjects=*rhs.fIObjects;
+  *fAIObjects=*rhs.fAIObjects;
+  *fOObjects=*rhs.fOObjects;
   *fObjsPDepends=*rhs.fObjsPDepends;
   return *this;
 }
@@ -400,11 +411,11 @@ void QProcObjProcessor::PrintAnalysisResults() const
     (*fProcsParDepends)[i].Print();
   }
 
-  printf("\nAll Input Objects:\n");
-  for(i=0; i<fIObjects->Count(); i++) {
+  printf("\nAbsolute Input Objects:\n");
+  for(i=0; i<fAIObjects->Count(); i++) {
     printf("%3i\t",i);
-    if(dynamic_cast<TObject*>((*fIObjects)[i])) printf("%s (%p)\t",dynamic_cast<TObject*>((*fIObjects)[i])->GetName(),(*fIObjects)[i]);
-    else printf("%p\t",(*fIObjects)[i]);
+    if(dynamic_cast<TObject*>((*fAIObjects)[i])) printf("%s (%p)\t",dynamic_cast<TObject*>((*fAIObjects)[i])->GetName(),(*fAIObjects)[i]);
+    else printf("%p\t",(*fAIObjects)[i]);
     (*fObjsPDepends)[i].Print();
   }
 
@@ -448,7 +459,7 @@ void QProcObjProcessor::PrintProcesses(const UInt_t &level, const Bool_t &printd
       (*fProcsParDepends)[i].Print();
 
       mask.Clear();
-      for(j=0; j<fIObjects->Count(); j++) if((*fObjsPDepends)[j].GetBit(i)) mask.SetBit(j,kTRUE);
+      for(j=0; j<fAIObjects->Count(); j++) if((*fObjsPDepends)[j].GetBit(i)) mask.SetBit(j,kTRUE);
       printf("%*sIO: ",level*3+4,"");
       mask.Print();
     }

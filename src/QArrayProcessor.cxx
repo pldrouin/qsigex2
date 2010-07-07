@@ -30,8 +30,12 @@ QArrayProcessor::~QArrayProcessor()
   fOOIndices=NULL;
   delete fIArrays;
   fIArrays=NULL;
+  delete fAIArrays;
+  fAIArrays=NULL;
   delete fIObjects;
   fIObjects=NULL;
+  delete fAIObjects;
+  fAIObjects=NULL;
   delete fOArrays;
   fOArrays=NULL;
   delete fOObjects;
@@ -159,6 +163,7 @@ void QArrayProcessor::Analyze()
   fOAIndices->Clear();
   fOOIndices->Clear();
   fIObjects->Clear();
+  fAIObjects->Clear();
   fOObjects->Clear();
 
   fIAIndices->RedimList(nprocs);
@@ -287,15 +292,21 @@ void QArrayProcessor::Analyze()
     for(j=0; j<niobjs; j++) {
       //Add the object
       iidx=fIObjects->AddUnique(const_cast<QProcObj*>(proc->IObj(j)));
+      oidx=fOObjects->FindFirst(const_cast<QProcObj*>(proc->IObj(j)));
 
       if(iidx == -1) {
 	iidx=fIObjects->Count()-1;
-	fObjsPDepends->RedimList(fObjsPDepends->Count()+1);
-      }
-      (*fIOIndices)[i][j]=iidx;
-      (*fObjsPDepends)[iidx].SetBit(i,kTRUE);
+      
+	//If this is also an absolute input, add it to the absolute input array and make room for it in fObjsPDepends
+	if(oidx==-1) {
+	  fAIObjects->Add(const_cast<QProcObj*>(proc->IObj(j)));
+	  fObjsPDepends->RedimList(fObjsPDepends->Count()+1);
+          (*fObjsPDepends)[fObjsPDepends->Count()-1].SetBit(i,kTRUE);
+	}
 
-      oidx=fOObjects->FindFirst(const_cast<QProcObj*>(proc->IObj(j)));
+      //Else if this is a known absolute input, add the current process in the list of dependencies
+      } else if(oidx==-1) (*fObjsPDepends)[fAIObjects->FindFirst(const_cast<QProcObj*>(proc->IObj(j)))].SetBit(i,kTRUE);
+      (*fIOIndices)[i][j]=iidx;
 
       //If the object has been updated by a previous process
       if(oidx != -1) {
@@ -384,6 +395,7 @@ void QArrayProcessor::Analyze()
       iidx=fIObjects->FindFirst(proc->OObj(j));
       oidx=fOObjects->FindFirst(proc->OObj(j));
 
+      //This is required because one does not want a given process to use its own output as an input if it gets triggered by another input object or by a parameter. For arrays also the output would be used as an input for every array event
       if(oidx==-1 && iidx!=-1) {
 	fprintf(stderr,"QArrayProcessor: Analyze(): Error with process '%s': Object '%p' cannot be overwritten\n",proc->GetName(),proc->OObj(j));
 	throw 1;
@@ -553,19 +565,19 @@ void QArrayProcessor::Exec() const
     }
 
     //Loop over all input arrays
-    for(lExeci=fIArrays->Count()-1; lExeci>=0; --lExeci) {
+    for(lExeci=fAIArrays->Count()-1; lExeci>=0; --lExeci) {
 
       //If the current input array has been modified after the last run, add its mask to the mask of required processes.
-      if((*fIArrays)[lExeci]->NewerThan(fLastExec)) {
+      if((*fAIArrays)[lExeci]->NewerThan(fLastExec)) {
 	lExecdepmods|=(*fAPDepends)[lExeci];
       }
     }
 
-    //Loop over all input objects
-    for(lExeci=fIObjects->Count()-1; lExeci>=0; --lExeci) {
+    //Loop over all absolute input objects
+    for(lExeci=fAIObjects->Count()-1; lExeci>=0; --lExeci) {
 
-      //If the current input object has been modified after the last run, add its mask to the mask of required processes
-      if((*fIObjects)[lExeci]->NewerThan(fLastExec)) lExecdepmods|=(*fObjsPDepends)[lExeci];
+      //If the current absolute input object has been modified after the last run, add its mask to the mask of required processes
+      if((*fAIObjects)[lExeci]->NewerThan(fLastExec)) lExecdepmods|=(*fObjsPDepends)[lExeci];
     }
 
     lExecrunall=fForceExecAll;
@@ -926,7 +938,6 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
       fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Array type '%s' is unknown\n",proto.Data());
       throw 1;
     }
-
   }
 
   //Loop over the input arrays
@@ -957,6 +968,9 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
       fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Array type '%s' is unknown\n",proto.Data());
       throw 1;
     }
+
+    //If this is an absolute input array, add it to the list of absolute input arrays
+    if(fOArrays->FindFirst(fIArrays->GetLast())==-1) fAIArrays->Add(fIArrays->GetLast());
   }
 
   //Create output buffers
@@ -1053,7 +1067,8 @@ const QArrayProcessor& QArrayProcessor::operator=(const QArrayProcessor &rhs)
   *fOAIndices=*rhs.fOAIndices;
   *fOOIndices=*rhs.fOOIndices;
   *fIObjects=*rhs.fIObjects;
-  *fOObjects=*rhs.fIObjects;
+  *fAIObjects=*rhs.fAIObjects;
+  *fOObjects=*rhs.fOObjects;
   *fSelDepProcs=*rhs.fSelDepProcs;
   *fIASProc=*rhs.fIASProc;
   *fOASProc=*rhs.fOASProc;
@@ -1156,11 +1171,11 @@ void QArrayProcessor::PrintAnalysisResults() const
     (*fAPDepends)[i].Print();
   }
 
-  printf("\nAll Input Objects:\n");
-  for(i=0; i<fIObjects->Count(); i++) {
+  printf("\nAbsolute Input Objects:\n");
+  for(i=0; i<fAIObjects->Count(); i++) {
     printf("%3i\t",i);
-    if(dynamic_cast<TObject*>((*fIObjects)[i])) printf("%s (%p)\t",dynamic_cast<TObject*>((*fIObjects)[i])->GetName(),(*fIObjects)[i]);
-    else printf("%p\t",(*fIObjects)[i]);
+    if(dynamic_cast<TObject*>((*fAIObjects)[i])) printf("%s (%p)\t",dynamic_cast<TObject*>((*fAIObjects)[i])->GetName(),(*fAIObjects)[i]);
+    else printf("%p\t",(*fAIObjects)[i]);
     (*fObjsPDepends)[i].Print();
   }
 
@@ -1229,7 +1244,7 @@ void QArrayProcessor::PrintProcesses(const UInt_t &level, const Bool_t &printdep
       mask.Print();
 
       mask.Clear();
-      for(j=0; j<fIObjects->Count(); j++) if((*fObjsPDepends)[j].GetBit(i)) mask.SetBit(j,kTRUE);
+      for(j=0; j<fAIObjects->Count(); j++) if((*fObjsPDepends)[j].GetBit(i)) mask.SetBit(j,kTRUE);
       printf("%*sIO: ",level*3+4,"");
       mask.Print();
     }
@@ -1282,15 +1297,15 @@ void QArrayProcessor::BuildObjLists()
 {
   Int_t i;
 
-  if(!fAIObjects) {
-    fAIObjects=new QList<QProcObj*>;
-    fAOObjects=new QList<QProcObj*>;
+  if(!fAllIObjects) {
+    fAllIObjects=new QList<QProcObj*>;
+    fAllOObjects=new QList<QProcObj*>;
 
-    fAIObjects->Add(*fIObjects);
-    for(i=fIArrays->Count()-1; i>=0; --i) fAIObjects->AddUnique((*fIArrays)[i]);
+    fAllIObjects->Add(*fIObjects);
+    for(i=fIArrays->Count()-1; i>=0; --i) fAllIObjects->AddUnique((*fIArrays)[i]);
 
-    fAOObjects->Add(*fOObjects);
-    for(i=fOArrays->Count()-1; i>=0; --i) fAOObjects->AddUnique((*fOArrays)[i]);
+    fAllOObjects->Add(*fOObjects);
+    for(i=fOArrays->Count()-1; i>=0; --i) fAllOObjects->AddUnique((*fOArrays)[i]);
   }
 }
 

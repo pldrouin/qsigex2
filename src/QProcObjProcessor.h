@@ -14,9 +14,9 @@
 class QProcObjProcessor: public QStdProcessor
 {
   public:
-    QProcObjProcessor(): QStdProcessor(), fIOIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fObjsPDepends(new QList<QMask>), fIObjects(new QList<QProcObj*>), fOObjects(new QList<QProcObj*>) {}
-    QProcObjProcessor(const char* name, const char* title): QStdProcessor(name,title), fIOIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fObjsPDepends(new QList<QMask>), fIObjects(new QList<QProcObj*>), fOObjects(new QList<QProcObj*>) {}
-    QProcObjProcessor(const QProcObjProcessor &rhs): QStdProcessor(rhs), fIOIndices(new QList<QList<Int_t> >(*rhs.fIOIndices)), fOOIndices(new QList<QList<Int_t> >(*rhs.fOOIndices)), fObjsPDepends(new QList<QMask>(*rhs.fObjsPDepends)), fIObjects(new QList<QProcObj*>(*rhs.fIObjects)), fOObjects(new QList<QProcObj*>(*rhs.fOObjects)) {}
+    QProcObjProcessor(): QStdProcessor(), fIOIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fObjsPDepends(new QList<QMask>), fIObjects(new QList<QProcObj*>), fAIObjects(new QList<QProcObj*>), fOObjects(new QList<QProcObj*>) {}
+    QProcObjProcessor(const char* name, const char* title): QStdProcessor(name,title), fIOIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fObjsPDepends(new QList<QMask>), fIObjects(new QList<QProcObj*>), fAIObjects(new QList<QProcObj*>), fOObjects(new QList<QProcObj*>) {}
+    QProcObjProcessor(const QProcObjProcessor &rhs): QStdProcessor(rhs), fIOIndices(new QList<QList<Int_t> >(*rhs.fIOIndices)), fOOIndices(new QList<QList<Int_t> >(*rhs.fOOIndices)), fObjsPDepends(new QList<QMask>(*rhs.fObjsPDepends)), fIObjects(new QList<QProcObj*>(*rhs.fIObjects)), fAIObjects(new QList<QProcObj*>(*rhs.fAIObjects)), fOObjects(new QList<QProcObj*>(*rhs.fOObjects)) {}
     virtual ~QProcObjProcessor();
 
     Int_t AddProc(const char* name, const char* title=NULL, Int_t index=-1);
@@ -51,8 +51,9 @@ class QProcObjProcessor: public QStdProcessor
   private:
     QList<QList<Int_t> > *fIOIndices;    //-> Indices of objects that are used as input for each process
     QList<QList<Int_t> > *fOOIndices;    //-> Indices of objects that are used as output for each process
-    QList<QMask >             *fObjsPDepends; //-> Dependencies of processes on input objects
+    QList<QMask >             *fObjsPDepends; //-> Dependencies of processes on absolute input objects
     QList<QProcObj*>         *fIObjects; //! Input objects 
+    QList<QProcObj*>         *fAIObjects; //! Absolute input objects 
     QList<QProcObj*>         *fOObjects; //! Output objects 
 
     mutable QMask lExecpardiffs;            //! Modified parameters since the last call
