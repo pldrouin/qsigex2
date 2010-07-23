@@ -80,49 +80,56 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
       }
     }
 
-    dbuf1=fMinuitStrategy;
-    fMinuit->mnexcm("SET STR",&dbuf1,1,ierflg);
+    if(j) {
+      dbuf1=fMinuitStrategy;
+      fMinuit->mnexcm("SET STR",&dbuf1,1,ierflg);
 
-    //**** Call the minimizer ****
-    fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
-
-    if(fituncerts) {
-      j=0;
-
-      // set fit parameters to result from this run of the minimizer
-      for (i=0; i<numpar; i++){
-
-	//If the parameter is not hided to Minuit
-	if(fParams[i].IsFixed()!=1 && fParams[i].IsMaster()) {
-
-	  if(!fParams[i].IsFixed()) {
-	    fMinuit->mnpout(j,strbuf,dbuf4,dbuf1,dbuf2,dbuf3,ibuf1); //dbuf4 contains the fitted value
-	    fMinuit->mnparm(j, fParams[i].GetName(), dbuf4, fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
-	  }
-	  j++;
-	}
-      }
-      // rerun minimizer
+      //**** Call the minimizer ****
       fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
 
-      //Calculate non-symmetric errors with MINOS:
-      //Minuit calculates errors by finding the change in the parameter value 
-      //required to change the function by fcnerror.
-      //In the case of a Chi-2, 
-      //     fcnerror =1.0 --> 1 sigma
-      //     fcnerror =4.0 --> 2 sigma
-      //     fcnerror =9.0 --> 3 sigma
-      //When minosmaxcalls is positive, it sets the maximum number of function
-      //calls per parameter to its values 
-      dbuf1=fMinosMaxCalls;
-      fMinuit->mnexcm("MINO",&dbuf1,(Int_t)(fMinosMaxCalls>=0),ierflg); 
+      if(fituncerts) {
+	j=0;
+
+	// set fit parameters to result from this run of the minimizer
+	for (i=0; i<numpar; i++){
+
+	  //If the parameter is not hided to Minuit
+	  if(fParams[i].IsFixed()!=1 && fParams[i].IsMaster()) {
+
+	    if(!fParams[i].IsFixed()) {
+	      fMinuit->mnpout(j,strbuf,dbuf4,dbuf1,dbuf2,dbuf3,ibuf1); //dbuf4 contains the fitted value
+	      fMinuit->mnparm(j, fParams[i].GetName(), dbuf4, fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+	    }
+	    j++;
+	  }
+	}
+	// rerun minimizer
+	fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
+
+	//Calculate non-symmetric errors with MINOS:
+	//Minuit calculates errors by finding the change in the parameter value 
+	//required to change the function by fcnerror.
+	//In the case of a Chi-2, 
+	//     fcnerror =1.0 --> 1 sigma
+	//     fcnerror =4.0 --> 2 sigma
+	//     fcnerror =9.0 --> 3 sigma
+	//When minosmaxcalls is positive, it sets the maximum number of function
+	//calls per parameter to its values 
+	dbuf1=fMinosMaxCalls;
+	fMinuit->mnexcm("MINO",&dbuf1,(Int_t)(fMinosMaxCalls>=0),ierflg); 
+      }
+      fMinuitStatus=fMinuit->fCstatu;
+      fFCNMin=fMinuit->fAmin;
+
+    } else {
+      fMinuitStatus="SUCCESSFUL";
+
+      fFCNMin=EvalFCN();
     }
 
     delete[] minimargs;
     ierflg = 0; 
 
-    fMinuitStatus=fMinuit->fCstatu;
-    fFCNMin=fMinuit->fAmin;
     j=0;
 
     //Loop over the parameters
