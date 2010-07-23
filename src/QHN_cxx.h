@@ -311,7 +311,7 @@ template <typename U> void QHN<U>::Add(const QHN<U> *qhn, const U &c)
   Long64_t li;
 
   for(li=qhn->GetNFbins()-1; li>=0; --li) {
-    AddBinContent(GetFBinCoord(li),qhn->GetFBinContent(li)*c);
+    AddBinContent(qhn->GetFBinCoord(li),qhn->GetFBinContent(li)*c);
   }
 }
 
@@ -369,7 +369,7 @@ template <typename U> void QHN<U>::Divide(const QHN<U> *qhn)
   Long64_t li;
 
   for(li=qhn->GetNFbins()-1; li>=0; --li) {
-    ScaleBinContent(GetFBinCoord(li),qhn->GetFBinContent(li)?1/qhn->GetFBinContent(li):0);
+    ScaleBinContent(qhn->GetFBinCoord(li),qhn->GetFBinContent(li)?1/qhn->GetFBinContent(li):0);
   }
 }
 
@@ -1210,7 +1210,7 @@ template <typename U> void QHN<U>::Multiply(const QHN<U> *qhn)
   Long64_t li;
 
   for(li=qhn->GetNFbins()-1; li>=0; --li) {
-    ScaleBinContent(GetFBinCoord(li),1*qhn->GetFBinContent(li));
+    ScaleBinContent(qhn->GetFBinCoord(li),qhn->GetFBinContent(li));
   }
 }
 
