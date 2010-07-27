@@ -808,6 +808,26 @@ template <typename U> void QHN<U>::GetMeans(Double_t means[], Bool_t width) cons
   delete[] vbaindex;
 }
 
+template <typename U> U QHN<U>::GetMaximum() const
+{
+  if(!GetNFbins()) return 0;
+  U const *ptr=&GetFBinContent(GetNFbins()-1);
+  Long64_t li;
+
+  for(li=GetNFbins()-2; li>=0; --li) if(GetFBinContent(li)>*ptr) ptr=&GetFBinContent(li);
+  return *ptr;
+}
+
+template <typename U> U QHN<U>::GetMinimum() const
+{
+  if(!GetNFbins()) return 0;
+  U const *ptr=&GetFBinContent(GetNFbins()-1);
+  Long64_t li;
+
+  for(li=GetNFbins()-2; li>=0; --li) if(GetFBinContent(li)<*ptr) ptr=&GetFBinContent(li);
+  return *ptr;
+}
+
 template <typename U> Double_t QHN<U>::Integral(Int_t const* const* binranges, const Bool_t *widths) const
 {
   Int_t mins[fNDims], maxs[fNDims];

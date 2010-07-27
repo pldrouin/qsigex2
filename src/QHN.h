@@ -163,6 +163,8 @@ template <typename U> class QHN: public QDis
     const Bool_t& GetIntUseFBinLoop() const {return fIntUseFBinLoop;}
     virtual void CopyStruct(const QHN<U> &qthn);
     void GetMeans(Double_t means[], Bool_t width=kTRUE) const;
+    U GetMaximum() const;
+    U GetMinimum() const;
     inline void InitProcObj(){Reset();}
     Double_t Integral(Int_t const* const* binranges=NULL, const Bool_t *widths=NULL) const;
     QHN<Double_t>* MarginalPDF(const char *name="_md", const Int_t *axes=NULL, const Int_t &naxes=0) const;
