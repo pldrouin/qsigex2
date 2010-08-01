@@ -125,6 +125,7 @@ void QSigExFit::Streamer(TBuffer &R__b)
     fParams.Streamer(R__b);
 
     for(i=fParams.Count()-1; i>=0; --i) {
+      fParams[i].fIndex=i;
       j=((long)fParams[i].fMaster)-1;
       fParams[i].fMaster=NULL;
 
