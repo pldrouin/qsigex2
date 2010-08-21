@@ -22,6 +22,8 @@ template <typename U> class QProcNamedVar: public QNamedVar<U>, public QProcObj
 
     QProcNamedVar(const QProcNamedVar<U>& namedval): QNamedVar<U>(namedval), QProcObj(namedval) {}
 
+    void InitProcObj(){QNamedVar<U>::operator=((U)0);}
+
     const QProcNamedVar& operator=(const QProcNamedVar& rhs){QNamedVar<U>::operator=(rhs); QProcObj::operator=(rhs); return *this;}
     const QProcNamedVar& operator=(const U& rhs){QNamedVar<U>::operator=(rhs); return *this;}
     const QProcNamedVar& operator=(const char *valstr) {QNamedVar<U>::operator=(valstr); return *this;}
