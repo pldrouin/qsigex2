@@ -75,7 +75,7 @@ void QProcList::Exec() const
 {
   if(GetVerbosity()&QProcessor::kShowExec2) printf("QProcList('%s')::Exec()\n",GetName());
 
-  //pthread_mutex_lock(&fChMutex);
+  pthread_mutex_lock(&fChMutex);
   fFirstChain=fIFirstChain;
   fLastChain=fILastChain;
   /*SChainConfig *chain=fFirstChain;
@@ -92,7 +92,7 @@ void QProcList::Exec() const
     fprintf(stderr,"Exec: Error: Number of initial chains does not match\n");
     throw 1;
   }*/
-  //pthread_mutex_unlock(&fChMutex);
+  pthread_mutex_unlock(&fChMutex);
 
   for(Int_t i=fINChains-1; i>=0; --i) sem_post(&fTWSem);
 
@@ -456,6 +456,8 @@ void QProcList::TerminateThreads()
     for(i=fINChains-1; i>=0; --i) sem_post(&fTWSem);
 
     for(i=fNThreads-1; i>=0; --i) pthread_join(fThreads[i],NULL);
+    sem_destroy(&fTWSem);
+    sem_init(&fTWSem,0,0);
     delete[] fThreads;
     fThreads=NULL;
     fNThreads=0;

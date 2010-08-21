@@ -11,7 +11,7 @@
 #endif
 #endif
 
-//#undef GCC_VERSION
+#undef GCC_VERSION
 
 #ifdef GCC_VERSION
 #define q_load(ptr) __sync_add_and_fetch(ptr,0)
