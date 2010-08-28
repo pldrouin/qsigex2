@@ -839,7 +839,11 @@ void QOversizeArray::OpenFile()
 
   switch(fOpenMode) {
     case kRead:
+#ifdef __FreeBSD__
+      fFDesc=open(fFilename,O_RDONLY|O_DIRECT);
+#else
       fFDesc=open(fFilename,O_RDONLY);
+#endif
 
       if(fFDesc<0) {
 	perror("QOversizeArray");
@@ -850,7 +854,11 @@ void QOversizeArray::OpenFile()
       break;
 
     case kRW:
+#ifdef __FreeBSD__
+      fFDesc=open(fFilename,O_RDWR|O_DIRECT);
+#else
       fFDesc=open(fFilename,O_RDWR);
+#endif
 
       if(fFDesc<0) {
 	perror("QOversizeArray");
@@ -861,7 +869,11 @@ void QOversizeArray::OpenFile()
       break;
 
     case kRecreate:
+#ifdef __FreeBSD__
+      fFDesc=open(fFilename,O_RDWR|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH|O_DIRECT);
+#else
       fFDesc=open(fFilename,O_RDWR|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+#endif
 
       if(fFDesc<0) {
 	perror("QOversizeArray");
@@ -1167,6 +1179,10 @@ void QOversizeArray::ReadHeader()
     throw 1;
   }
   fTStamp.SetNanoSec(nsec);
+
+#ifdef __linux__
+  posix_fadvise(fFDesc,0,0,POSIX_FADV_DONTNEED);
+#endif
   pthread_mutex_unlock(&fFileMutex);
 }
 
@@ -1224,6 +1240,9 @@ void QOversizeArray::ReadBuffer(QOABuffer **buf, const UInt_t &bufferidx)
     perror("QOversizeArray::ReadBuffer: Error: ");
     throw 1;
   }
+#ifdef __linux__
+  posix_fadvise(fFDesc,0,0,POSIX_FADV_DONTNEED);
+#endif
   pthread_mutex_unlock(&fFileMutex);
 }
 
@@ -1286,6 +1305,9 @@ void QOversizeArray::ReadWriteBuffer()
   fWriteBuffer->fBufferIdx=bufferidx;
   pthread_mutex_lock(&fBuffersMutex);
   fWBFirstObjIdx=fNObjects-numobjs;
+#ifdef __linux__
+  posix_fadvise(fFDesc,0,0,POSIX_FADV_DONTNEED);
+#endif
   pthread_mutex_unlock(&fBuffersMutex);
 }
 
@@ -1650,6 +1672,9 @@ void QOversizeArray::WriteHeader() const
     perror("QOversizeArray::WriteHeader: Error: ");
     throw 1;
   }
+#ifdef __linux__
+  posix_fadvise(fFDesc,0,0,POSIX_FADV_DONTNEED);
+#endif
   pthread_mutex_unlock(&fFileMutex);
   pthread_mutex_unlock(&fFileWMutex);
 }
@@ -1668,6 +1693,9 @@ void QOversizeArray::WriteBuffer(const QOABuffer *buf) const
     perror("QOversizeArray::WriteBuffer: write Error: ");
     throw 1;
   }
+#ifdef __linux__
+  posix_fadvise(fFDesc,0,0,POSIX_FADV_DONTNEED);
+#endif
   pthread_mutex_unlock(&fFileMutex);
   pthread_mutex_unlock(&fFileWMutex);
 }

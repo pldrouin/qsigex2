@@ -437,7 +437,11 @@ void QSharedArray::LoadArray()
   int fd=0;
 
   if(fOwns) {
+#ifdef __FreeBSD__
+    fd=open(fFilename.c_str(),O_RDONLY|O_DIRECT);
+#else
     fd=open(fFilename.c_str(),O_RDONLY);
+#endif
 
     if(fd<0) {
       perror("QSharedArray::LoadArray()::open");
@@ -588,6 +592,10 @@ void QSharedArray::LoadArray()
       perror("mprotect");
       throw 1;
     }
+
+#ifdef __linux__
+    posix_fadvise(fd,0,0,POSIX_FADV_DONTNEED);
+#endif
 
     if(close(fd)) {
       perror("close");
