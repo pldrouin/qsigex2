@@ -516,12 +516,11 @@ template <typename U> const TH1& QHN<U>::GetTH()
   Long64_t li;
   Int_t coords[3];
   Long64_t nfbins=GetNFbins();
-  TString thname=GetName();
 
   switch(fNDims) {
     case 1:
-      if(!fAxes[0]->GetBins()) fTH=new TH1D(GetName(),GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax());
-      else fTH=new TH1D(GetName(),GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetBins());
+      if(!fAxes[0]->GetBins()) fTH=new TH1D("qhn2th",GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax());
+      else fTH=new TH1D("qhn2th",GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetBins());
       fTH->SetDirectory(NULL);
       fTH->GetXaxis()->SetTitle(fAxes[0]->GetTitle());
 
@@ -566,6 +565,7 @@ template <typename U> const TH1& QHN<U>::GetTH()
       throw 1;
   }
 
+  fTH->SetName(GetName());
   fTH->SetEntries(fEntries);
   return *fTH;
 }
