@@ -1,7 +1,6 @@
 #ifndef _QAXIS_
 #define _QAXIS_
 
-#include <cmath>
 #include <algorithm>
 #include "TNamed.h"
 #include "TAxis.h"
@@ -112,7 +111,7 @@ template <typename U> Bool_t QAxis::IsConstantBW(const Int_t &nbins, const U *bi
       fprintf(stderr,"Error: QAxis::IsConstanBW: Bins must be in increasing order\n");
       throw 1;
     }
-    if(fabs((bins[i]-bins[i-1])/bw-1)>1e-15) return kFALSE;
+    if(bins[i]-bins[i-1]!=bw) return kFALSE;
   }
   return kTRUE;
 }
