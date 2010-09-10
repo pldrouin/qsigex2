@@ -1,6 +1,7 @@
 #ifndef _QAXIS_
 #define _QAXIS_
 
+#include <cmath>
 #include <algorithm>
 #include "TNamed.h"
 #include "TAxis.h"
