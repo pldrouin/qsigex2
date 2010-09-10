@@ -111,7 +111,7 @@ template <typename U> Bool_t QAxis::IsConstantBW(const Int_t &nbins, const U *bi
       fprintf(stderr,"Error: QAxis::IsConstanBW: Bins must be in increasing order\n");
       throw 1;
     }
-    if(bins[i]-bins[i-1]!=bw) return kFALSE;
+    if(fabs((bins[i]-bins[i-1])/bw-1)>1e-15) return kFALSE;
   }
   return kTRUE;
 }
