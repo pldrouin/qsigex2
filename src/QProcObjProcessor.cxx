@@ -460,7 +460,7 @@ void QProcObjProcessor::PrintProcesses(const UInt_t &level, const Bool_t &printd
 
       mask.Clear();
       for(j=0; j<fAIObjects->Count(); j++) if((*fObjsPDepends)[j].GetBit(i)) mask.SetBit(j,kTRUE);
-      printf("%*sIO: ",level*3+4,"");
+      printf("%*sAIO: ",level*3+4,"");
       mask.Print();
     }
   }

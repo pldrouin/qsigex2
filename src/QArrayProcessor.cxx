@@ -16,6 +16,8 @@ QArrayProcessor::~QArrayProcessor()
   fTrigAEProcs=NULL;
   delete fIANames;
   fIANames=NULL;
+  delete fAIANames;
+  fAIANames=NULL;
   delete fOANames;
   fOANames=NULL;
   delete fBuNames;
@@ -154,6 +156,7 @@ void QArrayProcessor::Analyze()
   Int_t iidx, oidx;
 
   fIANames->Clear();
+  fAIANames->Clear();
   fOANames->Clear();
   fBuNames->Clear();
   fAPDepends->Clear();
@@ -215,6 +218,7 @@ void QArrayProcessor::Analyze()
 
 	//Ensure the required array is in the list
 	iidx=AddUniqueArray(fIANames,qlsbuf);
+	oidx=FindArray(fOANames,qlsbuf);
 
 	if(iidx == -2) {
 	  fprintf(stderr,"QArrayProcessor: Analyze(): Error with process '%s': Input array '%s\t%s' has a different type from what previously declared\n",proc->GetName(),qlsbuf[0].Data(),qlsbuf[1].Data());
@@ -224,14 +228,18 @@ void QArrayProcessor::Analyze()
 	//If the array is not already listed in the list of existing arrays
 	if(iidx == -1) {
 	  //printf("New input array\n");
-	  //Add the current process to the list of processes that depend on the current input array
-	  fAPDepends->RedimList(fIANames->Count());
-	  iidx=fIANames->Count()-1;
-	}
-	(*fAPDepends)[iidx].SetBit(i,kTRUE);
-	(*fIAIndices)[i].Add(iidx);
 
-	oidx=FindArray(fOANames,qlsbuf);
+	  //If this is also an absolute input, add it to the absolute input array and make room for it in fAPDepends
+	  if(oidx==-1) {
+	    //Add the current process to the list of processes that depend on the current input array
+	    fAIANames->Add(qlsbuf);
+	    fAPDepends->RedimList(fAPDepends->Count()+1);
+	    (*fAPDepends)[fAPDepends->Count()-1].SetBit(i,kTRUE);
+	  }
+	  iidx=fIANames->Count()-1;
+	  //Else if this is a known absolute array, add the current process in the list of dependencies
+	} else if(oidx==-1) (*fAPDepends)[fAIANames->FindFirst(qlsbuf)].SetBit(i,kTRUE);
+	(*fIAIndices)[i].Add(iidx);
 
 	if(oidx == -2) {
 	  fprintf(stderr,"QArrayProcessor: Analyze(): Error with process '%s': Input array '%s\t%s' has a different type from what previously declared\n",proc->GetName(),qlsbuf[0].Data(),qlsbuf[1].Data());
@@ -502,8 +510,8 @@ void QArrayProcessor::Analyze()
     //printf("%03i Process '%s'\n",i,proc->GetName());
     dpidx=depprocs[i].GetAllDepends();
 
-    //Loop over all input arrays
-    for(j=0; j<fIANames->Count(); j++) {
+    //Loop over all absolute input arrays
+    for(j=0; j<fAPDepends->Count(); j++) {
 
       //If the current process is triggered by the input branch
       if((*fAPDepends)[j].GetBit(i)) {
@@ -516,7 +524,7 @@ void QArrayProcessor::Analyze()
       }
     }
 
-    //Loop over all input objects
+    //Loop over all absolute input objects
     for(j=0; j<fObjsPDepends->Count(); j++) {
 
       //If the current process is triggered by the input object
@@ -564,20 +572,26 @@ void QArrayProcessor::Exec() const
       }
     }
 
-    //Loop over all input arrays
+    //Loop over all absolute input arrays
     for(lExeci=fAIArrays->Count()-1; lExeci>=0; --lExeci) {
 
       //If the current input array has been modified after the last run, add its mask to the mask of required processes.
       if((*fAIArrays)[lExeci]->NewerThan(fLastExec)) {
 	lExecdepmods|=(*fAPDepends)[lExeci];
+	//printf("Absolute input array %i (%p) has been modified ",lExeci,(*fAIArrays)[lExeci]);
+      } else {
+	//printf("Absolute input array %i (%p) has not been modified ",lExeci,(*fAIArrays)[lExeci]);
       }
+      //(*fAPDepends)[lExeci].Print();
     }
 
     //Loop over all absolute input objects
     for(lExeci=fAIObjects->Count()-1; lExeci>=0; --lExeci) {
 
       //If the current absolute input object has been modified after the last run, add its mask to the mask of required processes
-      if((*fAIObjects)[lExeci]->NewerThan(fLastExec)) lExecdepmods|=(*fObjsPDepends)[lExeci];
+      if((*fAIObjects)[lExeci]->NewerThan(fLastExec)) {
+	lExecdepmods|=(*fObjsPDepends)[lExeci];
+      }
     }
 
     lExecrunall=fForceExecAll;
@@ -655,6 +669,8 @@ void QArrayProcessor::Exec() const
 	for(lExecj=(*fOAIndices)[lExeci].Count()-1; lExecj>=0; --lExecj) {
 	  //Add the current output array to the list of needed output arrays
 	  fNeededOA[(*fOAIndices)[lExeci][lExecj]]=kTRUE;
+
+	  //printf("Output array %i of process %i (%p) is needed\n",lExecj,lExeci,(*fOArrays)[lExeci]);
 	}
 
 	//Loop over output objets of the current process
@@ -938,6 +954,7 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
       fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Array type '%s' is unknown\n",proto.Data());
       throw 1;
     }
+    //printf("Output array %i (%p) has been loaded\n",i,fOArrays->GetLast());
   }
 
   //Loop over the input arrays
@@ -968,6 +985,7 @@ void QArrayProcessor::InitProcess(Bool_t allocateparammem)
       fprintf(stderr,"QArrayProcessor::InitProcess(): Error: Array type '%s' is unknown\n",proto.Data());
       throw 1;
     }
+    //printf("Input array %i (%p) has been loaded\n",i,fIArrays->GetLast());
 
     //If this is an absolute input array, add it to the list of absolute input arrays
     if(fOArrays->FindFirst(fIArrays->GetLast())==-1) fAIArrays->Add(fIArrays->GetLast());
@@ -1060,6 +1078,7 @@ const QArrayProcessor& QArrayProcessor::operator=(const QArrayProcessor &rhs)
   fNAEProcs=rhs.fNAEProcs;
   fAnalysisDir=rhs.fAnalysisDir;
   *fIANames=*rhs.fIANames;
+  *fAIANames=*rhs.fAIANames;
   *fOANames=*rhs.fOANames;
   *fBuNames=*rhs.fBuNames;
   *fIAIndices=*rhs.fIAIndices;
@@ -1088,7 +1107,7 @@ void QArrayProcessor::PrintAnalysisResults() const
 
   printf("Analysis Directory: %s\n",fAnalysisDir.Data());
 
-  Int_t i,j,k;
+  Int_t i,j,k,l;
   printf("\nParameters:\n");
   for(i=0; i<GetNParams(); i++) {
     printf("%3i:\t%s\n",i,GetParamName(i));
@@ -1119,7 +1138,12 @@ void QArrayProcessor::PrintAnalysisResults() const
       sbuf=proc->GetIVarNameTitle(j).GetTitle();
       printf("%3i",j);
       printf("\t%s",proc->GetIVarNameTitle(j).GetName());
-      if(sbuf.Length()) {printf("\t%s (%i)",sbuf.Data(),(*fIAIndices)[i][k]); k++;}
+      if(sbuf.Length()) {
+	printf("\t%s",sbuf.Data());
+
+	if((l=fAIANames->FindFirst((*fIANames)[(*fIAIndices)[i][k]]))!=-1) printf(" (%i)",l);
+	++k;
+      }
       printf("\n");
     }
 
@@ -1128,7 +1152,9 @@ void QArrayProcessor::PrintAnalysisResults() const
       printf("%3i\t",j);
       if(dynamic_cast<TObject*>((*fIObjects)[(*fIOIndices)[i][j]])) printf("%s (%p)",dynamic_cast<TObject*>((*fIObjects)[(*fIOIndices)[i][j]])->GetName(),(*fIObjects)[(*fIOIndices)[i][j]]);
       else printf("%p",(*fIObjects)[(*fIOIndices)[i][j]]);
-      printf(" (%i)\n",(*fIOIndices)[i][j]);
+
+      if((l=fAIObjects->FindFirst((*fIObjects)[(*fIOIndices)[i][j]]))!=-1) printf(" (%i)\n",l);
+      else printf("\n");
     }
 
     printf("\nOutput Variables:\n");
@@ -1165,9 +1191,9 @@ void QArrayProcessor::PrintAnalysisResults() const
     else printf("Does not depend on a selector process\n");
   }
 
-  printf("\nAll Input Arrays:\n");
-  for(i=0; i<fIANames->Count(); i++) {
-    printf("%3i Array '%s\t%s'\t",i,(*fIANames)[i][0].Data(),(*fIANames)[i][1].Data());
+  printf("\nAbsolute Input Arrays:\n");
+  for(i=0; i<fAIANames->Count(); i++) {
+    printf("%3i Array '%s\t%s'\t",i,(*fAIANames)[i][0].Data(),(*fAIANames)[i][1].Data());
     (*fAPDepends)[i].Print();
   }
 
@@ -1239,13 +1265,13 @@ void QArrayProcessor::PrintProcesses(const UInt_t &level, const Bool_t &printdep
       (*fProcsParDepends)[i].Print();
 
       mask.Clear();
-      for(j=0; j<fIANames->Count(); j++) if((*fAPDepends)[j].GetBit(i)) mask.SetBit(j,kTRUE);
-      printf("%*sIA: ",level*3+4,"");
+      for(j=0; j<fAIANames->Count(); j++) if((*fAPDepends)[j].GetBit(i)) mask.SetBit(j,kTRUE);
+      printf("%*sAIA: ",level*3+4,"");
       mask.Print();
 
       mask.Clear();
       for(j=0; j<fAIObjects->Count(); j++) if((*fObjsPDepends)[j].GetBit(i)) mask.SetBit(j,kTRUE);
-      printf("%*sIO: ",level*3+4,"");
+      printf("%*sAIO: ",level*3+4,"");
       mask.Print();
     }
   }

@@ -113,6 +113,7 @@ void QProcList::InitProcess(Bool_t allocateparammem)
   for(Int_t i=0; i<fQPL->Count(); ++i)  {
 
     try {
+      //printf("\n====================\nProcessor '%s'\n====================\n",((QProcessor*)(*fQPL)[i])->GetName());
       ((QProcessor*)(*fQPL)[i])->InitProcess(kFALSE);
 
     } catch (Int_t e) {
