@@ -54,6 +54,11 @@ QArrayProcessor::~QArrayProcessor()
   fObjsPDepends=NULL;
   delete fBuffers;
   fBuffers=NULL;
+
+  if(fAllIObjects) {
+    delete fAllIObjects;
+    delete fAllOObjects;
+  }
 }
 
 Int_t QArrayProcessor::AddProc(const char *name, const char *title, Bool_t selector, Int_t index)
