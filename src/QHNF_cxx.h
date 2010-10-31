@@ -99,7 +99,6 @@ template <typename U> void QHNF<U>::CopyStruct(const QHN<U> &qthn)
   QHN<U>::fNDims=qthn.GetNDims();
   QHN<U>::fAxes=new QAxis*[QHN<U>::fNDims];
   for(Int_t i=QHN<U>::fNDims-1; i>=0; --i) QHN<U>::fAxes[i]=qthn.GetAxis(i)?(QAxis*)qthn.GetAxis(i)->Clone():NULL;
-  QHN<U>::fEntries=qthn.GetEntries();
   QHN<U>::fNBins=qthn.GetNBins();
   fNFBins=qthn.GetNFbins();
   fBins=(Long64_t*)malloc(qthn.GetNFbins()*sizeof(Long64_t));

@@ -351,7 +351,6 @@ template <typename U> void QHN<U>::CopyStruct(const QHN<U> &qthn)
   Clear();
   QDis::operator=(qthn);
   fNDims=qthn.fNDims;
-  fEntries=qthn.fEntries;
   fNBins=qthn.fNBins;
   fAxes=new QAxis*[fNDims];
   for(Int_t i=fNDims-1; i>=0; --i) fAxes[i]=qthn.fAxes[i]?(QAxis*)qthn.fAxes[i]->Clone():NULL;
