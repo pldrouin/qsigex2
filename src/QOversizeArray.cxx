@@ -1463,7 +1463,8 @@ void QOversizeArray::SetMemConstraints(const Long64_t &minmemsize, Float_t critl
   FuncDef(SetMemConstraints,1);
 
   if(critlevel>1) critlevel=1;
-  if(cthreshlevel<0) cthreshlevel=2;
+  //if(cthreshlevel<0) cthreshlevel=2; Memory Compression is broken
+  cthreshlevel=2;
 
   pthread_mutex_lock(&fILMutex);
   if(fInstances.Count()>0) {
