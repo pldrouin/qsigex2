@@ -14,7 +14,9 @@ class QProcQSA: public QProcArray
     QProcQSA(const char *filename, const char* adesc, const UInt_t &nobjectsperbuffer=0);
     virtual ~QProcQSA(){if(fArray) delete fArray; if(fOwnsBuffer) delete[] (Char_t*)fBuffer;}
     Int_t Fill(){fArray->Fill(); return 1;}
+#ifndef __CINT__
     void* const& GetBuffer() const{return fBuffer;}
+#endif
     Long64_t GetEntries() const{return fArray->GetEntries();}
     QSharedArray* GetQOA(){return fArray;}
     void LoadEntry(const Long64_t &entry = 0){fArray->LoadEntry(entry);}

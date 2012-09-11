@@ -234,6 +234,10 @@ void QSigExFitMCMC::InitFit()
       //Create the output array and store the pointer
       (*fParOArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fParOANames)[i].GetValue()(j+3,(*fParOANames)[i].GetValue().Length()-j-3),(*fParOANames)[i].GetName(), kTRUE));
 
+    } else if(!strcmp(proto,"ttree")) {
+      //Create the output array and store the pointer
+      (*fParOArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fParOANames)[i].GetValue()(j+3,(*fParOANames)[i].GetValue().Length()-j-3),(*fParOANames)[i].GetName(), kTRUE, kTRUE, kTRUE));
+
     } else if(!strcmp(proto,"qoa")) {
       //Create the output array and store the pointer
       (*fParOArrays).Add(QProcQOAHandler::LoadQOA((TString)(*fParOANames)[i].GetValue()(j+3,(*fParOANames)[i].GetValue().Length()-j-3),(*fParOANames)[i].GetName(), kTRUE));
