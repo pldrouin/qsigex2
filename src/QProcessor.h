@@ -3,6 +3,7 @@
 
 #include "TNamed.h"
 #include "QList.h"
+#include "QMask.h"
 #include "QDepTree.h"
 
 //#define DEBUG
@@ -23,8 +24,9 @@ class QProcessor: public TNamed
     virtual void Analyze()=0;
     virtual void Exec() const=0;
     virtual void InitProcess(Bool_t allocateparammem=kTRUE)=0;
+    virtual void UpdateProcessFlags()=0;
 
-    void ClearParams();
+    virtual void ClearParams();
 
     void CopyParamAddress(const Int_t &fromidx, const Int_t &toidx);
 
@@ -60,8 +62,10 @@ class QProcessor: public TNamed
     virtual void SetForceExecAll(const Bool_t &forceexecall=kFALSE){fForceExecAll=forceexecall;}
 
     void SetParam(const Int_t &index, const Double_t &value=0);
-    virtual void SetParamAddress(const Int_t &index, Double_t* const paddr=NULL);
     void SetParam(const char *paramname, const Double_t &value=0);
+    virtual void SetParamActive(const Int_t &index, const Bool_t &active=kTRUE)=0;
+    void SetParamActive(const char *paramname, const Bool_t &active=kTRUE);
+    virtual void SetParamAddress(const Int_t &index, Double_t* const paddr=NULL);
     virtual void SetParamAddress(const char *paramname, Double_t* const paddr=NULL);
     void SetParams(Double_t const* const params);
 

@@ -14,9 +14,9 @@
 class QArrayProcessor: public QStdProcessor
 {
   public:
-    QArrayProcessor(): QStdProcessor(), fSelProcs(new QList<Bool_t>), fTrigAEProcs(new QList<Bool_t>), fNAEProcs(0), fIANames(new QList<QList<TString> >), fAIANames(new QList<QList<TString> >), fOANames(new QList<QList<TString> >), fBuNames(new QList<TString>), fIAIndices(new QList<QList<Int_t> >), fIOIndices(new QList<QList<Int_t> >), fOAIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fSelDepProcs(new QList<Bool_t>), fIASProc(new QList<Bool_t>), fOASProc(new QList<Bool_t>), fAPDepends(new QList<QMask>), fObjsPDepends(new QList<QMask>), fIArrays(new QList<QProcArray*>), fAIArrays(new QList<QProcArray*>), fIObjects(new QList<QProcObj*>), fAIObjects(new QList<QProcObj*>), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>), fBuffers(new QList<void*>) {}
-    QArrayProcessor(const char* name, const char* title): QStdProcessor(name,title), fSelProcs(new QList<Bool_t>), fTrigAEProcs(new QList<Bool_t>), fNAEProcs(0), fAnalysisDir(), fIANames(new QList<QList<TString> >), fAIANames(new QList<QList<TString> >), fOANames(new QList<QList<TString> >), fBuNames(new QList<TString>), fIAIndices(new QList<QList<Int_t> >), fIOIndices(new QList<QList<Int_t> >), fOAIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fSelDepProcs(new QList<Bool_t>), fIASProc(new QList<Bool_t>), fOASProc(new QList<Bool_t>), fAPDepends(new QList<QMask>), fObjsPDepends(new QList<QMask>), fIArrays(new QList<QProcArray*>), fAIArrays(new QList<QProcArray*>), fIObjects(new QList<QProcObj*>), fAIObjects(new QList<QProcObj*>), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>), fBuffers(new QList<void*>), fAllIObjects(NULL), fAllOObjects(NULL) {}
-    QArrayProcessor(const QArrayProcessor &rhs): QStdProcessor(rhs), fSelProcs(new QList<Bool_t>(*rhs.fSelProcs)), fTrigAEProcs(new QList<Bool_t>(*rhs.fTrigAEProcs)), fNAEProcs(0), fAnalysisDir(rhs.fAnalysisDir), fIANames(new QList<QList<TString> >(*rhs.fIANames)), fAIANames(new QList<QList<TString> >(*rhs.fAIANames)), fOANames(new QList<QList<TString> >(*rhs.fOANames)), fBuNames(new QList<TString>(*rhs.fBuNames)), fIAIndices(new QList<QList<Int_t> >(*rhs.fIAIndices)), fIOIndices(new QList<QList<Int_t> >(*rhs.fIOIndices)), fOAIndices(new QList<QList<Int_t> >(*rhs.fOAIndices)), fOOIndices(new QList<QList<Int_t> >(*rhs.fOOIndices)), fSelDepProcs(new QList<Bool_t>(*rhs.fSelDepProcs)), fIASProc(new QList<Bool_t>(*rhs.fIASProc)), fOASProc(new QList<Bool_t>(*rhs.fOASProc)), fAPDepends(new QList<QMask>(*rhs.fAPDepends)), fObjsPDepends(new QList<QMask>(*rhs.fObjsPDepends)), fIArrays(new QList<QProcArray*>), fAIArrays(new QList<QProcArray*>), fIObjects(new QList<QProcObj*>(*rhs.fIObjects)), fAIObjects(new QList<QProcObj*>(*rhs.fAIObjects)), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>(*rhs.fOObjects)), fBuffers(new QList<void*>), fAllIObjects(NULL), fAllOObjects(NULL) {}
+    QArrayProcessor(): QStdProcessor(), fSelProcs(new QList<Bool_t>), fTrigAEProcs(new QList<Bool_t>), fNAEProcs(0), fIANames(new QList<QList<TString> >), fAIANames(new QList<QList<TString> >), fOANames(new QList<QList<TString> >), fBuNames(new QList<TString>), fActiveAIA(NULL), fLastActiveAIA(NULL), fIAIndices(new QList<QList<Int_t> >), fIOIndices(new QList<QList<Int_t> >), fOAIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fSelDepProcs(new QList<Bool_t>), fIASProc(new QList<Bool_t>), fOASProc(new QList<Bool_t>), fAPDepends(new QList<QMask>), fAAPDepends(fAPDepends), fObjsPDepends(new QList<QMask>), fAObjsPDepends(fObjsPDepends), fIArrays(new QList<QProcArray*>), fAIArrays(new QList<QProcArray*>), fAAIArrays(fAIArrays), fIObjects(new QList<QProcObj*>), fAIObjects(new QList<QProcObj*>), fAAIObjects(fAIObjects), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>), fBuffers(new QList<void*>), fActiveAIO(NULL), fLastActiveAIO(NULL) {}
+    QArrayProcessor(const char* name, const char* title): QStdProcessor(name,title), fSelProcs(new QList<Bool_t>), fTrigAEProcs(new QList<Bool_t>), fNAEProcs(0), fAnalysisDir(), fIANames(new QList<QList<TString> >), fAIANames(new QList<QList<TString> >), fOANames(new QList<QList<TString> >), fBuNames(new QList<TString>), fActiveAIA(NULL), fLastActiveAIA(NULL), fIAIndices(new QList<QList<Int_t> >), fIOIndices(new QList<QList<Int_t> >), fOAIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fSelDepProcs(new QList<Bool_t>), fIASProc(new QList<Bool_t>), fOASProc(new QList<Bool_t>), fAPDepends(new QList<QMask>), fAAPDepends(fAPDepends), fObjsPDepends(new QList<QMask>), fAObjsPDepends(fObjsPDepends), fIArrays(new QList<QProcArray*>), fAIArrays(new QList<QProcArray*>), fAAIArrays(fAIArrays), fIObjects(new QList<QProcObj*>), fAIObjects(new QList<QProcObj*>), fAAIObjects(fAIObjects), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>), fBuffers(new QList<void*>), fActiveAIO(NULL), fLastActiveAIO(NULL), fAllIObjects(NULL), fAllOObjects(NULL) {}
+    QArrayProcessor(const QArrayProcessor &rhs): QStdProcessor(rhs), fSelProcs(new QList<Bool_t>(*rhs.fSelProcs)), fTrigAEProcs(new QList<Bool_t>(*rhs.fTrigAEProcs)), fNAEProcs(0), fAnalysisDir(rhs.fAnalysisDir), fIANames(new QList<QList<TString> >(*rhs.fIANames)), fAIANames(new QList<QList<TString> >(*rhs.fAIANames)), fOANames(new QList<QList<TString> >(*rhs.fOANames)), fBuNames(new QList<TString>(*rhs.fBuNames)), fActiveAIA(rhs.fActiveAIA?new QMask(*rhs.fActiveAIA):NULL), fLastActiveAIA(rhs.fLastActiveAIA?new QMask(*rhs.fLastActiveAIA):NULL), fIAIndices(new QList<QList<Int_t> >(*rhs.fIAIndices)), fIOIndices(new QList<QList<Int_t> >(*rhs.fIOIndices)), fOAIndices(new QList<QList<Int_t> >(*rhs.fOAIndices)), fOOIndices(new QList<QList<Int_t> >(*rhs.fOOIndices)), fSelDepProcs(new QList<Bool_t>(*rhs.fSelDepProcs)), fIASProc(new QList<Bool_t>(*rhs.fIASProc)), fOASProc(new QList<Bool_t>(*rhs.fOASProc)), fAPDepends(new QList<QMask>(*rhs.fAPDepends)), fAAPDepends(rhs.fAAPDepends==rhs.fAPDepends?fAPDepends:new QList<QMask>(*rhs.fAAPDepends)), fObjsPDepends(new QList<QMask>(*rhs.fObjsPDepends)), fAObjsPDepends(rhs.fAObjsPDepends==rhs.fObjsPDepends?fObjsPDepends:new QList<QMask>(*rhs.fAObjsPDepends)), fIArrays(new QList<QProcArray*>), fAIArrays(new QList<QProcArray*>), fAAIArrays(rhs.fAAIArrays==rhs.fAIArrays?fAIArrays:new QList<QProcArray*>(*rhs.fAAIArrays)), fIObjects(new QList<QProcObj*>(*rhs.fIObjects)), fAIObjects(new QList<QProcObj*>(*rhs.fAIObjects)), fAAIObjects(rhs.fAAIObjects==rhs.fAIObjects?fAIObjects:new QList<QProcObj*>(*rhs.fAAIObjects)), fOArrays(new QList<QProcArray*>), fOObjects(new QList<QProcObj*>(*rhs.fOObjects)), fBuffers(new QList<void*>), fActiveAIO(rhs.fActiveAIO?new QMask(*rhs.fActiveAIO):NULL), fLastActiveAIO(rhs.fLastActiveAIO?new QMask(*rhs.fLastActiveAIO):NULL), fAllIObjects(NULL), fAllOObjects(NULL) {}
     virtual ~QArrayProcessor();
 
     Int_t AddProc(const char* name, const char* title=NULL, Bool_t selector=kFALSE, Int_t index=-1);
@@ -38,11 +38,16 @@ class QArrayProcessor: public QStdProcessor
     Int_t GetNPSProcs() const{return fProcs->Count()-fNAEProcs;} //Number of post selection processes
 
     void InitProcess(Bool_t allocateparammem=kTRUE);
+    void UpdateProcessFlags();
 
     const QArrayProcessor& operator=(const QArrayProcessor &rhs);
 
     void PrintAnalysisResults() const;
     void PrintProcesses(const UInt_t &level=0, const Bool_t &printdeps=kTRUE) const;
+
+    void SetAIAActive(const char* name, const char* title = NULL, const Bool_t &active=kTRUE);
+
+    void SetAIOActive(QProcObj *const obj, const Bool_t &active=kTRUE);
 
     void TerminateProcess();
 
@@ -66,9 +71,11 @@ class QArrayProcessor: public QStdProcessor
     Int_t                     fNAEProcs; //   Number of non-post-selection processes
     TString                fAnalysisDir; //   Directory returned by gDirectory->GetPath() during the last call of Analyze()
     QList<QList<TString> >    *fIANames; //-> Names of arrays that are used as inputs
-    QList<QList<TString> >    *fAIANames; //-> Names of absolute input arrays
+    QList<QList<TString> >    *fAIANames; //-> Names of absolute input arrays. Order of elements must match fIANames
     QList<QList<TString> >    *fOANames; //-> Names of generated arrays
     QList<TString>            *fBuNames; //-> Names of output buffers
+    QMask   		    *fActiveAIA; //! Indicates which absolute input arrays are active within this processor (i.e. not the other processors). NULL if all absolute input objects are active 
+    QMask   	        *fLastActiveAIA; //! Indicates which absolute input arrays are active at the moment of the last call to UpdateProcessFlags. NULL if all absolute input objects are active 
     QList<QList<Int_t> >    *fIAIndices; //-> Indices of input arrays that are used as input for each process
     QList<QList<Int_t> >    *fIOIndices; //-> Indices of objects that are used as input for each process
     QList<QList<Int_t> >    *fOAIndices; //-> Indices of arrays that are used as output for each process
@@ -77,14 +84,20 @@ class QArrayProcessor: public QStdProcessor
     QList<Bool_t>             *fIASProc; //-> Direct or indirect dependency of input arrays on a selector process
     QList<Bool_t>             *fOASProc; //-> Direct or indirect dependency of output arrays on a selector process
     QList<QMask>            *fAPDepends; //-> Dependencies of processes on absolute input arrays
+    QList<QMask>            *fAAPDepends; //-> Dependencies of processes on active absolute input arrays
     QList<QMask>         *fObjsPDepends; //-> Dependencies of processes on absolute input objects
+    QList<QMask>         *fAObjsPDepends; //! Dependencies of processes on active absolute input objects. fAObjsPDepends==fObjsPDepends if all absolute input objects are active
     QList<QProcArray*>        *fIArrays; //! Input arrays
     QList<QProcArray*>        *fAIArrays; //! Absolute input arrays
+    QList<QProcArray*>        *fAAIArrays; //! Active absolute input arrays
     QList<QProcObj*>         *fIObjects; //! Input objects 
-    QList<QProcObj*>         *fAIObjects; //! Absolute input objects 
+    QList<QProcObj*>         *fAIObjects; //! Absolute input objects. 
+    QList<QProcObj*>         *fAAIObjects; //! Active absolute input objects. fAAIObjects==fAIObjects if all absolute input objects are active 
     QList<QProcArray*>        *fOArrays; //! Output arrays
     QList<QProcObj*>         *fOObjects; //! Output objects 
     QList<void*>              *fBuffers; //! Buffers for output buffers
+    QMask   		    *fActiveAIO; //! Indicates which absolute input objects are active within this processor (i.e. not the other processors). NULL if all absolute input objects are active 
+    QMask   	        *fLastActiveAIO; //! Indicates which absolute input objects are active at the moment of the last call to UpdateProcessFlags. NULL if all absolute input objects are active 
 
     QList<QProcObj*>        *fAllIObjects; //! All input objects, including input arrays (temporary)
     QList<QProcObj*>        *fAllOObjects; //! All output objects, including output arrays (temporary)

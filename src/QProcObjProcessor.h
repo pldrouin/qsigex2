@@ -14,9 +14,9 @@
 class QProcObjProcessor: public QStdProcessor
 {
   public:
-    QProcObjProcessor(): QStdProcessor(), fIOIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fObjsPDepends(new QList<QMask>), fIObjects(new QList<QProcObj*>), fAIObjects(new QList<QProcObj*>), fOObjects(new QList<QProcObj*>) {}
-    QProcObjProcessor(const char* name, const char* title): QStdProcessor(name,title), fIOIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fObjsPDepends(new QList<QMask>), fIObjects(new QList<QProcObj*>), fAIObjects(new QList<QProcObj*>), fOObjects(new QList<QProcObj*>) {}
-    QProcObjProcessor(const QProcObjProcessor &rhs): QStdProcessor(rhs), fIOIndices(new QList<QList<Int_t> >(*rhs.fIOIndices)), fOOIndices(new QList<QList<Int_t> >(*rhs.fOOIndices)), fObjsPDepends(new QList<QMask>(*rhs.fObjsPDepends)), fIObjects(new QList<QProcObj*>(*rhs.fIObjects)), fAIObjects(new QList<QProcObj*>(*rhs.fAIObjects)), fOObjects(new QList<QProcObj*>(*rhs.fOObjects)) {}
+    QProcObjProcessor(): QStdProcessor(), fIOIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fObjsPDepends(new QList<QMask>), fAObjsPDepends(fObjsPDepends), fIObjects(new QList<QProcObj*>), fAIObjects(new QList<QProcObj*>), fAAIObjects(fAIObjects), fOObjects(new QList<QProcObj*>), fActiveAIO(NULL), fLastActiveAIO(NULL) {}
+    QProcObjProcessor(const char* name, const char* title): QStdProcessor(name,title), fIOIndices(new QList<QList<Int_t> >), fOOIndices(new QList<QList<Int_t> >), fObjsPDepends(new QList<QMask>), fAObjsPDepends(fObjsPDepends), fIObjects(new QList<QProcObj*>), fAIObjects(new QList<QProcObj*>), fAAIObjects(fAIObjects), fOObjects(new QList<QProcObj*>), fActiveAIO(NULL), fLastActiveAIO(NULL) {}
+    QProcObjProcessor(const QProcObjProcessor &rhs): QStdProcessor(rhs), fIOIndices(new QList<QList<Int_t> >(*rhs.fIOIndices)), fOOIndices(new QList<QList<Int_t> >(*rhs.fOOIndices)), fObjsPDepends(new QList<QMask>(*rhs.fObjsPDepends)), fAObjsPDepends(rhs.fAObjsPDepends==rhs.fObjsPDepends?fObjsPDepends:new QList<QMask>(*rhs.fAObjsPDepends)), fIObjects(new QList<QProcObj*>(*rhs.fIObjects)), fAIObjects(new QList<QProcObj*>(*rhs.fAIObjects)), fAAIObjects(rhs.fAAIObjects==rhs.fAIObjects?fAIObjects:new QList<QProcObj*>(*rhs.fAAIObjects)), fOObjects(new QList<QProcObj*>(*rhs.fOObjects)), fActiveAIO(rhs.fActiveAIO?new QMask(*rhs.fActiveAIO):NULL), fLastActiveAIO(rhs.fLastActiveAIO?new QMask(*rhs.fLastActiveAIO):NULL) {}
     virtual ~QProcObjProcessor();
 
     Int_t AddProc(const char* name, const char* title=NULL, Int_t index=-1);
@@ -32,11 +32,14 @@ class QProcObjProcessor: public QStdProcessor
     void Exec() const;
 
     void InitProcess(Bool_t allocateparammem=kTRUE);
+    void UpdateProcessFlags();
 
     const QProcObjProcessor& operator=(const QProcObjProcessor &rhs);
 
     void PrintAnalysisResults() const;
     void PrintProcesses(const UInt_t &level=0, const Bool_t &printdeps=kTRUE) const;
+
+    void SetAIOActive(QProcObj *const obj, const Bool_t &active=kTRUE);
 
     void TerminateProcess();
 
@@ -52,9 +55,13 @@ class QProcObjProcessor: public QStdProcessor
     QList<QList<Int_t> > *fIOIndices;    //-> Indices of objects that are used as input for each process
     QList<QList<Int_t> > *fOOIndices;    //-> Indices of objects that are used as output for each process
     QList<QMask >             *fObjsPDepends; //-> Dependencies of processes on absolute input objects
+    QList<QMask>         *fAObjsPDepends; //! Dependencies of processes on active absolute input objects. fAObjsPDepends==fObjsPDepends if all absolute input objects are active
     QList<QProcObj*>         *fIObjects; //! Input objects 
     QList<QProcObj*>         *fAIObjects; //! Absolute input objects 
+    QList<QProcObj*>         *fAAIObjects; //! Active absolute input objects. fAAIObjects==fAIObjects if all absolute input objects are active 
     QList<QProcObj*>         *fOObjects; //! Output objects 
+    QMask   		    *fActiveAIO; //! Indicates which absolute input objects are active within this processor (i.e. not the other processors). NULL if all absolute input objects are active 
+    QMask   	        *fLastActiveAIO; //! Indicates which absolute input objects are active at the moment of the last call to UpdateProcessFlags. NULL if all absolute input objects are active 
 
     mutable QMask lExecpardiffs;            //! Modified parameters since the last call
     mutable QMask lExecdepmods;             //! Required processes due to modified input objects

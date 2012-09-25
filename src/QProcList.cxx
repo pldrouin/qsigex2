@@ -125,6 +125,11 @@ void QProcList::InitProcess(Bool_t allocateparammem)
   InitThreads();
 }
 
+void QProcList::UpdateProcessFlags()
+{
+  for(Int_t i=0; i<fQPL->Count(); ++i) ((QProcessor*)(*fQPL)[i])->UpdateProcessFlags();
+}
+
 void QProcList::InitThreads()
 {
   TerminateThreads();
@@ -428,6 +433,17 @@ void QProcList::SetForceExecAll(const Bool_t &forceexecall)
   QProcessor::SetForceExecAll(forceexecall);
 
   for(Int_t i=0; i<fQPL->Count(); i++) ((QProcessor*)(*fQPL)[i])->SetForceExecAll(forceexecall);
+}
+
+void QProcList::SetParamActive(const Int_t &index, const Bool_t &active)
+{
+  Int_t i;
+
+  //Loop over the children that depend on the current parameter
+  for(i=0; i<(*fParamsChildIndices)[index].Count(); i++) {
+    //Set the address to the assign buffer for this parameter
+    ((QProcessor*)(*fQPL)[(*fParamsChildIndices)[index][i]])->SetParamActive((*fChildParamsMapping)[index][i],active);
+  }
 }
 
 void QProcList::SetParamAddress(const Int_t &index, Double_t* const paddr)

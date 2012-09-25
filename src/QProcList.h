@@ -40,6 +40,8 @@ class QProcList: public QProcessor
     const Bool_t& GetPProcessor() const{return fPProcessor;}
 
     void InitProcess(Bool_t allocateparammem=kTRUE);
+    void UpdateProcessFlags();
+
     void InitThreads();
 
     void KillThreads(); //For signal-handling only! Does not clear any memory!
@@ -57,6 +59,9 @@ class QProcList: public QProcessor
     void SetForceExecAll(const Bool_t &forceexecall=kFALSE);
 
     void SetNThreads(const Int_t &nthreads){fRNThreads=nthreads;}
+
+    void SetParamActive(const Int_t &index, const Bool_t &active=kTRUE);
+    void SetParamActive(const char *paramname, const Bool_t &active=kTRUE){QProcessor::SetParamActive(paramname,active);}
 
     void SetParamAddress(const Int_t &index, Double_t* const paddr=NULL);
     void SetParamAddress(const char *paramname, Double_t* const paddr=NULL){QProcessor::SetParamAddress(paramname,paddr);}

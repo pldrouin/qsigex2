@@ -9,24 +9,26 @@ ClassImp(QProcessor)
 
 UInt_t QProcessor::fDefVerbosity=0;
 
+QProcessor::QProcessor(const QProcessor &rhs): TNamed(rhs), fParams(new QList<Double_t*>(*rhs.fParams)),  fOwnsParams(new QList<Bool_t>), fParamsNames(new QList<TString>(*rhs.fParamsNames)), fParamsChildIndices(new QList<QList<Int_t > >(*rhs.fParamsChildIndices)), fChildParamsMapping(new QList<QList<Int_t> >(*rhs.fChildParamsMapping)), fForceExecAll(rhs.fForceExecAll), fVerbosity(rhs.fVerbosity), fPProcessing(rhs.fPProcessing)
+{
+  fOwnsParams->RedimList(rhs.fParams->Count(),-1,kFALSE);
+}
+
 QProcessor::~QProcessor()
 {
   ClearParams();
+
   delete fParams;
   fParams=NULL;
   delete fOwnsParams;
   fOwnsParams=NULL;
+
   delete fParamsNames;
   fParamsNames=NULL;
   delete fParamsChildIndices;
   fParamsChildIndices=NULL;
   delete fChildParamsMapping;
   fChildParamsMapping=NULL;
-}
-
-QProcessor::QProcessor(const QProcessor &rhs): TNamed(rhs), fParams(new QList<Double_t*>(*rhs.fParams)), fOwnsParams(new QList<Bool_t>), fParamsNames(new QList<TString>(*rhs.fParamsNames)), fParamsChildIndices(new QList<QList<Int_t > >(*rhs.fParamsChildIndices)), fChildParamsMapping(new QList<QList<Int_t> >(*rhs.fChildParamsMapping)), fForceExecAll(rhs.fForceExecAll), fVerbosity(rhs.fVerbosity), fPProcessing(rhs.fPProcessing)
-{
-  fOwnsParams->RedimList(rhs.fParams->Count(),-1,kFALSE);
 }
 
 void QProcessor::ClearParams()
@@ -96,6 +98,26 @@ void QProcessor::SetParam(const Int_t &index, const Double_t &value)
   }
 }
 
+void QProcessor::SetParam(const char *paramname, const Double_t &value)
+{
+  Int_t i;
+  if((i=FindParamIndex(paramname))!=-1) SetParam(i,value);
+  else {
+    fprintf(stderr,"QProcessor::SetParam: Error: Parameter '%s' does not exist\n",paramname);
+    throw 1;
+  }
+}
+
+void QProcessor::SetParamActive(const char *paramname, const Bool_t &active)
+{
+  Int_t i;
+  if((i=FindParamIndex(paramname))!=-1) SetParamActive(i,active);
+  else {
+    fprintf(stderr,"QProcessor::SetParam: Error: Parameter '%s' does not exist\n",paramname);
+    throw 1;
+  }
+}
+
 void QProcessor::SetParamAddress(const Int_t &index, Double_t* const paddr)
 {
   if(paddr && (*fOwnsParams)[index]) {
@@ -110,16 +132,6 @@ void QProcessor::SetParamAddress(const Int_t &index, Double_t* const paddr)
     (*fOwnsParams)[index]=kTRUE;
     (*fParams)[index]=new Double_t;
     *((*fParams)[index])=0;
-  }
-}
-
-void QProcessor::SetParam(const char *paramname, const Double_t &value)
-{
-  Int_t i;
-  if((i=FindParamIndex(paramname))!=-1) SetParam(i,value);
-  else {
-    fprintf(stderr,"QProcessor::SetParam: Error: Parameter '%s' does not exist\n",paramname);
-    throw 1;
   }
 }
 

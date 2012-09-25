@@ -14,14 +14,34 @@ QProcObjProcessor::~QProcObjProcessor()
   fIOIndices=NULL;
   delete fOOIndices;
   fOOIndices=NULL;
+
+  if(fAObjsPDepends!=fObjsPDepends) {
+      delete fAObjsPDepends;
+      fAObjsPDepends=NULL;
+  }
   delete fObjsPDepends;
   fObjsPDepends=NULL;
   delete fIObjects;
   fIObjects=NULL;
+
+  if(fAAIObjects!=fAIObjects) {
+      delete fAAIObjects;
+      fAAIObjects=NULL;
+  }
   delete fAIObjects;
   fAIObjects=NULL;
   delete fOObjects;
   fOObjects=NULL;
+
+  if(fActiveAIO) {
+      delete fActiveAIO;
+      fActiveAIO=NULL;
+  }
+
+  if(fLastActiveAIO) {
+      delete fLastActiveAIO;
+      fLastActiveAIO=NULL;
+  }
 }
 
 Int_t QProcObjProcessor::AddProc(const char *name, const char *title, Int_t index)
@@ -243,17 +263,17 @@ void QProcObjProcessor::Exec() const
   if(fLastExec.GetSec() != 0) {
 
     //Loop over parameters
-    for(lExeci=fParams->Count()-1; lExeci>=0; --lExeci) {
+    for(lExeci=fAParams->Count()-1; lExeci>=0; --lExeci) {
 
       //If the current parameter value has changed, set the correspongind bit in the parameter mask
-      if(*(fParams->GetArray()[lExeci]) != fLastParams->GetArray()[lExeci]) lExecpardiffs.SetBit(lExeci,1);
+      if(*(fAParams->GetArray()[lExeci]) != fLastParams->GetArray()[lExeci]) lExecpardiffs.SetBit(lExeci,1);
     }
 
     //Loop over all absolute input objects
-    for(lExeci=fAIObjects->Count()-1; lExeci>=0; --lExeci) {
+    for(lExeci=fAAIObjects->Count()-1; lExeci>=0; --lExeci) {
 
       //If the current input object has been modified after the last run, add its mask to the mask of required processes
-      if((*fAIObjects)[lExeci]->NewerThan(fLastExec)) lExecdepmods|=(*fObjsPDepends)[lExeci];
+      if((*fAAIObjects)[lExeci]->NewerThan(fLastExec)) lExecdepmods|=(*fAObjsPDepends)[lExeci];
     }
 
     lExecrunall=fForceExecAll;
@@ -280,7 +300,7 @@ void QProcObjProcessor::Exec() const
     for(lExeci=0; lExeci<fProcs->Count(); lExeci++) {
 
       //If the current process has never been run or if it is triggered by the parameters mask
-      if(((*fProcsParDepends)[lExeci] && lExecpardiffs) || lExecdepmods.GetBit(lExeci) || lExecrunall) {
+      if(((*fProcsAParDepends)[lExeci] && lExecpardiffs) || lExecdepmods.GetBit(lExeci) || lExecrunall) {
 
 	if(GetVerbosity()&QProcessor::kShowExec) printf("\tProcess '%s' will be called\n",(*fProcs)[lExeci].GetName());
 	//Add it to the list of needed processes
@@ -350,22 +370,338 @@ void QProcObjProcessor::InitProcess(Bool_t allocateparammem)
     (*fProcs)[i].TellAddress();
   }
 
+  if(fAAIObjects!=fAIObjects) {
+      delete fAAIObjects;
+      fAAIObjects=fAIObjects;
+  }
+
+  if(fActiveAIO) {
+      delete fActiveAIO;
+      fActiveAIO=NULL;
+  }
+
+  if(fLastActiveAIO) {
+      delete fLastActiveAIO;
+      fLastActiveAIO=NULL;
+  }
+
+  if(fAObjsPDepends!=fObjsPDepends) {
+      delete fAObjsPDepends;
+      fAObjsPDepends=fObjsPDepends;
+  } 
+
   //Erase last parameters
   fLastParams->Clear();
   fLastParams->RedimList(fParams->Count(),-1,0.);
   fLastExec.SetSec(0);
 }
 
+void QProcObjProcessor::UpdateProcessFlags()
+{
+    QMask mask;
+    mask.FillMask(fParams->Count());
+
+    //If all parameters are active
+    if(fActiveParams && !((*fActiveParams)^mask)) {
+	delete fActiveParams;
+	fActiveParams=NULL;
+    }
+    mask.Clear();
+    Bool_t didPreviousExec=kFALSE;
+    Int_t i,j,k=0;
+
+    //If all parameters were previously active
+    if(fAParams==fParams) {
+
+	//If it is no longer the case (assertions: fLastActiveParams==NULL, fProcsAParDepends==fProcsParDepends)
+	if(fActiveParams) {
+            //First call Exec to update the processors before deactivating some parameters
+	    Exec();
+	    didPreviousExec=kTRUE;
+
+	    const Int_t& nparams=fParams->Count();
+
+	    for(i=nparams-1; i>=0; --i) if(fActiveParams->GetBit(i)) ++k;
+
+	    fAParams=new QList<Double_t*>;
+	    fAParams->RedimList(k);
+	    fAParIndexMapping=new QList<Int_t>;
+	    fAParIndexMapping->RedimList(nparams,-1,-1);
+	    QList<double>* tmpLastParams=new QList<double>;
+	    tmpLastParams->RedimList(k);
+	    fProcsAParDepends=new QList<QMask>;
+	    const Int_t& nprocs=fProcs->Count();
+	    fProcsAParDepends->RedimList(nprocs);
+	    --k;
+
+	    for(i=nparams-1; i>=0; --i) {
+
+		if(fActiveParams->GetBit(i)) {
+		    (*fAParams)[k]=(*fParams)[i];
+		    (*fAParIndexMapping)[i]=k;
+		    (*tmpLastParams)[k]=(*fLastParams)[i];
+
+		    for(j=nprocs-1; j>=0; --j) (*fProcsAParDepends)[j].SetBit(k,(*fProcsParDepends)[j].GetBit(i));
+		    --k;
+		}
+	    }
+
+	    delete fLastParams;
+	    fLastParams=tmpLastParams;
+	    fLastActiveParams=new QMask(*fActiveParams);
+	}
+
+    //Else if some of the parameters were not previously active
+    } else {
+
+	//If some parameters are still inactive
+	if(fActiveParams) {
+	    k=0;
+	    Int_t l=0;
+	    Bool_t hasDeactivated=kFALSE;
+	    Bool_t hasActivated=kFALSE;
+	    const Int_t& nparams=fParams->Count();
+
+	    //Count the number of active parameters and check if some parameters
+	    //are being deactivated
+	    for(i=nparams-1; i>=0; --i) {
+	      if(fActiveParams->GetBit(i)) {
+		++k;
+
+		if(fLastActiveParams->GetBit(i)) ++l;
+		else if(!hasActivated) hasActivated=kTRUE;
+
+	      } else if(fLastActiveParams->GetBit(i)) {
+
+		if(!hasDeactivated) hasDeactivated=kTRUE;
+		++l;
+	      }
+	    }
+
+	    if(hasDeactivated) {
+		Exec();
+		didPreviousExec=kTRUE;
+	    }
+
+	    fAParams->RedimList(k);
+	    fAParIndexMapping->Clear();
+	    fAParIndexMapping->RedimList(nparams,-1,-1);
+	    QList<double>* tmpLastParams=new QList<double>;
+	    tmpLastParams->RedimList(k);
+	    fProcsAParDepends->Clear();
+	    const Int_t& nprocs=fProcs->Count();
+	    fProcsAParDepends->RedimList(nprocs);
+	    Int_t j;
+	    --k;
+	    --l;
+
+	    for(i=nparams-1; i>=0; --i) {
+
+		if(fActiveParams->GetBit(i)) {
+		    (*fAParams)[k]=(*fParams)[i];
+		    (*fAParIndexMapping)[i]=k;
+
+		    if(fLastActiveParams->GetBit(i)) {
+		      (*tmpLastParams)[k]=(*fLastParams)[l];
+		      --l;
+
+		    } else (*tmpLastParams)[k]=!*(*fParams)[i];
+
+		    for(j=nprocs-1; j>=0; --j) (*fProcsAParDepends)[j].SetBit(k,(*fProcsParDepends)[j].GetBit(i));
+		    --k;
+
+		} else if (fLastActiveParams->GetBit(i)) --l;
+	    }
+
+	    delete fLastParams;
+	    fLastParams=tmpLastParams;
+	    *fLastActiveParams=*fActiveParams;
+
+	    //Update the processes to account for the newly activated parameters
+	    if(hasActivated) {
+		Exec();
+		didPreviousExec=kTRUE;
+	    }
+
+	//Else if all parameters are now active
+	} else {
+	    delete fAParams;
+	    fAParams=fParams;
+	    delete fAParIndexMapping;
+	    fAParIndexMapping=NULL;
+	    delete fProcsAParDepends;
+	    fProcsAParDepends=fProcsParDepends;
+
+	    QList<double>* tmpLastParams=new QList<double>;
+	    const Int_t& nparams=fParams->Count();
+	    tmpLastParams->RedimList(nparams);
+
+	    j=0;
+
+	    for(Int_t i=0; i<nparams; ++i) {
+
+		//If the parameter was active
+		if(fLastActiveParams->GetBit(i)) {
+		    (*tmpLastParams)[i]=(*fLastParams)[j];
+		    ++j;
+
+		} else (*tmpLastParams)[i]=!*(*fParams)[i]; //Just setting the last param value to a value
+							    //different from the current parameter value
+	    }
+	    delete fLastParams;
+	    fLastParams=tmpLastParams;
+
+	    delete fLastActiveParams;
+	    fLastActiveParams=NULL;
+
+	    //Update the processes to account for the newly activated parameters
+	    Exec();
+	    didPreviousExec=kTRUE;
+	}
+    }
+
+    mask.FillMask(fAIObjects->Count());
+
+    //If all aios are active
+    if(fActiveAIO && !((*fActiveAIO)^mask)) {
+	delete fActiveAIO;
+	fActiveAIO=NULL;
+    }
+    mask.Clear();
+
+    //If all aios were previously active
+    if(fAAIObjects==fAIObjects) {
+
+	//If it is no longer the case (assertions: fLastActiveAIO==NULL, fAObjsPDepends==fObjsPDepends)
+	if(fActiveAIO) {
+
+	    if(!didPreviousExec) Exec();
+	    k=0;
+
+	    const Int_t& naios=fAIObjects->Count();
+
+	    for(i=naios-1; i>=0; --i) if(fActiveAIO->GetBit(i)) ++k;
+
+	    fAAIObjects=new QList<QProcObj*>;
+	    fAAIObjects->RedimList(k);
+	    fAObjsPDepends=new QList<QMask>;
+	    const Int_t& nprocs=fProcs->Count();
+	    fAObjsPDepends->RedimList(k);
+	    --k;
+
+	    for(i=naios-1; i>=0; --i) {
+
+		if(fActiveAIO->GetBit(i)) {
+		    (*fAAIObjects)[k]=(*fAIObjects)[i];
+
+		    for(j=nprocs-1; j>=0; --j) (*fAObjsPDepends)[k].SetBit(j,(*fObjsPDepends)[i].GetBit(j));
+		    --k;
+		}
+	    }
+	    fLastActiveAIO=new QMask(*fActiveAIO);
+	}
+
+    //Else if some of the aios were not previously active
+    } else {
+
+	//If some aios are still inactive
+	if(fActiveAIO) {
+	    k=0;
+	    Bool_t hasDeactivated=kFALSE;
+	    const Int_t& naios=fAIObjects->Count();
+
+	    //Count the number of active aios and check if some aios
+	    //are being deactivated
+	    for(i=naios-1; i>=0; --i) {
+	      if(fActiveAIO->GetBit(i)) {
+		++k;
+
+	      } else if(fLastActiveAIO->GetBit(i)) {
+
+		if(!hasDeactivated) hasDeactivated=kTRUE;
+	      }
+	    }
+
+	    if(hasDeactivated && !didPreviousExec) Exec();
+
+	    fAAIObjects->RedimList(k);
+	    fAObjsPDepends->Clear();
+	    const Int_t& nprocs=fProcs->Count();
+	    fAObjsPDepends->RedimList(k);
+	    --k;
+
+	    for(i=naios-1; i>=0; --i) {
+
+		if(fActiveAIO->GetBit(i)) {
+		    (*fAAIObjects)[k]=(*fAIObjects)[i];
+
+		    for(j=nprocs-1; j>=0; --j) (*fAObjsPDepends)[k].SetBit(j,(*fObjsPDepends)[i].GetBit(j));
+		    --k;
+
+		}
+	    }
+	    *fLastActiveAIO=*fActiveAIO;
+
+	//Else if all aios are now active
+	} else {
+	    delete fAAIObjects;
+	    fAAIObjects=fAIObjects;
+	    delete fAObjsPDepends;
+	    fAObjsPDepends=fObjsPDepends;
+	    delete fLastActiveAIO;
+	    fLastActiveAIO=NULL;
+	}
+    }
+}
+
 const QProcObjProcessor& QProcObjProcessor::operator=(const QProcObjProcessor &rhs)
 {
-  QStdProcessor::operator=(rhs);
-  *fIOIndices=*rhs.fIOIndices;
-  *fOOIndices=*rhs.fOOIndices;
-  *fIObjects=*rhs.fIObjects;
-  *fAIObjects=*rhs.fAIObjects;
-  *fOObjects=*rhs.fOObjects;
-  *fObjsPDepends=*rhs.fObjsPDepends;
-  return *this;
+    QStdProcessor::operator=(rhs);
+    *fIOIndices=*rhs.fIOIndices;
+    *fOOIndices=*rhs.fOOIndices;
+    *fIObjects=*rhs.fIObjects;
+    *fAIObjects=*rhs.fAIObjects;
+
+    if(rhs.fAAIObjects==rhs.fAIObjects) {
+
+	if(fAAIObjects!=fAIObjects) {
+	    delete fAAIObjects;
+	    fAAIObjects=fAIObjects;
+	}
+
+    } else {
+
+	if(fAAIObjects==fAIObjects) fAAIObjects=new QList<QProcObj*>(*rhs.fAAIObjects);
+	else *fAAIObjects=*rhs.fAAIObjects;
+    }
+    *fOObjects=*rhs.fOObjects;
+    *fObjsPDepends=*rhs.fObjsPDepends;
+
+    if(rhs.fAObjsPDepends==rhs.fObjsPDepends) {
+
+	if(fAObjsPDepends!=fObjsPDepends) {
+	    delete fAObjsPDepends;
+	    fAObjsPDepends=fObjsPDepends;
+	}
+
+    } else {
+
+	if(fAObjsPDepends==fObjsPDepends) fAObjsPDepends=new QList<QMask>(*rhs.fAObjsPDepends);
+	else *fAObjsPDepends=*rhs.fAObjsPDepends;
+    }
+
+    if(rhs.fActiveAIO) {
+
+	if(fActiveAIO) *fActiveAIO=*rhs.fActiveAIO;
+	else fActiveAIO=new QMask(*rhs.fActiveAIO);
+
+    } else {
+	if(fActiveAIO) {
+	    delete fActiveAIO;
+	    fActiveAIO=NULL;
+	}
+    }
+    return *this;
 }
 
 void QProcObjProcessor::PrintAnalysisResults() const
@@ -464,6 +800,27 @@ void QProcObjProcessor::PrintProcesses(const UInt_t &level, const Bool_t &printd
       mask.Print();
     }
   }
+}
+
+void QProcObjProcessor::SetAIOActive(QProcObj *const obj, const Bool_t &active)
+{
+    Int_t index;
+
+    if((index=fAIObjects->FindFirst(obj))!=-1) {
+
+	if(!fActiveAIO) {
+
+	    if(!active) {
+		fActiveAIO=new QMask;
+		fActiveAIO->FillMask(fAIObjects->Count());
+		fActiveAIO->SetBit(index,kFALSE);
+	    }
+	} else fActiveAIO->SetBit(index,active);
+    } else {
+	fprintf(stderr,"QProcObjProcessor::SetAIOActive: Error: Absolute input object %p does not exist\n",obj);
+	throw 1;
+    }
+
 }
 
 void QProcObjProcessor::TerminateProcess()
