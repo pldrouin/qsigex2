@@ -34,6 +34,7 @@ class QSigExFit: public TObject
     const Double_t& GetFCNMin() const{return fFCNMin;}
     Int_t GetNVarParams() const;
     const Int_t& GetNParams() const{return fParams.Count();}
+    const Int_t& GetNProcOutputs() const{return fQPOutputs.Count();}
     const QProcessor* GetProcessor() const{return fQProcessor;}
     const QProcObj& GetProcOutput(Int_t index=-1) const{return *fQPOutputs[index];}
 
