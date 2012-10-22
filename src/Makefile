@@ -10,6 +10,7 @@
 # Version 1.00  13/08/2002 PL
 
 INCLUDEDIRS	=	-I$(shell root-config --incdir)
+ROOTLIBS	=	$(shell root-config --libs)
 
 ifdef WITH_LIBPROCINFO
 INCLUDEDIRS	+=	-I$(LIBPROCINFODIR)
@@ -78,7 +79,7 @@ libqsigex2.a: $(STD)
 	rm -rf $@ && $(STCOM) $@ $^
 
 libqsigex2.so: $(SHD)
-	$(CXX) $(CXXFLAGSSH) -shared -o $@ $^
+	$(CXX) $(CXXFLAGSSH) -shared -o $@ $^ $(ROOTLIBS)
 
 clean:
 	rm -f *.d

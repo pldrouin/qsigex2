@@ -141,7 +141,7 @@ void QProcList::InitThreads()
   QList<Int_t>         initchains;  //Initial chains
   QList<void*> notifchains; //Chains sending notifications
 
-  if(fPProcessor && fRNThreads>1) {
+  if(fPProcessor && fRNThreads>1 && fQPL->Count()>0) {
     QProcessor* proc;
     Int_t npiobjs, npoobjs;
     QList<QProcObj*> iobjs;
@@ -351,7 +351,7 @@ void QProcList::InitThreads()
   fStopThreads=kFALSE;
   fFirstChain=NULL;
   fLastChain=NULL;
-  fNThreads=(fPProcessor?fRNThreads:1);
+  fNThreads=(fPProcessor && fQPL->Count()?fRNThreads:1);
   if(fNThreads<0) fNThreads=0;
 
   block_signals_once(throw 1);
@@ -470,7 +470,7 @@ void QProcList::TerminateThreads()
 
   if(fThreads) {
     fStopThreads=kTRUE;
-    for(i=fINChains-1; i>=0; --i) sem_post(&fTWSem);
+    for(i=fNThreads-1; i>=0; --i) sem_post(&fTWSem);
 
     for(i=fNThreads-1; i>=0; --i) pthread_join(fThreads[i],NULL);
     sem_destroy(&fTWSem);
