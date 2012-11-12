@@ -74,6 +74,7 @@ void SetStepVal(const Double_t& stepval){*fData->fStepVal=stepval;}
     operator Double_t&(){return fData->fValue;}
     Double_t& MinusFitError(){return *fData->fMinusFitError;}
     Double_t& PlusFitError(){return *fData->fPlusFitError;}
+    Double_t& StartVal(){return *fData->fStartVal;}
     Int_t& FreeParamIndex(){return *fData->fFreeParamIndex;}
 
   private:

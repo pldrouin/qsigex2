@@ -52,6 +52,8 @@ class QSigExFit: public TObject
 
     virtual void TerminateFit(){}
 
+    void UpdateParamStartVals();
+
     const QSigExFit& operator=(const QSigExFit &rhs){TObject::operator=(rhs); return *this;}
 
     virtual void Browse(TBrowser *b);

@@ -149,3 +149,9 @@ void QSigExFit::Streamer(TBuffer &R__b)
     R__b.SetByteCount(R__c, kTRUE);
   }
 }
+
+void QSigExFit::UpdateParamStartVals()
+{
+  //Loop over the parameters
+  for(Int_t i=fParams.Count()-1; i>=0; --i) if(fParams[i].IsMaster()) fParams[i].StartVal()=fParams[i];
+}
