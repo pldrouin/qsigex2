@@ -1,6 +1,7 @@
 #ifndef _QARRAYPROCESSOR_
 #define _QARRAYPROCESSOR_
 
+#include "strdiffer.h"
 #include "QStdProcessor.h"
 #include "QProcArray.h"
 #include "QProcBranchHandler.h"

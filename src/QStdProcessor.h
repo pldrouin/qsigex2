@@ -2,6 +2,7 @@
 #define _QSTDPROCESSOR_
 
 #include "TNamed.h"
+#include "strdiffer.h"
 #include "QList.h"
 #include "QProcessor.h"
 #include "QNamedProc.h"

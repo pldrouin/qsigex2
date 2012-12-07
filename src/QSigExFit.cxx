@@ -30,7 +30,7 @@ Int_t QSigExFit::FindParamIndex(const char *paramname) const
   Int_t ret=-1;
   for(Int_t i=0; i<fParams.Count(); i++) {
 
-    if(!strcmp(fParams[i].GetName(),paramname)) ret=i;
+    if(!strdiffer(fParams[i].GetName(),paramname)) ret=i;
   }
   return ret;
 }
@@ -75,6 +75,7 @@ void QSigExFit::Init()
 
 void QSigExFit::InitFit()
 {
+  TerminateFit();
   for (Int_t i=0; i<fParams.Count(); ++i)
     if(!fParams[i].IsMaster())
       printf("Parameter '%s' is a slave of parameter '%s'\n",fParams[i].GetName(),fParams[fParams[i].GetMasterIndex()].GetName());

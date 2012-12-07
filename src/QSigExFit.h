@@ -3,6 +3,7 @@
 
 #include "TMatrixDSym.h"
 #include "TMath.h"
+#include "strdiffer.h"
 #include "QList.h"
 #include "QProcessor.h"
 #include "QProcDouble.h"
@@ -38,8 +39,11 @@ class QSigExFit: public TObject
     const QProcessor* GetProcessor() const{return fQProcessor;}
     const QProcObj& GetProcOutput(Int_t index=-1) const{return *fQPOutputs[index];}
 
+    bool  HasCovMatrix() const{return (fCovMatrix!=NULL);}
+
     void Init();
     virtual void InitFit();
+    virtual void TerminateFit(){}
 
     QSigExFitParam& Param(Int_t index) const{return fParams[index];}
     QSigExFitParam& Param(const char* paramname) const;
@@ -49,8 +53,6 @@ class QSigExFit: public TObject
     void SetFCNError(Double_t fcnerror){fFCNError=fcnerror;}
     void SetProcessor(QProcessor* processor){fQProcessor=processor; Init();}
     void SetVerbose(Int_t verbose=0){fVerbose=verbose;}
-
-    virtual void TerminateFit(){}
 
     void UpdateParamStartVals();
 

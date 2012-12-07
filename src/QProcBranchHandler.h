@@ -4,6 +4,7 @@
 #include "TFile.h"
 #include "TBranch.h"
 #include "TKey.h"
+#include "strdiffer.h"
 #include "QList.h"
 #include "QTypes.h"
 #include "QFileUtils.h"

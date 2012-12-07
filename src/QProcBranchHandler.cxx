@@ -95,7 +95,7 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
 
 	while ((key =(TKey*)nextkey())) {
 
-	  if(!strcmp(key->GetName(),dpn.GetLast())) {
+	  if(!strdiffer(key->GetName(),dpn.GetLast())) {
 	    namecycle=key->GetName();
 	    namecycle=namecycle+";";
 	    namecycle+=key->GetCycle();

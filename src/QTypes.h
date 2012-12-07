@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include "Rtypes.h"
 #include "TString.h"
+#include "strdiffer.h"
 
 namespace QTypes {
     enum TypeID {kBool, kChar, kUChar, kShort, kUShort, kInt, kUInt, kFloat, kDouble, kLong64, kULong64};

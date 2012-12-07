@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <stdint.h>
 
+#include "strdiffer.h"
 #include "qatomic.h"
 #include "sigcontrol.h"
 #else

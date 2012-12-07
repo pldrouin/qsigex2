@@ -4,11 +4,7 @@ ClassImp(QSigExFitMinuit)
 
 QSigExFitMinuit::~QSigExFitMinuit()
 {
-  if(fMinuit) {
-    delete fMinuit;
-    fMinuit=NULL;
-  }
-  
+  TerminateFit();
   if(fMinimArgs) {
     delete fMinimArgs;
     fMinimArgs=NULL;
@@ -32,7 +28,7 @@ Double_t QSigExFitMinuit::EvalFCN() const
 Int_t QSigExFitMinuit::FindMinimArg(const char* name) const
 {
   for(Int_t i=0; i<fMinimArgs->Count(); i++){
-    if(!strcmp((*fMinimArgs)[i].GetName(),name)) return i;
+    if(!strdiffer((*fMinimArgs)[i].GetName(),name)) return i;
   }
   return -1;
 }
@@ -201,7 +197,6 @@ void QSigExFitMinuit::InitFit()
   Double_t dbuf;
   Int_t numfpar=0;
 
-  if(fMinuit) delete fMinuit;
   fMinuit=new TMinuit(fParams.Count());
 
   //Set parameters to use for Minuit SET PRINT command:
@@ -286,6 +281,33 @@ void QSigExFitMinuit::InitFit()
 
       //Update the buffer address
       if(!fParams[i].IsMaster()) fQProcessor->CopyParamAddress(fParams[i].GetTopMasterIndex(),i);
+    }
+  }
+}
+
+void QSigExFitMinuit::TerminateFit()
+{
+  if(fMinuit) {
+    delete fMinuit;
+    fMinuit=NULL;
+
+    if(fQProcessor) {
+      int j=0;
+
+      //Loop through master parameters, and initialize a variable in Minuit for each one.
+      for (int i=0; i<fParams.Count(); i++){
+
+	//If the current parameter is not a slave of another param, add it to Minuit
+	if(fParams[i].IsMaster()) {
+	  //printf("Param '%s' owns its value\n",fParams[i].GetName());
+
+	  //If IsFixed() is not equal to 1, add the parameter to Minuit
+	  if(fParams[i].IsFixed()!=1) {
+	    fQProcessor->SetParamAddress(i,NULL);
+	    ++j;
+	  }
+	}
+      }
     }
   }
 }

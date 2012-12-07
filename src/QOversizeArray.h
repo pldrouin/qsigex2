@@ -35,6 +35,8 @@ struct sem_t;
 #include "TRandom.h"
 #include "TTimeStamp.h"
 
+#include "strdiffer.h"
+
 #ifdef WITH_LIBPROCINFO
 #include "procinfo.h"
 #endif

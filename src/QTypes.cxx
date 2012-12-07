@@ -21,37 +21,37 @@ Int_t QTypes::GetTypeID(const Char_t *atype)
 {
   Int_t type=-1;
 
-  if(!strcmp(atype,"D") || !strcmp(atype,"Double_t")) {
+  if(!strdiffer(atype,"D") || !strdiffer(atype,"Double_t")) {
     type=kDouble;
 
-  } else if(!strcmp(atype,"F") || !strcmp(atype,"Float_t")) {
+  } else if(!strdiffer(atype,"F") || !strdiffer(atype,"Float_t")) {
     type=kFloat;
 
-  } else if(!strcmp(atype,"I") || !strcmp(atype,"Int_t")) {
+  } else if(!strdiffer(atype,"I") || !strdiffer(atype,"Int_t")) {
     type=kInt;
 
-  } else if(!strcmp(atype,"i") || !strcmp(atype,"UInt_t")) {
+  } else if(!strdiffer(atype,"i") || !strdiffer(atype,"UInt_t")) {
     type=kUInt;
 
-  } else if(!strcmp(atype,"O") || !strcmp(atype,"Bool_t")) {
+  } else if(!strdiffer(atype,"O") || !strdiffer(atype,"Bool_t")) {
     type=kBool;
 
-  } else if(!strcmp(atype,"L") || !strcmp(atype,"Long64_t")) {
+  } else if(!strdiffer(atype,"L") || !strdiffer(atype,"Long64_t")) {
     type=kLong64;
 
-  } else if(!strcmp(atype,"l") || !strcmp(atype,"ULong64_t")) {
+  } else if(!strdiffer(atype,"l") || !strdiffer(atype,"ULong64_t")) {
     type=kULong64;
 
-  } else if(!strcmp(atype,"B") || !strcmp(atype,"Char_t")) {
+  } else if(!strdiffer(atype,"B") || !strdiffer(atype,"Char_t")) {
     type=kChar;
 
-  } else if(!strcmp(atype,"b") || !strcmp(atype,"UChar_t")) {
+  } else if(!strdiffer(atype,"b") || !strdiffer(atype,"UChar_t")) {
     type=kUChar;
 
-  } else if(!strcmp(atype,"S") || !strcmp(atype,"Short_t")) {
+  } else if(!strdiffer(atype,"S") || !strdiffer(atype,"Short_t")) {
     type=kShort;
 
-  } else if(!strcmp(atype,"s") || !strcmp(atype,"UShort_t")) {
+  } else if(!strdiffer(atype,"s") || !strdiffer(atype,"UShort_t")) {
     type=kUShort;
 
   } else {

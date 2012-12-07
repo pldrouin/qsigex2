@@ -31,6 +31,7 @@ class QSigExFitMinuit: public QSigExFit
     const char* GetMinuitStatus() const{return (const TString&)fMinuitStatus;}
 
     void InitFit();
+    void TerminateFit();
 
     void SetFCN(void (*fcn)(Int_t&, Double_t*, Double_t&f, Double_t*, Int_t));
     void SetFCN(void* fcn);

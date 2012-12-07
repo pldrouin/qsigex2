@@ -12,6 +12,7 @@
 #include "TH3D.h"
 #include "TMath.h"
 #include "TMatrixDSym.h"
+#include "strdiffer.h"
 #include "QDisTH.h"
 #include "QAxis.h"
 
@@ -55,7 +56,7 @@ template <typename U> class QHN: public QDis
     const Double_t& AddEntries(const Double_t &nentries=1){return (fEntries+=nentries);}
     inline virtual void AddFBinContent(const Long64_t &fbin, const U &w=1){AddBinContent(fbin,w);}
     virtual void Clear(Option_t* option="");
-    virtual TObject* Clone(const char* newname = "") const{QHN<U>* ret=new QHN<U>(*this); if(strcmp(newname,"")) dynamic_cast<TNamed*>(ret)->SetName(newname); return dynamic_cast<TObject*>(ret);}
+    virtual TObject* Clone(const char* newname = "") const{QHN<U>* ret=new QHN<U>(*this); if(strdiffer(newname,"")) dynamic_cast<TNamed*>(ret)->SetName(newname); return dynamic_cast<TObject*>(ret);}
     QDis* CloneQDis() const{return new QHN<U>(*this);}
     void Divide(const QHN<U> *qhn);
     void Draw(Option_t *option=""){if(fNDims<4) const_cast<TH1&>(GetTH()).Draw(option);}

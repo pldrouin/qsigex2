@@ -105,7 +105,7 @@ void QStdProcessor::ClearParams()
 Int_t QStdProcessor::FindProcIndex(const char *procname) const
 {
   for(Int_t i=0; i<fProcs->Count(); i++){
-    if(!strcmp((*fProcs)[i].GetName(),procname)) return i;
+    if(!strdiffer((*fProcs)[i].GetName(),procname)) return i;
   }
   return -1;
 }

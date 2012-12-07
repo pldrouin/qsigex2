@@ -455,14 +455,14 @@ void QSharedArray::LoadArray()
     }
   }
 
-  if(strcmp(fArrayPars->arrayname,fArrayName.c_str())) {
+  if(strdiffer(fArrayPars->arrayname,fArrayName.c_str())) {
     fprintf(stderr,"QSharedArray::LoadArray: Error: Array name saved in file '%s' does not match provided array name\n",fFilename.c_str());
     throw 1;
   }
 
   uint32_t uibuf=strlen(fArrayPars->arrayname)+1;
 
-  if(fObjectTypeName.size() && fArrayPars->anamelength>uibuf && strcmp(fObjectTypeName.c_str(),fArrayPars->arrayname+uibuf)) {
+  if(fObjectTypeName.size() && fArrayPars->anamelength>uibuf && strdiffer(fObjectTypeName.c_str(),fArrayPars->arrayname+uibuf)) {
     fprintf(stderr,"QSharedArray::LoadArray: Error: Array type '%s' saved in file '%s' does not match the provided array type ('%s')\n",fArrayPars->arrayname+uibuf,fFilename.c_str(),fObjectTypeName.c_str());
     throw 1;
   }

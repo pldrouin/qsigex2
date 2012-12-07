@@ -171,7 +171,6 @@ Double_t QSigExFitMCMC::Fit(Bool_t fituncerts)
 
 void QSigExFitMCMC::InitFit()
 {
-  TerminateFit();
   TDirectory *curdir=gDirectory;
   TDirectory *dbuf;
   Int_t i,j;
@@ -230,15 +229,15 @@ void QSigExFitMCMC::InitFit()
     }
     proto=(*fParOANames)[i].GetValue()(0,j);
 
-    if(!strcmp(proto,"tree")) {
+    if(!strdiffer(proto,"tree")) {
       //Create the output array and store the pointer
       (*fParOArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fParOANames)[i].GetValue()(j+3,(*fParOANames)[i].GetValue().Length()-j-3),(*fParOANames)[i].GetName(), kTRUE));
 
-    } else if(!strcmp(proto,"ttree")) {
+    } else if(!strdiffer(proto,"ttree")) {
       //Create the output array and store the pointer
       (*fParOArrays).Add(QProcBranchHandler::LoadBranch((TString)(*fParOANames)[i].GetValue()(j+3,(*fParOANames)[i].GetValue().Length()-j-3),(*fParOANames)[i].GetName(), kTRUE, kTRUE, kTRUE));
 
-    } else if(!strcmp(proto,"qoa")) {
+    } else if(!strdiffer(proto,"qoa")) {
       //Create the output array and store the pointer
       (*fParOArrays).Add(QProcQOAHandler::LoadQOA((TString)(*fParOANames)[i].GetValue()(j+3,(*fParOANames)[i].GetValue().Length()-j-3),(*fParOANames)[i].GetName(), kTRUE));
 

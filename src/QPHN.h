@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include "TMath.h"
+#include "strdiffer.h"
 #include "QAxis.h"
 #include "TH1D.h"
 #include "TH2D.h"
@@ -60,7 +61,7 @@ class QPHN: public QHN_D
     }
     void CopyStruct(const QHN_D &qthn);
     void Clear(Option_t* option=""){QHN_D::Clear(); if(fBinEntries) {free(fBinEntries); fBinEntries=NULL;}}
-    TObject* Clone(const char* newname = "") const{QPHN* ret=new QPHN(*this); if(strcmp(newname,"")) dynamic_cast<TNamed*>(ret)->SetName(newname); return dynamic_cast<TObject*>(ret);}
+    TObject* Clone(const char* newname = "") const{QPHN* ret=new QPHN(*this); if(strdiffer(newname,"")) dynamic_cast<TNamed*>(ret)->SetName(newname); return dynamic_cast<TObject*>(ret);}
     inline void Fill(Double_t const * const &x, const Double_t &y){AddBinContent(FindBin(x),y);}
     inline void Fill(Double_t const * const &x, const Double_t &y, const Double_t &w){AddBinContent(FindBin(x),y,w);}
     inline void Fill(const Double_t &x0, const Double_t &y){AddBinContent(FindBin(x0),y);}
