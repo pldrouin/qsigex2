@@ -1,3 +1,9 @@
+// Author: Pierre-Luc Drouin <pldrouin@pldrouin.net>
+// All information contained herein is, and remains the property of Pierre-Luc Drouin,
+// may be covered by patents and is protected by copyright law. Direct or indirect usage
+// of information from this material, including, but not limited to, inspection and distribution,
+// is strictly forbidden unless prior permission is obtained from the author.
+
 #ifndef _QSIGEXFITMINUIT_
 #define _QSIGEXFITMINUIT_
 
@@ -9,8 +15,8 @@
 class QSigExFitMinuit: public QSigExFit
 {
   public:
-    QSigExFitMinuit(): QSigExFit(), fMinuit(NULL), fCompiledFunc(NULL), fInterpretedFunc(NULL), fMinimName("Minimizer Name","MIGrad"), fMinimArgs(new QList<QNamedVar<Double_t> >), fMinosMaxCalls("Minos Max Calls",-1), fMinuitStrategy("Minuit Strategy",0), fMinuitStatus("Minuit Status","") {}
-    QSigExFitMinuit(const QSigExFitMinuit &rhs): QSigExFit(rhs), fMinuit(NULL), fCompiledFunc(rhs.fCompiledFunc), fInterpretedFunc(rhs.fInterpretedFunc), fMinimName(rhs.fMinimName), fMinimArgs(new QList<QNamedVar<Double_t> >(*rhs.fMinimArgs)), fMinosMaxCalls(rhs.fMinosMaxCalls), fMinuitStrategy("Minuit Strategy",rhs.fMinuitStrategy), fMinuitStatus(rhs.fMinuitStatus) {};
+    QSigExFitMinuit(): QSigExFit(), fMinuit(NULL), fCompiledFunc(NULL), fInterpretedFunc(NULL), fMinimName("Minimizer Name","MIGrad"), fMinimArgs(new QList<QNamedVar<Double_t> >), fMinosMaxCalls("Minos Max Calls",-1), fMinuitStrategy("Minuit Strategy",0), fMinuitAccuracy("Minuit Accuracy",-1), fMinuitStatus("Minuit Status","") {}
+    QSigExFitMinuit(const QSigExFitMinuit &rhs): QSigExFit(rhs), fMinuit(NULL), fCompiledFunc(rhs.fCompiledFunc), fInterpretedFunc(rhs.fInterpretedFunc), fMinimName(rhs.fMinimName), fMinimArgs(new QList<QNamedVar<Double_t> >(*rhs.fMinimArgs)), fMinosMaxCalls(rhs.fMinosMaxCalls), fMinuitStrategy("Minuit Strategy",rhs.fMinuitStrategy), fMinuitAccuracy("Minuit Accuracy",rhs.fMinuitAccuracy), fMinuitStatus(rhs.fMinuitStatus) {};
     virtual ~QSigExFitMinuit();
 
     Double_t EvalFCN() const;
@@ -32,6 +38,8 @@ class QSigExFitMinuit: public QSigExFit
 
     void InitFit();
     void TerminateFit();
+
+    void SetMinuitAccuracy(const double& accuracy){fMinuitAccuracy=accuracy;}
 
     void SetFCN(void (*fcn)(Int_t&, Double_t*, Double_t&f, Double_t*, Int_t));
     void SetFCN(void* fcn);
@@ -55,6 +63,7 @@ class QSigExFitMinuit: public QSigExFit
     QList<QNamedVar<Double_t> > *fMinimArgs; //->Minimizer arguments
     QNamedVar<Int_t> fMinosMaxCalls;  //Maximum number of calls of MINOS
     QNamedVar<Int_t> fMinuitStrategy; //Minuit strategy
+    QNamedVar<Double_t> fMinuitAccuracy; //Minuit accuracy
     QNamedVar<TString> fMinuitStatus; //TMinuit Status
   private:
     ClassDef(QSigExFitMinuit,1) //QSigExFit using TMinuit minimizer

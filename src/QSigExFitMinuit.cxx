@@ -1,3 +1,9 @@
+// Author: Pierre-Luc Drouin <pldrouin@pldrouin.net>
+// All information contained herein is, and remains the property of Pierre-Luc Drouin,
+// may be covered by patents and is protected by copyright law. Direct or indirect usage
+// of information from this material, including, but not limited to, inspection and distribution,
+// is strictly forbidden unless prior permission is obtained from the author.
+
 #include "QSigExFitMinuit.h"
 
 ClassImp(QSigExFitMinuit)
@@ -80,6 +86,11 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
       dbuf1=fMinuitStrategy;
       fMinuit->mnexcm("SET STR",&dbuf1,1,ierflg);
 
+      if(fMinuitAccuracy>0) {
+	dbuf1=fMinuitAccuracy;
+	fMinuit->mnexcm("SET EPSmachine",&dbuf1,1,ierflg);
+      }
+
       //**** Call the minimizer ****
       fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
 
@@ -99,18 +110,8 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
 	    j++;
 	  }
 	}
-	// rerun minimizer
 	fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
 
-	//Calculate non-symmetric errors with MINOS:
-	//Minuit calculates errors by finding the change in the parameter value 
-	//required to change the function by fcnerror.
-	//In the case of a Chi-2, 
-	//     fcnerror =1.0 --> 1 sigma
-	//     fcnerror =4.0 --> 2 sigma
-	//     fcnerror =9.0 --> 3 sigma
-	//When minosmaxcalls is positive, it sets the maximum number of function
-	//calls per parameter to its values 
 	dbuf1=fMinosMaxCalls;
 	fMinuit->mnexcm("MINO",&dbuf1,(Int_t)(fMinosMaxCalls>=0),ierflg); 
       }
@@ -135,19 +136,7 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
       if(fParams[i].IsFixed()!=1) {
 
 	if(fParams[i].IsMaster()) {
-	  //mnpout takes in the index of the parameter we're asking about, and returns
-	  //it's name, fitted value, estimate of parameter uncertainty, lower limit
-	  //on the parameter value, upper limit on the parameter value, and the
-	  //internal parameter number (if the parameter is variable).  See Minuit
-	  //documentation for details.  We aren't actually interested in any of this
-	  //except the fit value.
-
 	  fMinuit->mnpout(j,strbuf,ParamFitVal(i),dbuf1,dbuf2,dbuf3,ibuf1);
-
-	  //mnerrs reports the errors calculated by MINOS.  It takes in the index of 
-	  //the parameter we're asking about, and returns the positive error, 
-	  //negative error (as a negative number), the parabolic parameter error 
-	  //and the global correlation coefficient for the parameter.  
 
 	  if(fituncerts) fMinuit->mnerrs(j,ParamPlusFitError(i),ParamMinusFitError(i),dbuf1,dbuf2);
 	  else ParamPlusFitError(i)=ParamMinusFitError(i)=0;
@@ -339,6 +328,7 @@ void QSigExFitMinuit::Browse(TBrowser *b)
   b->Add(&fMinimName);
   b->Add(fMinimArgs,"Minimizer Arguments");
   b->Add(&fMinosMaxCalls);
+  b->Add(&fMinuitAccuracy);
   b->Add(&fMinuitStrategy);
   b->Add(&fMinuitStatus);
 }
