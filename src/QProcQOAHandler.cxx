@@ -9,7 +9,7 @@
 ClassImp(QProcQOAHandler)
 
 QList<TString> QProcQOAHandler::fFiles;
-QList<TObject*> QProcQOAHandler::fQOAObjs;
+QList<void*> QProcQOAHandler::fQOAObjs;
 QList<Int_t> QProcQOAHandler::fNObjReqQOA;
 Bool_t QProcQOAHandler::fSharedInputs=kTRUE;
 Bool_t QProcQOAHandler::fSaveOutputs=kTRUE;
@@ -31,7 +31,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *ades
       if((i=fFiles.FindFirst(pathname)) != -1) {
 
 	//If the array is opened in read mode
-	if(dynamic_cast<QProcQOA*>(fQOAObjs[i])->GetQOA()->GetOpenMode()==QOversizeArray::kRead) {
+	if(((QProcQOA*)fQOAObjs[i])->GetQOA()->GetOpenMode()==QOversizeArray::kRead) {
 	  fprintf(stderr,"QProcQOAHandler::LoadQOA: Error: Array '%s' located in file '%s' is not writable\n",adesc,pathname.Data());
 	}
 
@@ -44,7 +44,7 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *ades
 	fFiles.Add(pathname);
 	if(incrdeps) fNObjReqQOA.Add(1);
 	else fNObjReqQOA.Add(0);
-	fQOAObjs.Add((TObject*)new QProcQOA(pathname,adesc,QOversizeArray::kRecreate,fDefNOPerBuffer,fDefNPCBuffers,fDefNOAllocBlock));
+	fQOAObjs.Add(new QProcQOA(pathname,adesc,QOversizeArray::kRecreate,fDefNOPerBuffer,fDefNPCBuffers,fDefNOAllocBlock));
 
 	return (QProcQOA*)fQOAObjs.GetLast();
       }
@@ -63,8 +63,8 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *ades
 	if(incrdeps) fNObjReqQOA.Add(1);
 	else fNObjReqQOA.Add(0);
 
-	if(fSharedInputs) fQOAObjs.Add((TObject*)new QProcQSA(pathname,adesc,0));
-	else fQOAObjs.Add((TObject*)new QProcQOA(pathname,adesc,QOversizeArray::kRead,0,fDefNPCBuffers,fDefNOAllocBlock));
+	if(fSharedInputs) fQOAObjs.Add(new QProcQSA(pathname,adesc,0));
+	else fQOAObjs.Add(new QProcQOA(pathname,adesc,QOversizeArray::kRead,0,fDefNPCBuffers,fDefNOAllocBlock));
 
 	return (QProcQOA*)fQOAObjs.GetLast();
       }
@@ -88,7 +88,7 @@ void QProcQOAHandler::UnloadQOA(QProcArray *array)
   Int_t i;
 
   //If the file is an input file loaded by this class
-  if((i=fQOAObjs.FindFirst((TObject*)array)) != -1) {
+  if((i=fQOAObjs.FindFirst(array)) != -1) {
     //Decrement the number of objects requiring this array
     fNObjReqQOA[i]--;
 

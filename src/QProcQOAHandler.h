@@ -29,7 +29,7 @@ class QProcQOAHandler
     friend class QProcQSA;
   protected:
     static QList<TString> fFiles;    //Filenames of QOA objects required by this class
-    static QList<TObject*> fQOAObjs;     //QOA objects required by this class
+    static QList<void*> fQOAObjs;     //QOA objects required by this class
     static QList<Int_t> fNObjReqQOA;     //Number of objects requiring the QOA objects
     static Bool_t fSharedInputs;         //Use QProcQSA objects for inputs
     static Bool_t fSaveOutputs;          //Save output arrays loaded by this class before closing the files
