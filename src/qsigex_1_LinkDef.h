@@ -60,8 +60,8 @@
 #pragma link C++ class QProcQOAHandler;
 #pragma link C++ class QProcArgs;
 #pragma link C++ class QProcedure;
-#pragma link C++ class QCompProc;
-#pragma link C++ class QCINTProc;
+//#pragma link C++ class QCompProc;
+//#pragma link C++ class QCINTProc;
 #pragma link C++ class QNamedProc;
 #pragma link C++ class QProcTree;
 #pragma link C++ class QProcBranch-;
@@ -77,7 +77,7 @@
 
 #pragma link C++ class QProgress;
 #pragma link C++ class QDis;
-#pragma link C++ class QDisTF;
+//#pragma link C++ class QDisTF;
 #pragma link C++ class QDisTH-;
 #pragma link C++ class QFileUtils;
 #pragma link C++ class QTTreeUtils;

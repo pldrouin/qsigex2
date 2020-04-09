@@ -11,7 +11,7 @@
 
 #include "debugger.h"
 
-ClassImp(QCompProc)
+//ClassImp(QCompProc)
 
 Bool_t QCompProc::Exec()
 {

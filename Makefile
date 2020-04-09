@@ -53,5 +53,8 @@ clear:
 	cd ./src; $(MAKE) clear
 	rm -f lib/* include/*
 
-$(ALLINCS):
-	ln -s ../src/$(notdir $@) include/
+bindist:
+	rm -rf src Makefile
+
+$(ALLINCS): include/% : src/%
+	cp $^ $@

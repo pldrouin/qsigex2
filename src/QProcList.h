@@ -17,6 +17,7 @@ struct pthread_mutex_t;
 struct sem_t;
 #endif
 #include "sigcontrol.h"
+#include "strdiffer.h"
 #include "QList.h"
 #include "QProcessor.h"
 
@@ -37,6 +38,8 @@ class QProcList: public QProcessor
 
     void Exec() const;
 
+    Int_t FindQProcIndex(const char *qprocname) const;
+
     static const Bool_t& GetDefPProcessor(){return fDefPProcessor;}
 
     const Int_t& GetNThreads() const{return fNThreads;}
@@ -44,6 +47,9 @@ class QProcList: public QProcessor
     Int_t GetNQProcs() const{return fQPL->Count();}
 
     const Bool_t& GetPProcessor() const{return fPProcessor;}
+
+    QProcessor& GetQProc(const Int_t &index) const{return *dynamic_cast<QProcessor*>((*fQPL)[index]);}
+    QProcessor& GetQProc(const char *qprocname) const;
 
     void InitProcess(Bool_t allocateparammem=kTRUE);
     void UpdateProcessFlags();

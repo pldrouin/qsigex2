@@ -10,6 +10,7 @@
 #include <algorithm>
 #include "TNamed.h"
 #include "TAxis.h"
+#include "TBuffer.h"
 
 class QAxis: public TNamed
 {

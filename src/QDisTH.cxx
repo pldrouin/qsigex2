@@ -639,7 +639,7 @@ void QDisTH::Normalize(Double_t* integral, Bool_t reverse)
 
   PRINTF4(this,"\tvoid QDisTH::Normalize(Double_t* integral<",integral,">)\n")
 
-  if(!fNormFlags!=kNoNorm) {
+  if(!(fNormFlags!=kNoNorm)) {
     Double_t cutintbuf;         //Buffer for integral value(s)
     Int_t nfix=fNFixedCoords;   //Number of fixed coordinates for a conditional PDF
     Double_t nentries=fTH->GetEntries();

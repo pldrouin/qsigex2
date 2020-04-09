@@ -8,6 +8,8 @@
 
 ClassImp(QSigExFitMinuit)
 
+QProcRandom3 QSigExFitMinuit::fRnd;
+
 QSigExFitMinuit::~QSigExFitMinuit()
 {
   TerminateFit();
@@ -39,7 +41,7 @@ Int_t QSigExFitMinuit::FindMinimArg(const char* name) const
   return -1;
 }
 
-Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
+Double_t QSigExFitMinuit::Fit(const Bool_t& fituncerts, const Int_t& niters, const Bool_t& stoponsuccess, const Bool_t& inititerseed)
 {
   Int_t i,j;
   Double_t* minimargs=new Double_t[fMinimArgs->Count()];
@@ -48,6 +50,9 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
   Double_t dbuf1,dbuf2,dbuf3,dbuf4; 
   Int_t ibuf1;
   TString strbuf;
+  Int_t iter;
+  TString minuitstatus;
+  Double_t fcnmin;
 
   fCurInstance=this;
 
@@ -66,109 +71,134 @@ Double_t QSigExFitMinuit::Fit(Bool_t fituncerts)
 
       if(fParams[i].IsMaster()) {
 
-	//If the parameter is not hided to Minuit
+	//If the parameter is not hidden to Minuit
 	if(fParams[i].IsFixed()!=1) {
 
 	  if(!fParams[i].IsFixed()) {
 	    fMinuit->mnparm(j, fParams[i].GetName(), fParams[i].GetStartVal(), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
 	  }
-	  j++;
-
-	  //Else if the parameter is hided
-	} else {
-
-	  if(fQProcessor) fQProcessor->SetParam(i,fParams[i].GetStartVal());
+	  ++j;
 	}
       }
     }
 
-    if(j) {
-      dbuf1=fMinuitStrategy;
-      fMinuit->mnexcm("SET STR",&dbuf1,1,ierflg);
+    if(inititerseed) fRnd.InitProcObj();
 
-      if(fMinuitAccuracy>0) {
-	dbuf1=fMinuitAccuracy;
-	fMinuit->mnexcm("SET EPSmachine",&dbuf1,1,ierflg);
-      }
+    //Loop over fit iterations
+    for(iter=0;;) {
 
-      //**** Call the minimizer ****
-      fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
+      if(j) {
+	dbuf1=fMinuitStrategy;
+	fMinuit->mnexcm("SET STR",&dbuf1,1,ierflg);
 
-      if(fituncerts) {
-	j=0;
-
-	// set fit parameters to result from this run of the minimizer
-	for (i=0; i<numpar; i++){
-
-	  //If the parameter is not hided to Minuit
-	  if(fParams[i].IsFixed()!=1 && fParams[i].IsMaster()) {
-
-	    if(!fParams[i].IsFixed()) {
-	      fMinuit->mnpout(j,strbuf,dbuf4,dbuf1,dbuf2,dbuf3,ibuf1); //dbuf4 contains the fitted value
-	      fMinuit->mnparm(j, fParams[i].GetName(), dbuf4, fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
-	    }
-	    j++;
-	  }
+	if(fMinuitAccuracy>0) {
+	  dbuf1=fMinuitAccuracy;
+	  fMinuit->mnexcm("SET EPSmachine",&dbuf1,1,ierflg);
 	}
+
+	//**** Call the minimizer ****
 	fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
 
-	dbuf1=fMinosMaxCalls;
-	fMinuit->mnexcm("MINO",&dbuf1,(Int_t)(fMinosMaxCalls>=0),ierflg); 
-      }
-      fMinuitStatus=fMinuit->fCstatu;
-      fFCNMin=fMinuit->fAmin;
+	if(fituncerts) {
+	  j=0;
 
-    } else {
-      fMinuitStatus="SUCCESSFUL";
+	  // set fit parameters to result from this run of the minimizer
+	  for (i=0; i<numpar; i++){
 
-      fFCNMin=EvalFCN();
-    }
+	    //If the parameter is not hidden to Minuit
+	    if(fParams[i].IsFixed()!=1 && fParams[i].IsMaster()) {
 
-    delete[] minimargs;
-    ierflg = 0; 
+	      if(!fParams[i].IsFixed()) {
+		fMinuit->mnpout(j,strbuf,dbuf4,dbuf1,dbuf2,dbuf3,ibuf1); //dbuf4 contains the fitted value
+		fMinuit->mnparm(j, fParams[i].GetName(), dbuf4, fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+	      }
+	      ++j;
+	    }
+	  }
+	  fMinuit->mnexcm((TString&)fMinimName, minimargs, fMinimArgs->Count(), ierflg ); 
 
-    j=0;
-
-    //Loop over the parameters
-    for(i=0;i<numpar;i++){
-
-      //If the parameter is not hided to Minuit
-      if(fParams[i].IsFixed()!=1) {
-
-	if(fParams[i].IsMaster()) {
-	  fMinuit->mnpout(j,strbuf,ParamFitVal(i),dbuf1,dbuf2,dbuf3,ibuf1);
-
-	  if(fituncerts) fMinuit->mnerrs(j,ParamPlusFitError(i),ParamMinusFitError(i),dbuf1,dbuf2);
-	  else ParamPlusFitError(i)=ParamMinusFitError(i)=0;
-	  j++;
-
+	  dbuf1=fMinosMaxCalls;
+	  fMinuit->mnexcm("MINO",&dbuf1,(Int_t)(fMinosMaxCalls>=0),ierflg); 
 	}
+	minuitstatus=fMinuit->fCstatu;
+	fcnmin=fMinuit->fAmin;
 
       } else {
-	ParamFitVal(i)=fParams[i].GetStartVal();
+	minuitstatus="SUCCESSFUL";
+	fcnmin=EvalFCN();
+      }
+
+      if(!iter || (!(fcnmin>=fFCNMin) && (!strdiffer(minuitstatus,"SUCCESSFUL") || !strdiffer(minuitstatus,"CONVERGED ")))) {
+	fFCNMin=fcnmin;
+	fMinuitStatus=minuitstatus;
+	ierflg = 0; 
+	j=0;
+
+	//Loop over the parameters
+	for(i=0;i<numpar;i++){
+
+	  //If the parameter is not hidden to Minuit
+	  if(fParams[i].IsFixed()!=1) {
+
+	    if(fParams[i].IsMaster()) {
+	      fMinuit->mnpout(j,strbuf,ParamFitVal(i),dbuf1,dbuf2,dbuf3,ibuf1);
+
+	      if(fituncerts) fMinuit->mnerrs(j,ParamPlusFitError(i),ParamMinusFitError(i),dbuf1,dbuf2);
+	      else ParamPlusFitError(i)=ParamMinusFitError(i)=0;
+	      ++j;
+
+	    }
+
+	  } else if(fQProcessor) ParamFitVal(i)=fQProcessor->GetParam(i);
+	}
+
+	if(fituncerts) {
+
+	  if(fCovMatrix) {
+	    delete fCovMatrix;
+	    fCovMatrix=NULL;
+	  }
+
+	  if(fCorMatrix) {
+	    delete fCorMatrix;
+	    fCorMatrix=NULL;
+	  }
+	  Int_t numfpar=fMinuit->GetNumFreePars();        //Number of floating parameters
+	  Double_t *covmat=new Double_t[numfpar*numfpar]; //covariance matrix array
+	  //Get the covariance matrix from TMinuit
+	  fMinuit->mnemat(covmat,numfpar);
+	  //Store the matrix in a TMatrixDSym object
+	  fCovMatrix=new TMatrixDSym(numfpar,covmat);
+	  //Delete the covariance matrix array
+	  delete[] covmat;
+
+	  if(stoponsuccess && !strdiffer((TString&)fMinuitStatus,"SUCCESSFUL")) break;
+
+	} else if(stoponsuccess && !strdiffer((TString&)fMinuitStatus,"CONVERGED ")) break;
+      }
+
+      ++iter;
+      if(iter==niters) break;
+
+      j=0;
+
+      // Initialize floating parameters values using random values
+      for (i=0; i<numpar; i++){
+
+	if(fParams[i].IsMaster()) {
+
+	  //If the parameter is not hidden to Minuit
+	  if(fParams[i].IsFixed()!=1) {
+
+	    if(!fParams[i].IsFixed()) {
+	      fMinuit->mnparm(j, fParams[i].GetName(), fParams[i].GetMinVal()+fRnd.Rndm()*(fParams[i].GetMaxVal()-fParams[i].GetMinVal()), fParams[i].GetStepVal(), fParams[i].GetMinVal(), fParams[i].GetMaxVal(), ierflg);
+	    }
+	    ++j;
+	  }
+	}
       }
     }
-
-    if(fCovMatrix) {
-      delete fCovMatrix;
-      fCovMatrix=NULL;
-    }
-
-    if(fCorMatrix) {
-      delete fCorMatrix;
-      fCorMatrix=NULL;
-    }
-
-    if(fituncerts) {
-      Int_t numfpar=fMinuit->GetNumFreePars();        //Number of floating parameters
-      Double_t *covmat=new Double_t[numfpar*numfpar]; //covariance matrix array
-      //Get the covariance matrix from TMinuit
-      fMinuit->mnemat(covmat,numfpar);
-      //Store the matrix in a TMatrixDSym object
-      fCovMatrix=new TMatrixDSym(numfpar,covmat);
-      //Delete the covariance matrix array
-      delete[] covmat;
-    }
+    delete[] minimargs;
 
   } catch (Int_t e) {
     fprintf(stderr,"Exception handled by QSigExFit::Fit()\n");
@@ -205,13 +235,13 @@ void QSigExFitMinuit::InitFit()
   //See http://root.cern.ch/root/roottalk/roottalk97/0407.html for more details on the following lines
   if(fCompiledFunc) { //If the function is compiled
     //If the function pointer is passed from CINT, call TMinuit::SetFCN(void*)
-    if(G__p2f2funcname((void*)fCompiledFunc)) fMinuit->SetFCN((void*)fCompiledFunc);
+    /*if(G__p2f2funcname((void*)fCompiledFunc)) fMinuit->SetFCN((void*)fCompiledFunc);
     //else if it's passed from compiled code, call TMiuit::SetFCN(void (*)(Int_t&, Double_t*, Double_t&f, Double_t*, Int_t))
-    else fMinuit->SetFCN(fCompiledFunc);  //Sets name of fit function
-  }
+    else*/ fMinuit->SetFCN(fCompiledFunc);  //Sets name of fit function
+  //}
 
-  else if(fInterpretedFunc) { //Else if the function is interpreted by CINT
-    fMinuit->SetFCN(fInterpretedFunc);  //Sets name of fit function
+  //else if(fInterpretedFunc) { //Else if the function is interpreted by CINT
+  //  fMinuit->SetFCN(fInterpretedFunc);  //Sets name of fit function
 
   } else { //Else if no function has been set, throw an error
     fprintf(stderr,"QSigExFitMinuit::InitFit: Error: No fit function has been set\n");
@@ -252,7 +282,7 @@ void QSigExFitMinuit::InitFit()
 	}
 
 	if(fQProcessor) fQProcessor->SetParamAddress(i,&(fMinuit->fU[j]));
-	j++;
+	++j;
 
 	//Else if the parameter is fixed but is not required to be passed to Minuit
       } else {

@@ -85,7 +85,7 @@ Double_t QSigExFitMCMC::EvalFCN() const
   return 0;
 }
 
-Double_t QSigExFitMCMC::Fit(Bool_t fituncerts)
+Double_t QSigExFitMCMC::Fit(const Bool_t& fituncerts, const Int_t& niters, const Bool_t& stoponsuccess, const Bool_t& inititerseed)
 {
   Int_t i,j;
   Int_t numpar=0;

@@ -585,7 +585,12 @@ template <typename U> Int_t QList<U>::RedimList(const Int_t &newdim, Int_t index
       //If the address of the array has changed and the elements were stored in the object table
       //TObjectTable::PtrIsValid is called to detect if the array elements of the old table were stored in the object table.
       //The cast to TObject* should not matter since the memory pointed by the address is not accessed by PtrIsValid.
-      if(newarray!=fUArray && gObjectTable && gObjectTable->PtrIsValid((TObject*)fUArray)){
+#if defined(__i386__) || defined(__x86_64__)
+      if(newarray!=fUArray && gObjectTable && gObjectTable->PtrIsValid((TObject*)fUArray))
+#else
+      if(newarray!=fUArray && sizeof(U)>=4 && gObjectTable && sizeof(U*)==sizeof(TObject*) && gObjectTable->PtrIsValid((TObject*)fUArray))
+#endif
+      {
 
 	for(i=fNElements-1; i>=0; --i){
 	  //Update the address of the elements in the object table

@@ -24,54 +24,48 @@ QProcArray* QProcQOAHandler::LoadQOA(const char *arraylocation, const char *ades
   TString pathname=QFileUtils::SimplifyPathName(gSystem->ExpandPathName(arraylocation));
   Int_t i;
 
-  switch (isoutput) {
-    case kTRUE:
+  if(isoutput) {
 
-      //If the array has been opened previously by QProcQOAHandler
-      if((i=fFiles.FindFirst(pathname)) != -1) {
+    //If the array has been opened previously by QProcQOAHandler
+    if((i=fFiles.FindFirst(pathname)) != -1) {
 
-	//If the array is opened in read mode
-	if(((QProcQOA*)fQOAObjs[i])->GetQOA()->GetOpenMode()==QOversizeArray::kRead) {
-	  fprintf(stderr,"QProcQOAHandler::LoadQOA: Error: Array '%s' located in file '%s' is not writable\n",adesc,pathname.Data());
-	}
-
-	//Increment the number of output branches that require that file
-	if(incrdeps) fNObjReqQOA[i]++;
-	return (QProcArray*)fQOAObjs[i];
-
-	//Else if the array is not opened
-      } else {
-	fFiles.Add(pathname);
-	if(incrdeps) fNObjReqQOA.Add(1);
-	else fNObjReqQOA.Add(0);
-	fQOAObjs.Add(new QProcQOA(pathname,adesc,QOversizeArray::kRecreate,fDefNOPerBuffer,fDefNPCBuffers,fDefNOAllocBlock));
-
-	return (QProcQOA*)fQOAObjs.GetLast();
+      //If the array is opened in read mode
+      if(((QProcQOA*)fQOAObjs[i])->GetQOA()->GetOpenMode()==QOversizeArray::kRead) {
+	fprintf(stderr,"QProcQOAHandler::LoadQOA: Error: Array '%s' located in file '%s' is not writable\n",adesc,pathname.Data());
       }
-      break;
 
-    case kFALSE:
+      //Increment the number of output branches that require that file
+      if(incrdeps) fNObjReqQOA[i]++;
+      return (QProcArray*)fQOAObjs[i];
 
-      //If the array has been opened previously by QProcQOAHandler
-      if((i=fFiles.FindFirst(pathname)) != -1) {
-	if(incrdeps) fNObjReqQOA[i]++;
-	return (QProcArray*)fQOAObjs[i];
+      //Else if the array is not opened
+    } else {
+      fFiles.Add(pathname);
+      if(incrdeps) fNObjReqQOA.Add(1);
+      else fNObjReqQOA.Add(0);
+      fQOAObjs.Add(new QProcQOA(pathname,adesc,QOversizeArray::kRecreate,fDefNOPerBuffer,fDefNPCBuffers,fDefNOAllocBlock));
 
-	//Else if the file is not opened
-      } else {
-	fFiles.Add(pathname);
-	if(incrdeps) fNObjReqQOA.Add(1);
-	else fNObjReqQOA.Add(0);
+      return (QProcQOA*)fQOAObjs.GetLast();
+    }
 
-	if(fSharedInputs) fQOAObjs.Add(new QProcQSA(pathname,adesc,0));
-	else fQOAObjs.Add(new QProcQOA(pathname,adesc,QOversizeArray::kRead,0,fDefNPCBuffers,fDefNOAllocBlock));
+  } else {
 
-	return (QProcQOA*)fQOAObjs.GetLast();
-      }
-      break;
+    //If the array has been opened previously by QProcQOAHandler
+    if((i=fFiles.FindFirst(pathname)) != -1) {
+      if(incrdeps) fNObjReqQOA[i]++;
+      return (QProcArray*)fQOAObjs[i];
 
-    default:
-      return NULL;
+      //Else if the file is not opened
+    } else {
+      fFiles.Add(pathname);
+      if(incrdeps) fNObjReqQOA.Add(1);
+      else fNObjReqQOA.Add(0);
+
+      if(fSharedInputs) fQOAObjs.Add(new QProcQSA(pathname,adesc,0));
+      else fQOAObjs.Add(new QProcQOA(pathname,adesc,QOversizeArray::kRead,0,fDefNPCBuffers,fDefNOAllocBlock));
+
+      return (QProcQOA*)fQOAObjs.GetLast();
+    }
   }
 }
 

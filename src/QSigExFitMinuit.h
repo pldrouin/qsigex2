@@ -7,10 +7,10 @@
 #ifndef _QSIGEXFITMINUIT_
 #define _QSIGEXFITMINUIT_
 
-#include "G__ci.h"
 #include "TMinuit.h"
 #include "TMatrixDSym.h"
 #include "QSigExFit.h"
+#include "QProcRandom3.h"
 
 class QSigExFitMinuit: public QSigExFit
 {
@@ -23,7 +23,7 @@ class QSigExFitMinuit: public QSigExFit
 
     Int_t FindMinimArg(const char* name) const;
 
-    Double_t Fit(Bool_t fituncerts=kTRUE);
+    Double_t Fit(const Bool_t& fituncerts=kTRUE, const Int_t& niters=1, const Bool_t& stoponsuccess=kTRUE, const Bool_t& inititerseed=kFALSE);
 
     const Double_t& GetMinimArg(Int_t index) const{return (*fMinimArgs)[index];}
     const char* GetMinimName() const
@@ -56,6 +56,7 @@ class QSigExFitMinuit: public QSigExFit
     void Browse(TBrowser *b);
 
   protected:
+    static QProcRandom3 fRnd;
     TMinuit *fMinuit;              //!
     void (*fCompiledFunc)(Int_t&, Double_t*, Double_t&f, Double_t*, Int_t); //! Pointer to a compiled minimization function
     void *fInterpretedFunc;                                                 //! Pointer to an interpreted minimization function

@@ -4,29 +4,39 @@
 // of information from this material, including, but not limited to, inspection and distribution,
 // is strictly forbidden unless prior permission is obtained from the author.
 
-#include "QPHN.h"
+#include "QPHNE.h"
 
-ClassImp(QPHN)
+ClassImp(QPHNE)
 
-void QPHN::CopyStruct(const QHN_D &qthn)
+void QPHNE::CopyStruct(const QHN_D &qthn)
 {
   QHN_D::CopyStruct(qthn);
-  const QPHN *qphn=dynamic_cast<const QPHN*>(&qthn);
+  const QPHNE *qphn=dynamic_cast<const QPHNE*>(&qthn);
   fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t));
+  fBinContent2=(Double_t*)malloc(fNBins*sizeof(Double_t));
 
-  if(qphn) memcpy(fBinEntries,qphn->fBinEntries,fNBins*sizeof(Double_t));
-  else for(Long64_t li=fNBins-1; li>=0; --li) fBinEntries[li]=1;
+  if(qphn) {
+    memcpy(fBinEntries,qphn->fBinEntries,fNBins*sizeof(Double_t));
+    memcpy(fBinContent2,qphn->fBinContent2,fNBins*sizeof(Double_t));
+
+  } else {
+    memset(fBinContent2,0,fNBins*sizeof(Double_t));
+
+    for(Long64_t li=fNBins-1; li>=0; --li) fBinEntries[li]=1;
+  }
 }
 
-const QPHN& QPHN::operator=(const QPHN &qthn)
+const QPHNE& QPHNE::operator=(const QPHNE &qthn)
 {
   QHN_D::operator=(qthn);
   fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t));
   memcpy(fBinEntries,qthn.fBinEntries,fNBins*sizeof(Double_t));
+  fBinContent2=(Double_t*)malloc(fNBins*sizeof(Double_t));
+  memcpy(fBinContent2,qthn.fBinContent2,fNBins*sizeof(Double_t));
   return *this;
 }
 
-QHN_D* QPHN::Projection(const char *name, const Int_t *axes, const Int_t &naxes) const
+QHN_D* QPHNE::Projection(const char *name, const Int_t *axes, const Int_t &naxes) const
 {
   const Int_t nsdims=fNDims-naxes;
 
@@ -36,12 +46,12 @@ QHN_D* QPHN::Projection(const char *name, const Int_t *axes, const Int_t &naxes)
 
   for(i=0; i<naxes; ++i) {
     if(axes[i]<0 || axes[i]>=fNDims) {
-      fprintf(stderr,"QPHN::Projection: Error: Invalid axis index: %i\n",axes[i]);
+      fprintf(stderr,"QPHNE::Projection: Error: Invalid axis index: %i\n",axes[i]);
       throw 1;
     }
   }
 
-  QPHN *th=new QPHN(name,name,naxes);
+  QPHNE *th=new QPHNE(name,name,naxes);
 
   for(i=0; i<naxes; ++i) {
     th->SetAxis(i,fAxes[axes[i]]);
@@ -50,7 +60,7 @@ QHN_D* QPHN::Projection(const char *name, const Int_t *axes, const Int_t &naxes)
   Int_t *indices=new Int_t[nsdims]; //Axes indices for axes that are not projected
   Int_t *biniter=new Int_t[fNDims]; //Integers used as indices for iteration over bins of original histogram
   Int_t *pbiniter=new Int_t[naxes]; //Integers used as indices for iteration over bins of projected histogram
-  Double_t bcbuf, bebuf;
+  Double_t bcbuf, bc2buf, bebuf;
   Long64_t bin;
   l=0;
 
@@ -68,13 +78,14 @@ QHN_D* QPHN::Projection(const char *name, const Int_t *axes, const Int_t &naxes)
 
   //Loop over bin indices of projection axes
   for(;;) {
-    bcbuf=bebuf=0;
+    bcbuf=bc2buf=bebuf=0;
 
     for(i=0; i<nsdims; ++i) biniter[indices[i]]=1;
 
     for(;;) {
       bin=GetBin(biniter);
       bcbuf+=fBinContent[bin];
+      bc2buf+=fBinContent2[bin];
       bebuf+=fBinEntries[bin];
 
       if(biniter[indices[0]]<fAxes[indices[0]]->GetNBins()) ++(biniter[indices[0]]);
@@ -98,6 +109,7 @@ doneloop1:
     for(i=0; i<naxes; ++i) pbiniter[i]=biniter[axes[i]];
     bin=th->GetBin(pbiniter);
     th->fBinContent[bin]=bcbuf;
+    th->fBinContent2[bin]=bc2buf;
     th->fBinEntries[bin]=bebuf;
 
     if(biniter[axes[0]]<fAxes[axes[0]]->GetNBins()) ++(biniter[axes[0]]);
@@ -126,9 +138,9 @@ doneloop0:
   return th;
 }
 
-void QPHN::Streamer(TBuffer &R__b)
+void QPHNE::Streamer(TBuffer &R__b)
 { 
-  // Stream an object of class QPHN.
+  // Stream an object of class QPHNE.
 
   UInt_t R__s, R__c;
 
@@ -136,14 +148,16 @@ void QPHN::Streamer(TBuffer &R__b)
     Version_t R__v = R__b.ReadVersion(&R__s, &R__c); if (R__v) { }
     QHN_D::Streamer(R__b);
     R__b.ReadFastArray(fBinEntries,fNBins);
+    R__b.ReadFastArray(fBinContent2,fNBins);
 
-    R__b.CheckByteCount(R__s, R__c, QPHN::IsA());
+    R__b.CheckByteCount(R__s, R__c, QPHNE::IsA());
 
   } else {
-    R__c = R__b.WriteVersion(QPHN::IsA(), kTRUE);
+    R__c = R__b.WriteVersion(QPHNE::IsA(), kTRUE);
     QHN_D::Streamer(R__b);
 
     R__b.WriteFastArray(fBinEntries,fNBins);
+    R__b.WriteFastArray(fBinContent2,fNBins);
 
     R__b.SetByteCount(R__c, kTRUE);
   }

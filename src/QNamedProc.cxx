@@ -76,10 +76,11 @@ void QNamedProc::SetProc(Bool_t (*proc)(QProcArgs&),const char *procname)
 {
   *fProcName=procname;
   if(fProcedure) delete fProcedure;
-  if(G__p2f2funcname((void*)proc)) fProcedure=new QCINTProc((void*)proc);
-  else fProcedure=new QCompProc(proc);
+  /*if(G__p2f2funcname((void*)proc)) fProcedure=new QCINTProc((void*)proc);
+  else*/ fProcedure=new QCompProc(proc);
 }
 
+/*
 void QNamedProc::SetProc(const char *procname)
 {
   *fProcName=procname;
@@ -93,6 +94,7 @@ void QNamedProc::SetProc(void *proc, const char *procname)
   if(fProcedure) delete fProcedure;
   fProcedure=new QCINTProc(proc);
 }
+*/
 
 Bool_t operator==(const QNamedProc &lhs, const QNamedProc &rhs)
 {

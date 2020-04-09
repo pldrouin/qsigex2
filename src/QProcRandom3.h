@@ -25,7 +25,7 @@ class QProcRandom3: public QProcObj, public TRandom3
   protected:
     UInt_t fInitSeed;
     static UInt_t fInitGSeed;
-    static TRandom3 fSRndm;
+    static TRandom fSRndm;
     static QList<QProcObj*> fSInstances;
     ClassDef(QProcRandom3,1) //TRandom3 with QProcObj properties
 };

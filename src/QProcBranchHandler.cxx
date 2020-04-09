@@ -34,196 +34,189 @@ QProcArray* QProcBranchHandler::LoadBranch(const char *treelocation, const char 
     throw 1;
   }
 
-  switch (isoutput) {
-    case kTRUE:
+  if(isoutput) {
 
-      if(btype==-1) btype=kDouble;
+    if(btype==-1) btype=kDouble;
 
-      //If the tree is located in a file
-      if(donbuf.Count() == 2) {
+    //If the tree is located in a file
+    if(donbuf.Count() == 2) {
 
-	//If the file is already opened
-	if((dbuf=gDirectory->GetDirectory(donbuf[1]+":/"))) {
-	  dbuf->cd();
-
-	  if(!gDirectory->IsWritable()) {
-	    fprintf(stderr,"QProcBranchHandler::LoadBranch: Error: File '%s' is not writable\n",donbuf[1].Data());
-	    throw 1;
-	  }
-
-	  //If the file has been opened previously by QProcBranchHandler in rw mode
-	  if((i=fOFiles.FindFirst(dbuf)) != -1) {
-	    //Increment the number of output branches that require that file
-	    if(incrdeps) fNObjReqOFiles[i]++;
-	  }
-
-	  //Else if the file is not opened
-	} else {
-	  if((gSystem->AccessPathName(gSystem->DirName(donbuf[1]),kWritePermission) || gSystem->AccessPathName(gSystem->DirName(donbuf[1]),kExecutePermission))
-	      && !gSystem->AccessPathName(donbuf[1],kFileExists) && gSystem->AccessPathName(donbuf[1],kWritePermission)) {
-	    fprintf(stderr,"QProcBranchHandler::LoadBranch: Error: File '%s' cannot be opened for writing\n",donbuf[1].Data());
-	    throw 1;
-	  }
-
-	  //Open the file
-	  fOFiles.Add(new TFile(donbuf[1],"update"));
-	  if(incrdeps) fNObjReqOFiles.Add(1);
-	  else fNObjReqOFiles.Add(0);
-	}
-      }
-      //Decode the path to the object
-      dpn=QFileUtils::DecodePathName(donbuf[0]);
-
-      //Access the directory where the tree has to be created and create directories if necessary
-      for(i=0; i<dpn.Count()-1; i++) {
-
-	if(!(dbuf=gDirectory->GetDirectory(dpn[i]))) {
-	  dbuf=gDirectory->mkdir(dpn[i]);
-
-	  if(!dbuf) {
-	    fprintf(stderr,"QProcBranchHandler::LoadBranch: Error: Directory '%s' cannot be created in location '%s'\n",dpn[i].Data(),gDirectory->GetPath());
-	    throw 1;
-	  }
-	}
+      //If the file is already opened
+      if((dbuf=gDirectory->GetDirectory(donbuf[1]+":/"))) {
 	dbuf->cd();
-      }
 
-      //If the tree does not exist
-      if(!(tbuf=dynamic_cast<TTree*>(gDirectory->Get(dpn.GetLast())))) {
-	//Create the output tree
-	if(ttreeoutput) tbuf=new TTree(dpn.GetLast(),dpn.GetLast());
-	else tbuf=new QProcTree(dpn.GetLast(),dpn.GetLast());
-
-      } else {
-	//If the tree already existed, look for other cycles and delete them
-	TKey *key;
-	TIter nextkey(gDirectory->GetListOfKeys());
-
-	while ((key =(TKey*)nextkey())) {
-
-	  if(!strdiffer(key->GetName(),dpn.GetLast())) {
-	    namecycle=key->GetName();
-	    namecycle=namecycle+";";
-	    namecycle+=key->GetCycle();
-	    gDirectory->Delete(namecycle);
-	  }
-	}
-
-      }
-      dpn.Clear();
-
-      //If the branch already exists
-      if(!(bbuf=tbuf->GetBranch(bname))) bbuf=tbuf->Branch(bname,NULL,bname+"/"+GetTypeSName(btype));
-
-      //If the branch is a not QProcBranch
-      if(!(qabuf=dynamic_cast<QProcBranch*>(bbuf))) {
-
-	//If there is no wrapper that have been created for that branch, create one
-	if((i=fTBObjs.FindFirst(bbuf)) == -1) {
-	  fTBObjs.Add(bbuf);
-	  qabuf=new QProcTBranchWrapper(bbuf);
-	  fQPTBWObjs.Add((TObject*)qabuf);
-	  fNObjReqTB.Add(0);
-	  i=fQPTBWObjs.Count()-1;
-
-	} else qabuf=(QProcTBranchWrapper*)fQPTBWObjs[i];
-	//Return a pointer to the wrapper
-	fNObjReqTB[i]++;
-      }
-
-      if(qabuf->GetBTypeID()!=btype) {
-	fprintf(stderr,"QProcBranchHandler::LoadBranch(): Error: Existing branch '%s' in tree '%s:%s' has type '%s' instead of '%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data(),GetTypeName(qabuf->GetBTypeID()),GetTypeName(btype));
-	throw 1;
-      }
-      return qabuf;
-      break;
-
-    case kFALSE:
-
-      //If the tree is located in a file
-      if(donbuf.Count() ==2) {
-
-	//If the file is already opened
-	if((dbuf=gDirectory->GetDirectory(donbuf[1]+":/"))) {
-	  dbuf->cd();
-
-	  //If the file has been opened previously by QProcBranchHandler in rw mode
-	  if((i=fOFiles.FindFirst(dbuf)) != -1) {
-	    //Increment the number of output branches that require that file
-	    if(incrdeps) fNObjReqOFiles[i]++;
-	  }
-
-	  //If the file has been opened previously by QProcBranchHandler in read-only mode
-	  if((i=fIFiles.FindFirst(dbuf)) != -1) {
-	    //Increment the number of input branches that require that file
-	    if(incrdeps) fNObjReqIFiles[i]++;
-	  }
-
-	  //Else if the file is not opened
-	} else {
-
-	  if(gSystem->AccessPathName(donbuf[1],kReadPermission)) {
-	    fprintf(stderr,"QProcBranchHandler::LoadBranch: Error: File '%s' cannot be read\n",donbuf[1].Data());
-	    throw 1;
-	  }
-
-	  //Open the file
-	  fIFiles.Add(new TFile(donbuf[1],"read"));
-	  if(incrdeps) fNObjReqIFiles.Add(1);
-	  else fNObjReqIFiles.Add(0);
-	}
-      }
-      //Decode the path to the object
-      dpn=QFileUtils::DecodePathName(donbuf[0]);
-
-      //Access the directory from where the tree has to be read
-      for(i=0; i<dpn.Count()-1; i++) {
-
-	if(!(dbuf=gDirectory->GetDirectory(dpn[i]))) {
-	  fprintf(stderr,"QProcBranchHandler::LoadBranch: Directory '%s' does not exist in location '%s'\n",dpn[i].Data(),gDirectory->GetPath());
+	if(!gDirectory->IsWritable()) {
+	  fprintf(stderr,"QProcBranchHandler::LoadBranch: Error: File '%s' is not writable\n",donbuf[1].Data());
 	  throw 1;
 	}
+
+	//If the file has been opened previously by QProcBranchHandler in rw mode
+	if((i=fOFiles.FindFirst(dbuf)) != -1) {
+	  //Increment the number of output branches that require that file
+	  if(incrdeps) fNObjReqOFiles[i]++;
+	}
+
+	//Else if the file is not opened
+      } else {
+	if((gSystem->AccessPathName(gSystem->DirName(donbuf[1]),kWritePermission) || gSystem->AccessPathName(gSystem->DirName(donbuf[1]),kExecutePermission))
+	    && !gSystem->AccessPathName(donbuf[1],kFileExists) && gSystem->AccessPathName(donbuf[1],kWritePermission)) {
+	  fprintf(stderr,"QProcBranchHandler::LoadBranch: Error: File '%s' cannot be opened for writing\n",donbuf[1].Data());
+	  throw 1;
+	}
+
+	//Open the file
+	fOFiles.Add(new TFile(donbuf[1],"update"));
+	if(incrdeps) fNObjReqOFiles.Add(1);
+	else fNObjReqOFiles.Add(0);
+      }
+    }
+    //Decode the path to the object
+    dpn=QFileUtils::DecodePathName(donbuf[0]);
+
+    //Access the directory where the tree has to be created and create directories if necessary
+    for(i=0; i<dpn.Count()-1; i++) {
+
+      if(!(dbuf=gDirectory->GetDirectory(dpn[i]))) {
+	dbuf=gDirectory->mkdir(dpn[i]);
+
+	if(!dbuf) {
+	  fprintf(stderr,"QProcBranchHandler::LoadBranch: Error: Directory '%s' cannot be created in location '%s'\n",dpn[i].Data(),gDirectory->GetPath());
+	  throw 1;
+	}
+      }
+      dbuf->cd();
+    }
+
+    //If the tree does not exist
+    if(!(tbuf=dynamic_cast<TTree*>(gDirectory->Get(dpn.GetLast())))) {
+      //Create the output tree
+      if(ttreeoutput) tbuf=new TTree(dpn.GetLast(),dpn.GetLast());
+      else tbuf=new QProcTree(dpn.GetLast(),dpn.GetLast());
+
+    } else {
+      //If the tree already existed, look for other cycles and delete them
+      TKey *key;
+      TIter nextkey(gDirectory->GetListOfKeys());
+
+      while ((key =(TKey*)nextkey())) {
+
+	if(!strdiffer(key->GetName(),dpn.GetLast())) {
+	  namecycle=key->GetName();
+	  namecycle=namecycle+";";
+	  namecycle+=key->GetCycle();
+	  gDirectory->Delete(namecycle);
+	}
+      }
+
+    }
+    dpn.Clear();
+
+    //If the branch already exists
+    if(!(bbuf=tbuf->GetBranch(bname))) bbuf=tbuf->Branch(bname,(void*)NULL,bname+"/"+GetTypeSName(btype));
+
+    //If the branch is a not QProcBranch
+    if(!(qabuf=dynamic_cast<QProcBranch*>(bbuf))) {
+
+      //If there is no wrapper that have been created for that branch, create one
+      if((i=fTBObjs.FindFirst(bbuf)) == -1) {
+	fTBObjs.Add(bbuf);
+	qabuf=new QProcTBranchWrapper(bbuf);
+	fQPTBWObjs.Add((TObject*)qabuf);
+	fNObjReqTB.Add(0);
+	i=fQPTBWObjs.Count()-1;
+
+      } else qabuf=(QProcTBranchWrapper*)fQPTBWObjs[i];
+      //Return a pointer to the wrapper
+      fNObjReqTB[i]++;
+    }
+
+    if(qabuf->GetBTypeID()!=btype) {
+      fprintf(stderr,"QProcBranchHandler::LoadBranch(): Error: Existing branch '%s' in tree '%s:%s' has type '%s' instead of '%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data(),GetTypeName(qabuf->GetBTypeID()),GetTypeName(btype));
+      throw 1;
+    }
+    return qabuf;
+
+  } else {
+    //If the tree is located in a file
+    if(donbuf.Count() ==2) {
+
+      //If the file is already opened
+      if((dbuf=gDirectory->GetDirectory(donbuf[1]+":/"))) {
 	dbuf->cd();
-      }
 
-      //Load the input tree
-      if(!(tbuf=dynamic_cast<TTree*>(gDirectory->Get(dpn.GetLast())))) {
-	fprintf(stderr,"QProcBranchHandler::LoadBranch: Tree '%s:%s' does not exist\n",donbuf[1].Data(),donbuf[0].Data());
+	//If the file has been opened previously by QProcBranchHandler in rw mode
+	if((i=fOFiles.FindFirst(dbuf)) != -1) {
+	  //Increment the number of output branches that require that file
+	  if(incrdeps) fNObjReqOFiles[i]++;
+	}
+
+	//If the file has been opened previously by QProcBranchHandler in read-only mode
+	if((i=fIFiles.FindFirst(dbuf)) != -1) {
+	  //Increment the number of input branches that require that file
+	  if(incrdeps) fNObjReqIFiles[i]++;
+	}
+
+	//Else if the file is not opened
+      } else {
+
+	if(gSystem->AccessPathName(donbuf[1],kReadPermission)) {
+	  fprintf(stderr,"QProcBranchHandler::LoadBranch: Error: File '%s' cannot be read\n",donbuf[1].Data());
+	  throw 1;
+	}
+
+	//Open the file
+	fIFiles.Add(new TFile(donbuf[1],"read"));
+	if(incrdeps) fNObjReqIFiles.Add(1);
+	else fNObjReqIFiles.Add(0);
+      }
+    }
+    //Decode the path to the object
+    dpn=QFileUtils::DecodePathName(donbuf[0]);
+
+    //Access the directory from where the tree has to be read
+    for(i=0; i<dpn.Count()-1; i++) {
+
+      if(!(dbuf=gDirectory->GetDirectory(dpn[i]))) {
+	fprintf(stderr,"QProcBranchHandler::LoadBranch: Directory '%s' does not exist in location '%s'\n",dpn[i].Data(),gDirectory->GetPath());
 	throw 1;
       }
-      dpn.Clear();
+      dbuf->cd();
+    }
 
-      //Get a pointer to the branch
-      if(!(bbuf=tbuf->GetBranch(bname))) {
-	fprintf(stderr,"QProcBranchHandler::LoadBranch(): Error: Branch '%s' does not exist in tree '%s:%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data());
-	throw 1;
-      }
+    //Load the input tree
+    if(!(tbuf=dynamic_cast<TTree*>(gDirectory->Get(dpn.GetLast())))) {
+      fprintf(stderr,"QProcBranchHandler::LoadBranch: Tree '%s:%s' does not exist\n",donbuf[1].Data(),donbuf[0].Data());
+      throw 1;
+    }
+    dpn.Clear();
 
-      //If the branch is not a QProcBranch
-      if(!(qabuf=dynamic_cast<QProcBranch*>(bbuf))) {
+    //Get a pointer to the branch
+    if(!(bbuf=tbuf->GetBranch(bname))) {
+      fprintf(stderr,"QProcBranchHandler::LoadBranch(): Error: Branch '%s' does not exist in tree '%s:%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data());
+      throw 1;
+    }
 
-	//If there is no wrapper that have been created for that branch, create one
-	if((i=fTBObjs.FindFirst(bbuf)) == -1) {
-	  fTBObjs.Add(bbuf);
-	  qabuf=new QProcTBranchWrapper(bbuf);
-	  fQPTBWObjs.Add((TObject*)qabuf);
-	  fNObjReqTB.Add(0);
-	  i=fQPTBWObjs.Count()-1;
-	} else qabuf=(QProcTBranchWrapper*)fQPTBWObjs[i];
-	//Return a pointer to the wrapper
-	fNObjReqTB[i]++;
-      }
+    //If the branch is not a QProcBranch
+    if(!(qabuf=dynamic_cast<QProcBranch*>(bbuf))) {
 
-      if(btype!=-1 && qabuf->GetBTypeID()!=btype) {
-	fprintf(stderr,"QProcBranchHandler::LoadBranch(): Error: Existing branch '%s' in tree '%s:%s' has type '%s' instead of '%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data(),GetTypeName(qabuf->GetBTypeID()),GetTypeName(btype));
-	throw 1;
-      }
+      //If there is no wrapper that have been created for that branch, create one
+      if((i=fTBObjs.FindFirst(bbuf)) == -1) {
+	fTBObjs.Add(bbuf);
+	qabuf=new QProcTBranchWrapper(bbuf);
+	fQPTBWObjs.Add((TObject*)qabuf);
+	fNObjReqTB.Add(0);
+	i=fQPTBWObjs.Count()-1;
+      } else qabuf=(QProcTBranchWrapper*)fQPTBWObjs[i];
+      //Return a pointer to the wrapper
+      fNObjReqTB[i]++;
+    }
 
-      return qabuf;
-      break;
+    if(btype!=-1 && qabuf->GetBTypeID()!=btype) {
+      fprintf(stderr,"QProcBranchHandler::LoadBranch(): Error: Existing branch '%s' in tree '%s:%s' has type '%s' instead of '%s'\n",bname.Data(),donbuf[1].Data(),donbuf[0].Data(),GetTypeName(qabuf->GetBTypeID()),GetTypeName(btype));
+      throw 1;
+    }
 
-    default:
-      return NULL;
+    return qabuf;
   }
 }
 

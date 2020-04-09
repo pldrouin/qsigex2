@@ -126,7 +126,7 @@ void QSigExFit::Streamer(TBuffer &R__b)
   UInt_t R__s, R__c;
   Int_t i,j;
   if (R__b.IsReading()) {
-    Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+    R__b.ReadVersion(&R__s, &R__c);
 
     TObject::Streamer(R__b);
     fParams.Streamer(R__b);

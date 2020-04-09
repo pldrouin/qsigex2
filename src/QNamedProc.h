@@ -12,7 +12,7 @@
 #include "TNamed.h"
 #include "TString.h"
 #include "QCompProc.h"
-#include "QCINTProc.h"
+//#include "QCINTProc.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -25,8 +25,8 @@ class QNamedProc: public TNamed
     QNamedProc(): TNamed(), fIVarsNames(new QList<QNamedVar<TString> >), fOVarsNames(new QList<QNamedVar<TString> >), fParamsNames(new QList<QNamedVar<TString> >), fProcName(new QNamedVar<TString>), fProcedure(NULL){}
     QNamedProc(const char *name, const char *title): TNamed(name,title), fIVarsNames(new QList<QNamedVar<TString> >), fOVarsNames(new QList<QNamedVar<TString> >), fParamsNames(new QList<QNamedVar<TString> >), fProcName(new QNamedVar<TString>("Procedure",NULL)), fProcedure(NULL){}
     QNamedProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname=NULL): TNamed(name,title), fIVarsNames(new QList<QNamedVar<TString> >), fOVarsNames(new QList<QNamedVar<TString> >), fParamsNames(new QList<QNamedVar<TString> >), fProcName(new QNamedVar<TString>("Procedure",NULL)), fProcedure(NULL){SetProc(proc,procname);}
-    QNamedProc(const char *name, const char *title, const char *procname): TNamed(name,title), fIVarsNames(new QList<QNamedVar<TString> >), fOVarsNames(new QList<QNamedVar<TString> >), fParamsNames(new QList<QNamedVar<TString> >), fProcName(new QNamedVar<TString>("Procedure",procname)) {fProcedure=new QCINTProc(procname);}
-    QNamedProc(const char *name, const char *title, void *proc, const char *procname=NULL): TNamed(name,title), fIVarsNames(new QList<QNamedVar<TString> >), fOVarsNames(new QList<QNamedVar<TString> >), fParamsNames(new QList<QNamedVar<TString> >), fProcName(new QNamedVar<TString>("Procedure",procname)) {fProcedure=new QCINTProc(proc);}
+//    QNamedProc(const char *name, const char *title, const char *procname): TNamed(name,title), fIVarsNames(new QList<QNamedVar<TString> >), fOVarsNames(new QList<QNamedVar<TString> >), fParamsNames(new QList<QNamedVar<TString> >), fProcName(new QNamedVar<TString>("Procedure",procname)) {fProcedure=new QCINTProc(procname);}
+//    QNamedProc(const char *name, const char *title, void *proc, const char *procname=NULL): TNamed(name,title), fIVarsNames(new QList<QNamedVar<TString> >), fOVarsNames(new QList<QNamedVar<TString> >), fParamsNames(new QList<QNamedVar<TString> >), fProcName(new QNamedVar<TString>("Procedure",procname)) {fProcedure=new QCINTProc(proc);}
     QNamedProc(const QNamedProc &rhs):TNamed(rhs), fIVarsNames(new QList<QNamedVar<TString> >(*rhs.fIVarsNames)), fOVarsNames(new QList<QNamedVar<TString> >(*rhs.fOVarsNames)), fParamsNames(new QList<QNamedVar<TString> >(*rhs.fParamsNames)), fProcName(new QNamedVar<TString>(*rhs.fProcName)), fProcedure(NULL){if(rhs.fProcedure) fProcedure=rhs.fProcedure->Clone();}
     virtual ~QNamedProc(){PRINTF2(this,"\tQNamedProc::~QNamedProc()\n") if(fProcedure) {delete fProcedure; fProcedure=NULL;} delete fIVarsNames; fIVarsNames=NULL; delete fOVarsNames; fOVarsNames=NULL; delete fParamsNames; fParamsNames=NULL; delete fProcName; fProcName=NULL;}
 
@@ -68,8 +68,8 @@ class QNamedProc: public TNamed
     void SetParamPtr(const Int_t &index, Double_t* const buf){fProcedure->SetParamPtr(index,buf);}
 
     void SetProc(Bool_t (*proc)(QProcArgs&),const char *procname=NULL);
-    void SetProc(const char *procname);
-    void SetProc(void *proc, const char *procname=NULL);
+    //void SetProc(const char *procname);
+    //void SetProc(void *proc, const char *procname=NULL);
 
     void TellAddress() const{fProcedure->SetNamedProcAddr(this);}
 

@@ -7,7 +7,6 @@
 #ifndef _QSIGEXFITMCMC_
 #define _QSIGEXFITMCMC_
 
-#include "G__ci.h"
 #include "TMatrixDSym.h"
 #include "TRandom3.h"
 #include "QSigExFit.h"
@@ -29,7 +28,7 @@ class QSigExFitMCMC: public QSigExFit
 
     Double_t EvalFCN() const;
 
-    Double_t Fit(Bool_t fituncerts=kTRUE);
+    Double_t Fit(const Bool_t& fituncerts=kTRUE, const Int_t& niters=1, const Bool_t& stoponsuccess=kTRUE, const Bool_t& inititerseed=kFALSE);
 
     const Int_t& GetNParOutputs(){return fParOANames->Count();}
     QNamedVar<TString>& GetParOutputNameTitle(Int_t index) const{return (*fParOANames)[index];}

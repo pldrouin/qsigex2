@@ -8,7 +8,7 @@
 
 template <typename U> QHNF<U>::QHNF(const QHNF &qthn): QHN<U>(), fZero(qthn.fZero), fNFBins(qthn.fNFBins), fBins(NULL)
 {
-  SetNameTitle(qthn.GetName(),qthn.GetTitle());
+  TNamed::SetNameTitle(qthn.GetName(),qthn.GetTitle());
   Int_t i;
   QHN<U>::fNDims=qthn.fNDims;
   QHN<U>::fAxes=new QAxis*[QHN<U>::fNDims];
@@ -24,7 +24,7 @@ template <typename U> QHNF<U>::QHNF(const QHNF &qthn): QHN<U>(), fZero(qthn.fZer
 
 template <typename U> QHNF<U>::QHNF(const QHN<U> &qthn): QHN<U>(), fZero(0), fNFBins(0), fBins(NULL)
 {
-  SetNameTitle(qthn.GetName(),qthn.GetTitle());
+  TNamed::SetNameTitle(qthn.GetName(),qthn.GetTitle());
   QHN<U>::fNDims=qthn.GetNDims();
   QHN<U>::fAxes=new QAxis*[QHN<U>::fNDims];
   for(Int_t i=QHN<U>::fNDims-1; i>=0; --i) QHN<U>::fAxes[i]=qthn.GetAxis(i)?(QAxis*)qthn.GetAxis(i)->Clone():NULL;
@@ -203,8 +203,9 @@ template <typename U> const QHNF<U>& QHNF<U>::operator=(const QHN<U> &qthn)
   QHN<U>::fNBins=qthn.GetNBins();
   fBins=(Long64_t*)malloc(qthn.GetNFbins()*sizeof(Long64_t));
   QHN<U>::fBinContent=(U*)malloc(qthn.GetNFbins()*sizeof(U));
+  const Long64_t qnfbins=qthn.GetNFbins();
 
-  for(Long64_t li=QHN<U>::GetNFbins()-1; li>=0; --li) {
+  for(Long64_t li=0; li<qnfbins; ++li) {
 
     if(qthn.GetFBinContent(li)) {
       fBins[fNFBins]=qthn.GetFBinCoord(li);

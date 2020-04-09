@@ -111,6 +111,25 @@ void QProcList::Exec() const
   }
 }
 
+Int_t QProcList::FindQProcIndex(const char *qprocname) const
+{
+  for(Int_t i=0; i<fQPL->Count(); ++i){
+    if(!strdiffer((*fQPL)[i]->GetName(),qprocname)) return i;
+  }
+  return -1;
+}
+
+QProcessor& QProcList::GetQProc(const char *qprocname) const
+{
+  Int_t i;
+  if((i=FindQProcIndex(qprocname))!=-1){
+    return GetQProc(i);
+  }
+  fprintf(stderr,"QProcList::GetQProc: QProcessor '%s' does not exist\n",qprocname);
+  throw 1;
+  return GetQProc(0);
+}
+
 void QProcList::InitProcess(Bool_t allocateparammem)
 {
   //printf("InitProcess %p\n",this);
@@ -147,7 +166,7 @@ void QProcList::InitThreads()
   QList<Int_t>         initchains;  //Initial chains
   QList<void*> notifchains; //Chains sending notifications
 
-  if(fPProcessor && fRNThreads>1 && fQPL->Count()>0) {
+  if(fPProcessor && fRNThreads>1 && fQPL->Count()>1) {
     QProcessor* proc;
     Int_t npiobjs, npoobjs;
     QList<QProcObj*> iobjs;

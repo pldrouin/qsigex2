@@ -32,7 +32,7 @@ class QSigExFit: public TObject
     Int_t FindFreeParamIndex(const char *paramname) const;
     Int_t FindParamIndex(const char *paramname) const;
 
-    virtual Double_t Fit(Bool_t fituncerts=kTRUE)=0;
+    virtual Double_t Fit(const Bool_t& fituncerts=kTRUE, const Int_t& niters=1, const Bool_t& stoponsuccess=kTRUE, const Bool_t& inititerseed=kFALSE)=0;
 
     const TMatrixDSym& GetCorMatrix();
     const TMatrixDSym& GetCovMatrix() const{return *fCovMatrix;}

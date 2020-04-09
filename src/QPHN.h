@@ -98,6 +98,7 @@ class QPHN: public QHN_D
     QHN_D* NewD(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return New(name,title,ndims);}
     void ComputeNBins(){QHN_D::ComputeNBins(); if(fBinEntries) free(fBinEntries); fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t));}
     void Init(){fBinEntries=(Double_t*)malloc(fNBins*sizeof(Double_t)); memset(fBinEntries,0,fNBins*sizeof(Double_t));}
+    QHN_D* Projection(const char *name="_pd", const Int_t *axes=NULL, const Int_t &naxes=0) const;
   private:
     Double_t *fBinEntries;
     mutable Double_t lBCret;
@@ -106,8 +107,6 @@ class QPHN: public QHN_D
     void Fill(const Float_t &x0){}
     const Bool_t& IsReadThreadSafe() const{return kFALSE;}
     const QPHN& operator=(const QHN_D &qthn){return *this;}
-    void ScaleBinContent(const Long64_t &bin, const Double_t &scale){}
-    void ScaleBinContent(const Int_t *coords, const Double_t &scale){}
     void SetBinContent(const Long64_t &bin, const Double_t &content){}
     void SetBinContent(const Int_t *coords, const Double_t &content){}
 

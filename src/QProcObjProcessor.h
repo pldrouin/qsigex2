@@ -10,7 +10,6 @@
 #include "TFile.h"
 #include "TLeaf.h"
 #include "QStdProcessor.h"
-#include "QFileUtils.h"
 
 //#define DEBUG
 //#define DEBUG2
@@ -27,8 +26,8 @@ class QProcObjProcessor: public QStdProcessor
 
     Int_t AddProc(const char* name, const char* title=NULL, Int_t index=-1);
     Int_t AddProc(const char *name, const char *title, Bool_t (*proc)(QProcArgs&),const char *procname=NULL, Int_t index=-1);
-    Int_t AddProc(const char *name, const char *title, const char *procname, Int_t index=-1);
-    Int_t AddProc(const char *name, const char *title, void *proc, const char *procname=NULL, Int_t index=-1);
+    //Int_t AddProc(const char *name, const char *title, const char *procname, Int_t index=-1);
+    //Int_t AddProc(const char *name, const char *title, void *proc, const char *procname=NULL, Int_t index=-1);
 
     void Analyze();
 

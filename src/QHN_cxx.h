@@ -371,7 +371,7 @@ template <typename U> void QHN<U>::Divide(const QHN<U> *qhn)
   Long64_t li;
 
   for(li=qhn->GetNFbins()-1; li>=0; --li) {
-    ScaleBinContent(qhn->GetFBinCoord(li),qhn->GetFBinContent(li)?1/qhn->GetFBinContent(li):0);
+    ScaleBinContent(qhn->GetFBinCoord(li),qhn->GetFBinContent(li)?1./qhn->GetFBinContent(li):0);
   }
 }
 

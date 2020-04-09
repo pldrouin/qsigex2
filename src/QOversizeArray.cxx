@@ -139,7 +139,7 @@ QOversizeArray::~QOversizeArray()
 void QOversizeArray::ClearShMem()
 {
   //Block Signals in case the function is called by a signal handler
-  bool error=false;
+  //bool error=false;
   block_signals_once();
   int i,j;
 
@@ -162,7 +162,7 @@ retry2:
 
       if(shm_unlink("/QOversizeArray")==-1){
 	perror("shm_unlink");
-	error=true;
+	//error=true;
       }
 
       //If not last user 
@@ -183,7 +183,7 @@ retry2:
 
     if(shm_unlink("/QOversizeArray")==-1){
       perror("shm_unlink");
-      error=true;
+      //error=true;
     }
   }
 
@@ -192,7 +192,7 @@ retry2:
     if(close(fShFDesc)) {
       fShFDesc=0;
       perror("close");
-      error=true;
+      //error=true;
     }
     fShFDesc=0;
   }
@@ -2248,8 +2248,8 @@ void* QOversizeArray::QOAMMThread(void *)
   QOABuffer *bbuf, *bbuf2;
   Long64_t libuf,libuf2;
   Bool_t dwait;
-  struct timespec waittime;
-  waittime.tv_nsec=0;
+  //struct timespec waittime;
+  //waittime.tv_nsec=0;
   //printstatus("Starting memory management thread");
 
   for(;;) {

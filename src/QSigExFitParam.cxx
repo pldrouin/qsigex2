@@ -177,7 +177,7 @@ void QSigExFitParam::Streamer(TBuffer &R__b)
       R__b >> qnvp;
 
       //If masterindex is not -1, the current parameter is a slave. The master index is stored in the master pointer
-      if(qnvp->GetValue()!=-1) fMaster=(QSigExFitParam*)(qnvp->GetValue()+1);
+      if(qnvp->GetValue()!=-1) fMaster=(QSigExFitParam*)(intptr_t)(qnvp->GetValue()+1);
       //Read these even if they are not used
       R__b >> fData->fPlusFitError;
       R__b >> fData->fMinusFitError;
@@ -188,7 +188,7 @@ void QSigExFitParam::Streamer(TBuffer &R__b)
       Int_t i;
       R__b >> fName;
       R__b >> i;
-      fMaster=(QSigExFitParam*)(i);
+      fMaster=(QSigExFitParam*)(intptr_t)(i);
 
       //If the current parameter is a slave, the master index is stored in the master pointer
       if(i) fMaster=(QSigExFitParam*)((long)i);

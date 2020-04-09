@@ -68,6 +68,7 @@ Int_t QProcObjProcessor::AddProc(const char *name, const char *title, Bool_t (*p
   return index;
 }
 
+/*
 Int_t QProcObjProcessor::AddProc(const char *name, const char *title, const char *procname, Int_t index)
 {
   PRINTF10(this,"\tQProcObjProcessor::AddProc(const char *name<'",name,"'>, const char *title<'",title,"'>, const char *procname<'",procname,"'>, Int_t index<",index,">)\n")
@@ -85,6 +86,7 @@ Int_t QProcObjProcessor::AddProc(const char *name, const char *title, void *proc
   (*fProcs)[index].SetProc(proc,procname);
   return index;
 }
+*/
 
 void QProcObjProcessor::Analyze()
 {

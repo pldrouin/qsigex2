@@ -182,15 +182,15 @@ template <typename U> class QHN: public QDis
     virtual const QHN<U>& operator=(const QHN<U> &qthn);
     const QHN<U>& operator=(const TH1 &th);
     const QHN<U>& operator=(const QDisTH &qth);
-    QHN<U>* Projection(const char *name="_pd", const Int_t *axes=NULL, const Int_t &naxes=0) const;
+    virtual QHN<U>* Projection(const char *name="_pd", const Int_t *axes=NULL, const Int_t &naxes=0) const;
     QHN<U>* Projection(const char *name, const Int_t &axis0) const{return Projection(name,&axis0,1);}
     QHN<U>* Projection(const char *name, const Int_t &axis0, const Int_t &axis1) const;
     QHN<U>* Projection(const char *name, const Int_t &axis0, const Int_t &axis1, const Int_t &axis2) const;
     virtual void Reset();
-    inline void Scale(const Double_t &scale){for(Long64_t li=GetNFbins()-1; li>=0; --li) fBinContent[li]*=(U)scale;}
+    inline virtual void Scale(const Double_t &scale){for(Long64_t li=GetNFbins()-1; li>=0; --li) fBinContent[li]*=(U)scale;}
     virtual void ScaleBinContent(const Long64_t &bin, const Double_t &scale);
     virtual void ScaleBinContent(const Int_t *coords, const Double_t &scale);
-    inline void ScaleFBinContent(const Long64_t &fbin, const Double_t &scale){
+    inline virtual void ScaleFBinContent(const Long64_t &fbin, const Double_t &scale){
 #ifndef QSFAST
       if(fbin<0 || fbin>=fNBins) {
 	fprintf(stderr,"Error: QHN::ScaleFBinContent: %lli is not a valid bin number\n",fbin);
