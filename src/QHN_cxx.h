@@ -1633,13 +1633,13 @@ template <typename U> inline void QHN<U>::ScaleBinContent(const Long64_t &bin, c
       }
 #endif
   Long64_t fbin=GetFBin(bin);
-  if(fbin!=-1) fBinContent[fbin]*=(U)scale;
+  if(fbin!=-1) fBinContent[fbin]*=scale;
 }
 
 template <typename U> inline void QHN<U>::ScaleBinContent(const Int_t *coords, const Double_t &scale)
 {
   Long64_t fbin=GetFBin(coords);
-  if(fbin!=-1) fBinContent[fbin]*=(U)scale;
+  if(fbin!=-1) fBinContent[fbin]*=scale;
 }
 
 template <typename U> void QHN<U>::SetAxis(const Int_t &axis, const Int_t &nbins, const Double_t &min, const Double_t &max)

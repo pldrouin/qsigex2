@@ -34,15 +34,15 @@ endif
 
 all: $(ALLINCS)
 	cd ./src; $(MAKE) shared static
-	cp ./src/libqsigex*.a ./src/libqsigex*.so ./lib/
+	cp ./src/libqsigex*.a ./src/libqsigex*.so ./src/*_rdict.pcm ./lib/
 
 static: $(ALLINCS)
 	cd ./src; $(MAKE) static
-	cp ./src/libqsigex*.a ./lib/
+	cp ./src/libqsigex*.a ./src/*_rdict.pcm ./lib/
 
 shared: $(ALLINCS)
 	cd ./src; $(MAKE) shared
-	cp ./src/libqsigex*.so ./lib/
+	cp ./src/libqsigex*.so ./src/*_rdict.pcm ./lib/
 
 htmldoc: shared
 	cd ./src; root -b -n -q -l htmlgen.C; mv htmldoc ../

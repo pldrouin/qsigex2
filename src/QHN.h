@@ -18,6 +18,7 @@
 #include "strdiffer.h"
 #include "QDisTH.h"
 #include "QAxis.h"
+#include "QHN_LinkDef_inc.h"
 
 template <typename U> class QHN: public QDis
 {
@@ -46,7 +47,16 @@ template <typename U> class QHN: public QDis
 
     virtual ~QHN(){Clear();}
     void Add(const QHN<U> *qhn, const U &c=1);
-    inline virtual void AddBinContent(const Long64_t &bin, const U &w=1){
+    inline virtual void AddBinContent(const Long64_t &bin){
+#ifndef QSFAST
+      if(bin<0 || bin>=fNBins) {
+	fprintf(stderr,"Error: QHN::AddBinContent: %lli is not a valid bin number\n",bin);
+	throw 1;
+      }
+#endif
+      ++fBinContent[bin]; ++fEntries;
+    }
+    inline virtual void AddBinContent(const Long64_t &bin, const U &w){
 #ifndef QSFAST
       if(bin<0 || bin>=fNBins) {
 	fprintf(stderr,"Error: QHN::AddBinContent: %lli is not a valid bin number\n",bin);
@@ -187,7 +197,7 @@ template <typename U> class QHN: public QDis
     QHN<U>* Projection(const char *name, const Int_t &axis0, const Int_t &axis1) const;
     QHN<U>* Projection(const char *name, const Int_t &axis0, const Int_t &axis1, const Int_t &axis2) const;
     virtual void Reset();
-    inline virtual void Scale(const Double_t &scale){for(Long64_t li=GetNFbins()-1; li>=0; --li) fBinContent[li]*=(U)scale;}
+    inline virtual void Scale(const Double_t &scale){for(Long64_t li=GetNFbins()-1; li>=0; --li) fBinContent[li]*=scale;}
     virtual void ScaleBinContent(const Long64_t &bin, const Double_t &scale);
     virtual void ScaleBinContent(const Int_t *coords, const Double_t &scale);
     inline virtual void ScaleFBinContent(const Long64_t &fbin, const Double_t &scale){
@@ -197,7 +207,7 @@ template <typename U> class QHN: public QDis
 	throw 1;
       }
 #endif
-      fBinContent[fbin]*=(U)scale;
+      fBinContent[fbin]*=scale;
     }
     void SetAxis(const Int_t &axis, const Int_t &nbins, const Double_t &min, const Double_t &max);
     void SetAxis(const Int_t &axis, const Int_t &nbins, const Double_t *bins);

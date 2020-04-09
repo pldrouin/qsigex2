@@ -44,7 +44,7 @@ examples: $(EXEC)
 
 $(EXEC): %: %.o $(POBJ)
 #	$(CXX) $(CXXFLAGS) $^ $(ROOTLIBS) -L$(QSIGEXDIR)/lib -lqsigex2 -o $@
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(QSIGEXDIR)/lib/libqsigex2.a $(ROOTLIBS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(QSIGEXDIR)/lib/libqsigex2.a -lrt $(ROOTLIBS)
 #	$(CXX) $(CXXFLAGS) -o $@ $^ $(QSIGEXDIR)/src/*.os $(ROOTLIBS)
 
 $(DEP): %.d: %.cxx

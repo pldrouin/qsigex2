@@ -4,8 +4,10 @@
 // of information from this material, including, but not limited to, inspection and distribution,
 // is strictly forbidden unless prior permission is obtained from the author.
 
+template <> inline void QHN<QPHData>::Streamer(TBuffer &){}
+
 template <typename U> void QHN<U>::Streamer(TBuffer &R__b)
-{ 
+{
   // Stream an object of class QHN<U>.
 
   UInt_t R__s, R__c;

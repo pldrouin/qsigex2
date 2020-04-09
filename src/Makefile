@@ -16,7 +16,7 @@ ifdef WITH_LIBPROCINFO
 INCLUDEDIRS	+=	-I$(LIBPROCINFODIR)
 endif
 
-QSIGEX_QCXX_2	=	QAxis.cxx QPHN.cxx QPHNE.cxx
+QSIGEX_QCXX_2	=	QAxis.cxx QPHNE.cxx
 QSIGEX_QCXX_1	=	$(filter-out $(QSIGEX_QCXX_2),$(wildcard Q*.cxx))
 QSIGEX_QCXX	=	$(QSIGEX_QCXX_1) $(QSIGEX_QCXX_2)
 QSIGEX_OBJS_1	=	$(QSIGEX_QCXX_1:.cxx=.o)
@@ -26,7 +26,7 @@ QSIGEX_OBJSS_2	=	$(QSIGEX_QCXX_2:.cxx=.os)
 QSIGEX_OBJS	=	$(QSIGEX_OBJS_1) $(QSIGEX_OBJS_2)
 QSIGEX_OBJSS	=	$(QSIGEX_OBJSS_1) $(QSIGEX_OBJSS_2)
 QSIGEX_CLHD_1	=	$(QSIGEX_QCXX_1:.cxx=.h) QList.h QNamedVar.h QProcNamedVar.h
-QSIGEX_CLHD_2	=	$(QSIGEX_QCXX_2:.cxx=.h) QList.h QNamedVar.h QProcNamedVar.h QHN.h QHNF.h QHNDL.h
+QSIGEX_CLHD_2	=	$(QSIGEX_QCXX_2:.cxx=.h) QList.h QNamedVar.h QProcNamedVar.h QHN.h QHNF.h QHNDL.h QPHN.h
 QSIGEX_CLHD	=	$(QSIGEX_CLHD_1) $(QSIGEX_CLHD_2)
 
 QSIGEX_DICTCXX_1=	qsigex_1_Dict.cxx
@@ -87,11 +87,11 @@ clean:
 	rm -f *Dict.o
 	rm -f *Dict.h
 	rm -f *Dict.cxx
-	rm -f *Dict_rdict.pcm
 	rm -f libqsigex*.so libqsigex*.a
 
 clear: clean
 	rm -f lib*.{so,a}
+	rm -f *Dict_rdict.pcm
 
 $(QSIGEX_OBJSDEP) $(QSIGEX_OOBJSDEP): %.d: %.cxx %.h
 	@echo "Generating dependency file $@"

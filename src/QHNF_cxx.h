@@ -237,13 +237,13 @@ template <typename U> inline void QHNF<U>::Reset()
 template <typename U> inline void QHNF<U>::ScaleBinContent(const Long64_t &bin, const Double_t &scale)
 {
   Long64_t fbin=GetFBin(bin);
-  if(fbin!=-1) QHN<U>::fBinContent[fbin]*=(U)scale;
+  if(fbin!=-1) QHN<U>::fBinContent[fbin]*=scale;
 }
 
 template <typename U> inline void QHNF<U>::ScaleBinContent(const Int_t *coords, const Double_t &scale)
 {
   Long64_t fbin=GetFBin(coords);
-  if(fbin!=-1) QHN<U>::fBinContent[fbin]*=(U)scale;
+  if(fbin!=-1) QHN<U>::fBinContent[fbin]*=scale;
 }
 
 template <typename U> void QHNF<U>::SetBinContent(const Long64_t &bin, const U &content)
