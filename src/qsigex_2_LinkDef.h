@@ -13,14 +13,18 @@
 #pragma link C++ class QHN<Double_t>-;
 #pragma link C++ class QHN<Float_t>-;
 #pragma link C++ class QHN<Int_t>-;
-#pragma link C++ class QHN<QPHData>-;
 #pragma link C++ class QHNF<Double_t>-;
 #pragma link C++ class QHNF<Float_t>-;
 #pragma link C++ class QHNF<Int_t>-;
 #pragma link C++ class QHNDL<Double_t>-;
 #pragma link C++ class QHNDL<Float_t>-;
 #pragma link C++ class QHNDL<Int_t>-;
-#pragma link C++ class QPHN-;
+#pragma link C++ class QPHN<QPHData, QHN<QPHData> >-;
+#pragma link C++ class QPHN<QPHData, QHNF<QPHData> >-;
+#pragma link C++ class QPHN<QPHData, QHNDL<QPHData> >-;
+#pragma link C++ class QPHN<QPHEData, QHN<QPHEData> >-;
+#pragma link C++ class QPHN<QPHEData, QHNF<QPHEData> >-;
+#pragma link C++ class QPHN<QPHEData, QHNDL<QPHEData> >-;
 //#pragma link C++ class QPHNE-;
 
 #endif

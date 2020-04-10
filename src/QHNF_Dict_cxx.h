@@ -4,6 +4,9 @@
 // of information from this material, including, but not limited to, inspection and distribution,
 // is strictly forbidden unless prior permission is obtained from the author.
 
+template <> inline void QHNF<QPHData>::Streamer(TBuffer &){}
+template <> inline void QHNF<QPHEData>::Streamer(TBuffer &){}
+
 template <typename U> void QHNF<U>::Streamer(TBuffer &R__b)
 { 
   // Stream an object of class QHN<U>.

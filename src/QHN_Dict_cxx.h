@@ -5,6 +5,7 @@
 // is strictly forbidden unless prior permission is obtained from the author.
 
 template <> inline void QHN<QPHData>::Streamer(TBuffer &){}
+template <> inline void QHN<QPHEData>::Streamer(TBuffer &){}
 
 template <typename U> void QHN<U>::Streamer(TBuffer &R__b)
 {
