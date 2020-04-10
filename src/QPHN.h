@@ -20,6 +20,7 @@
 
 typedef QHN<QPHData> QHN_QPHD;
 
+//template <typename QHBASE> class QPHN: public QHN_QPHD
 class QPHN: public QHN_QPHD
 {
   public:
@@ -45,26 +46,8 @@ class QPHN: public QHN_QPHD
     QPHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QHN_QPHD(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins){}
 
     virtual ~QPHN(){}
-    inline void AddBinContent(const Long64_t &bin, const Double_t &y)
-    {
-#ifndef QSFAST
-      if(bin<0 || bin>=fNBins) {
-	fprintf(stderr,"Error: QPHN::AddBinContent: %lli is not a valid bin number\n",bin);
-	throw 1;
-      }
-#endif
-      QHN_QPHD::fBinContent[bin].Add(y); ++QHN_QPHD::fEntries;
-    }
-    inline void AddBinContent(const Long64_t &bin, const Double_t &y, const Double_t &w)
-    {
-#ifndef QSFAST
-      if(bin<0 || bin>=fNBins) {
-	fprintf(stderr,"Error: QPHN::AddBinContent: %lli is not a valid bin number\n",bin);
-	throw 1;
-      }
-#endif
-      QHN_QPHD::fBinContent[bin].Add(w*y,w); QHN_QPHD::fEntries+=w;
-    }
+    inline virtual void AddBinContent(const Long64_t &bin, const Double_t &y){QHN_QPHD::AddBinContent(bin, QPHData(y,1));}
+    inline virtual void AddBinContent(const Long64_t &bin, const Double_t &y, const Double_t &w){QHN_QPHD::AddBinContent(bin, QPHData(y,w));}
     TObject* Clone(const char* newname = "") const{QPHN* ret=new QPHN(*this); if(strdiffer(newname,"")) dynamic_cast<TNamed*>(ret)->SetName(newname); return dynamic_cast<TObject*>(ret);}
     inline void Fill(Double_t const * const &x, const Double_t &y){AddBinContent(FindBin(x),y);}
     inline void Fill(Double_t const * const &x, const Double_t &y, const Double_t &w){AddBinContent(FindBin(x),y,w);}
@@ -94,7 +77,7 @@ class QPHN: public QHN_QPHD
     QHN_D* NewD() const{return new QHN_D();}
     QHN_D* NewD(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHN_D(name,title,ndims);}
   private:
-    void AddBinContent(const Long64_t &fbin){}
+    inline void AddBinContent(const Long64_t &fbin){}
     void Fill(const Double_t &x0){}
     void Fill(const Float_t &x0){}
     const QPHN& operator=(const QHN_QPHD &qthn){return *this;}

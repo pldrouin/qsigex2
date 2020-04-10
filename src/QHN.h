@@ -47,16 +47,7 @@ template <typename U> class QHN: public QDis
 
     virtual ~QHN(){Clear();}
     void Add(const QHN<U> *qhn, const U &c=1);
-    inline virtual void AddBinContent(const Long64_t &bin){
-#ifndef QSFAST
-      if(bin<0 || bin>=fNBins) {
-	fprintf(stderr,"Error: QHN::AddBinContent: %lli is not a valid bin number\n",bin);
-	throw 1;
-      }
-#endif
-      ++fBinContent[bin]; ++fEntries;
-    }
-    inline virtual void AddBinContent(const Long64_t &bin, const U &w){
+    inline virtual void AddBinContent(const Long64_t &bin, const U &w=1){
 #ifndef QSFAST
       if(bin<0 || bin>=fNBins) {
 	fprintf(stderr,"Error: QHN::AddBinContent: %lli is not a valid bin number\n",bin);
