@@ -19,12 +19,17 @@
 #pragma link C++ class QHNDL<Double_t>-;
 #pragma link C++ class QHNDL<Float_t>-;
 #pragma link C++ class QHNDL<Int_t>-;
-#pragma link C++ class QPHN<QPHData, QHN<QPHData> >-;
-#pragma link C++ class QPHN<QPHData, QHNF<QPHData> >-;
-#pragma link C++ class QPHN<QPHData, QHNDL<QPHData> >-;
-#pragma link C++ class QPHN<QPHEData, QHN<QPHEData> >-;
-#pragma link C++ class QPHN<QPHEData, QHNF<QPHEData> >-;
-#pragma link C++ class QPHN<QPHEData, QHNDL<QPHEData> >-;
-//#pragma link C++ class QPHNE-;
+#pragma link C++ class QHN<QPHData>-;
+#pragma link C++ class QHNF<QPHData>-;
+#pragma link C++ class QHNDL<QPHData>-;
+#pragma link C++ class QHN<QPHEData>-;
+#pragma link C++ class QHNF<QPHEData>-;
+#pragma link C++ class QHNDL<QPHEData>-;
+#pragma link C++ class QPHNT<QPHData, QHN<QPHData> >-;
+#pragma link C++ class QPHNT<QPHData, QHNF<QPHData> >-;
+#pragma link C++ class QPHNT<QPHData, QHNDL<QPHData> >-;
+#pragma link C++ class QPHNT<QPHEData, QHN<QPHEData> >-;
+#pragma link C++ class QPHNT<QPHEData, QHNF<QPHEData> >-;
+#pragma link C++ class QPHNT<QPHEData, QHNDL<QPHEData> >-;
 
 #endif

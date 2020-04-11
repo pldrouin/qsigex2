@@ -4,6 +4,20 @@
 // of information from this material, including, but not limited to, inspection and distribution,
 // is strictly forbidden unless prior permission is obtained from the author.
 
+#ifndef __INTEL_COMPILER
+#ifndef GCC_VERSION
+#define GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)
+#endif
+
+#if GCC_VERSION >= 403
+# define EXTERN
+#else
+# define EXTERN extern
+#endif
+#else
+# define EXTERN
+#endif
+
 #include "QHNF.h"
 
 template <typename U> QHNF<U>::QHNF(const QHNF &qthn): QHN<U>(), fZero(qthn.fZero), fNFBins(qthn.fNFBins), fBins(NULL)
@@ -46,6 +60,35 @@ template <typename U> QHNF<U>::QHNF(const QHN<U> &qthn): QHN<U>(), fZero(0), fNF
   QHN<U>::fIntUseFBinLoop=kTRUE;
 }
 
+template <typename U> void QHNF<U>::AddBinContent(const Long64_t &bin)
+{
+#ifndef QSFAST
+      if(bin<0 || bin>=QHN<U>::fNBins) {
+	fprintf(stderr,"Error: QHNF::AddBinContent: %lli is not a valid bin number\n",bin);
+	throw 1;
+      }
+#endif
+
+  Long64_t bidx=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;
+
+  if(bidx==fNFBins || fBins[bidx]!=bin) {
+    ++fNFBins;
+    fBins=(Long64_t*)realloc(fBins,fNFBins*sizeof(Long64_t));
+    QHN<U>::fBinContent=(U*)realloc(QHN<U>::fBinContent,fNFBins*sizeof(U));
+
+    for(Long64_t li=fNFBins-1; li>bidx; --li) {
+      fBins[li]=fBins[li-1];
+      QHN<U>::fBinContent[li]=QHN<U>::fBinContent[li-1];
+    }
+    fBins[bidx]=bin;
+    QHN<U>::fBinContent[bidx].SetToOne();
+
+  } else {
+    ++QHN<U>::fBinContent[bidx];
+  }
+  ++QHN<U>::fEntries;
+}
+
 template <typename U> void QHNF<U>::AddBinContent(const Long64_t &bin, const U &w)
 {
 #ifndef QSFAST
@@ -75,8 +118,89 @@ template <typename U> void QHNF<U>::AddBinContent(const Long64_t &bin, const U &
   } else {
     QHN<U>::fBinContent[bidx]+=w;
   }
-  QHN<U>::fEntries+=w;
+  QHN<U>::fEntries+=w.Entries();
 }
+
+#ifndef _QHNF_SPECIALS_
+template <> EXTERN void QHNF<Double_t>::AddBinContent(const Long64_t &bin);
+template <> EXTERN void QHNF<Float_t>::AddBinContent(const Long64_t &bin);
+template <> EXTERN void QHNF<Int_t>::AddBinContent(const Long64_t &bin);
+template <> EXTERN void QHNF<Double_t>::AddBinContent(const Long64_t &bin, const Double_t &w);
+template <> EXTERN void QHNF<Float_t>::AddBinContent(const Long64_t &bin, const Float_t &w);
+template <> EXTERN void QHNF<Int_t>::AddBinContent(const Long64_t &bin, const Int_t &w);
+#else
+#ifndef QSFAST
+#define BINCHECK(T) \
+      if(bin<0 || bin>=QHN<T>::fNBins) {\
+	fprintf(stderr,"Error: QHNF::AddBinContent: %lli is not a valid bin number\n",bin);\
+	throw 1;\
+      }
+#else
+#define BINCHECK
+#endif
+#define QHNF_ABC(T) \
+template <> void QHNF<T>::AddBinContent(const Long64_t &bin)\
+{\
+    BINCHECK(T)\
+\
+  Long64_t bidx=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;\
+\
+  if(bidx==fNFBins || fBins[bidx]!=bin) {\
+\
+    ++fNFBins;\
+    fBins=(Long64_t*)realloc(fBins,fNFBins*sizeof(Long64_t));\
+    QHN<T>::fBinContent=(T*)realloc(QHN<T>::fBinContent,fNFBins*sizeof(T));\
+\
+    for(Long64_t li=fNFBins-1; li>bidx; --li) {\
+      fBins[li]=fBins[li-1];\
+      QHN<T>::fBinContent[li]=QHN<T>::fBinContent[li-1];\
+    }\
+    fBins[bidx]=bin;\
+    QHN<T>::fBinContent[bidx]=1;\
+\
+  } else {\
+    ++QHN<T>::fBinContent[bidx];\
+  }\
+  ++QHN<T>::fEntries;\
+}\
+
+QHNF_ABC(Double_t)
+QHNF_ABC(Float_t)
+QHNF_ABC(Int_t)
+
+#define QHNF_ABCW(T) \
+template <> void QHNF<T>::AddBinContent(const Long64_t &bin, const T &w)\
+{\
+  BINCHECK(T)\
+\
+  Long64_t bidx=std::lower_bound(fBins, fBins+fNFBins, bin)-fBins;\
+\
+  if(bidx==fNFBins || fBins[bidx]!=bin) {\
+\
+    if(w) {\
+      ++fNFBins;\
+      fBins=(Long64_t*)realloc(fBins,fNFBins*sizeof(Long64_t));\
+      QHN<T>::fBinContent=(T*)realloc(QHN<T>::fBinContent,fNFBins*sizeof(T));\
+\
+      for(Long64_t li=fNFBins-1; li>bidx; --li) {\
+	fBins[li]=fBins[li-1];\
+	QHN<T>::fBinContent[li]=QHN<T>::fBinContent[li-1];\
+      }\
+      fBins[bidx]=bin;\
+      QHN<T>::fBinContent[bidx]=w;\
+    }\
+\
+  } else {\
+    QHN<T>::fBinContent[bidx]+=w;\
+  }\
+  QHN<T>::fEntries+=w;\
+}
+
+QHNF_ABCW(Double_t)
+QHNF_ABCW(Float_t)
+QHNF_ABCW(Int_t)
+#undef BINCHECK
+#endif
 
 template <typename U> void QHNF<U>::Clear(Option_t* option)
 {

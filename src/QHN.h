@@ -47,18 +47,22 @@ template <typename U> class QHN: public QDis
 
     virtual ~QHN(){Clear();}
     void Add(const QHN<U> *qhn, const U &c=1);
-    inline virtual void AddBinContent(const Long64_t &bin, const U &w=1){
+    inline virtual void AddBinContent(const Long64_t &bin){
 #ifndef QSFAST
       if(bin<0 || bin>=fNBins) {
 	fprintf(stderr,"Error: QHN::AddBinContent: %lli is not a valid bin number\n",bin);
 	throw 1;
       }
 #endif
-      fBinContent[bin]+=w; fEntries+=w;
+      ++fBinContent[bin];
+      ++fEntries;
     }
-    inline void AddBinContent(const Int_t *coords, const U &w=1){AddBinContent(GetBin(coords),w);}
+    inline virtual void AddBinContent(const Long64_t &bin, const U &w);
+    inline void AddBinContent(const Int_t *coords){AddBinContent(GetBin(coords));}
+    inline void AddBinContent(const Int_t *coords, const U &w){AddBinContent(GetBin(coords),w);}
     const Double_t& AddEntries(const Double_t &nentries=1){return (fEntries+=nentries);}
-    inline virtual void AddFBinContent(const Long64_t &fbin, const U &w=1){AddBinContent(fbin,w);}
+    inline virtual void AddFBinContent(const Long64_t &fbin){AddBinContent(fbin);}
+    inline virtual void AddFBinContent(const Long64_t &fbin, const U &w){AddBinContent(fbin,w);}
     virtual void Clear(Option_t* option="");
     virtual TObject* Clone(const char* newname = "") const{QHN<U>* ret=new QHN<U>(*this); if(strdiffer(newname,"")) dynamic_cast<TNamed*>(ret)->SetName(newname); return dynamic_cast<TObject*>(ret);}
     QDis* CloneQDis() const{return new QHN<U>(*this);}
@@ -86,7 +90,8 @@ template <typename U> class QHN: public QDis
     inline const U& Eval(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8) const{return GetBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8));}
     inline const U& Eval(const Float_t &x0, const Float_t &x1, const Float_t &x2, const Float_t &x3, const Float_t &x4, const Float_t &x5, const Float_t &x6, const Float_t &x7, const Float_t &x8, const Float_t &x9) const{return GetBinContent(FindBin(x0,x1,x2,x3,x4,x5,x6,x7,x8,x9));}
     inline const U& Eval(Float_t const* const &x) const{return GetBinContent(FindBin(x));}
-    inline virtual void Fill(Double_t const * const &x, const U &w=1){AddBinContent(FindBin(x),w);}
+    inline virtual void Fill(Double_t const * const &x){AddBinContent(FindBin(x));}
+    inline virtual void Fill(Double_t const * const &x, const U &w){AddBinContent(FindBin(x),w);}
     inline virtual void Fill(const Double_t &x0){AddBinContent(FindBin(x0));}
     inline virtual void Fill(const Double_t &x0, const Double_t &x1){AddBinContent(FindBin(x0,x1));}
     inline virtual void Fill(const Double_t &x0, const Double_t &x1, const Double_t &x2){AddBinContent(FindBin(x0,x1,x2));}
@@ -224,6 +229,7 @@ template <typename U> class QHN: public QDis
     void SetIntUseFBinLoop(const Bool_t &intusefbinloop){fIntUseFBinLoop=intusefbinloop;}
     inline void TerminateProcObj(){Normalize();}
     void WritePSPlot(const char *filename=NULL) const;
+    inline static void ResetBinData(U& bdata);
   protected:
     virtual QHN<Double_t>* NewD() const{return new QHN<Double_t>;}
     virtual QHN<Double_t>* NewD(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHN<Double_t>(name,title,ndims);}
@@ -240,6 +246,42 @@ template <typename U> class QHN: public QDis
 
     ClassDef(QHN,2) //Multidimensional histogram template class optimized for random access
 };
+
+#ifndef QSFAST
+#define BINCHECK \
+  if(bin<0 || bin>=fNBins) {\
+    fprintf(stderr,"Error: QHN::AddBinContent: %lli is not a valid bin number\n",bin);\
+    throw 1;\
+  }
+#else
+#define BINCHECK
+#endif
+
+#define QHN_ABC(T) \
+template <> inline void QHN<T>::AddBinContent(const Long64_t &bin, const T &w){\
+  BINCHECK\
+    fBinContent[bin]+=w; fEntries+=w;\
+}
+
+QHN_ABC(Double_t)
+QHN_ABC(Float_t)
+QHN_ABC(Int_t)
+#undef BINCHECK
+
+template <typename U> inline void QHN<U>::AddBinContent(const Long64_t &bin, const U &w){
+#ifndef QSFAST
+  if(bin<0 || bin>=fNBins) {
+    fprintf(stderr,"Error: QHN::AddBinContent: %lli is not a valid bin number\n",bin);
+    throw 1;
+  }
+#endif
+  fBinContent[bin]+=w; fEntries+=w.Entries();
+}
+
+template <> inline void QHN<Double_t>::ResetBinData(Double_t& bdata){bdata=0;}
+template <> inline void QHN<Float_t>::ResetBinData(Float_t& bdata){bdata=0;}
+template <> inline void QHN<Int_t>::ResetBinData(Int_t& bdata){bdata=0;}
+template <typename U> inline void QHN<U>::ResetBinData(U& bdata){bdata.Reset();}
 
 typedef QHN<Double_t> QHN_D;
 typedef QHN<Float_t> QHN_F;

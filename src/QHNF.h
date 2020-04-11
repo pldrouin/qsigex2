@@ -43,17 +43,19 @@ template <typename U> class QHNF: public QHN<U>
     QHNF(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QHN<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins,kFALSE), fZero(0){Init();}
 
     virtual ~QHNF(){}
-    virtual void AddBinContent(const Long64_t &bin, const U &w=1);
-    inline void AddFBinContent(const Long64_t &fbin, const U &w=1)
-    {
+    virtual void AddBinContent(const Long64_t &bin);
+    virtual void AddBinContent(const Long64_t &bin, const U &w);
+    inline void AddFBinContent(const Long64_t &fbin){
 #ifndef QSFAST
       if(fbin<0 || fbin>=fNFBins) {
 	fprintf(stderr,"Error: QHNF::AddFBinContent: %lli is not a valid fbin number\n",fbin);
 	throw 1;
       }
 #endif
-      QHN<U>::fBinContent[fbin]+=w; QHN<U>::fEntries+=w;
+      ++QHN<U>::fBinContent[fbin];
+      ++QHN<U>::fEntries;
     }
+    inline void AddFBinContent(const Long64_t &fbin, const U &w);
     virtual void Clear(Option_t* option="");
     TObject* Clone(const char* newname = "") const{QHNF<U>* ret=new QHNF<U>(*this); if(strdiffer(newname,"")) dynamic_cast<TNamed*>(ret)->SetName(newname); return dynamic_cast<TObject*>(ret);}
     virtual void CopyStruct(const QHN<U> &qthn);
@@ -86,6 +88,37 @@ template <typename U> class QHNF: public QHN<U>
 
     ClassDef(QHNF,2) //Multidimensional histogram template class optimized for memory and iteration over filled bins
 };
+
+#ifndef QSFAST
+#define BINCHECK \
+  if(fbin<0 || fbin>=fNFBins) {\
+    fprintf(stderr,"Error: QHNF::AddFBinContent: %lli is not a valid fbin number\n",fbin);\
+    throw 1;\
+  }
+#else
+#define BINCHECK
+#endif
+
+#define QHNF_AFBC(T) \
+template <> inline void QHNF<T>::AddFBinContent(const Long64_t &fbin, const T &w){\
+  BINCHECK\
+    QHN<T>::fBinContent[fbin]+=w; QHN<T>::fEntries+=w;\
+}
+
+QHNF_AFBC(Double_t)
+QHNF_AFBC(Float_t)
+QHNF_AFBC(Int_t)
+#undef BINCHECK
+
+template <typename U> inline void QHNF<U>::AddFBinContent(const Long64_t &fbin, const U &w){
+#ifndef QSFAST
+  if(fbin<0 || fbin>=fNFBins) {
+    fprintf(stderr,"Error: QHNF::AddFBinContent: %lli is not a valid fbin number\n",fbin);
+    throw 1;
+  }
+#endif
+  QHN<U>::fBinContent[fbin]+=w; QHN<U>::fEntries+=w.Entries();
+}
 
 typedef QHNF<Double_t> QHNF_D;
 typedef QHNF<Float_t> QHNF_F;

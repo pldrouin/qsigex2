@@ -4,9 +4,9 @@
 // of information from this material, including, but not limited to, inspection and distribution,
 // is strictly forbidden unless prior permission is obtained from the author.
 
-template <typename DTYPE, typename QHBASE> void QPHN<DTYPE, QHBASE>::Streamer(TBuffer &R__b)
+template <typename DTYPE, typename QHBASE> void QPHNT<DTYPE, QHBASE>::Streamer(TBuffer &R__b)
 { 
-  // Stream an object of class QPHN<DTYPE, QHASE >>.
+  // Stream an object of class QPHNT<DTYPE, QHASE >>.
 
   UInt_t R__s, R__c;
   Int_t i;
@@ -25,15 +25,15 @@ template <typename DTYPE, typename QHBASE> void QPHN<DTYPE, QHBASE>::Streamer(TB
     QHBASE::ComputeNBins();
     R__b >> QHBASE::fNBins;
     QHBASE::fBinContent=(DTYPE*)malloc(QHBASE::fNBins*sizeof(DTYPE));
-    R__b.ReadFastArray(QHBASE::fBinContent, DTYPE::Class(), QHBASE::fNBins);
+    R__b.ReadFastArray(QHBASE::fBinContent, TClass::GetClass<DTYPE>(), QHBASE::fNBins);
 
     if(R__v>1) R__b >> QHBASE::fIntUseFBinLoop;
 
-    R__b.CheckByteCount(R__s, R__c, QPHN<DTYPE, QHBASE>::IsA());
+    R__b.CheckByteCount(R__s, R__c, QPHNT<DTYPE, QHBASE>::IsA());
 
   } else {
     QAxis *abuf;
-    R__c = R__b.WriteVersion(QPHN<DTYPE, QHBASE>::IsA(), kTRUE);
+    R__c = R__b.WriteVersion(QPHNT<DTYPE, QHBASE>::IsA(), kTRUE);
     QDis::Streamer(R__b);
     R__b << QHBASE::fNDims;
 
@@ -50,7 +50,7 @@ template <typename DTYPE, typename QHBASE> void QPHN<DTYPE, QHBASE>::Streamer(TB
     }
     R__b << QHBASE::fEntries;
     R__b << QHBASE::fNBins;
-    R__b.WriteFastArray(QHBASE::fBinContent, DTYPE::Class(), QHBASE::fNBins);
+    R__b.WriteFastArray(QHBASE::fBinContent, TClass::GetClass<DTYPE>(), QHBASE::fNBins);
     R__b << QHBASE::fIntUseFBinLoop;
 
     R__b.SetByteCount(R__c, kTRUE);

@@ -39,7 +39,8 @@ template <typename U> class QHNDL: public QHNF<U>
     QHNDL(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QHNF<U>(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins){Init();}
 
     virtual ~QHNDL(){}
-    void AddBinContent(const Long64_t &bin, const U &w=1);
+    void AddBinContent(const Long64_t &bin);
+    void AddBinContent(const Long64_t &bin, const U &w);
     void Clear(Option_t* option="");
     TObject* Clone(const char* newname = "") const{QHNDL<U>* ret=new QHNDL<U>(*this); if(strdiffer(newname,"")) dynamic_cast<TNamed*>(ret)->SetName(newname); return dynamic_cast<TObject*>(ret);}
     void CopyStruct(const QHN<U> &qthn);

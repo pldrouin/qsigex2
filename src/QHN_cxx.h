@@ -1558,7 +1558,7 @@ template <typename U> QHN<U>* QHN<U>::Projection(const char *name, const Int_t *
 
   //Loop over bin indices of projection axes
   for(;;) {
-    dbuf=0;
+    ResetBinData(dbuf);
 
     for(i=0; i<nsdims; ++i) biniter[indices[i]]=1;
 
