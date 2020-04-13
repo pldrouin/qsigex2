@@ -31,11 +31,9 @@ class QPHData
   private:
     inline QPHData(const Double_t& content): fContent(content), fEntries(1){}
     inline const QPHData& operator=(const Int_t&){return *this;}
-
-    //ClassDef(QPHData,1) //Container for Double_t profile data
 };
 
-class QPHEData
+class QPHEData: public QHBinWithError
 {
   public:
     inline QPHEData(const Int_t& zero=0): fContent(0), fEntries(0), fContent2(0){} //Dummy zero initializer
@@ -69,8 +67,6 @@ class QPHEData
   private:
     inline QPHEData(const Double_t& content): fContent(content), fEntries(1), fContent2(content*content){}
     inline const QPHEData& operator=(const Int_t&){return *this;}
-
-    //ClassDef(QPHEData,1) //Container for Double_t profile data with variance
 };
 
 #endif

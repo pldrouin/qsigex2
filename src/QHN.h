@@ -9,6 +9,9 @@
 
 #include <cstdio>
 #include <cstdlib>
+
+#include <type_traits>
+
 #include "TFile.h"
 #include "TH1D.h"
 #include "TH2D.h"
@@ -18,6 +21,10 @@
 #include "strdiffer.h"
 #include "QDisTH.h"
 #include "QAxis.h"
+
+class QHBinWithError{};
+
+#include "QHEData.h"
 #include "QHN_LinkDef_inc.h"
 
 template <typename U> class QHN: public QDis
@@ -231,6 +238,7 @@ template <typename U> class QHN: public QDis
     void WritePSPlot(const char *filename=NULL) const;
     inline static void ResetBinData(U& bdata);
   protected:
+
     virtual QHN<Double_t>* NewD() const{return new QHN<Double_t>;}
     virtual QHN<Double_t>* NewD(const Char_t* name, const Char_t* title, const Int_t &ndims) const{return new QHN<Double_t>(name,title,ndims);}
     virtual void ComputeNBins();
@@ -245,6 +253,99 @@ template <typename U> class QHN: public QDis
     TH1 *fTH;
 
     ClassDef(QHN,2) //Multidimensional histogram template class optimized for random access
+};
+
+template <typename U, bool=std::is_base_of<QHBinWithError, U>::value> class QHNtoTH1Copy
+{
+  public:
+    inline QHNtoTH1Copy(const QHN<U>& from, TH1* to){
+      Long64_t li;
+      Int_t coords[1];
+      const Long64_t nfbins=from.GetNFbins();
+
+      for(li=0; li<nfbins; li++) {
+	from.GetFBinCoords(li,coords);
+	to->SetBinContent(coords[0],from.GetFBinContent(li));
+      }
+    }
+};
+
+template <typename U> class QHNtoTH1Copy<U, true>
+{
+  public:
+    inline QHNtoTH1Copy(const QHN<U>& from, TH1* to){
+      Long64_t li;
+      Int_t coords[1];
+      const Long64_t nfbins=from.GetNFbins();
+
+      for(li=0; li<nfbins; li++) {
+	from.GetFBinCoords(li,coords);
+	to->SetBinContent(coords[0],from.GetFBinContent(li));
+	to->SetBinError(coords[0],from.GetFBinContent(li).Error());
+      }
+    }
+};
+
+template <typename U, bool=std::is_base_of<QHBinWithError, U>::value> class QHNtoTH2Copy
+{
+  public:
+    inline QHNtoTH2Copy(const QHN<U>& from, TH1* to){
+      Long64_t li;
+      Int_t coords[2];
+      const Long64_t nfbins=from.GetNFbins();
+
+      for(li=0; li<nfbins; li++) {
+	from.GetFBinCoords(li,coords);
+	to->SetBinContent(coords[0],coords[1],from.GetFBinContent(li));
+      }
+    }
+};
+
+template <typename U> class QHNtoTH2Copy<U, true>
+{
+  public:
+    inline QHNtoTH2Copy(const QHN<U>& from, TH1* to){
+      Long64_t li;
+      Int_t coords[2];
+      const Long64_t nfbins=from.GetNFbins();
+
+      for(li=0; li<nfbins; li++) {
+	from.GetFBinCoords(li,coords);
+	to->SetBinContent(coords[0],coords[1],from.GetFBinContent(li));
+	to->SetBinError(coords[0],coords[1],from.GetFBinContent(li).Error());
+      }
+    }
+};
+
+template <typename U, bool=std::is_base_of<QHBinWithError, U>::value> class QHNtoTH3Copy
+{
+  public:
+    inline QHNtoTH3Copy(const QHN<U>& from, TH1* to){
+      Long64_t li;
+      Int_t coords[3];
+      const Long64_t nfbins=from.GetNFbins();
+
+      for(li=0; li<nfbins; li++) {
+	from.GetFBinCoords(li,coords);
+	to->SetBinContent(coords[0],coords[1],coords[2],from.GetFBinContent(li));
+      }
+    }
+};
+
+template <typename U> class QHNtoTH3Copy<U, true>
+{
+  public:
+    inline QHNtoTH3Copy(const QHN<U>& from, TH1* to){
+      Long64_t li;
+      Int_t coords[3];
+      const Long64_t nfbins=from.GetNFbins();
+
+      for(li=0; li<nfbins; li++) {
+	from.GetFBinCoords(li,coords);
+	to->SetBinContent(coords[0],coords[1],coords[2],from.GetFBinContent(li));
+	to->SetBinError(coords[0],coords[1],coords[2],from.GetFBinContent(li).Error());
+      }
+    }
 };
 
 #ifndef QSFAST
@@ -286,6 +387,9 @@ template <typename U> inline void QHN<U>::ResetBinData(U& bdata){bdata.Reset();}
 typedef QHN<Double_t> QHN_D;
 typedef QHN<Float_t> QHN_F;
 typedef QHN<Int_t> QHN_I;
+
+typedef QHN<QHEData<Double_t> > QHEN_D;
+typedef QHN<QHEData<Float_t> > QHEN_F;
 
 #include "QHN_cxx.h"
 

@@ -124,6 +124,9 @@ typedef QHNF<Double_t> QHNF_D;
 typedef QHNF<Float_t> QHNF_F;
 typedef QHNF<Int_t> QHNF_I;
 
+typedef QHNF<QHEData<Double_t> > QHENF_D;
+typedef QHNF<QHEData<Float_t> > QHENF_F;
+
 #include "QHNF_cxx.h"
 
 #endif

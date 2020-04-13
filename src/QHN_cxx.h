@@ -6,6 +6,20 @@
 
 #include "QHN.h"
 
+#ifndef __INTEL_COMPILER
+#ifndef GCC_VERSION
+#define GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)
+#endif
+
+#if GCC_VERSION >= 403
+# define EXTERN
+#else
+# define EXTERN extern
+#endif
+#else
+# define EXTERN
+#endif
+
 template <typename U> QHN<U>::QHN(const QHN &qthn): QDis(qthn), fNDims(qthn.fNDims), fAxes(NULL), fEntries(qthn.fEntries), fBinContent(NULL), fNBins(qthn.fNBins), fIntUseFBinLoop(kFALSE), fTH(NULL)
 {
   Int_t i;
@@ -515,21 +529,14 @@ template <typename U> const TH1& QHN<U>::GetTH()
 
   if(fTH) delete fTH;
 
-  Long64_t li;
-  Int_t coords[3];
-  Long64_t nfbins=GetNFbins();
-
   switch(fNDims) {
     case 1:
       if(!fAxes[0]->GetBins()) fTH=new TH1D("qhn2th",GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetMin(),fAxes[0]->GetMax());
       else fTH=new TH1D("qhn2th",GetTitle(),fAxes[0]->GetNBins(),fAxes[0]->GetBins());
       fTH->SetDirectory(NULL);
       fTH->GetXaxis()->SetTitle(fAxes[0]->GetTitle());
+      QHNtoTH1Copy<U>(*this, fTH);
 
-      for(li=0; li<nfbins; li++) {
-	GetFBinCoords(li,coords);
-	fTH->SetBinContent(coords[0],GetFBinContent(li));
-      }
       break;
 
     case 2:
@@ -539,11 +546,7 @@ template <typename U> const TH1& QHN<U>::GetTH()
       if(fAxes[1]->GetBins()) fTH->GetYaxis()->Set(fAxes[1]->GetNBins(),fAxes[1]->GetBins());
       fTH->GetXaxis()->SetTitle(fAxes[0]->GetTitle());
       fTH->GetYaxis()->SetTitle(fAxes[1]->GetTitle());
-
-      for(li=0; li<nfbins; li++) {
-	GetFBinCoords(li,coords);
-	fTH->SetBinContent(coords[0],coords[1],GetFBinContent(li));
-      }
+      QHNtoTH2Copy<U>(*this,fTH);
       break;
 
     case 3:
@@ -555,11 +558,7 @@ template <typename U> const TH1& QHN<U>::GetTH()
       fTH->GetXaxis()->SetTitle(fAxes[0]->GetTitle());
       fTH->GetYaxis()->SetTitle(fAxes[1]->GetTitle());
       fTH->GetZaxis()->SetTitle(fAxes[2]->GetTitle());
-
-      for(li=0; li<nfbins; li++) {
-	GetFBinCoords(li,coords);
-	fTH->SetBinContent(coords[0],coords[1],coords[2],GetFBinContent(li));
-      }
+      QHNtoTH3Copy<U>(*this,fTH);
       break;
 
     default:

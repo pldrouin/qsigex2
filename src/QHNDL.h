@@ -69,6 +69,9 @@ typedef QHNDL<Double_t> QHNDL_D;
 typedef QHNDL<Float_t> QHNDL_F;
 typedef QHNDL<Int_t> QHNDL_I;
 
+typedef QHNDL<QHEData<Double_t> > QHENDL_D;
+typedef QHNDL<QHEData<Float_t> > QHENDL_F;
+
 #include "QHNDL_cxx.h"
 
 #endif
