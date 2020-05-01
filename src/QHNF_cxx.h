@@ -136,7 +136,7 @@ template <> EXTERN void QHNF<Int_t>::AddBinContent(const Long64_t &bin, const In
 	throw 1;\
       }
 #else
-#define BINCHECK
+#define BINCHECK(T)
 #endif
 #define QHNF_ABC(T) \
 template <> void QHNF<T>::AddBinContent(const Long64_t &bin)\

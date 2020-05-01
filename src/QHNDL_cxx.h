@@ -119,7 +119,7 @@ template <> EXTERN void QHNDL<Int_t>::AddBinContent(const Long64_t &bin, const I
 	throw 1;\
       }
 #else
-#define BINCHECK
+#define BINCHECK(T)
 #endif
 #define QHNDL_ABC(T) \
 template <> void QHNDL<T>::AddBinContent(const Long64_t &bin) \
