@@ -23,7 +23,7 @@ class QPHData
     inline const QPHData& operator/=(const Double_t& scale){fContent/=scale; return *this;}
     inline const QPHData& operator++(){++fContent; ++fEntries; return *this;}
     inline QPHData operator*(const Double_t& scale) const{return QPHData(fContent*scale,fEntries);}
-    inline QPHData operator/(const Double_t& scale) const{return QPHData(fContent/content,fEntries);}
+    inline QPHData operator/(const Double_t& scale) const{return QPHData(fContent/scale,fEntries);}
     inline void Reset(){fContent=fEntries=0;}
     inline void Set(const Double_t& content, const Double_t& entries){fContent=content; fEntries=entries;}
     inline void SetToOne(){fContent=1; fEntries=1;}
