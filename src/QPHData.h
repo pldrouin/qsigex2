@@ -55,8 +55,8 @@ class QPHEData: public QHBinWithError
     inline const QPHEData& operator*=(const Double_t& scale){fContent*=scale; fContent2*=scale*scale; return *this;}
     inline const QPHEData& operator/=(const Double_t& scale){fContent/=scale; fContent2/=scale*scale; return *this;}
     inline const QPHEData& operator++(){++fContent; ++fEntries; ++fContent2; return *this;}
-    inline QPHEData operator*(const Double_t& scale) const{return QPHEData(fContent*scale,fContent2*scale*scale,fEntries);}
-    inline QPHEData operator/(const Double_t& scale) const{return QPHEData(fContent/scale,fContent2/(scale*scale),fEntries);}
+    inline QPHEData operator*(const Double_t& scale) const{return QPHEData(fContent*scale,fEntries,fContent2*scale*scale);}
+    inline QPHEData operator/(const Double_t& scale) const{return QPHEData(fContent/scale,fEntries,fContent2/(scale*scale));}
     inline void Reset(){fContent=fContent2=fEntries=0;}
     inline void Set(const Double_t& content, const Double_t& entries, const Double_t& content2){fContent=content; fEntries=entries; fContent2=content2;}
     inline void SetToOne(){fContent=1; fEntries=1; fContent2=1;}
