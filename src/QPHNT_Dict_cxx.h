@@ -23,6 +23,7 @@ template <typename DTYPE, typename QHBASE> void QPHNT<DTYPE, QHBASE>::Streamer(T
       R__b >> QHBASE::fAxes[i]; 
     }
     QHBASE::ComputeNBins();
+    R__b >> QHBASE::fEntries;
     R__b >> QHBASE::fNBins;
     QHBASE::fBinContent=(DTYPE*)malloc(QHBASE::fNBins*sizeof(DTYPE));
     R__b.ReadFastArray(QHBASE::fBinContent, TClass::GetClass<DTYPE>(), QHBASE::fNBins);
