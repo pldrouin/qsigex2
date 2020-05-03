@@ -61,9 +61,13 @@ class QPHEData: public QHBinWithError
     inline void Set(const Double_t& content, const Double_t& entries, const Double_t& content2){fContent=content; fEntries=entries; fContent2=content2;}
     inline void SetToOne(){fContent=1; fEntries=1; fContent2=1;}
     inline Double_t SampStd() const{return sqrt(SampVar());}
+    inline Double_t RelSampStd() const{return sqrt(RelSampVar());}
     inline Double_t SampVar() const{if(fEntries<=1) return 0; const Double_t mean=fContent/fEntries; return (fContent2/fEntries-mean*mean)*fEntries/(fEntries-1);}
+    inline Double_t RelSampVar() const{if(fEntries<=1) return 0; const Double_t mean=fContent/fEntries; return (fContent2/fEntries/(mean*mean)-1)*fEntries/(fEntries-1);}
     inline Double_t Std() const{return sqrt(Var());}
+    inline Double_t RelStd() const{return sqrt(RelVar());}
     inline Double_t Var() const{if(!fEntries) return 0; const Double_t mean=fContent/fEntries; return fContent2/fEntries-mean*mean;}
+    inline Double_t RelVar() const{if(!fEntries) return 0; const Double_t mean=fContent/fEntries; return fContent2/fEntries/(mean*mean)-1;}
   protected:
     Double_t fContent;
     Double_t fEntries;
