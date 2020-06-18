@@ -39,7 +39,8 @@ template <typename DTYPE=QPHData, typename QHBASE=QHN<DTYPE> > class QPHNT: publ
     QPHNT(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins): QHBASE(name,title,nbinsx,xbins,nbinsy,ybins,nbinsz,zbins){}
 
     virtual ~QPHNT(){}
-    inline virtual void AddBinContent(const Long64_t &bin, const Double_t &y){QHBASE::AddBinContent(bin, DTYPE::Generator(y));}
+    inline void AddBinContent(const Long64_t &bin, const DTYPE &w){QHBASE::AddBinContent(bin, w);}
+    inline void AddBinContent(const Long64_t &bin, const Double_t &y){QHBASE::AddBinContent(bin, DTYPE::Generator(y));}
     TObject* Clone(const char* newname = "") const{QPHNT<DTYPE, QHBASE>* ret=new QPHNT<DTYPE, QHBASE>(*this); if(strdiffer(newname,"")) dynamic_cast<TNamed*>(ret)->SetName(newname); return dynamic_cast<TObject*>(ret);}
     inline void Fill(Double_t const * const &x, const Double_t &y){AddBinContent(QHBASE::FindBin(x),y);}
     inline void Fill(const Double_t &x0, const Double_t &y){AddBinContent(QHBASE::FindBin(x0),y);}
