@@ -571,7 +571,7 @@ template <typename U> Int_t QList<U>::RedimList(const Int_t &newdim, Int_t index
 	fUArray[i].~U();
       }
       fNElements=newdim;
-      fUArray=(U*)realloc(fUArray,fNElements*sizeof(U));
+      fUArray=(U*)realloc((char*)fUArray,fNElements*sizeof(U));
       return index;
       
     } else if(newdim>fNElements){
@@ -579,7 +579,7 @@ template <typename U> Int_t QList<U>::RedimList(const Int_t &newdim, Int_t index
       U* newarray;
       if(index==-1) index=fNElements;
       if(index<0 || index>fNElements) {cout << "QList<" << typeid(U).name() << ">: A bad index has been passed (" << index << ")\n"; throw 4000;}
-      newarray=(U*)realloc(fUArray,newdim*sizeof(U));
+      newarray=(U*)realloc((char*)fUArray,newdim*sizeof(U));
       Int_t i;
       
       //If the address of the array has changed and the elements were stored in the object table

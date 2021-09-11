@@ -46,7 +46,7 @@ template <typename U> void QHNDL<U>::AddBinContent(const Long64_t &bin)
     if(bidx==QHNF<U>::fNFBins || QHNF<U>::fBins[bidx]!=bin) {
       ++QHNF<U>::fNFBins;
       QHNF<U>::fBins=(Long64_t*)realloc(QHNF<U>::fBins,QHNF<U>::fNFBins*sizeof(Long64_t));
-      QHN<U>::fBinContent=(U*)realloc(QHN<U>::fBinContent,QHNF<U>::fNFBins*sizeof(U));
+      QHN<U>::fBinContent=(U*)realloc((char*)QHN<U>::fBinContent,QHNF<U>::fNFBins*sizeof(U));
 
       for(Long64_t li=QHNF<U>::fNFBins-1; li>bidx; --li) {
 	fFBins[QHNF<U>::fBins[li-1]]=li;
@@ -85,7 +85,7 @@ template <typename U> void QHNDL<U>::AddBinContent(const Long64_t &bin, const U 
       if(w) {
 	++QHNF<U>::fNFBins;
 	QHNF<U>::fBins=(Long64_t*)realloc(QHNF<U>::fBins,QHNF<U>::fNFBins*sizeof(Long64_t));
-	QHN<U>::fBinContent=(U*)realloc(QHN<U>::fBinContent,QHNF<U>::fNFBins*sizeof(U));
+	QHN<U>::fBinContent=(U*)realloc((char*)QHN<U>::fBinContent,QHNF<U>::fNFBins*sizeof(U));
 
 	for(Long64_t li=QHNF<U>::fNFBins-1; li>bidx; --li) {
           fFBins[QHNF<U>::fBins[li-1]]=li;
@@ -137,7 +137,7 @@ template <> void QHNDL<T>::AddBinContent(const Long64_t &bin) \
       \
       ++QHNF<T>::fNFBins; \
       QHNF<T>::fBins=(Long64_t*)realloc(QHNF<T>::fBins,QHNF<T>::fNFBins*sizeof(Long64_t)); \
-      QHN<T>::fBinContent=(T*)realloc(QHN<T>::fBinContent,QHNF<T>::fNFBins*sizeof(T)); \
+      QHN<T>::fBinContent=(T*)realloc((char*)QHN<T>::fBinContent,QHNF<T>::fNFBins*sizeof(T)); \
       \
       for(Long64_t li=QHNF<T>::fNFBins-1; li>bidx; --li) { \
 	fFBins[QHNF<T>::fBins[li-1]]=li; \
@@ -176,7 +176,7 @@ template <> void QHNDL<T>::AddBinContent(const Long64_t &bin, const T &w) \
       if(w) { \
 	++QHNF<T>::fNFBins; \
 	QHNF<T>::fBins=(Long64_t*)realloc(QHNF<T>::fBins,QHNF<T>::fNFBins*sizeof(Long64_t)); \
-	QHN<T>::fBinContent=(T*)realloc(QHN<T>::fBinContent,QHNF<T>::fNFBins*sizeof(T)); \
+	QHN<T>::fBinContent=(T*)realloc((char*)QHN<T>::fBinContent,QHNF<T>::fNFBins*sizeof(T)); \
  \
 	for(Long64_t li=QHNF<T>::fNFBins-1; li>bidx; --li) { \
           fFBins[QHNF<T>::fBins[li-1]]=li; \
@@ -258,7 +258,7 @@ template <typename U> void QHNDL<U>::SetBinContent(const Long64_t &bin, const U 
 	QHN<U>::fBinContent[li]=QHN<U>::fBinContent[li+1];
       }
       QHNF<U>::fBins=(Long64_t*)realloc(QHNF<U>::fBins,QHNF<U>::fNFBins*sizeof(Long64_t));
-      QHN<U>::fBinContent=(U*)realloc(QHN<U>::fBinContent,QHNF<U>::fNFBins*sizeof(U));
+      QHN<U>::fBinContent=(U*)realloc((char*)QHN<U>::fBinContent,QHNF<U>::fNFBins*sizeof(U));
     }
 
   } else {
@@ -267,7 +267,7 @@ template <typename U> void QHNDL<U>::SetBinContent(const Long64_t &bin, const U 
     if(content) {
       ++QHNF<U>::fNFBins;
       QHNF<U>::fBins=(Long64_t*)realloc(QHNF<U>::fBins,QHNF<U>::fNFBins*sizeof(Long64_t));
-      QHN<U>::fBinContent=(U*)realloc(QHN<U>::fBinContent,QHNF<U>::fNFBins*sizeof(U));
+      QHN<U>::fBinContent=(U*)realloc((char*)QHN<U>::fBinContent,QHNF<U>::fNFBins*sizeof(U));
 
       for(Long64_t li=QHNF<U>::fNFBins-1; li>bidx; --li) {
         fFBins[QHNF<U>::fBins[li-1]]=li;
@@ -296,7 +296,7 @@ template <typename U> void QHNDL<U>::SetFBinContent(const Long64_t &fbin, const 
       QHN<U>::fBinContent[li]=QHN<U>::fBinContent[li+1];
     }
     QHNF<U>::fBins=(Long64_t*)realloc(QHNF<U>::fBins,QHNF<U>::fNFBins*sizeof(Long64_t));
-    QHN<U>::fBinContent=(U*)realloc(QHN<U>::fBinContent,QHNF<U>::fNFBins*sizeof(U));
+    QHN<U>::fBinContent=(U*)realloc((char*)QHN<U>::fBinContent,QHNF<U>::fNFBins*sizeof(U));
   }
 }
 

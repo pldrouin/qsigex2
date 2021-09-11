@@ -27,7 +27,7 @@ template <typename U> QHN<U>::QHN(const QHN &qthn): QDis(qthn), fNDims(qthn.fNDi
 
   for(i=0; i<fNDims; i++) fAxes[i]=qthn.fAxes[i]?(QAxis*)qthn.fAxes[i]->Clone():NULL;
   fBinContent=(U*)malloc(fNBins*sizeof(U));
-  memset(fBinContent,0,fNBins*sizeof(U));
+  memset((char*)fBinContent,0,fNBins*sizeof(U));
   Long64_t li;
   Long64_t nfbins=qthn.GetNFbins();
 
@@ -372,7 +372,7 @@ template <typename U> void QHN<U>::CopyStruct(const QHN<U> &qthn)
   fAxes=new QAxis*[fNDims];
   for(Int_t i=fNDims-1; i>=0; --i) fAxes[i]=qthn.fAxes[i]?(QAxis*)qthn.fAxes[i]->Clone():NULL;
   fBinContent=(U*)malloc(fNBins*sizeof(U));
-  memset(fBinContent,0,fNBins*sizeof(U));
+  memset((char*)fBinContent,0,fNBins*sizeof(U));
 }
 
 template <typename U> void QHN<U>::Divide(const QHN<U> *qhn)
@@ -1457,7 +1457,7 @@ template <typename U> const QHN<U>& QHN<U>::operator=(const QHN<U> &qthn)
   for(Int_t i=fNDims-1; i>=0; --i) fAxes[i]=qthn.fAxes[i]?(QAxis*)qthn.fAxes[i]->Clone():NULL;
   fBinContent=(U*)malloc(fNBins*sizeof(U));
 
-  memset(fBinContent,0,fNBins*sizeof(U));
+  memset((char*)fBinContent,0,fNBins*sizeof(U));
   Long64_t li;
   Long64_t nfbins=qthn.GetNFbins();
 
@@ -1507,7 +1507,7 @@ template <typename U> const QHN<U>& QHN<U>::operator=(const QDisTH &qth)
 
 template <typename U> inline void QHN<U>::Reset()
 {
-  memset(fBinContent,0,fNBins*sizeof(U));
+  memset((char*)fBinContent,0,fNBins*sizeof(U));
   fEntries=0;
 
   if(fTH) {
