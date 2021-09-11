@@ -394,7 +394,7 @@ template <typename U> void QHN<U>::Init()
   fNBins=1;
   for(Int_t i=fNDims-1; i>=0; --i) fNBins*=fAxes[i]->GetNBins()+2;
   fBinContent=(U*)malloc(fNBins*sizeof(U));
-  memset(fBinContent,0,fNBins*sizeof(U));
+  memset((char*)fBinContent,0,fNBins*sizeof(U));
   fEntries=0;
   fIntUseFBinLoop=kFALSE;
   fTH=NULL;
