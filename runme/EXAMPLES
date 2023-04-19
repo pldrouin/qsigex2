@@ -1,9 +1,5 @@
-How to run the examples
+Examples
 =======================
 
-The examples can be run using the programs in runme/name, where name
-is d2o, mcgen, or data2root.
-
 d2o: fit the d2o data
-d2o_legacy: fit of the d2o data, using code that is compatible only with the old qsigex interface
 systematics: shows how MC can be smeared using QSigEx

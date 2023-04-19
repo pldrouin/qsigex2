@@ -3,12 +3,12 @@ The framework consists of optimised data structures, optimised histogramming too
 
 Dependencies:
 -GNU sed (to generated dependency files)
--GCC (tested with GCC 4.4.5)
+-GCC (tested with GCC 9.4.0)
 -GNU Make
--ROOT (http://root.cern.ch . Tested with ROOT 5.26.00)
+-ROOT (http://root.cern.ch . Tested with ROOT 6.28.02)
 -libprocinfo (optional, but recommended)
 
-To compile the library, simply call GNU make (gmake/make) from this directory
+To compile the library, simply call GNU make from this directory
 (default target). Make options are:
 WITH_LIBPROCINFO: Support for libprocinfo
 QSFAST: Compile without debugging support
@@ -18,4 +18,4 @@ libraries generated with the PROFGEN option)
 The clear target must be used prior to call make with different options
 
 To generate the HTML documentation, use the htmldoc target. 
-
+"lib" and "include" subdirectories must be created before compiling.

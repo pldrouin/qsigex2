@@ -4,5 +4,5 @@
 
 *************************************************
 
-> gmake
-> testptoc_qoa
+> make
+> testproc_qoa

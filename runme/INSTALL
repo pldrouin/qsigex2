@@ -1,7 +1,7 @@
 REQUIREMENTS:
 =============
 
--gmake
+-GNU make
 -sed
 -ROOT 5.19/03 or newer
 
@@ -20,4 +20,4 @@ INSTALLATION:
 
  and type:
 
- gmake
+ make
