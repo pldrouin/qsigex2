@@ -6,3 +6,5 @@
 
 > make
 > testproc_qoa
+
+Note: If the QSigEx library was compiled with the QSFAST make option enabled, it should also be used to compile the examples.

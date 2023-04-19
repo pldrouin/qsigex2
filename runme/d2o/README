@@ -10,3 +10,5 @@
 > rund2o_tree d2o_results.root
 #Or
 > rund2o_buffers d2o_results.root
+
+Note: If the QSigEx library was compiled with the QSFAST make option enabled, it should also be used to compile the examples.
