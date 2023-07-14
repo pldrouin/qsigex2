@@ -819,6 +819,20 @@ template <typename U> U QHN<U>::GetMaximum() const
   return *ptr;
 }
 
+template <typename U> U QHN<U>::GetMaximum(Long64_t *fbin) const
+{
+  if(!GetNFbins()) return 0;
+  *fbin=GetNFbins()-1;
+  U const *ptr=&GetFBinContent(*fbin);
+  Long64_t li;
+
+  for(li=GetNFbins()-2; li>=0; --li) if(GetFBinContent(li)>*ptr) {
+    ptr=&GetFBinContent(li);
+    *fbin=li;
+  }
+  return *ptr;
+}
+
 template <typename U> U QHN<U>::GetMinimum() const
 {
   if(!GetNFbins()) return 0;
@@ -826,6 +840,20 @@ template <typename U> U QHN<U>::GetMinimum() const
   Long64_t li;
 
   for(li=GetNFbins()-2; li>=0; --li) if(GetFBinContent(li)<*ptr) ptr=&GetFBinContent(li);
+  return *ptr;
+}
+
+template <typename U> U QHN<U>::GetMinimum(Long64_t* fbin) const
+{
+  if(!GetNFbins()) return 0;
+  *fbin=GetNFbins()-1;
+  U const *ptr=&GetFBinContent(*fbin);
+  Long64_t li;
+
+  for(li=GetNFbins()-2; li>=0; --li) if(GetFBinContent(li)<*ptr) {
+    ptr=&GetFBinContent(li);
+    *fbin=li;
+  }
   return *ptr;
 }
 
