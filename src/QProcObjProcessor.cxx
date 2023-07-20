@@ -273,7 +273,7 @@ void QProcObjProcessor::Exec() const
     //Loop over parameters
     for(lExeci=fAParams->Count()-1; lExeci>=0; --lExeci) {
 
-      //If the current parameter value has changed, set the correspongind bit in the parameter mask
+      //If the current parameter value has changed, set the corresponding bit in the parameter mask
       if(*(fAParams->GetArray()[lExeci]) != fLastParams->GetArray()[lExeci]) lExecpardiffs.SetBit(lExeci,1);
     }
 
