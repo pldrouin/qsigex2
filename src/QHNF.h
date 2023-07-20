@@ -86,7 +86,7 @@ template <typename U> class QHNF: public QHN<U>
     Long64_t fNFBins;
     Long64_t *fBins; //!
 
-    ClassDef(QHNF,2) //Multidimensional histogram template class optimized for memory and iteration over filled bins
+    ClassDef(QHNF,3) //Multidimensional histogram template class optimized for memory and iteration over filled bins
 };
 
 #ifndef QSFAST

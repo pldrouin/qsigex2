@@ -29,6 +29,7 @@ template <typename DTYPE, typename QHBASE> void QPHNT<DTYPE, QHBASE>::Streamer(T
     R__b.ReadFastArray(QHBASE::fBinContent, TClass::GetClass<DTYPE>(), QHBASE::fNBins);
 
     if(R__v>1) R__b >> QHBASE::fIntUseFBinLoop;
+    if(R__v>2) R__b >> QHBASE::fNormalizeAtTermination;
 
     R__b.CheckByteCount(R__s, R__c, QPHNT<DTYPE, QHBASE>::IsA());
 
@@ -53,6 +54,7 @@ template <typename DTYPE, typename QHBASE> void QPHNT<DTYPE, QHBASE>::Streamer(T
     R__b << QHBASE::fNBins;
     R__b.WriteFastArray(QHBASE::fBinContent, TClass::GetClass<DTYPE>(), QHBASE::fNBins);
     R__b << QHBASE::fIntUseFBinLoop;
+    R__b << QHBASE::fNormalizeAtTermination;
 
     R__b.SetByteCount(R__c, kTRUE);
   }

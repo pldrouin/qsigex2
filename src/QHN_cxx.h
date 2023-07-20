@@ -20,7 +20,7 @@
 # define EXTERN
 #endif
 
-template <typename U> QHN<U>::QHN(const QHN &qthn): QDis(qthn), fNDims(qthn.fNDims), fAxes(NULL), fEntries(qthn.fEntries), fBinContent(NULL), fNBins(qthn.fNBins), fIntUseFBinLoop(kFALSE), fTH(NULL)
+template <typename U> QHN<U>::QHN(const QHN &qthn): QDis(qthn), fNDims(qthn.fNDims), fAxes(NULL), fEntries(qthn.fEntries), fBinContent(NULL), fNBins(qthn.fNBins), fIntUseFBinLoop(kFALSE), fNormalizeAtTermination(qthn.fNormalizeAtTermination), fTH(NULL)
 {
   Int_t i;
   fAxes=new QAxis*[fNDims];
@@ -36,7 +36,7 @@ template <typename U> QHN<U>::QHN(const QHN &qthn): QDis(qthn), fNDims(qthn.fNDi
   }
 }
 
-template <typename U> QHN<U>::QHN(const Char_t* filename, const Char_t* objectname): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0), fIntUseFBinLoop(kFALSE), fTH(NULL)
+template <typename U> QHN<U>::QHN(const Char_t* filename, const Char_t* objectname): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0), fIntUseFBinLoop(kFALSE), fNormalizeAtTermination(kTRUE), fTH(NULL)
 {
   TDirectory *curdir=gDirectory;
   TFile f(filename,"READ");
@@ -65,7 +65,7 @@ template <typename U> QHN<U>::QHN(const Char_t* filename, const Char_t* objectna
   curdir->cd();
 }
 
-template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &ndims): QDis(name,title), fNDims(ndims), fAxes(new QAxis*[ndims]), fBinContent(NULL), fNBins(0), fIntUseFBinLoop(kFALSE), fTH(NULL)
+template <typename U> QHN<U>::QHN(const Char_t *name, const Char_t *title, const Int_t &ndims): QDis(name,title), fNDims(ndims), fAxes(new QAxis*[ndims]), fBinContent(NULL), fNBins(0), fIntUseFBinLoop(kFALSE), fNormalizeAtTermination(kTRUE), fTH(NULL)
 {
   if(fNDims<=0) {
     fprintf(stderr,"QHN::QHN: Error: Number of dimensions is invalid\n");

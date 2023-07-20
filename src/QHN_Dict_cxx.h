@@ -35,6 +35,7 @@ template <> void QHN<QHEData<T> >::Streamer(TBuffer &R__b)\
     fBinContent=(QHEData<T>*)malloc(fNBins*sizeof(QHEData<T>));\
     R__b.ReadFastArray(fBinContent,TClass::GetClass<QHEData<T> >(), fNBins);\
     if(R__v>1) R__b >> fIntUseFBinLoop;\
+    if(R__v>2) R__b >> fNormalizeAtTermination;\
 \
     R__b.CheckByteCount(R__s, R__c, QHN<QHEData<T> >::IsA());\
 \
@@ -59,6 +60,7 @@ template <> void QHN<QHEData<T> >::Streamer(TBuffer &R__b)\
     R__b << fNBins;\
     R__b.WriteFastArray(fBinContent, TClass::GetClass<QHEData<T> >(), fNBins);\
     R__b << fIntUseFBinLoop;\
+    R__b << fNormalizeAtTermination;\
 \
     R__b.SetByteCount(R__c, kTRUE);\
   }\
@@ -89,6 +91,7 @@ template <typename U> void QHN<U>::Streamer(TBuffer &R__b)
     R__b >> fEntries;
     R__b.ReadFastArray(fBinContent,fNBins);
     if(R__v>1) R__b >> fIntUseFBinLoop;
+    if(R__v>2) R__b >> fNormalizeAtTermination;
 
     R__b.CheckByteCount(R__s, R__c, QHN<U>::IsA());
 
@@ -112,6 +115,7 @@ template <typename U> void QHN<U>::Streamer(TBuffer &R__b)
     R__b << fEntries;
     R__b.WriteFastArray(fBinContent,fNBins);
     R__b << fIntUseFBinLoop;
+    R__b << fNormalizeAtTermination;
 
     R__b.SetByteCount(R__c, kTRUE);
   }

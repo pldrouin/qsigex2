@@ -30,7 +30,7 @@ class QHBinWithError{};
 template <typename U> class QHN: public QDis
 {
   public:
-    QHN(): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0), fIntUseFBinLoop(kFALSE), fTH(NULL){};
+    QHN(): QDis(),fNDims(0), fAxes(NULL), fEntries(0), fBinContent(NULL), fNBins(0), fIntUseFBinLoop(kFALSE), fNormalizeAtTermination(kTRUE), fTH(NULL){};
     QHN(const QHN &qthn);
     QHN(const Char_t* filename, const Char_t* objectname);
     QHN(const Char_t *name, const Char_t *title, const Int_t &ndims);
@@ -178,6 +178,7 @@ template <typename U> class QHN: public QDis
     inline virtual const Long64_t& GetFBinCoord(const Long64_t &fbin) const{return fbin;}
     inline virtual void GetFBinCoords(const Long64_t &fbin, Int_t *coords) const{return GetBinCoords(fbin,coords);}
     const Bool_t& GetIntUseFBinLoop() const {return fIntUseFBinLoop;}
+    const Bool_t& GetNormalizeAtTermination() const {return fNormalizeAtTermination;}
     virtual void CopyStruct(const QHN<U> &qthn);
     void GetMeans(Double_t means[], Bool_t width=kTRUE) const;
     U GetMaximum() const;
@@ -236,7 +237,8 @@ template <typename U> class QHN: public QDis
     QHN<U>* SubHist(const char *name, const Int_t &axis0, const Int_t &firstbin0, const Int_t &lastbin0, const Int_t &axis1, const Int_t &firstbin1, const Int_t &lastbin1) const;
     QHN<U>* SubHist(const char *name, const Int_t &axis0, const Int_t &firstbin0, const Int_t &lastbin0, const Int_t &axis1, const Int_t &firstbin1, const Int_t &lastbin1, const Int_t &axis2, const Int_t &firstbin2, const Int_t &lastbin2) const;
     void SetIntUseFBinLoop(const Bool_t &intusefbinloop){fIntUseFBinLoop=intusefbinloop;}
-    inline void TerminateProcObj(){Normalize();}
+    void SetNormalizeAtTermination(const Bool_t &normalizeattermination){fNormalizeAtTermination=normalizeattermination;}
+    inline void TerminateProcObj(){if(fNormalizeAtTermination) Normalize();}
     void WritePSPlot(const char *filename=NULL) const;
     inline static void ResetBinData(U& bdata);
   protected:
@@ -252,9 +254,10 @@ template <typename U> class QHN: public QDis
     U *fBinContent; //!
     Long64_t fNBins;
     Bool_t fIntUseFBinLoop;
+    Bool_t fNormalizeAtTermination;
     TH1 *fTH;
 
-    ClassDef(QHN,2) //Multidimensional histogram template class optimized for random access
+    ClassDef(QHN,3) //Multidimensional histogram template class optimized for random access
 };
 
 template <typename U, bool=std::is_base_of<QHBinWithError, U>::value> class QHNtoTH1Copy

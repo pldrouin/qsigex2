@@ -72,7 +72,7 @@ template <typename DTYPE=QPHData, typename QHBASE=QHN<DTYPE> > class QPHNT: publ
     void Fill(const Double_t &x0){}
     void Fill(const Float_t &x0){}
 
-    ClassDef(QPHNT,1) //Multidimensional profile histogram class optimized for random access
+    ClassDef(QPHNT,3) //Multidimensional profile histogram class optimized for random access
 };
 
 typedef QPHNT<QPHData,QHN<QPHData> > QPHN;
