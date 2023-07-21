@@ -52,8 +52,8 @@ struct sem_t;
 
 #define QOA_MAXPROCS 16
 
-extern "C" void R__zip (Int_t cxlevel, Int_t *nin, char *bufin, Int_t *lout, char *bufout, Int_t *nout);
-extern "C" void R__unzip(Int_t *nin, UChar_t *bufin, Int_t *lout, char *bufout, Int_t *nout);
+extern "C" void R__zip(int cxlevel, int *srcsize, char *src, int *tgtsize, char *tgt, int *irep);
+extern "C" void R__unzip(int *srcsize, unsigned char *src, int *tgtsize, unsigned char *tgt, int *irep);
 
 class QOversizeArray;
 
@@ -159,7 +159,7 @@ class QOversizeArray
     QOABuffer *fFirstReadBuffer; //!
     QOABuffer *fLastReadBuffer;  //!
     QOABuffer *fWriteBuffer;     //!
-    Char_t    *fCRBData;         //! Pointer to current read buffer uncompressed data
+    UChar_t    *fCRBData;         //! Pointer to current read buffer uncompressed data
     Long64_t   fWBFirstObjIdx;   // Index of the first object contained in the write buffer. ****Value should be modified only by the main thread
     UInt_t     fWBNAllocObjs;    // Number of objects for which memory is allocated in the write buffer
     Int_t fCurRBIdx;             // Current read buffer index. A value of -1 indicates the array is in write mode, a value of -2 indicates that unzipped buffers should be cleaned by QOABLThread. A value >=0 indicates that the main thread considers the array to be in read mode. Read mode check should also ensure that fCurBLRBIdx>=0.
@@ -192,7 +192,7 @@ class QOversizeArray
     struct QOAQueue	   fQOAQ;          // QOAQueue structure for this
     QOABuffer	   *fCurBLBuffer;  //Current buffer hold by QOABLThread
     QOABuffer     **fUZQOAB;       //! Array of QOABuffers that have been unzipped
-    Char_t        **fUZBuffers;    //! Array of unzipped buffers
+    UChar_t        **fUZBuffers;    //! Array of unzipped buffers
     pthread_mutex_t fUZBMutex;     // Lock on unzipped buffer arrays
 
     static QList<QOversizeArray*> fInstances; // List of QOversizeArray instances

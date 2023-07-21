@@ -389,9 +389,9 @@ void QOversizeArray::Init()
 {
   CFuncDef(Init,1);
   fUZQOAB=(QOABuffer**)malloc((fNPCBuffers+2)*sizeof(QOABuffer*));
-  fUZBuffers=(Char_t**)malloc((fNPCBuffers+2)*sizeof(Char_t*));
+  fUZBuffers=(UChar_t**)malloc((fNPCBuffers+2)*sizeof(UChar_t*));
   memset(fUZQOAB,0,(fNPCBuffers+2)*sizeof(QOABuffer*));
-  memset(fUZBuffers,0,(fNPCBuffers+2)*sizeof(Char_t*));
+  memset(fUZBuffers,0,(fNPCBuffers+2)*sizeof(UChar_t*));
   ReadWriteBuffer();
 }
 
@@ -466,7 +466,7 @@ void QOversizeArray::Fill()
       if(fWBNAllocObjs>fNOPerBuffer) fWBNAllocObjs=fNOPerBuffer;
       lFillallocsize=fWBNAllocObjs*fObjectSize;
 
-      fWriteBuffer->fBuffer=(char*)realloc(fWriteBuffer->fBuffer,lFillallocsize);
+      fWriteBuffer->fBuffer=(unsigned char*)realloc(fWriteBuffer->fBuffer,lFillallocsize);
       q_add(fTotalMemSize,lFillallocsize-fWriteBuffer->fBufferSize);
       q_add(&fArrayMemSize,lFillallocsize-fWriteBuffer->fBufferSize);
       fWriteBuffer->fBufferSize=lFillallocsize;
@@ -539,7 +539,7 @@ void QOversizeArray::Fill()
 	  free(fWriteBuffer->fBuffer);
 	  fWBNAllocObjs=fNOAllocBlock;
 	  lFillallocsize=fWBNAllocObjs*fObjectSize;
-	  fWriteBuffer->fBuffer=(char*)malloc(lFillallocsize);
+	  fWriteBuffer->fBuffer=(unsigned char*)malloc(lFillallocsize);
 	  q_add(fTotalMemSize,lFillallocsize-fWriteBuffer->fBufferSize);
 	  q_add(&fArrayMemSize,lFillallocsize-fWriteBuffer->fBufferSize);
 	  fWriteBuffer->fBufferSize=lFillallocsize;
@@ -1217,7 +1217,7 @@ void QOversizeArray::ReadBuffer(QOABuffer **buf, const UInt_t &bufferidx)
 
     if((*buf)->fBufferSize != buffersize) {
       free((*buf)->fBuffer);
-      (*buf)->fBuffer=(char*)malloc(buffersize);
+      (*buf)->fBuffer=(unsigned char*)malloc(buffersize);
       q_add(fTotalMemSize,buffersize-(*buf)->fBufferSize);
       q_add(&fArrayMemSize,buffersize-(*buf)->fBufferSize);
 
@@ -1284,7 +1284,7 @@ void QOversizeArray::ReadWriteBuffer()
       free(fWriteBuffer->fBuffer);
       fWBNAllocObjs=numobjs;
       allocsize=fWBNAllocObjs*fObjectSize;
-      fWriteBuffer->fBuffer=(char*)malloc(allocsize);
+      fWriteBuffer->fBuffer=(unsigned char*)malloc(allocsize);
       q_add(fTotalMemSize,allocsize-fWriteBuffer->fBufferSize);
       q_add(&fArrayMemSize,allocsize-fWriteBuffer->fBufferSize);
       fWriteBuffer->fBufferSize=allocsize;
@@ -1333,7 +1333,7 @@ void QOversizeArray::Save(const Float_t &compfrac)
   }
 
   QOABuffer *buf;
-  Char_t *tmpbuf;
+  UChar_t *tmpbuf;
   Int_t ibuf;
 
   pthread_mutex_lock(&fMWMutex);
@@ -1382,14 +1382,14 @@ void QOversizeArray::Save(const Float_t &compfrac)
 
     while(buf) {
       if(buf->fIsModified) {
-	tmpbuf=(char*)malloc(fMaxBDataSize);
-	R__zip(1,&fMaxBDataSize,buf->fBuffer,&fMaxBDataSize,tmpbuf,&ibuf);
+	tmpbuf=(unsigned char*)malloc(fMaxBDataSize);
+	R__zip(1,&fMaxBDataSize,(char*)buf->fBuffer,&fMaxBDataSize,(char*)tmpbuf,&ibuf);
 
 	//If compressed data is more compact than uncompressed data
 	if(ibuf && ibuf<fMaxBDataSize) {
 	  //printf("Compression %i/%i\n",ibuf,buf->fBufferSize);
 	  free(buf->fBuffer);
-	  tmpbuf=(char*)realloc(tmpbuf,ibuf);
+	  tmpbuf=(unsigned char*)realloc(tmpbuf,ibuf);
 	  buf->fBuffer=tmpbuf;
 	  q_add(fTotalMemSize,-(buf->fBufferSize-ibuf));
 	  q_add(&fArrayMemSize,-(buf->fBufferSize-ibuf));
@@ -1411,14 +1411,14 @@ void QOversizeArray::Save(const Float_t &compfrac)
 	fbuf+=compfrac;
 
 	if(fbuf>=1) {
-	  tmpbuf=(char*)malloc(fMaxBDataSize);
-	  R__zip(1,&fMaxBDataSize,buf->fBuffer,&fMaxBDataSize,tmpbuf,&ibuf);
+	  tmpbuf=(unsigned char*)malloc(fMaxBDataSize);
+	  R__zip(1,&fMaxBDataSize,(char*)buf->fBuffer,&fMaxBDataSize,(char*)tmpbuf,&ibuf);
 
 	  //If compressed data is more compact than uncompressed data
 	  if(ibuf && ibuf<fMaxBDataSize) {
 	    //printf("Compression %i/%i\n",ibuf,buf->fBufferSize);
 	    free(buf->fBuffer);
-	    tmpbuf=(char*)realloc(tmpbuf,ibuf);
+	    tmpbuf=(unsigned char*)realloc(tmpbuf,ibuf);
 	    buf->fBuffer=tmpbuf;
 	    q_add(fTotalMemSize,-(buf->fBufferSize-ibuf));
 	    q_add(&fArrayMemSize,-(buf->fBufferSize-ibuf));
@@ -2009,12 +2009,12 @@ void* QOversizeArray::QOABLThread(void*)
 	    q_add(fTotalMemSize,qoa->fMaxBDataSize);
 	    q_add(&qoa->fArrayMemSize,qoa->fMaxBDataSize);
 	    //Allocate space for the unzipped buffer
-	    qoa->fUZBuffers[ibuf2]=(Char_t*)malloc(qoa->fMaxBDataSize);
+	    qoa->fUZBuffers[ibuf2]=(UChar_t*)malloc(qoa->fMaxBDataSize);
 	    //printf("Allocating space for fUZBuffers[%i] at position %p\n",ibuf2,qoa->fUZBuffers[ibuf2]);
 	    pthread_mutex_unlock(&qoa->fUZBMutex);
 	    CheckMemory();
 	    //Unzip the buffer
-	    R__unzip(&buf2->fBufferSize, (UChar_t*)buf2->fBuffer, &qoa->fMaxBDataSize, qoa->fUZBuffers[ibuf2], &ibuf3);
+	    R__unzip(&buf2->fBufferSize, buf2->fBuffer, &qoa->fMaxBDataSize, qoa->fUZBuffers[ibuf2], &ibuf3);
 
 	    if(!ibuf3) {
 	      fprintf(stderr,"QOversizeArray::QOABLThread: Error: A buffer cannot be unzipped\n");
@@ -2137,12 +2137,12 @@ void* QOversizeArray::QOABLThread(void*)
 	  q_add(fTotalMemSize,qoa->fMaxBDataSize);
 	  q_add(&qoa->fArrayMemSize,qoa->fMaxBDataSize);
 	  //Allocate space for the unzipped buffer
-	  qoa->fUZBuffers[ibuf2]=(Char_t*)malloc(qoa->fMaxBDataSize);
+	  qoa->fUZBuffers[ibuf2]=(UChar_t*)malloc(qoa->fMaxBDataSize);
 	  //printf("Allocating space for fUZBuffers[%i] at position %p\n",ibuf2,qoa->fUZBuffers[ibuf2]);
 	  pthread_mutex_unlock(&qoa->fUZBMutex);
 	  CheckMemory();
 	  //Unzip the buffer
-	  R__unzip(&qoa->fCurBLBuffer->fBufferSize, (UChar_t*)qoa->fCurBLBuffer->fBuffer, &qoa->fMaxBDataSize, qoa->fUZBuffers[ibuf2], &ibuf2);
+	  R__unzip(&qoa->fCurBLBuffer->fBufferSize, qoa->fCurBLBuffer->fBuffer, &qoa->fMaxBDataSize, qoa->fUZBuffers[ibuf2], &ibuf2);
 
 	  if(!ibuf2) {
 	    fprintf(stderr,"QOversizeArray::QOABLThread: Error: A buffer cannot be unzipped\n");
@@ -2597,7 +2597,7 @@ void* QOversizeArray::QOAMCThread(void *array)
   pthread_block_signals_once();
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL); //Thread will cancel right away if pthread_cancel is called
   QOABuffer *buf;
-  char* tmpbuf;
+  unsigned char* tmpbuf;
   Int_t ibuf;
   printstatus("Starting memory compression thread");
 
@@ -2659,15 +2659,15 @@ void* QOversizeArray::QOAMCThread(void *array)
       //printf("Memory compression thread will compress buffer %p\n",buf);
       printstatus("Memory compression thread just sent a confirmation");
 
-      tmpbuf=(char*)malloc(fMCQOA->fMaxBDataSize);
+      tmpbuf=(unsigned char*)malloc(fMCQOA->fMaxBDataSize);
       //printf("Compressing buffer %p\n",buf);
-      R__zip(1,&fMCQOA->fMaxBDataSize,buf->fBuffer,&fMCQOA->fMaxBDataSize,tmpbuf,&ibuf);
+      R__zip(1,&fMCQOA->fMaxBDataSize,(char*)buf->fBuffer,&fMCQOA->fMaxBDataSize,(char*)tmpbuf,&ibuf);
 
       //If compressed data is more compact than uncompressed data
       if(ibuf && ibuf<fMCQOA->fMaxBDataSize) {
 	//printf("Compression %i/%i\n",ibuf,buf->fBufferSize);
 	free(buf->fBuffer);
-	tmpbuf=(char*)realloc(tmpbuf,ibuf);
+	tmpbuf=(unsigned char*)realloc(tmpbuf,ibuf);
 	buf->fBuffer=tmpbuf;
 	q_add(fTotalMemSize,-(buf->fBufferSize-ibuf));
 	q_add(&fMCQOA->fArrayMemSize,-(buf->fBufferSize-ibuf));

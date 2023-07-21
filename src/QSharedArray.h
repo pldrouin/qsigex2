@@ -50,8 +50,8 @@ typedef Long64_t int64_t;
 
 void dummy_h(int sig);
 
-extern "C" void R__zip (int cxlevel, int *nin, char *bufin, int *lout, char *bufout, int *nout);
-extern "C" void R__unzip(int *nin, unsigned char *bufin, int *lout, char *bufout, int *nout);
+extern "C" void R__zip(int cxlevel, int *srcsize, char *src, int *tgtsize, char *tgt, int *irep);
+extern "C" void R__unzip(int *srcsize, unsigned char *src, int *tgtsize, unsigned char *tgt, int *irep);
 
 using std::string;
 

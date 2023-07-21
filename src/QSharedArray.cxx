@@ -554,7 +554,7 @@ void QSharedArray::LoadArray()
       //If the disk buffer is compressed
       if(uibuf<maxdbdatasize && i!=wbidx) {
 	//Unzip it
-	R__unzip((int*)&uibuf,(unsigned char*)dbuf,(int*)&maxdbdatasize,(char*)uzbuf,&ibuf);
+	R__unzip((int*)&uibuf,(unsigned char*)dbuf,(int*)&maxdbdatasize,(unsigned char*)uzbuf,&ibuf);
 
 	if(!ibuf) {
 	  fprintf(stderr,"QSharedArray::LoadArray: Error: A buffer cannot be unzipped\n");
