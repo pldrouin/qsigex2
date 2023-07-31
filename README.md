@@ -6,7 +6,7 @@ Dependencies:<br>
 -GCC (tested with GCC 9.4.0)<br>
 -GNU Make<br>
 -[ROOT](http://root.cern.ch). Tested with ROOT 6.28.02)<br>
--libprocinfo (optional, but recommended)<br>
+-[libprocinfo](https://github.com/pldrouin/libprocinfo) (optional, but recommended)<br>
 
 To compile the library, simply call GNU make from this directory (default target). Make options are:<br>
 WITH_LIBPROCINFO: Support for libprocinfo<br>
