@@ -32,19 +32,23 @@ endif
 endif
 endif
 
-all: $(ALLINCS)
+all: lib $(ALLINCS)
 	cd ./src; $(MAKE) shared static
 	cp ./src/libqsigex*.a ./src/libqsigex*.so ./src/*_rdict.pcm ./lib/
 
-static: $(ALLINCS)
+static: lib $(ALLINCS)
 	cd ./src; $(MAKE) static
 	cp ./src/libqsigex*.a ./src/*_rdict.pcm ./lib/
 
-shared: $(ALLINCS)
+shared: lib $(ALLINCS)
 	cd ./src; $(MAKE) shared
 	cp ./src/libqsigex*.so ./src/*_rdict.pcm ./lib/
 
-htmldoc: shared
+lib:
+	mkdir -p $@
+
+htmldoc:
+	rm -rf htmldoc
 	cd ./src; root -b -n -q -l htmlgen.C; mv htmldoc ../
 clean:
 	cd ./src; $(MAKE) clean
@@ -56,5 +60,8 @@ clear:
 bindist:
 	rm -rf src Makefile
 
-$(ALLINCS): include/% : src/%
-	cp $^ $@
+$(ALLINCS): include/% : src/% include
+	cp $< $@
+
+include:
+	mkdir -p $@

@@ -1,3 +1,5 @@
+// Author: Pierre-Luc Drouin <pldrouin@pldrouin.net>
+
 #ifndef _QPHDATA_
 #define _QPHDATA_
 
