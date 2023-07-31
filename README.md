@@ -8,13 +8,11 @@ Dependencies:
 -[ROOT](http://root.cern.ch). Tested with ROOT 6.28.02)
 -libprocinfo (optional, but recommended)
 
-To compile the library, simply call GNU make from this directory
-(default target). Make options are:
+To compile the library, simply call GNU make from this directory (default target). Make options are:
 WITH_LIBPROCINFO: Support for libprocinfo
 QSFAST: Compile without debugging support
 PROFGEN: Add compilation flags to generate compiler profiles
-PROFUSE: Add compilation flags to use compiler profiles (after using the
-libraries generated with the PROFGEN option)
+PROFUSE: Add compilation flags to use compiler profiles (after using the libraries generated with the PROFGEN option)
 The clear target must be used prior to call make with different options
 
 To generate the HTML documentation, use the htmldoc target. 
