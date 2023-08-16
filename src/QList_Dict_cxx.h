@@ -164,6 +164,7 @@ template <> void QList<Double_t>::Streamer(TBuffer &R__b)
 template <> void QList<void*>::Streamer(TBuffer &){}
 template <> void QList<Double_t*>::Streamer(TBuffer &){}
 template <> void QList<TObject*>::Streamer(TBuffer &){}
+template <> void QList<QProcObj*>::Streamer(TBuffer &){}
 template <> void QList<QProcObj const*>::Streamer(TBuffer &){}
 template <> void QList<QProcArray*>::Streamer(TBuffer &){}
 template <> void QList<QOversizeArray*>::Streamer(TBuffer &){}
