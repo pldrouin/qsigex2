@@ -20,7 +20,7 @@ class QProcedure
     virtual const QProcedure& operator=(const QProcedure &rhs){fArgs=rhs.fArgs; return *this;}
 
     virtual void AddIVar(const Int_t &index=-1, void* const buf=NULL){fArgs.AddIVar(index,buf);}
-    virtual void AddIObj(const Int_t &index=-1, QProcObj* const obj=NULL){fArgs.AddIObj(index,obj);}
+    virtual void AddIObj(const Int_t &index=-1, QProcObj const* const obj=NULL){fArgs.AddIObj(index,obj);}
     virtual void AddOVar(const Int_t &index=-1, void* const buf=NULL){fArgs.AddOVar(index,buf);}
     virtual void AddOObj(const Int_t &index=-1, QProcObj* const obj=NULL){fArgs.AddOObj(index,obj);}
     virtual void AddParam(const Int_t &index=-1, Double_t* const buf=NULL){fArgs.AddParam(index,buf);}

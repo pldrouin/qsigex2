@@ -16,7 +16,7 @@ void QNamedProc::AddIVar(const char *name, const char *title, const Int_t &index
   fProcedure->AddIVar(index,buf);
 }
 
-void QNamedProc::AddIObj(QProcObj* const obj, const Int_t &index)
+void QNamedProc::AddIObj(QProcObj const* const obj, const Int_t &index)
 {
   fProcedure->AddIObj(index,obj);
 }

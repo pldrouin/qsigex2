@@ -27,7 +27,7 @@ class QNamedProc: public TNamed
     virtual ~QNamedProc(){PRINTF2(this,"\tQNamedProc::~QNamedProc()\n") if(fProcedure) {delete fProcedure; fProcedure=NULL;} delete fIVarsNames; fIVarsNames=NULL; delete fOVarsNames; fOVarsNames=NULL; delete fParamsNames; fParamsNames=NULL; delete fProcName; fProcName=NULL;}
 
     void AddIVar(const char *name, const char *title=NULL, const Int_t &index=-1, void* const buf=NULL);
-    void AddIObj(QProcObj* const obj=NULL, const Int_t &index=-1);
+    void AddIObj(QProcObj const* const obj=NULL, const Int_t &index=-1);
     void AddOVar(const char *name, const char *title=NULL, const Int_t &index=-1, void* const buf=NULL);
     void AddOObj(QProcObj* const obj=NULL, const Int_t &index=-1);
     void AddParam(const char *name, const char* title=NULL, const Int_t &index=-1, Double_t* const buf=NULL);

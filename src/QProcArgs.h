@@ -47,7 +47,7 @@ class QProcArgs
   QProcArgs(const QProcArgs& qprocargs):fIBuffers(qprocargs.fIBuffers), fIObjects(qprocargs.fIObjects), fOBuffers(qprocargs.fOBuffers), fOObjects(qprocargs.fOObjects), fPBuffers(qprocargs.fPBuffers), fNamedProc(qprocargs.fNamedProc){}
   virtual ~QProcArgs(){}
   virtual const QProcArgs& operator=(const QProcArgs& rhs);
-  const QList<QProcObj*>& GetListOfIObjs() const{return fIObjects;}
+  const QList<QProcObj const*>& GetListOfIObjs() const{return fIObjects;}
   const QList<QProcObj*>& GetListOfOObjs() const{return fOObjects;}
   const Int_t& GetNIVars() const{return fIBuffers.Count();}
   const Int_t& GetNIObjs() const{return fIObjects.Count();}
@@ -100,7 +100,7 @@ class QProcArgs
     fIBTypes.Add(type,index);
 #endif
   }
-  void AddIObj(const Int_t &index=-1, QProcObj* const obj=NULL){fIObjects.Add(obj,index);}
+  void AddIObj(const Int_t &index=-1, QProcObj const* const obj=NULL){fIObjects.Add(obj,index);}
   void AddOVar(const Int_t &index=-1, void* const buf=NULL, const Int_t &type=-1){
     fOBuffers.Add(buf,index);
 #ifndef QSFAST
@@ -190,7 +190,7 @@ class QProcArgs
 
   private:
   QList<void*> fIBuffers;
-  QList<QProcObj*> fIObjects;
+  QList<QProcObj const*> fIObjects;
   QList<void*> fOBuffers;
   QList<QProcObj*> fOObjects;
   QList<Double_t*> fPBuffers;
