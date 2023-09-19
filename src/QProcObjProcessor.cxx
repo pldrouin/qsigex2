@@ -356,10 +356,11 @@ void QProcObjProcessor::Exec() const
     //Save the parameters
     for(lExeci=fParams->Count()-1; lExeci>=0; --lExeci) fLastParams->GetArray()[lExeci]=*(fParams->GetArray()[lExeci]);
     fLastExec.Set();
+    if(GetVerbosity()&QProcessor::kShowExec2) printf("QProcObjProcessor('%s')::Exec() Done\n",GetName());
 
   } else {
 
-    if(GetVerbosity()&QProcessor::kShowExec2) printf("QProcObjProcessor('%s')::Exec()\n",GetName());
+    if(GetVerbosity()&QProcessor::kShowExec2) printf("QProcObjProcessor('%s')::Exec() Start and Done\n",GetName());
   }
 }
 
