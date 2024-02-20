@@ -48,7 +48,7 @@ template <typename U> class QHN: public QDis
     QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz=0, const Double_t &zlow=0, const Double_t &zhigh=0, const Bool_t &init=kTRUE);
     QHN(const Char_t *name, const Char_t *title, const Int_t &nbinsx, const Double_t *xbins, const Int_t &nbinsy, const Double_t *ybins, const Int_t &nbinsz, const Double_t *zbins, const Bool_t &init=kTRUE);
 
-    virtual ~QHN(){Clear();}
+    virtual ~QHN(){QHN::Clear();}
     void Add(const QHN<U> *qhn, const U &c=1);
     inline virtual void AddBinContent(const Long64_t &bin){
 #ifndef QSFAST

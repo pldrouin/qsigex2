@@ -30,6 +30,10 @@ ifdef PROFUSE
 CXXFLAGS        +=      -fprofile-use -fprofile-correction
 endif
 endif
+
+ifdef SANITIZE
+CXXFLAGS	+=	-fsanitize=address -fno-sanitize-recover=all -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow -fno-sanitize=alignment
+endif
 endif
 
 all: lib $(ALLINCS)
