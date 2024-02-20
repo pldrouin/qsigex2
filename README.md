@@ -10,9 +10,10 @@ Dependencies:<br>
 
 To compile the library, simply call GNU make from this directory (default target). Make options are:<br>
 WITH_LIBPROCINFO: Support for libprocinfo<br>
-QSFAST: Compile without debugging support<br>
+QSFAST: Compile without boundary and data type checks support<br>
 PROFGEN: Add compilation flags to generate compiler profiles<br>
 PROFUSE: Add compilation flags to use compiler profiles (after using the libraries generated with the PROFGEN option)<br>
+SANITIZE: Add compilation flags to use compiler sanitizer<br>
 The clear target must be used prior to call make with different options
 
 To generate the HTML documentation, use the htmldoc target. 
